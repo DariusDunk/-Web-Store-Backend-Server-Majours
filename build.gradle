@@ -35,6 +35,8 @@ dependencies {
     implementation group: 'org.springframework', name: 'spring-web', version: '6.1.5'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat', version: '3.2.4'
     implementation 'org.postgresql:postgresql:42.7.3'
+//    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0-M1'
+
 
 
     compileOnly 'org.projectlombok:lombok'
