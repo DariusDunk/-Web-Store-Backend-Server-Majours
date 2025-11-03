@@ -22,14 +22,19 @@ import java.util.Set;
 @RequestMapping("category/")
 public class CategoryController {
 
-    @Autowired
-    ProductCategoryService categoryService;
+
+    private final ProductCategoryService categoryService;
+
+    private final AttributeNameService attributeNameService;
+
+    private final ManufacturerService manufacturerService;
 
     @Autowired
-    AttributeNameService attributeNameService;
-
-    @Autowired
-    ManufacturerService manufacturerService;
+    public CategoryController(ProductCategoryService categoryService, AttributeNameService attributeNameService, ManufacturerService manufacturerService) {
+        this.categoryService = categoryService;
+        this.attributeNameService = attributeNameService;
+        this.manufacturerService = manufacturerService;
+    }
 
     @GetMapping("")
     public List<ProductCategory> getAll() {

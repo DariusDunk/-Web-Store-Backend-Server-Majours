@@ -15,8 +15,13 @@ import java.util.List;
 @Service
 public class CustomerCartService {
 
+
+    private final CustomerCartRepository customerCartRepository;
+
     @Autowired
-    CustomerCartRepository customerCartRepository;
+    public CustomerCartService(CustomerCartRepository customerCartRepository) {
+        this.customerCartRepository = customerCartRepository;
+    }
 
     @Transactional
     public ResponseEntity<String> addToOrRemoveFromCart(Customer customer, Product product, short quantity) {

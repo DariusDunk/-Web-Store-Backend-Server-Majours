@@ -11,8 +11,13 @@ import java.util.Set;
 @Service
 public class CategoryAttributeService {
 
+
+    private final CategoryAttributeRepository categoryAttributeRepository;
+
     @Autowired
-    CategoryAttributeRepository categoryAttributeRepository;
+    public CategoryAttributeService(CategoryAttributeRepository categoryAttributeRepository) {
+        this.categoryAttributeRepository = categoryAttributeRepository;
+    }
 
     public List<CategoryAttribute> getAll() {
         return categoryAttributeRepository.findAll();

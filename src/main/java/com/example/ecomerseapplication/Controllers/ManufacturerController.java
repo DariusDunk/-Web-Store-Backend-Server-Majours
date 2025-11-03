@@ -11,8 +11,13 @@ import java.util.List;
 @RestController
 public class ManufacturerController {
 
+
+    private final ManufacturerService manufacturerService;
+
     @Autowired
-    ManufacturerService manufacturerService;
+    public ManufacturerController(ManufacturerService manufacturerService) {
+        this.manufacturerService = manufacturerService;
+    }
 
     @GetMapping("manufacturers")
     public List<Manufacturer> getALl() {

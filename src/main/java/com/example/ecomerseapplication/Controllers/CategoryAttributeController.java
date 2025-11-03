@@ -12,8 +12,13 @@ import java.util.List;
 @RestController
 public class CategoryAttributeController {
 
+
+    private final CategoryAttributeService categoryAttributeService;
+
     @Autowired
-    CategoryAttributeService categoryAttributeService;
+    public CategoryAttributeController(CategoryAttributeService categoryAttributeService) {
+        this.categoryAttributeService = categoryAttributeService;
+    }
 
     @GetMapping("getattributes")
     public List<CategoryAttribute> findAll() {

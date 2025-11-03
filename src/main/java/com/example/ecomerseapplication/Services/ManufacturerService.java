@@ -11,8 +11,13 @@ import java.util.Set;
 @Service
 public class ManufacturerService {
 
+
+    private final ManufacturerRepository manufacturerRepository;
+
     @Autowired
-    ManufacturerRepository manufacturerRepository;
+    public ManufacturerService(ManufacturerRepository manufacturerRepository) {
+        this.manufacturerRepository = manufacturerRepository;
+    }
 
     public List<Manufacturer> getAll() {
         return manufacturerRepository.findAll();
