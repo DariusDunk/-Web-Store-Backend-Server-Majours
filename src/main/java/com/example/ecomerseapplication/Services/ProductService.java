@@ -21,14 +21,18 @@ import java.util.stream.Collectors;
 @Service
 public class ProductService {
 
-    @Autowired
-    ProductRepository productRepository;
+    private final ProductRepository productRepository;
+
+    private final CustomerCartService customerCartService;
+
+    private final ReviewService reviewService;
 
     @Autowired
-    CustomerCartService customerCartService;
-
-    @Autowired
-    ReviewService reviewService;
+    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService) {
+        this.productRepository = productRepository;
+        this.customerCartService = customerCartService;
+        this.reviewService = reviewService;
+    }
 
 
     public Page<CompactProductResponse> findAllProductsPage(PageRequest pageRequest) {
