@@ -10,8 +10,13 @@ import java.util.Set;
 @Service
 public class AttributeNameService {
 
+
+    private final AttributeNameRepository attributeNameRepository;
+
     @Autowired
-    AttributeNameRepository attributeNameRepository;
+    public AttributeNameService(AttributeNameRepository attributeNameRepository) {
+        this.attributeNameRepository = attributeNameRepository;
+    }
 
     public Set<AttributeName> getNameSetByCategory(ProductCategory productCategory) {
         return attributeNameRepository.getByCategory(productCategory);
