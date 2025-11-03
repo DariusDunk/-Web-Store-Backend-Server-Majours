@@ -37,7 +37,7 @@ public class PurchaseController {
     PurchaseCartService purchaseCartService;
 
     @PostMapping("savedetails")
-    public ResponseEntity<String> savePurchaseInformation(@RequestBody SavedPurchaseDetailsResponse savedPurchaseDetailsResponse,
+    public ResponseEntity<String> savePurchaseInformation(@RequestBody SavedRecipientDetailsRequest savedPurchaseDetailsResponse,
                                                           long id) {
         Customer customer = customerService.findById(id);
 
