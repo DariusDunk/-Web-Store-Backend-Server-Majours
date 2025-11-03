@@ -1,10 +1,14 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductQuantityPairResponse;
+import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
 import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.DTOs.responses.PurchaseResponse;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
+
+import java.util.List;
 
 public class PurchaseMapper {
 
@@ -31,13 +35,17 @@ public class PurchaseMapper {
 
         purchaseResponse.savedPurchaseDetailsResponse = savedPurchaseDetailsResponse;
 
-        /*RecipientDetailRequest recipientDetailRequest = new RecipientDetailRequest();
-        recipientDetailRequest.address = purchase.getAddress();
-        recipientDetailRequest.contactName= purchase.getContactName();
-        recipientDetailRequest.contactNumber = purchase.getContactNumber();
-
-        purchaseResponse.recipientDetailRequest = recipientDetailRequest;*/
-
         return purchaseResponse;
+    }
+
+    public static CompactPurchaseResponse purchaseDataToResponse(Purchase purchase, List<CompactProductQuantityPairResponse> pairs) {
+        CompactPurchaseResponse response = new CompactPurchaseResponse();
+
+        response.purchaseCode = purchase.getPurchaseCode();
+        response.purchaseDate = purchase.getDate();
+        response.totalCost = purchase.getTotalCost();
+        response.compactProductQuantityPairs = pairs;
+
+        return response;
     }
 }

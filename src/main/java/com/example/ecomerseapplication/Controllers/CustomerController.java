@@ -5,9 +5,9 @@ import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.Mappers.CompactPurchaseResponseBuilder;
 import com.example.ecomerseapplication.Mappers.CustomerCartResponseMapper;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
+import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,7 +153,7 @@ public class CustomerController {
                 pairs.add(pair);
             }
 
-            CompactPurchaseResponse compactPurchaseResponse = CompactPurchaseResponseBuilder.build(purchase, pairs);
+            CompactPurchaseResponse compactPurchaseResponse = PurchaseMapper.purchaseDataToResponse(purchase, pairs);
 
             responses.add(compactPurchaseResponse);
         }
