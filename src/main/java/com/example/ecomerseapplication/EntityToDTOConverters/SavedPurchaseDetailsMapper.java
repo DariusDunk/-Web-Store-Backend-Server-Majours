@@ -5,7 +5,7 @@ import com.example.ecomerseapplication.Entities.SavedPurchaseDetails;
 
 public class SavedPurchaseDetailsMapper {
 
-    public static SavedPurchaseDetailsResponse entityToDto(SavedPurchaseDetails inputEntity) {
+    public static SavedPurchaseDetailsResponse entityToResponse(SavedPurchaseDetails inputEntity) {
         SavedPurchaseDetailsResponse dto = new SavedPurchaseDetailsResponse();
 
         dto.contactName = inputEntity.getContactName();

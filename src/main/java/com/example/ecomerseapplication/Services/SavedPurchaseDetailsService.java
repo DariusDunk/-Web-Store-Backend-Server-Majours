@@ -39,6 +39,6 @@ public class SavedPurchaseDetailsService {
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(SavedPurchaseDetailsMapper
-                        .entityToDto(savedPurchaseDetails));
+                        .entityToResponse(savedPurchaseDetails));
     }
 }
