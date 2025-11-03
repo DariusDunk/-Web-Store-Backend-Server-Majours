@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.DTOs.CategoryFiltersResponse;
+import com.example.ecomerseapplication.DTOs.responses.CategoryFiltersResponse;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.EntityToDTOConverters.AttributeNameToDTO;
@@ -47,7 +47,7 @@ public class CategoryController {
         Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category.orElse(null));
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
-        categoryFiltersResponse.manufacturerDTOSet = ManufacturerConverter.objectArrSetToDtoSet(
+        categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
                 manufacturerService.
                         getByCategory(category.orElse(null))
         );

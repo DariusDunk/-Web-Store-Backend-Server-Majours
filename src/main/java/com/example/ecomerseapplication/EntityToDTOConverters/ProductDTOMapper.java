@@ -1,8 +1,8 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.CompactProductPagedListDto;
-import com.example.ecomerseapplication.DTOs.CompactProductResponse;
-import com.example.ecomerseapplication.DTOs.DetailedProductResponse;
+import com.example.ecomerseapplication.DTOs.CompactProductPagedListResponse;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.Product;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
@@ -58,9 +58,9 @@ public class ProductDTOMapper {
         return detailedProductResponse;
     }
 
-    public static CompactProductPagedListDto pagedListToDtoResponse(List<Product> productList,
-                                                                    Pageable pageable) {
-        CompactProductPagedListDto productPagedListDto = new CompactProductPagedListDto();
+    public static CompactProductPagedListResponse pagedListToDtoResponse(List<Product> productList,
+                                                                         Pageable pageable) {
+        CompactProductPagedListResponse productPagedListDto = new CompactProductPagedListResponse();
 
         List<CompactProductResponse> compactProductResponseList = productList
                 .stream()

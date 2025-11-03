@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Entities;
 
-import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsDto;
+import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsResponse;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,10 +28,10 @@ public class SavedPurchaseDetails {
     @OneToOne
     private Customer customer;
 
-    public SavedPurchaseDetails(SavedPurchaseDetailsDto savedPurchaseDetailsDto, Customer customer) {
-        this.contactName = savedPurchaseDetailsDto.contactName;
-        this.contactNumber = savedPurchaseDetailsDto.contactNumber;
-        this.address = savedPurchaseDetailsDto.address;
+    public SavedPurchaseDetails(SavedPurchaseDetailsResponse savedPurchaseDetailsResponse, Customer customer) {
+        this.contactName = savedPurchaseDetailsResponse.contactName;
+        this.contactNumber = savedPurchaseDetailsResponse.contactNumber;
+        this.address = savedPurchaseDetailsResponse.address;
         this.customer = customer;
     }
 }

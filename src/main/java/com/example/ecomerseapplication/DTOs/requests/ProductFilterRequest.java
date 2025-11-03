@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.DTOs;
+package com.example.ecomerseapplication.DTOs.requests;
 
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.ProductCategory;

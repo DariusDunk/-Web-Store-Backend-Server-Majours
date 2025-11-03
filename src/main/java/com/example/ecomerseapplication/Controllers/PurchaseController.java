@@ -2,6 +2,9 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
 import com.example.ecomerseapplication.DTOs.*;
+import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.PurchaseResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.EntityToDTOConverters.ProductDTOMapper;
 import com.example.ecomerseapplication.EntityToDTOConverters.PurchaseMapper;
@@ -34,20 +37,20 @@ public class PurchaseController {
     PurchaseCartService purchaseCartService;
 
     @PostMapping("savedetails")
-    public ResponseEntity<String> savePurchaseInformation(@RequestBody SavedPurchaseDetailsDto savedPurchaseDetailsDto,
+    public ResponseEntity<String> savePurchaseInformation(@RequestBody SavedPurchaseDetailsResponse savedPurchaseDetailsResponse,
                                                           long id) {
         Customer customer = customerService.findById(id);
 
         if (customer == null)
             return ResponseEntity.notFound().build();
 
-        SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsDto, customer);
+        SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsResponse, customer);
 
         return purchaseDetailsService.saveDetails(purchaseDetails);
     }
 
     @GetMapping("getdetails")
-    public ResponseEntity<SavedPurchaseDetailsDto> getPurchaseInformation(long id) {
+    public ResponseEntity<SavedPurchaseDetailsResponse> getPurchaseInformation(long id) {
         Customer customer = customerService.findById(id);
 
         if (customer == null)
@@ -64,7 +67,7 @@ public class PurchaseController {
         if (customer==null)
             ResponseEntity.notFound().build();
 
-        Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.purchaseDto);
+        Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.recipientDetailResponse);
 
         purchase.setCustomer(customer);
 
@@ -111,7 +114,7 @@ public class PurchaseController {
             CompactProductResponse compactProduct = ProductDTOMapper
                     .entityToCompactResponse(customerCart.getCustomerCartId().getProduct());
 
-            CompactProductQuantityPair pair = new CompactProductQuantityPair();
+            CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
             pair.compactProductResponse = compactProduct;
             pair.quantity = customerCart.getQuantity();
 

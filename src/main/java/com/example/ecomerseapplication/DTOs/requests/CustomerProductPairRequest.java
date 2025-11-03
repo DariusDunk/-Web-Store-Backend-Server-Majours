@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.DTOs;
+package com.example.ecomerseapplication.DTOs.requests;
 
 public class CustomerProductPairRequest {
     public long customerId;

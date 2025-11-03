@@ -1,6 +1,12 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.*;
+import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
+import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
+import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
+import com.example.ecomerseapplication.DTOs.responses.CustomerCartResponse;
+import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.EntityToDTOConverters.CompactPurchaseResponseBuilder;
 import com.example.ecomerseapplication.EntityToDTOConverters.CustomerCartResponseBuilder;
@@ -56,14 +62,14 @@ public class CustomerController {
     }
 
     @GetMapping("favourites/p/{page}")
-    public ResponseEntity<CompactProductPagedListDto> getFavourites(@RequestParam long id, @PathVariable int page) {
+    public ResponseEntity<CompactProductPagedListResponse> getFavourites(@RequestParam long id, @PathVariable int page) {
         Customer customer = customerService.findById(id);
         if (customer == null)
             return ResponseEntity.notFound().build();
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
-        CompactProductPagedListDto productResponse = ProductDTOMapper
+        CompactProductPagedListResponse productResponse = ProductDTOMapper
                 .pagedListToDtoResponse(customer.getFavourites(), pageRequest);
 
         if (productResponse.content.isEmpty())
@@ -139,10 +145,10 @@ public class CustomerController {
             if (purchaseCarts.isEmpty())
                 continue;
 
-            List<CompactProductQuantityPair> pairs = new ArrayList<>();
+            List<CompactProductQuantityPairResponse> pairs = new ArrayList<>();
 
             for (PurchaseCart cart : purchaseCarts) {
-                CompactProductQuantityPair pair = new CompactProductQuantityPair();
+                CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
                 pair.compactProductResponse = ProductDTOMapper
                         .entityToCompactResponse(cart.getPurchaseCartId().getProduct());
                 pair.quantity = cart.getQuantity();

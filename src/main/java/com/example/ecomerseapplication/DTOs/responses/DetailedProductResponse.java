@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.DTOs;
+package com.example.ecomerseapplication.DTOs.responses;
 
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.ProductImage;

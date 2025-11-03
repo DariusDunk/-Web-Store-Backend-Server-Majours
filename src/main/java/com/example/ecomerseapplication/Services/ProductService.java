@@ -1,10 +1,10 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.CompactProductPagedListDto;
-import com.example.ecomerseapplication.DTOs.DetailedProductResponse;
+import com.example.ecomerseapplication.DTOs.CompactProductPagedListResponse;
+import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.EntityToDTOConverters.ProductDTOMapper;
-import com.example.ecomerseapplication.DTOs.CompactProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
 import com.example.ecomerseapplication.Specifications.ProductSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,12 +87,12 @@ public class ProductService {
                         .getByProductCategoryOrderByRatingDesc(productCategory, pageable));
     }
 
-    public CompactProductPagedListDto getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
-                                                                                    ProductCategory productCategory,
-                                                                                    int priceLowest,
-                                                                                    int priceHighest,
-                                                                                    Manufacturer manufacturer,
-                                                                                    Pageable pageable) {
+    public CompactProductPagedListResponse getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
+                                                                                         ProductCategory productCategory,
+                                                                                         int priceLowest,
+                                                                                         int priceHighest,
+                                                                                         Manufacturer manufacturer,
+                                                                                         Pageable pageable) {
 
         Specification<Product> productSpec = Specification.where(
                 ProductSpecifications.equalsCategory(productCategory)

@@ -1,6 +1,11 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.*;
+import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
+import com.example.ecomerseapplication.DTOs.requests.ProductFilterRequest;
+import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
@@ -125,8 +130,8 @@ public class ProductController {
     }
 
     @PostMapping("filter/{page}")
-    public CompactProductPagedListDto productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
-                                                                     @PathVariable int page) {
+    public CompactProductPagedListResponse productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
+                                                                          @PathVariable int page) {
         Set<CategoryAttribute> categoryAttributeSet = null;
 
         if (productFilterRequest.filterAttributes != null) {

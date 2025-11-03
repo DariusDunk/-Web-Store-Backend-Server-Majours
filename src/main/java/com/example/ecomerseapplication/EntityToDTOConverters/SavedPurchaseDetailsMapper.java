@@ -1,12 +1,12 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsDto;
+import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.Entities.SavedPurchaseDetails;
 
 public class SavedPurchaseDetailsMapper {
 
-    public static SavedPurchaseDetailsDto entityToDto(SavedPurchaseDetails inputEntity) {
-        SavedPurchaseDetailsDto dto = new SavedPurchaseDetailsDto();
+    public static SavedPurchaseDetailsResponse entityToDto(SavedPurchaseDetails inputEntity) {
+        SavedPurchaseDetailsResponse dto = new SavedPurchaseDetailsResponse();
 
         dto.contactName = inputEntity.getContactName();
         dto.contactNumber = inputEntity.getContactNumber();

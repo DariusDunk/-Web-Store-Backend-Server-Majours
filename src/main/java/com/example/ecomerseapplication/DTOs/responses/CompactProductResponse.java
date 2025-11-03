@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.DTOs;
+package com.example.ecomerseapplication.DTOs.responses;
 
 public class CompactProductResponse {
     public String productCode;

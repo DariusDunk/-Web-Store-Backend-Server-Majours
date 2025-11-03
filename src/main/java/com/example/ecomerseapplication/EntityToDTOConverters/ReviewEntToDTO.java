@@ -1,7 +1,7 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.CustomerDetailsForReview;
-import com.example.ecomerseapplication.DTOs.ReviewResponse;
+import com.example.ecomerseapplication.DTOs.requests.CustomerDetailsForReview;
+import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Review;
 
 public class ReviewEntToDTO {

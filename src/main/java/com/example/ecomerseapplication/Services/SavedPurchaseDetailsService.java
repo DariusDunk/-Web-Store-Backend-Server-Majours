@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsDto;
+import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.SavedPurchaseDetails;
 import com.example.ecomerseapplication.EntityToDTOConverters.SavedPurchaseDetailsMapper;
@@ -23,7 +23,7 @@ public class SavedPurchaseDetailsService {
         return ResponseEntity.status(HttpStatus.CREATED).body("Информацията е запазена!");
     }
 
-    public ResponseEntity<SavedPurchaseDetailsDto> getByCustomer(Customer customer) {
+    public ResponseEntity<SavedPurchaseDetailsResponse> getByCustomer(Customer customer) {
 
         SavedPurchaseDetails purchaseDetails = savedPurchaseDetailsRepo.getByCustomer(customer).orElse(null);
 

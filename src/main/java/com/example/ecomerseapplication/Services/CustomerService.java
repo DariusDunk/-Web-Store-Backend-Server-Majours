@@ -1,7 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.CustomerAccountRequest;
-import com.example.ecomerseapplication.DTOs.CustomerResponse;
+import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
+import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.EntityToDTOConverters.CustomerMapper;

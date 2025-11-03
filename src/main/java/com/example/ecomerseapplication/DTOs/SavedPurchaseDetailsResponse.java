@@ -1,7 +1,8 @@
 package com.example.ecomerseapplication.DTOs;
 
-public class PurchaseDto {
+public class SavedPurchaseDetailsResponse {
     public String contactName;
     public String contactNumber;
     public String address;
+
 }

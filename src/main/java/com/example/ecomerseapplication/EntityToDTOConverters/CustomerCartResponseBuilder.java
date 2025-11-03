@@ -1,7 +1,7 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.CompactProductQuantityPair;
-import com.example.ecomerseapplication.DTOs.CustomerCartResponse;
+import com.example.ecomerseapplication.DTOs.CompactProductQuantityPairResponse;
+import com.example.ecomerseapplication.DTOs.responses.CustomerCartResponse;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
 import java.util.List;
@@ -16,7 +16,7 @@ public class CustomerCartResponseBuilder {
         for (CustomerCart customerCart : customerCarts) {
             Product product = customerCart.getCustomerCartId().getProduct();
 
-            CompactProductQuantityPair compactProductQuantityPair = new CompactProductQuantityPair();
+            CompactProductQuantityPairResponse compactProductQuantityPair = new CompactProductQuantityPairResponse();
             compactProductQuantityPair.compactProductResponse = ProductDTOMapper.entityToCompactResponse(product);
             compactProductQuantityPair.quantity = customerCart.getQuantity();
 

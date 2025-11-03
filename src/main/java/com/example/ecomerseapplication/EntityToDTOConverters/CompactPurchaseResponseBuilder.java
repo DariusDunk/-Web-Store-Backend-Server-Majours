@@ -1,13 +1,13 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.CompactProductQuantityPair;
-import com.example.ecomerseapplication.DTOs.CompactPurchaseResponse;
+import com.example.ecomerseapplication.DTOs.CompactProductQuantityPairResponse;
+import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
 import com.example.ecomerseapplication.Entities.Purchase;
 import java.util.List;
 
 public class CompactPurchaseResponseBuilder {
 
-    public static CompactPurchaseResponse build(Purchase purchase, List<CompactProductQuantityPair> pairs) {
+    public static CompactPurchaseResponse build(Purchase purchase, List<CompactProductQuantityPairResponse> pairs) {
         CompactPurchaseResponse response = new CompactPurchaseResponse();
 
         response.purchaseCode = purchase.getPurchaseCode();
