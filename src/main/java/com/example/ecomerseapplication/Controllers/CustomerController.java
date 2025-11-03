@@ -24,20 +24,24 @@ import java.util.List;
 @RequestMapping("customer/")
 public class CustomerController {
 
-    @Autowired
-    private CustomerService customerService;
+    private final CustomerService customerService;
+
+    private final ProductService productService;
+
+    private final CustomerCartService customerCartService;
+
+    private final PurchaseService purchaseService;
+
+    private final PurchaseCartService purchaseCartService;
 
     @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private CustomerCartService customerCartService;
-
-    @Autowired
-    private PurchaseService purchaseService;
-
-    @Autowired
-    private PurchaseCartService purchaseCartService;
+    public CustomerController(CustomerService customerService, ProductService productService, CustomerCartService customerCartService, PurchaseService purchaseService, PurchaseCartService purchaseCartService) {
+        this.customerService = customerService;
+        this.productService = productService;
+        this.customerCartService = customerCartService;
+        this.purchaseService = purchaseService;
+        this.purchaseCartService = purchaseCartService;
+    }
 
     @PostMapping("registration")
     public ResponseEntity<String> register(@RequestBody CustomerAccountRequest customerAccountRequest) {
