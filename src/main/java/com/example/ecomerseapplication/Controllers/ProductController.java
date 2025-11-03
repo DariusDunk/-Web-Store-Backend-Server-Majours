@@ -24,23 +24,27 @@ import java.util.*;
 @RequestMapping("product/")
 public class ProductController {
 
-    @Autowired
-    ProductService productService;
+    private final ProductService productService;
+
+    private final CategoryAttributeService categoryAttributeService;
+
+    private final CustomerService customerService;
+
+    private final ReviewService reviewService;
+
+    private final ProductCategoryService productCategoryService;
+
+    private final ManufacturerService manufacturerService;
 
     @Autowired
-    CategoryAttributeService categoryAttributeService;
-
-    @Autowired
-    CustomerService customerService;
-
-    @Autowired
-    ReviewService reviewService;
-
-    @Autowired
-    ProductCategoryService productCategoryService;
-
-    @Autowired
-    ManufacturerService manufacturerService;
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService) {
+        this.productService = productService;
+        this.categoryAttributeService = categoryAttributeService;
+        this.customerService = customerService;
+        this.reviewService = reviewService;
+        this.productCategoryService = productCategoryService;
+        this.manufacturerService = manufacturerService;
+    }
 
     @GetMapping("findall")
     public Page<CompactProductResponse> findAll(@RequestParam int page) {
