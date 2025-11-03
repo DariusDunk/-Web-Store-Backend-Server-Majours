@@ -10,8 +10,12 @@ import java.util.List;
 @Service
 public class PurchaseService {
 
+    private final PurchaseRepository purchaseRepository;
+
     @Autowired
-    PurchaseRepository purchaseRepository;
+    public PurchaseService(PurchaseRepository purchaseRepository) {
+        this.purchaseRepository = purchaseRepository;
+    }
 
     public Purchase save(Purchase purchase) {
         return purchaseRepository.save(purchase);
