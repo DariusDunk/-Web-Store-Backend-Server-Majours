@@ -1,7 +1,5 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
-import com.example.ecomerseapplication.DTOs.CompactProductQuantityPairResponse;
-
 import java.time.LocalDateTime;
 import java.util.List;
 

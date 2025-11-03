@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Entities;
 
-import com.example.ecomerseapplication.DTOs.SavedRecipientDetailsRequest;
+import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

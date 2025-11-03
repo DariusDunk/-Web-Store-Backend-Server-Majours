@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.DTOs;
+package com.example.ecomerseapplication.DTOs.responses;
 
 import lombok.EqualsAndHashCode;
 

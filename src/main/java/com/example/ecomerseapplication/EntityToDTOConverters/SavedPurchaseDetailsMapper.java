@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsResponse;
+import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.Entities.SavedPurchaseDetails;
 
 public class SavedPurchaseDetailsMapper {

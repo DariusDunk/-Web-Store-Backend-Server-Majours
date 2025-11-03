@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.CompactProductPagedListResponse;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductPagedListResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.Product;

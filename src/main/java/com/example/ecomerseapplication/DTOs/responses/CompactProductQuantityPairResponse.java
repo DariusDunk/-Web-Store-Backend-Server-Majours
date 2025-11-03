@@ -1,6 +1,4 @@
-package com.example.ecomerseapplication.DTOs;
-
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+package com.example.ecomerseapplication.DTOs.responses;
 
 public class CompactProductQuantityPairResponse {
     public CompactProductResponse compactProductResponse;

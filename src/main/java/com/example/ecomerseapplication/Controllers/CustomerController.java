@@ -1,12 +1,9 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.DTOs.*;
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
-import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
-import com.example.ecomerseapplication.DTOs.responses.CustomerCartResponse;
-import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.EntityToDTOConverters.CompactPurchaseResponseBuilder;
 import com.example.ecomerseapplication.EntityToDTOConverters.CustomerCartResponseMapper;

@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.ManufacturerDTOResponse;
+import com.example.ecomerseapplication.DTOs.responses.ManufacturerDTOResponse;
 import java.util.HashSet;
 import java.util.Set;
 

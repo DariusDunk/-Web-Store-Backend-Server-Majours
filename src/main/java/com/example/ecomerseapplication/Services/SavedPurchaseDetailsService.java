@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsResponse;
+import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.SavedPurchaseDetails;
 import com.example.ecomerseapplication.EntityToDTOConverters.SavedPurchaseDetailsMapper;

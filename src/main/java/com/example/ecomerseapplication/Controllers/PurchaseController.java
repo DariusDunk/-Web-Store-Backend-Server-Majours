@@ -1,10 +1,12 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
-import com.example.ecomerseapplication.DTOs.*;
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
+import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductQuantityPairResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.PurchaseResponse;
+import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.EntityToDTOConverters.ProductDTOMapper;
 import com.example.ecomerseapplication.EntityToDTOConverters.PurchaseMapper;
@@ -64,10 +66,15 @@ public class PurchaseController {
     @Transactional
     public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
 
+
         Customer customer = customerService.findById(purchaseRequest.customerId);
 
         if (customer==null)
-            ResponseEntity.notFound().build();
+          return  ResponseEntity.notFound().build();
+
+        if (purchaseRequest.savedRecipientDetailsRequest == null) {
+            return ResponseEntity.badRequest().build();
+        }
 
         Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.savedRecipientDetailsRequest);
 

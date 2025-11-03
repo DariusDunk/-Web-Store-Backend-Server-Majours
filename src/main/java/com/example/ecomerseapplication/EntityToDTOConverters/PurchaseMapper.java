@@ -1,7 +1,7 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.SavedRecipientDetailsRequest;
-import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsResponse;
+import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
+import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.DTOs.responses.PurchaseResponse;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;

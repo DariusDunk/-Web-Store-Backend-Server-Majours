@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.DTOs;
+package com.example.ecomerseapplication.DTOs.responses;
 
 public class SavedPurchaseDetailsResponse {
     public String contactName;
