@@ -3,7 +3,7 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.SavedPurchaseDetails;
-import com.example.ecomerseapplication.EntityToDTOConverters.SavedPurchaseDetailsMapper;
+import com.example.ecomerseapplication.Mappers.SavedPurchaseDetailsMapper;
 import com.example.ecomerseapplication.Repositories.SavedPurchaseDetailsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

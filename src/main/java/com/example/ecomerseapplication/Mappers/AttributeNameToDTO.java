@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.EntityToDTOConverters;
+package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
 import com.example.ecomerseapplication.Entities.AttributeName;

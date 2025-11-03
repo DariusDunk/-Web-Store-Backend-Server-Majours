@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.EntityToDTOConverters;
+package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.Entities.SavedPurchaseDetails;

@@ -4,7 +4,7 @@ import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
-import com.example.ecomerseapplication.EntityToDTOConverters.CustomerMapper;
+import com.example.ecomerseapplication.Mappers.CustomerMapper;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;

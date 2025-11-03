@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.EntityToDTOConverters;
+package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerDetailsForReview;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;

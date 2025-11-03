@@ -3,7 +3,7 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductPagedListResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.EntityToDTOConverters.ProductDTOMapper;
+import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
 import com.example.ecomerseapplication.Specifications.ProductSpecifications;
