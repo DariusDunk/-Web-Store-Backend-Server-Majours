@@ -11,8 +11,13 @@ import java.util.List;
 @Service
 public class PurchaseCartService {
 
+
+    private final PurchaseCartRepository purchaseCartRepository;
+
     @Autowired
-    PurchaseCartRepository purchaseCartRepository;
+    public PurchaseCartService(PurchaseCartRepository purchaseCartRepository) {
+        this.purchaseCartRepository = purchaseCartRepository;
+    }
 
     @Transactional
      public void saveCarts(List<PurchaseCart> purchaseCarts) {
