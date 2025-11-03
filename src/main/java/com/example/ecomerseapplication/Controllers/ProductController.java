@@ -154,7 +154,7 @@ public class ProductController {
                 pageRequest);
     }
 
-    @PostMapping("review")
+    @PostMapping("review/add")
     public ResponseEntity<String> addReview(@RequestBody ReviewRequest request) {
 
         if (request.rating > 5 || request.rating < 1)

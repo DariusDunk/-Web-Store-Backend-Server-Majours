@@ -12,8 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReviewService {
 
+
+    private final ReviewRepository reviewRepository;
+    
     @Autowired
-    ReviewRepository reviewRepository;
+    public ReviewService(ReviewRepository reviewRepository) {
+        this.reviewRepository = reviewRepository;
+    }
 
     public void save(Review review) {
         reviewRepository.save(review);
