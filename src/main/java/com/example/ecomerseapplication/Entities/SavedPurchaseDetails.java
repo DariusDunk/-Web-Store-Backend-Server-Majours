@@ -29,9 +29,9 @@ public class SavedPurchaseDetails {
     private Customer customer;
 
     public SavedPurchaseDetails(SavedRecipientDetailsRequest savedPurchaseDetailsResponse, Customer customer) {
-        this.contactName = savedPurchaseDetailsResponse.contactName();
-        this.contactNumber = savedPurchaseDetailsResponse.contactNumber();
-        this.address = savedPurchaseDetailsResponse.address();
+        this.contactName = savedPurchaseDetailsResponse.contactName;
+        this.contactNumber = savedPurchaseDetailsResponse.contactNumber;
+        this.address = savedPurchaseDetailsResponse.address;
         this.customer = customer;
     }
 }

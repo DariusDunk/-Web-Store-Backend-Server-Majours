@@ -12,6 +12,7 @@ import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ public class PurchaseController {
     }
 
     @PostMapping("complete")
+    @Transactional
     public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
 
         Customer customer = customerService.findById(purchaseRequest.customerId);
@@ -67,7 +69,7 @@ public class PurchaseController {
         if (customer==null)
             ResponseEntity.notFound().build();
 
-        Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.recipientDetailResponse);
+        Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.savedRecipientDetailsRequest);
 
         purchase.setCustomer(customer);
 

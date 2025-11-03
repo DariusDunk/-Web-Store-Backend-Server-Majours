@@ -1,9 +1,9 @@
 package com.example.ecomerseapplication.DTOs.requests;
 
-import com.example.ecomerseapplication.DTOs.RecipientDetailResponse;
+import com.example.ecomerseapplication.DTOs.SavedRecipientDetailsRequest;
 
 public class PurchaseRequest {
     public long customerId;
-    public RecipientDetailResponse recipientDetailResponse;
+    public SavedRecipientDetailsRequest savedRecipientDetailsRequest;
 
 }

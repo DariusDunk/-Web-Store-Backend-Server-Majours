@@ -6,9 +6,9 @@ import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
 import java.util.List;
 
-public class CustomerCartResponseBuilder {
+public class CustomerCartResponseMapper {
 
-    public static CustomerCartResponse build(List<CustomerCart> customerCarts) {
+    public static CustomerCartResponse listToResponse(List<CustomerCart> customerCarts) {
 
         CustomerCartResponse customerCartResponse = new CustomerCartResponse();
         int totalCost = 0;

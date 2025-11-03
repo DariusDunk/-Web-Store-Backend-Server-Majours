@@ -9,7 +9,7 @@ import com.example.ecomerseapplication.DTOs.responses.CustomerCartResponse;
 import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.EntityToDTOConverters.CompactPurchaseResponseBuilder;
-import com.example.ecomerseapplication.EntityToDTOConverters.CustomerCartResponseBuilder;
+import com.example.ecomerseapplication.EntityToDTOConverters.CustomerCartResponseMapper;
 import com.example.ecomerseapplication.EntityToDTOConverters.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
@@ -124,7 +124,7 @@ public class CustomerController {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(CustomerCartResponseBuilder.build(customerCarts));
+                .body(CustomerCartResponseMapper.listToResponse(customerCarts));
     }
 
     @GetMapping("purchase_history")

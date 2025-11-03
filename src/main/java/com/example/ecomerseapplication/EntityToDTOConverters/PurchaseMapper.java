@@ -1,18 +1,19 @@
 package com.example.ecomerseapplication.EntityToDTOConverters;
 
-import com.example.ecomerseapplication.DTOs.RecipientDetailResponse;
+import com.example.ecomerseapplication.DTOs.SavedRecipientDetailsRequest;
+import com.example.ecomerseapplication.DTOs.SavedPurchaseDetailsResponse;
 import com.example.ecomerseapplication.DTOs.responses.PurchaseResponse;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 
 public class PurchaseMapper {
 
-    public static Purchase requestToEntity(RecipientDetailResponse recipientDetailResponse) {
+    public static Purchase requestToEntity(SavedRecipientDetailsRequest savedRecipientDetailsRequest) {
         Purchase purchase = new Purchase();
         purchase.setPurchaseCode(PurchaseCodeGenerator.generateCode(purchase.getDate()));
-        purchase.setAddress(recipientDetailResponse.address);
-        purchase.setContactName(recipientDetailResponse.contactName);
-        purchase.setContactNumber(recipientDetailResponse.contactNumber);
+        purchase.setAddress(savedRecipientDetailsRequest.address);
+        purchase.setContactName(savedRecipientDetailsRequest.contactName);
+        purchase.setContactNumber(savedRecipientDetailsRequest.contactNumber);
 
         return purchase;
     }
@@ -22,12 +23,20 @@ public class PurchaseMapper {
         purchaseResponse.totalCost = purchase.getTotalCost();
         purchaseResponse.dateOfPurchase = purchase.getDate();
 
-        RecipientDetailResponse recipientDetailResponse = new RecipientDetailResponse();
-        recipientDetailResponse.address = purchase.getAddress();
-        recipientDetailResponse.contactName= purchase.getContactName();
-        recipientDetailResponse.contactNumber = purchase.getContactNumber();
+        SavedPurchaseDetailsResponse savedPurchaseDetailsResponse = new SavedPurchaseDetailsResponse();
 
-        purchaseResponse.recipientDetailResponse = recipientDetailResponse;
+        savedPurchaseDetailsResponse.address = purchase.getAddress();
+        savedPurchaseDetailsResponse.contactName = purchase.getContactName();
+        savedPurchaseDetailsResponse.contactNumber = purchase.getContactNumber();
+
+        purchaseResponse.savedPurchaseDetailsResponse = savedPurchaseDetailsResponse;
+
+        /*RecipientDetailRequest recipientDetailRequest = new RecipientDetailRequest();
+        recipientDetailRequest.address = purchase.getAddress();
+        recipientDetailRequest.contactName= purchase.getContactName();
+        recipientDetailRequest.contactNumber = purchase.getContactNumber();
+
+        purchaseResponse.recipientDetailRequest = recipientDetailRequest;*/
 
         return purchaseResponse;
     }
