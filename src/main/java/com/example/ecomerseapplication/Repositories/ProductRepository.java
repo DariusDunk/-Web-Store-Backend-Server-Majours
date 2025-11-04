@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
@@ -22,10 +23,17 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
                     "order by p.rating, p.id ")
     Page<Product> getByNameLike(@Param("name") String name, Pageable pageable);
 
+    @Query("select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse (p.productCode, p.productName, p.originalPriceStotinki, p.salePriceStotinki, p.rating, SIZE(p.reviews) , p.mainImageUrl) " +
+            "from Product p " +
+            "order by p.rating desc ")
+    Page<CompactProductResponse> findAllAsResponseSortByRating(Pageable pageable);
+
     @Query(value = "select p " +
             "from Product p " +
             "order by p.rating desc ")
     Page<Product> findAllSortByRating(Pageable pageable);
+
+
     @Query(value =
             "select p.productName " +
             "from Product p " +

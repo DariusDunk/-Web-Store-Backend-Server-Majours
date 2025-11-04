@@ -13,6 +13,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +41,10 @@ public class ProductService {
         return ProductDTOMapper.productPageToDtoPage(productRepository.findAllSortByRating(pageRequest));
     }
 
+    public Page<CompactProductResponse> findAllProductResponsePage(PageRequest pageRequest) {
+        return productRepository.findAllAsResponseSortByRating(pageRequest);
+    }
+
     public Page<CompactProductResponse> getProductsLikeName(PageRequest pageRequest, String name) {
 
         Page<Product> productPage = productRepository.getByNameLike(name, pageRequest);
@@ -49,7 +55,6 @@ public class ProductService {
     public List<String> getNameSuggestions(String name) {
         return productRepository.getNameSuggestions(name);
     }
-
 
     public ResponseEntity<DetailedProductResponse> getByNameAndCode(String productCode, Customer customer) {
         Product product = productRepository.getByProductCode(productCode).orElse(null);
@@ -77,6 +82,7 @@ public class ProductService {
 
         return ProductDTOMapper.productPageToDtoPage(productPage);
     }
+
 
     public List<CompactProductResponse> getFeaturedProducts() {
         return productRepository.getProductsByRating()

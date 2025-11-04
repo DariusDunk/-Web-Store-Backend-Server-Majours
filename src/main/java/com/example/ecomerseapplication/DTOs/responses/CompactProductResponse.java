@@ -1,5 +1,10 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
 public class CompactProductResponse {
     public String productCode;
     public String name;
