@@ -44,7 +44,7 @@ public class Customer {
     @JoinTable(name = "favourites", schema = "online_shop",
     joinColumns = @JoinColumn(name="customer_id"),
     inverseJoinColumns = @JoinColumn(name = "product_id"))
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany()
     List<Product> favourites;
 
     @OneToMany(mappedBy = "customer")
