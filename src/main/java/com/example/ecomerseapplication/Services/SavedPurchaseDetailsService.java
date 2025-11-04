@@ -14,8 +14,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class SavedPurchaseDetailsService {
 
+    private final SavedPurchaseDetailsRepo savedPurchaseDetailsRepo;
+
     @Autowired
-    SavedPurchaseDetailsRepo savedPurchaseDetailsRepo;
+    public SavedPurchaseDetailsService(SavedPurchaseDetailsRepo savedPurchaseDetailsRepo) {
+        this.savedPurchaseDetailsRepo = savedPurchaseDetailsRepo;
+    }
 
     public ResponseEntity<String> saveDetails(SavedPurchaseDetails purchaseDetails) {
         savedPurchaseDetailsRepo.save(purchaseDetails);
