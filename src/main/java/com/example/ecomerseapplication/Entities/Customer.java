@@ -38,7 +38,7 @@ public class Customer {
     @OneToMany(mappedBy = "customer")
     private List<Purchase> purchases;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "customer")
+    @OneToOne(mappedBy = "customer")
     private SavedPurchaseDetails savedPurchaseDetails;
 
     @JoinTable(name = "favourites", schema = "online_shop",

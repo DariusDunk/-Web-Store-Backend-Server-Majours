@@ -48,9 +48,9 @@ public class ProductController {
     }
 
     @GetMapping("findall")
-    public Page<CompactProductResponse> findAll(@RequestParam int page) {
+    public ResponseEntity<Page<CompactProductResponse>> findAll(@RequestParam int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
-        return productService.findAllProductsPage(pageRequest);
+        return ResponseEntity.ok(productService.findAllProductsPage(pageRequest));
     }
 
     @GetMapping("search")
