@@ -31,6 +31,6 @@ public class CategoryAttribute {
     private String attributeOption;
 
     @JsonIgnore
-    @ManyToMany(cascade = {CascadeType.ALL},mappedBy = "categoryAttributeSet")
+    @ManyToMany(mappedBy = "categoryAttributeSet", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Product> products;
 }

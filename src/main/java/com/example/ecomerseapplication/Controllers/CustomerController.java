@@ -153,10 +153,13 @@ public class CustomerController {
 
             List<CompactProductQuantityPairResponse> pairs = new ArrayList<>();
 
+
+
             for (PurchaseCart cart : purchaseCarts) {
                 CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
                 pair.compactProductResponse = ProductDTOMapper
                         .entityToCompactResponse(cart.getPurchaseCartId().getProduct());
+//                ProductDTOMapper.addReviewsCountToCompactResponse(pair.compactProductResponse);
                 pair.quantity = cart.getQuantity();
 
                 pairs.add(pair);
