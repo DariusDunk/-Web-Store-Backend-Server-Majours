@@ -9,6 +9,7 @@ import com.example.ecomerseapplication.Services.AttributeNameService;
 import com.example.ecomerseapplication.Services.ManufacturerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,23 +43,40 @@ public class CategoryController {
     }
 
     @GetMapping("names")
-    public List<String> getAllNames() {
-        return categoryService.getAllCategoryNames();
+    public ResponseEntity<List<String>> getAllNames() {
+
+        List<String> names = categoryService.getAllCategoryNames();
+
+        if (names.isEmpty()) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(names);
     }
 
     @GetMapping("filters")
-    public CategoryFiltersResponse getAttributes(@RequestParam int id) {
-        Optional<ProductCategory> category = categoryService.findById(id);
+    public ResponseEntity<CategoryFiltersResponse> getAttributes(@RequestParam int categoryId) {
+        Optional<ProductCategory> category = categoryService.findById(categoryId);
+
+        if (category.isEmpty())
+            return ResponseEntity.notFound().build();
+
         Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category.orElse(null));
+
+        if (attributeNameSet.isEmpty())
+            return ResponseEntity.notFound().build();
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
         categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
                 manufacturerService.
                         getByCategory(category.orElse(null))
         );
+
+        if (categoryFiltersResponse.manufacturerDTOResponseSet == null||
+                categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
+            return ResponseEntity.notFound().build();
+
         categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
 
-        return categoryFiltersResponse;
+        return ResponseEntity.ok(categoryFiltersResponse);
 
 
     }

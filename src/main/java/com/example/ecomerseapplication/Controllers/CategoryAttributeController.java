@@ -24,7 +24,7 @@ public class CategoryAttributeController {
     public List<CategoryAttribute> findAll() {
         return categoryAttributeService.getAll();
     }
-
+//TODO ako tezi 6te se polzvat trqbva da vry6tat Response<dto>
     @GetMapping("attributebycategory")
     public List<CategoryAttribute> findByCategory(ProductCategory productCategory) {
         return categoryAttributeService.getByCategory(productCategory);
