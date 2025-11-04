@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -155,6 +156,7 @@ public class ProductController {
     }
 
     @PostMapping("review/add")
+    @Transactional
     public ResponseEntity<String> addReview(@RequestBody ReviewRequest request) {
 
         if (request.rating > 5 || request.rating < 1)
@@ -181,6 +183,7 @@ public class ProductController {
     }
 
     @DeleteMapping("deletereview")
+    @Transactional
     public ResponseEntity<String> deleteReview(@RequestBody CustomerProductPairRequest pairRequest) {
         Customer customer = customerService.findById(pairRequest.customerId);
 

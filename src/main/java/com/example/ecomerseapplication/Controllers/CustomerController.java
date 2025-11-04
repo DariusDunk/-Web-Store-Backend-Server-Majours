@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class CustomerController {
     }
 
     @PostMapping("registration")
+    @Transactional
     public ResponseEntity<String> register(@RequestBody CustomerAccountRequest customerAccountRequest) {
         return customerService.registration(customerAccountRequest);
     }
@@ -54,6 +56,7 @@ public class CustomerController {
     }
 
     @PostMapping("addfavourite")
+    @Transactional
     public ResponseEntity<String> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
         Product product = productService.findByPCode(pairRequest.productCode);
 
@@ -80,6 +83,7 @@ public class CustomerController {
     }
 
     @PostMapping("addtocart")
+    @Transactional
     public ResponseEntity<String> addToCart(@RequestBody ProductForCartRequest request) {
         Product product = productService.findByPCode(request.customerProductPairRequest.productCode);
 
@@ -95,6 +99,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("removefav")
+    @Transactional
     public ResponseEntity<String> removeFromFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
 
         Customer customer = customerService.findById(pairRequest.customerId);
@@ -165,6 +170,7 @@ public class CustomerController {
     }
 
     @PostMapping("change-passowrd")
+    @Transactional
     public ResponseEntity<String> resetPassword(@RequestBody CustomerAccountRequest request) {
         Customer customer = customerService.getByEmail(request.email);
 

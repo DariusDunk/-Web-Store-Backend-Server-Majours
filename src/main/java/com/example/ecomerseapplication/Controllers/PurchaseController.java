@@ -44,6 +44,7 @@ public class PurchaseController {
     }
 
     @PostMapping("savedetails")
+    @Transactional
     public ResponseEntity<String> savePurchaseInformation(@RequestBody SavedRecipientDetailsRequest savedPurchaseDetailsResponse,
                                                           long id) {
         Customer customer = customerService.findById(id);
@@ -69,7 +70,6 @@ public class PurchaseController {
     @PostMapping("complete")
     @Transactional
     public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
-
 
         Customer customer = customerService.findById(purchaseRequest.customerId);
 
