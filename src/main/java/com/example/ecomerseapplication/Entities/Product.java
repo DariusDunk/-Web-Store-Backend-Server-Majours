@@ -45,17 +45,17 @@ public class Product {
     @Column(name = "delivery_cost", columnDefinition = "smallint DEFAULT 0")
     private short deliveryCost;
 
-    @Column(columnDefinition = "character varying(10)")
+    @Column(columnDefinition = "character varying(30)")
     private String model;
 
     @JoinTable(name = "product_attributes", schema = "online_shop",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "attribute_id"))
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<CategoryAttribute> categoryAttributeSet;
 
     @JsonIgnore
-    @ManyToMany(cascade = CascadeType.REMOVE, mappedBy = "favourites")
+    @ManyToMany(mappedBy = "favourites")
     private Set<Customer> favouredBy;
 
     @OneToMany(mappedBy = "product")
