@@ -58,6 +58,9 @@ public class Product {
     @ManyToMany(mappedBy = "favourites")
     private Set<Customer> favouredBy;
 
+    @Column(name = "main_image_url")
+    private String mainImageUrl;
+
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages;
 

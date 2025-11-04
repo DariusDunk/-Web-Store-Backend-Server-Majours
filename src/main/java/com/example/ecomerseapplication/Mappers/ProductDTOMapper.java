@@ -18,7 +18,7 @@ public class ProductDTOMapper {
         CompactProductResponse compactProductResponse = new CompactProductResponse();
         compactProductResponse.productCode = product.getProductCode();
         compactProductResponse.name = product.getProductName();
-        compactProductResponse.imageUrl = product.getProductImages().get(0).getImageFileName();
+        compactProductResponse.imageUrl = product.getMainImageUrl();
         compactProductResponse.rating = product.getRating();
         compactProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         compactProductResponse.salePriceStotinki = product.getSalePriceStotinki();
