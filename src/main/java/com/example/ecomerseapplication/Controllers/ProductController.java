@@ -82,7 +82,7 @@ public class ProductController {
 
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
     }
-
+//TODO vij kyde se izpolzva produkta kakto i drugi entitita, i kydeto se vzema samo 4asti4na informaciq go napravi da vry6ta napravo dto ot query i posle napravi eager fetch na samata promenliva
     @GetMapping("manufacturer/{manufacturerName}/p{page}")
     public ResponseEntity<Page<CompactProductResponse>> productsByManufacturer(@PathVariable String manufacturerName,
                                                                                @PathVariable int page) {
