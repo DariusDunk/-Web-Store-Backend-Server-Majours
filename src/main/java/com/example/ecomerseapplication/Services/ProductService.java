@@ -106,10 +106,12 @@ public class ProductService {
 
         Specification<Product> productSpec = Specification.where(
                 ProductSpecifications.equalsCategory(productCategory)
-                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest)));
+                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest))
+        );
 
-        if (manufacturer != null)
+        if (manufacturer != null) {
             productSpec = productSpec.and(ProductSpecifications.equalsManufacturer(manufacturer));
+        }
 
         List<Product> products = productRepository.findAll(productSpec);
 
@@ -128,6 +130,7 @@ public class ProductService {
                         filteredProductsList.add(product);
         } else
             filteredProductsList.addAll(products);
+
         return ProductDTOMapper.pagedListToDtoResponse(filteredProductsList, pageable);
     }
 

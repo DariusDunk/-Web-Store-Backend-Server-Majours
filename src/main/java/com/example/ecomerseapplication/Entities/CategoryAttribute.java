@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @Table(name = "category_attributes", schema = "online_shop")
 @Data
 @EqualsAndHashCode(exclude = "products")
+@ToString(exclude = {"products"})
 public class CategoryAttribute {
 
     @Id

@@ -137,24 +137,44 @@ public class ProductController {
     }
 
     @PostMapping("filter/{page}")
-    public CompactProductPagedListResponse productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
+    public ResponseEntity<CompactProductPagedListResponse> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
                                                                           @PathVariable int page) {
-        Set<CategoryAttribute> categoryAttributeSet = null;
+//        if (productFilterRequest.filterAttributes != null) {
+//            categoryAttributeSet = categoryAttributeService.getByNameAndOption(
+//                    productFilterRequest.filterAttributes.keySet(),
+//                    new HashSet<>(productFilterRequest.filterAttributes.values()));
+//        }
 
-        if (productFilterRequest.filterAttributes != null) {
-            categoryAttributeSet = categoryAttributeService.getByNameAndOption(
-                    productFilterRequest.filterAttributes.keySet(),
-                    new HashSet<>(productFilterRequest.filterAttributes.values()));
+        if (productFilterRequest.filterAttributes == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Set<CategoryAttribute> categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
+
+        if (categoryAttributeSet.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Manufacturer manufacturer = manufacturerService.findByName(productFilterRequest.manufacturerName);
+
+        if (manufacturer == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        ProductCategory productCategory = productCategoryService.findByName(productFilterRequest.productCategory);
+
+        if (productCategory == null) {
+            return ResponseEntity.badRequest().build();
         }
 
         PageRequest pageRequest = PageRequest.of(page, 10);
 
-        return productService.getByCategoryFiltersManufacturerAndPriceRange(categoryAttributeSet,
-                productFilterRequest.productCategory,
+        return ResponseEntity.ok(productService.getByCategoryFiltersManufacturerAndPriceRange(categoryAttributeSet,
+                productCategory,
                 productFilterRequest.priceLowest,
                 productFilterRequest.priceHighest,
-                productFilterRequest.manufacturer,
-                pageRequest);
+                manufacturer,
+                pageRequest));
     }
 
     @PostMapping("review/add")

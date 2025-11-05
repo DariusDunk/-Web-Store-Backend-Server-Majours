@@ -2,14 +2,20 @@ package com.example.ecomerseapplication.DTOs.requests;
 
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.ProductCategory;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 public class ProductFilterRequest {
-    public Map<Integer, String> filterAttributes;
-    public ProductCategory productCategory;
+    @JsonProperty("filter_attributes")
+    public Map<String, String> filterAttributes;
+    @JsonProperty("product_category")
+    public String productCategory;
+    @JsonProperty("price_lowest")
     public int priceLowest;
+    @JsonProperty("price_highest")
     public int priceHighest;
-
-    public Manufacturer manufacturer;
+    @JsonProperty("manufacturer_name")
+    public String  manufacturerName;
 
 }

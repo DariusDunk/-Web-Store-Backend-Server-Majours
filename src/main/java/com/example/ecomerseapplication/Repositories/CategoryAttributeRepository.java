@@ -15,6 +15,6 @@ public interface CategoryAttributeRepository extends JpaRepository<CategoryAttri
 
     @Query(value = "select ca " +
             "from CategoryAttribute ca " +
-            "where ca.attributeName.id in :nameIds and ca.attributeOption in :options")
-    Set<CategoryAttribute> findByNameIdAndOption(@Param("nameIds") Set<Integer> nameIds, @Param("options") Set<String> options);
+            "where ca.attributeName.attributeName in :names and ca.attributeOption in :options")
+    Set<CategoryAttribute> findByNamesAndOptions(@Param("names") Set<String> names, @Param("options") Set<String> options);
 }

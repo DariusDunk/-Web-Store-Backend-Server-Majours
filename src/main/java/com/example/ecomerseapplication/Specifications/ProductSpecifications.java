@@ -15,7 +15,8 @@ public class ProductSpecifications {
             return null;
         }
 
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(Product_.MANUFACTURER), manufacturer));
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get(Product_.MANUFACTURER), manufacturer));
     }
 
     public static Specification<Product> priceBetween(int priceLowest, int priceHighest) {
@@ -28,6 +29,7 @@ public class ProductSpecifications {
 
     public static Specification<Product> equalsCategory(ProductCategory productCategory) {
 
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(Product_.PRODUCT_CATEGORY), productCategory));
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get(Product_.PRODUCT_CATEGORY), productCategory));
     }
 }

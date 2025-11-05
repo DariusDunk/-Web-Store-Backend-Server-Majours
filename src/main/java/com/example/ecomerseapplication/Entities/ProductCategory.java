@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.util.List;
 
 @Entity
 @Table(name = "product_categories", schema = "online_shop")
 @Data
 @EqualsAndHashCode(exclude = {"categoryAttributes", "products"})
+@ToString(exclude = {"products","categoryAttributes"} )
 public class ProductCategory {
 
     @Id
