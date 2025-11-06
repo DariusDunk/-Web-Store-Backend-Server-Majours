@@ -37,10 +37,10 @@ public class CategoryController {
         this.manufacturerService = manufacturerService;
     }
 
-    @GetMapping("")
-    public List<ProductCategory> getAll() {
-        return categoryService.findAll();
-    }
+//    @GetMapping("")
+//    public List<ProductCategory> getAll() {
+//        return categoryService.findAll();
+//    }
 
     @GetMapping("names")
     public ResponseEntity<List<String>> getAllNames() {

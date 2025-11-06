@@ -27,10 +27,6 @@ public class ProductDTOMapper {
         return compactProductResponse;
     }
 
-//    public static void addReviewsCountToCompactResponse(CompactProductResponse compactProductResponse, int reviewsCount) {
-//        compactProductResponse.reviewCount = reviewsCount;
-//    }
-
     public static Page<CompactProductResponse> productPageToDtoPage(Page<Product> productPage) {
         return new PageImpl<>(
                 productPage.stream().map(ProductDTOMapper::entityToCompactResponse).collect(Collectors.toList()),

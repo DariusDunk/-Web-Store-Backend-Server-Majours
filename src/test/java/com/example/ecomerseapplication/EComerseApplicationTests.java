@@ -92,11 +92,11 @@ class EComerseApplicationTests {
     @Test
     void getAttributeByNameAndOption(){
 
-        HashSet<String> names = new HashSet<>();
-        HashSet<String> options = new HashSet<>();
-        names.add("Широчина на фрезоване");
-
-        options.add("1000-1200");
+//        HashSet<String> names = new HashSet<>();
+//        HashSet<String> options = new HashSet<>();
+//        names.add("Широчина на фрезоване");
+//
+//        options.add("1000-1200");
 
         Map<String, String > attMap = new HashMap<>();
         attMap.put("Широчина на фрезоване", "1000-1200");

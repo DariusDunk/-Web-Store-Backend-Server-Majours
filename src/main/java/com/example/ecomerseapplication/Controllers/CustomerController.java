@@ -65,7 +65,7 @@ public class CustomerController {
         return customerService.addProductToFavourites(pairRequest.customerId, product);
     }
 
-    @GetMapping("favourites/p/{page}")
+    @GetMapping("favourites/p/{page}")//PAGING
     public ResponseEntity<CompactProductPagedListResponse> getFavourites(@RequestParam long id, @PathVariable int page) {
         Customer customer = customerService.findById(id);
         if (customer == null)

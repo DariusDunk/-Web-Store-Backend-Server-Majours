@@ -13,7 +13,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +68,7 @@ public class ProductService {
         if (product.getFavouredBy().contains(customer))
             detailedProductResponse.inFavourites = true;
 
-        if (reviewService.exists(product,customer))
+        if (reviewService.exists(product, customer))
             detailedProductResponse.reviewed = true;
 
 
@@ -104,10 +103,13 @@ public class ProductService {
                                                                                          Manufacturer manufacturer,
                                                                                          Pageable pageable) {
 
-        Specification<Product> productSpec = Specification.where(
+//        Specification<Product> productSpec = Specification.where(
+//                ProductSpecifications.equalsCategory(productCategory)
+//                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest))
+//        );
+        Specification<Product> productSpec =
                 ProductSpecifications.equalsCategory(productCategory)
-                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest))
-        );
+                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
 
         if (manufacturer != null) {
             productSpec = productSpec.and(ProductSpecifications.equalsManufacturer(manufacturer));
@@ -123,11 +125,11 @@ public class ProductService {
                     pageable,
                     0);
 
-        if (categoryAttributes != null) {
-            if (!categoryAttributes.isEmpty())
-                for (Product product : products)
-                    if (product.getCategoryAttributeSet().containsAll(categoryAttributes))
-                        filteredProductsList.add(product);
+
+        if (!categoryAttributes.isEmpty()) {
+            for (Product product : products)
+                if (product.getCategoryAttributeSet().containsAll(categoryAttributes))
+                    filteredProductsList.add(product);
         } else
             filteredProductsList.addAll(products);
 

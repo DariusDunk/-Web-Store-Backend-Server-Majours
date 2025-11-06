@@ -136,24 +136,21 @@ public class ProductController {
 
     }
 
-    @PostMapping("filter/{page}")
+    @PostMapping("filter/{page}")//TODO PAGING!
     public ResponseEntity<CompactProductPagedListResponse> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
                                                                           @PathVariable int page) {
-//        if (productFilterRequest.filterAttributes != null) {
-//            categoryAttributeSet = categoryAttributeService.getByNameAndOption(
-//                    productFilterRequest.filterAttributes.keySet(),
-//                    new HashSet<>(productFilterRequest.filterAttributes.values()));
+
+        Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
+
+        if (productFilterRequest.filterAttributes != null) {
+            categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
+        }
+
+
+
+//        if (categoryAttributeSet.isEmpty()) {
+//            return ResponseEntity.notFound().build();
 //        }
-
-        if (productFilterRequest.filterAttributes == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Set<CategoryAttribute> categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
-
-        if (categoryAttributeSet.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
 
         Manufacturer manufacturer = manufacturerService.findByName(productFilterRequest.manufacturerName);
 

@@ -1,7 +1,5 @@
 package com.example.ecomerseapplication.DTOs.requests;
 
-import com.example.ecomerseapplication.Entities.Manufacturer;
-import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
