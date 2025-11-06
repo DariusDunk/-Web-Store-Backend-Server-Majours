@@ -48,13 +48,8 @@ public class ProductController {
     }
 
     @GetMapping("findall")
-//    @Transactional
     public ResponseEntity<PageResponse<CompactProductResponse>> findAll(@RequestParam int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
-
-//        return ResponseEntity.ok(productService.findAllProductsPage(pageRequest));
-
-//        return ResponseEntity.ok(productService.findAllProductResponsePage(pageRequest));
 
         return ResponseEntity.ok(PageResponse.
                 from(productService.findAllByRatingResponsePage(pageRequest))
@@ -146,7 +141,7 @@ public class ProductController {
 
     }
 
-    @PostMapping("filter/{page}")//TODO PAGING!
+    @PostMapping("filter/{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
 
