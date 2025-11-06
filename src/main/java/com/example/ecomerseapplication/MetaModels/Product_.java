@@ -4,6 +4,8 @@ import com.example.ecomerseapplication.Entities.*;
 import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.persistence.metamodel.StaticMetamodel;
 
+import java.util.Set;
+
 @StaticMetamodel(Product.class)
 public class Product_ {
 
@@ -40,7 +42,7 @@ public class Product_ {
     public static volatile SingularAttribute<Product, String> model;
     public static final String MODEL = "model";
 
-    public static volatile SingularAttribute<Product, CategoryAttribute> categoryAttributeSet;
+    public static volatile SingularAttribute<Product, Set<CategoryAttribute>> categoryAttributeSet;
     public static final String CATEGORY_ATTRIBUTE_SET = "categoryAttributeSet";
 
     public static volatile SingularAttribute<Product, ProductImage> productImages;

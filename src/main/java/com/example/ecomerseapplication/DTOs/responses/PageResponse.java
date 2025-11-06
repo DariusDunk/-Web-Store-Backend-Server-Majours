@@ -1,8 +1,6 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
 import org.springframework.data.domain.Page;
-
-import java.awt.print.Pageable;
 import java.util.List;
 
 public record PageResponse<T>(

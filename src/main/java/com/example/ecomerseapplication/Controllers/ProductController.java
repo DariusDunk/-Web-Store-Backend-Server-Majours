@@ -3,9 +3,9 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFilterRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductPagedListResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
@@ -49,14 +49,20 @@ public class ProductController {
 
     @GetMapping("findall")
 //    @Transactional
-    public ResponseEntity<Page<CompactProductResponse>> findAll(@RequestParam int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> findAll(@RequestParam int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
+
 //        return ResponseEntity.ok(productService.findAllProductsPage(pageRequest));
-        return ResponseEntity.ok(productService.findAllProductResponsePage(pageRequest));
+
+//        return ResponseEntity.ok(productService.findAllProductResponsePage(pageRequest));
+
+        return ResponseEntity.ok(PageResponse.
+                from(productService.findAllByRatingResponsePage(pageRequest))
+        );
     }
 
     @GetMapping("search")
-    public ResponseEntity<Page<CompactProductResponse>> findByNameLike(@RequestParam String name, @RequestParam int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam String name, @RequestParam int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         Page<CompactProductResponse> responsePages = productService.getProductsLikeName(pageRequest, name);
@@ -64,7 +70,8 @@ public class ProductController {
         if (responsePages.isEmpty())
             return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responsePages);
+//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responsePages);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(responsePages));
     }
 
     @GetMapping("suggest")
@@ -82,10 +89,11 @@ public class ProductController {
 
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
     }
-//TODO vij kyde se izpolzva produkta kakto i drugi entitita, i kydeto se vzema samo 4asti4na informaciq go napravi da vry6ta napravo dto ot query i posle napravi eager fetch na samata promenliva
+
+    //TODO vij kyde se izpolzva produkta kakto i drugi entitita, i kydeto se vzema samo 4asti4na informaciq go napravi da vry6ta napravo dto ot query i posle napravi eager fetch na samata promenliva
     @GetMapping("manufacturer/{manufacturerName}/p{page}")
-    public ResponseEntity<Page<CompactProductResponse>> productsByManufacturer(@PathVariable String manufacturerName,
-                                                                               @PathVariable int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> productsByManufacturer(@PathVariable String manufacturerName,
+                                                                                       @PathVariable int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
         Manufacturer manufacturer = manufacturerService.findByName(manufacturerName);
 
@@ -98,24 +106,25 @@ public class ProductController {
         if (productResponsePage.isEmpty())
             return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productResponsePage);
+//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productResponsePage);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }
 
-    @GetMapping("featured")
-    public ResponseEntity<List<CompactProductResponse>> featuredProducts() {
-
-        List<CompactProductResponse> compactProductResponses = productService.getFeaturedProducts();
-
-        if (compactProductResponses.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(compactProductResponses);
-
-    }
+//    @GetMapping("featured")
+//    public ResponseEntity<List<CompactProductResponse>> featuredProducts() {
+//
+//        List<CompactProductResponse> compactProductResponses = productService.getFeaturedProducts();
+//
+//        if (compactProductResponses.isEmpty())
+//            return ResponseEntity.notFound().build();
+//
+//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(compactProductResponses);
+//
+//    }
 
     @GetMapping("category/{name}/p{page}")
-    public ResponseEntity<Page<CompactProductResponse>> getProductsByCategory(@PathVariable String name,
-                                                                              @PathVariable int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> getProductsByCategory(@PathVariable String name,
+                                                                                      @PathVariable int page) {
 
         if (name.equals("Бензинови машини") || name.equals("електрически машини"))
             return ResponseEntity.notFound().build();
@@ -132,25 +141,20 @@ public class ProductController {
         if (productResponsePage.isEmpty())
             return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productResponsePage);
+//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productResponsePage);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
 
     }
 
     @PostMapping("filter/{page}")//TODO PAGING!
-    public ResponseEntity<CompactProductPagedListResponse> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
-                                                                          @PathVariable int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
+                                                                                               @PathVariable int page) {
 
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
         if (productFilterRequest.filterAttributes != null) {
             categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
         }
-
-
-
-//        if (categoryAttributeSet.isEmpty()) {
-//            return ResponseEntity.notFound().build();
-//        }
 
         Manufacturer manufacturer = manufacturerService.findByName(productFilterRequest.manufacturerName);
 
@@ -166,12 +170,14 @@ public class ProductController {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
 
-        return ResponseEntity.ok(productService.getByCategoryFiltersManufacturerAndPriceRange(categoryAttributeSet,
-                productCategory,
-                productFilterRequest.priceLowest,
-                productFilterRequest.priceHighest,
-                manufacturer,
-                pageRequest));
+        return ResponseEntity.ok(PageResponse.from(
+                productService.getByCategoryFiltersManufacturerAndPriceRange(
+                        categoryAttributeSet,
+                        productCategory,
+                        productFilterRequest.priceLowest,
+                        productFilterRequest.priceHighest,
+                        manufacturer,
+                        pageRequest)));
     }
 
     @PostMapping("review/add")

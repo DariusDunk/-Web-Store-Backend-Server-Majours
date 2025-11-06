@@ -40,7 +40,7 @@ public class ProductService {
         return ProductDTOMapper.productPageToDtoPage(productRepository.findAllSortByRating(pageRequest));
     }
 
-    public Page<CompactProductResponse> findAllProductResponsePage(PageRequest pageRequest) {
+    public Page<CompactProductResponse> findAllByRatingResponsePage(PageRequest pageRequest) {
         return productRepository.findAllAsResponseSortByRating(pageRequest);
     }
 
@@ -96,17 +96,14 @@ public class ProductService {
                         .getByProductCategoryOrderByRatingDesc(productCategory, pageable));
     }
 
-    public CompactProductPagedListResponse getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
-                                                                                         ProductCategory productCategory,
-                                                                                         int priceLowest,
-                                                                                         int priceHighest,
-                                                                                         Manufacturer manufacturer,
-                                                                                         Pageable pageable) {
+    public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
+                                                                                      ProductCategory productCategory,
+                                                                                      int priceLowest,
+                                                                                      int priceHighest,
+                                                                                      Manufacturer manufacturer,
+                                                                                      Pageable pageable) {
 
-//        Specification<Product> productSpec = Specification.where(
-//                ProductSpecifications.equalsCategory(productCategory)
-//                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest))
-//        );
+
         Specification<Product> productSpec =
                 ProductSpecifications.equalsCategory(productCategory)
                         .and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
@@ -115,25 +112,13 @@ public class ProductService {
             productSpec = productSpec.and(ProductSpecifications.equalsManufacturer(manufacturer));
         }
 
-        List<Product> products = productRepository.findAll(productSpec);
-
-        List<Product> filteredProductsList = new ArrayList<>();
-
-        if (products.isEmpty())
-            new PageImpl<>(
-                    new ArrayList<>(),
-                    pageable,
-                    0);
-
-
         if (!categoryAttributes.isEmpty()) {
-            for (Product product : products)
-                if (product.getCategoryAttributeSet().containsAll(categoryAttributes))
-                    filteredProductsList.add(product);
-        } else
-            filteredProductsList.addAll(products);
+            productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
+        }
 
-        return ProductDTOMapper.pagedListToDtoResponse(filteredProductsList, pageable);
+        Page<Product> products = productRepository.findAll(productSpec,pageable);
+
+        return ProductDTOMapper.productPageToDtoPage(products);
     }
 
     public Product findByPCode(String code) {
