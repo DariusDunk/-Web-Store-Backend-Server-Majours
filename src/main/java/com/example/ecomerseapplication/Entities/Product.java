@@ -33,6 +33,9 @@ public class Product {
     @Column(name = "product_code", columnDefinition = "character varying(10)")
     private String productCode;
 
+    @Column(name = "quantity_in_stock")
+    private int quantityInStock;
+
     @JoinColumn(name = "manufacturer_id")
     @ManyToOne
     private Manufacturer manufacturer;

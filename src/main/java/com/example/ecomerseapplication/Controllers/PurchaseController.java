@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
 import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
@@ -32,14 +33,16 @@ public class PurchaseController {
     private final CustomerCartService customerCartService;
 
     private final PurchaseCartService purchaseCartService;
+    private final ProductService productService;
 
     @Autowired
-    public PurchaseController(PurchaseService purchaseService, SavedPurchaseDetailsService purchaseDetailsService, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService) {
+    public PurchaseController(PurchaseService purchaseService, SavedPurchaseDetailsService purchaseDetailsService, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService, ProductService productService) {
         this.purchaseService = purchaseService;
         this.purchaseDetailsService = purchaseDetailsService;
         this.customerService = customerService;
         this.customerCartService = customerCartService;
         this.purchaseCartService = purchaseCartService;
+        this.productService = productService;
     }
 
     @PostMapping("savedetails")
@@ -70,71 +73,88 @@ public class PurchaseController {
     @Transactional
     public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
 
-        Customer customer = customerService.findById(purchaseRequest.customerId);
+//        Customer customer = customerService.findById(purchaseRequest.customerId);
+//
+//        if (customer==null)
+//          return  ResponseEntity.notFound().build();
+//
+//        if (purchaseRequest.savedRecipientDetailsRequest == null) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.savedRecipientDetailsRequest);
+//
+//        purchase.setCustomer(customer);
+//
+//        List<CustomerCart> customerCarts = customerCartService.cartsByCustomer(customer);
+//
+//        List<Product> updatedQuantProducts = new ArrayList<>();
+//
+//        if (customerCarts.isEmpty())
+//            return ResponseEntity.notFound().build();
+//
+//        for (CustomerCart cart : customerCarts) {
+//            Product currectProduct = cart.getCustomerCartId().getProduct();
+//            if (currectProduct.getQuantityInStock() < cart.getQuantity()) {
+//                return ResponseEntity.badRequest().build();//TODO tuk kato se vru6ta custom response, trqbva da kazva to4no koi produkt nqma broiki
+//            }
+//
+//            currectProduct.setQuantityInStock(currectProduct.getQuantityInStock() - cart.getQuantity());
+//
+//            updatedQuantProducts.add(currectProduct);
+//
+//        }
+//
+//        productService.saveAll(updatedQuantProducts);
+//
+//
+//        int totalCost = 0;
+//
+//        for (CustomerCart customerCart:customerCarts) {
+//            totalCost+=customerCart
+//                    .getCustomerCartId()
+//                    .getProduct()
+//                    .getSalePriceStotinki()*customerCart.getQuantity();
+//        }
+//
+//        purchase.setTotalCost(totalCost);
+//
+//        Purchase managedPurchase = purchaseService.save(purchase);
+//
+//        PurchaseCartId purchaseCartId;
+//
+//        List<PurchaseCart> purchaseCarts = new ArrayList<>();
+//
+//        for (CustomerCart customerCart:customerCarts)
+//        {
+//            purchaseCartId = new PurchaseCartId();
+//            purchaseCartId.setPurchase(managedPurchase);
+//            purchaseCartId.setProduct(customerCart
+//                    .getCustomerCartId()
+//                    .getProduct());
+//
+//            purchaseCarts.add(new PurchaseCart(purchaseCartId,
+//                    customerCart.getQuantity()));
+//        }
+//
+//        purchaseCartService.saveCarts(purchaseCarts);
+//
+//        PurchaseResponse purchaseResponse = PurchaseMapper.entityToResponse(purchase);
+//
+//        for (CustomerCart customerCart:customerCarts) {
+//
+//            CompactProductResponse compactProduct = ProductDTOMapper
+//                    .entityToCompactResponse(customerCart.getCustomerCartId().getProduct());
+//
+//            CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
+//            pair.compactProductResponse = compactProduct;
+//            pair.quantity = customerCart.getQuantity();
+//
+//            purchaseResponse.productQuantityPairs.add(pair);
+//        }
+//
+//        customerCartService.clearCart(customer);
 
-        if (customer==null)
-          return  ResponseEntity.notFound().build();
-
-        if (purchaseRequest.savedRecipientDetailsRequest == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.savedRecipientDetailsRequest);
-
-        purchase.setCustomer(customer);
-
-        List<CustomerCart> customerCarts = customerCartService.cartsByCustomer(customer);
-
-        if (customerCarts.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        int totalCost = 0;
-
-        for (CustomerCart customerCart:customerCarts) {
-            totalCost+=customerCart
-                    .getCustomerCartId()
-                    .getProduct()
-                    .getSalePriceStotinki()*customerCart.getQuantity();
-        }
-
-        purchase.setTotalCost(totalCost);
-
-        Purchase managedPurchase = purchaseService.save(purchase);
-
-        PurchaseCartId purchaseCartId;
-
-        List<PurchaseCart> purchaseCarts = new ArrayList<>();
-
-        for (CustomerCart customerCart:customerCarts)
-        {
-            purchaseCartId = new PurchaseCartId();
-            purchaseCartId.setPurchase(managedPurchase);
-            purchaseCartId.setProduct(customerCart
-                    .getCustomerCartId()
-                    .getProduct());
-
-            purchaseCarts.add(new PurchaseCart(purchaseCartId,
-                    customerCart.getQuantity()));
-        }
-
-        purchaseCartService.saveCarts(purchaseCarts);
-
-        PurchaseResponse purchaseResponse = PurchaseMapper.entityToResponse(purchase);
-
-        for (CustomerCart customerCart:customerCarts) {
-
-            CompactProductResponse compactProduct = ProductDTOMapper
-                    .entityToCompactResponse(customerCart.getCustomerCartId().getProduct());
-
-            CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
-            pair.compactProductResponse = compactProduct;
-            pair.quantity = customerCart.getQuantity();
-
-            purchaseResponse.productQuantityPairs.add(pair);
-        }
-
-        customerCartService.clearCart(customer);
-
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(purchaseResponse);
+        return purchaseService.completePurchase(purchaseRequest);
     }
 }
