@@ -5,16 +5,23 @@ plugins {
 }
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
+
+bootJar {
+    archiveBaseName = 'EComersApp'
+    archiveVersion = version.replace('-SNAPSHOT', '')
+}
 
 java {
-    sourceCompatibility = '17'
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 jar{
-    manifest{
-        attributes('Main-Class': 'com.example.ecomerseapplication.EComerseApplication')
-    }
+
+    enabled = false
 }
 
 configurations {
