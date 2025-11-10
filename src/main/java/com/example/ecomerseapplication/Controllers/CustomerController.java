@@ -124,9 +124,6 @@ public class CustomerController {
 
         List<CustomerCart> customerCarts = customerCartService.cartsByCustomer(customer);
 
-        if (customerCarts.isEmpty())
-            return ResponseEntity.notFound().build();
-
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
