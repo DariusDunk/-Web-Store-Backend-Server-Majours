@@ -12,6 +12,7 @@ import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.enums.UserRole;
+import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -201,12 +202,12 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-//    @PostMapping("login/customer")
-//    public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) {
-//
-//        if (request.identifier()==null)
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Няма подадени данни за имейл или потребителско име");
-//
-//        keycloakService.login
-//    }
+    @PostMapping("login/customer")
+    public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) throws VerificationException {
+
+        if (request.identifier()==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Няма подадени данни за имейл или потребителско име");
+
+        return keycloakService.loginUser(request);
+    }
 }

@@ -685,7 +685,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "secretGigaChadSecret",
       "redirectUris": [
         "*"
       ],

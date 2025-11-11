@@ -1,7 +1,17 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
+import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
+import com.example.ecomerseapplication.DTOs.responses.TokenResponse;
 import com.example.ecomerseapplication.enums.UserRole;
 import jakarta.annotation.PostConstruct;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import org.apache.http.HttpStatus;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -11,6 +21,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -33,6 +44,10 @@ public class KeycloakService {
     private String adminPassword;
     @Value("${keycloak.user-realm}")
     private String userRealm;
+    @Value("${keycloak.token-target-address}")
+    private String tokenAddress;
+    @Value("${spring.security.oauth2.client.registration.keycloak.client-secret}")
+    private String secret;
 
     @PostConstruct
     public void init() {
@@ -103,5 +118,34 @@ public class KeycloakService {
 
     public UserRepresentation getUserIdByEmail(String username) {
         return keycloak.realm(userRealm).users().searchByEmail(username, true).getFirst();
+    }
+
+    public ResponseEntity<?> loginUser(UserLoginRequest request) throws VerificationException {
+
+        MultivaluedMap<String, String> formParams = new MultivaluedHashMap<>();
+        formParams.add("grant_type", "password");
+        formParams.add("client_id", "backend-service");
+        formParams.add("client_secret", secret);
+        formParams.add("username", request.identifier());
+        formParams.add("password", request.password());
+
+        Response response = ClientBuilder.newClient()
+                .target(tokenAddress)
+                .request()
+                .post(Entity.form(new Form(formParams)));
+
+        if (response.getStatus() == HttpStatus.SC_OK) {
+
+            TokenResponse tokenResponse = response.readEntity(TokenResponse.class);
+
+            return ResponseEntity.ok(
+                    new LoginResponse(request.identifier(),
+                    getRoleByUserId(getUserIdFromToken(tokenResponse.accessToken())), tokenResponse)
+            );
+
+        }
+
+        return ResponseEntity.status(response.getStatus()).build();
+
     }
 }
