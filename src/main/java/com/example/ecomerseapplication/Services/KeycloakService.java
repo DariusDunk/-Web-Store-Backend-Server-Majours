@@ -86,6 +86,8 @@ public class KeycloakService {
         }
     }
 
+
+
     public String getUserIdFromToken(String token) throws VerificationException {
         AccessToken accessToken = TokenVerifier.create(token, AccessToken.class).getToken();
         return accessToken.getSubject();

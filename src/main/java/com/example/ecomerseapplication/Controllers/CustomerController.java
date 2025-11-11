@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
+import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.CustomerCartResponseMapper;
@@ -10,6 +11,7 @@ import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
+import com.example.ecomerseapplication.enums.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -34,14 +36,16 @@ public class CustomerController {
     private final PurchaseService purchaseService;
 
     private final PurchaseCartService purchaseCartService;
+    private final KeycloakService keycloakService;
 
     @Autowired
-    public CustomerController(CustomerService customerService, ProductService productService, CustomerCartService customerCartService, PurchaseService purchaseService, PurchaseCartService purchaseCartService) {
+    public CustomerController(CustomerService customerService, ProductService productService, CustomerCartService customerCartService, PurchaseService purchaseService, PurchaseCartService purchaseCartService, KeycloakService keycloakService) {
         this.customerService = customerService;
         this.productService = productService;
         this.customerCartService = customerCartService;
         this.purchaseService = purchaseService;
         this.purchaseCartService = purchaseCartService;
+        this.keycloakService = keycloakService;
     }
 
     @PostMapping("registration")
@@ -151,7 +155,6 @@ public class CustomerController {
             List<CompactProductQuantityPairResponse> pairs = new ArrayList<>();
 
 
-
             for (PurchaseCart cart : purchaseCarts) {
                 CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
                 pair.compactProductResponse = ProductDTOMapper
@@ -174,9 +177,36 @@ public class CustomerController {
     public ResponseEntity<String> resetPassword(@RequestBody CustomerAccountRequest request) {
         Customer customer = customerService.getByEmail(request.email);
 
-        if (customer==null)
+        if (customer == null)
             return ResponseEntity.notFound().build();
 
-        return customerService.passwordUpdate(customer,request.password);
+        return customerService.passwordUpdate(customer, request.password);
     }
+
+
+    @PostMapping("register/customer")
+    @Transactional
+    public ResponseEntity<?> registerUserKeycloak(@RequestBody CustomerAccountRequest customerAccountRequest) {
+
+        try {
+            keycloakService.registerUser(customerAccountRequest.userName,
+                    customerAccountRequest.password,
+                    customerAccountRequest.email,
+                    UserRole.CUSTOMER);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+//    @PostMapping("login/customer")
+//    public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) {
+//
+//        if (request.identifier()==null)
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Няма подадени данни за имейл или потребителско име");
+//
+//        keycloakService.login
+//    }
 }
