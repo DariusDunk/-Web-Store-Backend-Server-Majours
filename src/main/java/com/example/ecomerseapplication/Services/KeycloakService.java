@@ -10,6 +10,7 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -20,15 +21,28 @@ public class KeycloakService {
 
     private Keycloak keycloak;
 
+    @Value("${keycloak.server-url}")
+    private String serverUrl;
+    @Value("${keycloak.admin-realm}")
+    private String adminRealm;
+    @Value("${keycloak.client-id}")
+    private String clientId;
+    @Value("${keycloak.admin-username}")
+    private String adminUsername;
+    @Value("${keycloak.admin-password}")
+    private String adminPassword;
+    @Value("${keycloak.user-realm}")
+    private String userRealm;
+
     @PostConstruct
     public void init() {
         //login kato admin za da moje da se syzdavat potrebiteli
         keycloak = KeycloakBuilder.builder()
-                .serverUrl("http://localhost:8543/")
-                .realm("master")
-                .clientId("admin-cli")
-                .username("admin")
-                .password("admin")
+                .serverUrl(serverUrl)
+                .realm(adminRealm)
+                .clientId(clientId)
+                .username(adminUsername)
+                .password(adminPassword)
                 .build();
     }
 
@@ -45,7 +59,7 @@ public class KeycloakService {
         user.setCredentials(Collections.singletonList(cred));
 
         //Syzdavane na potrebitel v potrebitelskiq realm
-        var response = keycloak.realm("quarkus").users().create(user);
+        var response = keycloak.realm(userRealm).users().create(user);
 
         //Pri polu4avane na rezultat se polu4ava celiq url za potrebitelq i vsi4ko do poslednata 4ast, koqto e potrebitelskoto id
         if (response.getStatus() == org.apache.http.HttpStatus.SC_CREATED) {
@@ -54,13 +68,13 @@ public class KeycloakService {
                     .replaceAll(".*/([^/]+)$", "$1");
 
             //Vzemane na rolqta na dadeniq potrebitel ot keycloak
-            RoleRepresentation role = keycloak.realm("quarkus")
+            RoleRepresentation role = keycloak.realm(userRealm)
                     .roles()
                     .get(userRole.getValue())
                     .toRepresentation();
 
             //dobavqne na izbraniq potrebitel kym spisyka s izbranata rolq. Demek na potrebitelq mu se dava izbranata rolq
-            keycloak.realm("quarkus")
+            keycloak.realm(userRealm)
                     .users()
                     .get(userId)
                     .roles()
@@ -78,14 +92,14 @@ public class KeycloakService {
     }
 
     public List<UserRepresentation> getAllUsersOfRole(String roleName) {
-        return keycloak.realm("quarkus").roles().get(roleName).getUserMembers();
+        return keycloak.realm(userRealm).roles().get(roleName).getUserMembers();
     }
 
     public String getRoleByUserId(String userId) {
-        return keycloak.realm("quarkus").users().get(userId).roles().realmLevel().listAll().getFirst().getName();
+        return keycloak.realm(userRealm).users().get(userId).roles().realmLevel().listAll().getFirst().getName();
     }
 
     public UserRepresentation getUserIdByEmail(String username) {
-        return keycloak.realm("quarkus").users().searchByEmail(username, true).getFirst();
+        return keycloak.realm(userRealm).users().searchByEmail(username, true).getFirst();
     }
 }
