@@ -96,11 +96,37 @@ public class ProductService {
                         .getByProductCategoryOrderByRatingDesc(productCategory, pageable));
     }
 
+//    public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
+//                                                                                      ProductCategory productCategory,
+//                                                                                      int priceLowest,
+//                                                                                      int priceHighest,
+//                                                                                      Manufacturer manufacturer,
+//                                                                                      Pageable pageable) {
+//
+//
+//        Specification<Product> productSpec =
+//                ProductSpecifications.equalsCategory(productCategory)
+//                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
+//
+//        if (manufacturer != null) {
+//            productSpec = productSpec.and(ProductSpecifications.equalsManufacturer(manufacturer));
+//        }
+//
+//        if (!categoryAttributes.isEmpty()) {
+//            productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
+//        }
+//
+//        Page<Product> products = productRepository.findAll(productSpec,pageable);
+//
+//        return ProductDTOMapper.productPageToDtoPage(products);
+//    }
+
     public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
                                                                                       ProductCategory productCategory,
                                                                                       int priceLowest,
                                                                                       int priceHighest,
-                                                                                      Manufacturer manufacturer,
+                                                                                      List<Manufacturer> manufacturers,
+                                                                                      List<Integer> ratings,
                                                                                       Pageable pageable) {
 
 
@@ -108,12 +134,24 @@ public class ProductService {
                 ProductSpecifications.equalsCategory(productCategory)
                         .and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
 
-        if (manufacturer != null) {
-            productSpec = productSpec.and(ProductSpecifications.equalsManufacturer(manufacturer));
+        if (!manufacturers.isEmpty()) {
+            System.out.println("Manufacturers: ");
+            for (Manufacturer manufacturer : manufacturers) {
+                System.out.println(manufacturer.getManufacturerName());
+            }
+            productSpec = productSpec.and(ProductSpecifications.manufacturerIn(manufacturers));
         }
 
         if (!categoryAttributes.isEmpty()) {
             productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
+        }
+
+        if (ratings != null&& !ratings.isEmpty()) {
+            System.out.println("Ratings: ");
+            for (Integer rating : ratings) {
+                System.out.println(rating);
+            }
+            productSpec = productSpec.and(ProductSpecifications.ratingIn(ratings));
         }
 
         Page<Product> products = productRepository.findAll(productSpec,pageable);

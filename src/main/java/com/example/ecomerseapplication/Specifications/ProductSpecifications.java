@@ -25,6 +25,20 @@ public class ProductSpecifications {
                 criteriaBuilder.equal(root.get(Product_.MANUFACTURER), manufacturer));
     }
 
+    public static Specification<Product> manufacturerIn(List<Manufacturer> manufacturers) {
+        if (manufacturers == null) {
+            return null;
+        }
+
+        return ((root, query, criteriaBuilder) ->
+        {
+            assert query != null;
+            query.distinct(true);
+            Join<Product, Manufacturer> join = root.join(Product_.MANUFACTURER);
+            return join.in(manufacturers);
+        });
+    }
+
     public static Specification<Product> priceBetween(int priceLowest, int priceHighest) {
         return ((root, query, criteriaBuilder) -> criteriaBuilder.between(
                 root.get(Product_.SALE_PRICE_STOTINKI),
@@ -43,10 +57,18 @@ public class ProductSpecifications {
 
         return ((root, query, criteriaBuilder) ->
         {
+            assert query != null;
             query.distinct(true);
             Join<Product, Set<CategoryAttribute>> join = root.join(Product_.CATEGORY_ATTRIBUTE_SET);
             return join.in(attributes);
         }
         );
+    }
+
+    public static Specification<Product> ratingIn(List<Integer> ratings) {
+        return ((root, query, criteriaBuilder) ->
+                (ratings == null || ratings.isEmpty())
+                        ? criteriaBuilder.conjunction()
+                        : root.get(Product_.RATING).in(ratings));
     }
 }

@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.DTOs.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
 import java.util.Map;
 
 public class ProductFilterRequest {
@@ -13,7 +14,8 @@ public class ProductFilterRequest {
     public int priceLowest;
     @JsonProperty("price_highest")
     public int priceHighest;
-    @JsonProperty("manufacturer_name")
-    public String  manufacturerName;
-
+    @JsonProperty("manufacturer_names")
+    public List<String> manufacturerNames;
+    @JsonProperty("ratings")
+    public List<Integer> ratings;
 }

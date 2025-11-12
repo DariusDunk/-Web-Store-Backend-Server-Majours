@@ -12,22 +12,26 @@ import java.util.Set;
 public class ManufacturerService {
 
 
-    private final ManufacturerRepository manufacturerRepository;
+    private final ManufacturerRepository repository;
 
     @Autowired
-    public ManufacturerService(ManufacturerRepository manufacturerRepository) {
-        this.manufacturerRepository = manufacturerRepository;
+    public ManufacturerService(ManufacturerRepository repository) {
+        this.repository = repository;
     }
 
     public List<Manufacturer> getAll() {
-        return manufacturerRepository.findAll();
+        return repository.findAll();
     }
 
     public Set<Object[]> getByCategory(ProductCategory productCategory) {
-        return manufacturerRepository.getByCategory(productCategory);
+        return repository.getByCategory(productCategory);
     }
 
     public Manufacturer findByName(String manufacturerName) {
-        return manufacturerRepository.findByManufacturerName(manufacturerName).orElse(null);
+        return repository.findByManufacturerName(manufacturerName).orElse(null);
+    }
+
+    public List<Manufacturer> getByNames(List<String> manufacturerNames) {
+        return repository.findAllByManufacturerNameIn(manufacturerNames);
     }
 }

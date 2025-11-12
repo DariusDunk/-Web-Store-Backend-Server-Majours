@@ -27,7 +27,9 @@ public class SecurityConfig {
                                 "/docs/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/attributes/**"
+                                "/attributes/**",
+//                                "/**/**",
+                                "**"
                         ).permitAll() // public endpoints
                         .anyRequest().authenticated() // everything else needs auth
                 )

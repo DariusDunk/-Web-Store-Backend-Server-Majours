@@ -151,11 +151,16 @@ public class ProductController {
             categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
         }
 
-        Manufacturer manufacturer = manufacturerService.findByName(productFilterRequest.manufacturerName);
+//        Manufacturer manufacturer = manufacturerService.findByName(productFilterRequest.manufacturerName);
 
-        if (manufacturer == null) {
-            return ResponseEntity.badRequest().build();
-        }
+        List<Manufacturer> manufacturerList = new ArrayList<>();
+
+        if (productFilterRequest.manufacturerNames != null)
+            manufacturerList = manufacturerService.getByNames(productFilterRequest.manufacturerNames);
+
+//        if (manufacturer == null) {
+//            return ResponseEntity.badRequest().build();
+//        }
 
         ProductCategory productCategory = productCategoryService.findByName(productFilterRequest.productCategory);
 
@@ -171,7 +176,8 @@ public class ProductController {
                         productCategory,
                         productFilterRequest.priceLowest,
                         productFilterRequest.priceHighest,
-                        manufacturer,
+                        manufacturerList,
+                        productFilterRequest.ratings,
                         pageRequest)));
     }
 
