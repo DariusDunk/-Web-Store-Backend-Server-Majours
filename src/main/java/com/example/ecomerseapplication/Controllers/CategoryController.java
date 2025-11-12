@@ -8,6 +8,7 @@ import com.example.ecomerseapplication.Mappers.ManufacturerConverter;
 import com.example.ecomerseapplication.Services.AttributeNameService;
 import com.example.ecomerseapplication.Services.ManufacturerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
+import com.example.ecomerseapplication.Services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,12 +31,14 @@ public class CategoryController {
     private final AttributeNameService attributeNameService;
 
     private final ManufacturerService manufacturerService;
+    private final ProductService productService;
 
     @Autowired
-    public CategoryController(ProductCategoryService categoryService, AttributeNameService attributeNameService, ManufacturerService manufacturerService) {
+    public CategoryController(ProductCategoryService categoryService, AttributeNameService attributeNameService, ManufacturerService manufacturerService, ProductService productService) {
         this.categoryService = categoryService;
         this.attributeNameService = attributeNameService;
         this.manufacturerService = manufacturerService;
+        this.productService = productService;
     }
 
 //    @GetMapping("")
@@ -53,28 +57,39 @@ public class CategoryController {
     }
 
     @GetMapping("filters")
-    public ResponseEntity<CategoryFiltersResponse> getAttributes(@RequestParam int categoryId) {
-        Optional<ProductCategory> category = categoryService.findById(categoryId);
+    public ResponseEntity<CategoryFiltersResponse> getAttributes(@RequestParam String categoryName) {
+//        ProductCategory category = categoryService.findById(categoryId).orElse(null);
+        ProductCategory category = categoryService.findByName(categoryName);
 
-        if (category.isEmpty())
+        if (category==null)
             return ResponseEntity.notFound().build();
 
-        Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category.orElse(null));
+        Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category);
 
         if (attributeNameSet.isEmpty())
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
         categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
                 manufacturerService.
-                        getByCategory(category.orElse(null))
+                        getByCategory(category)
         );
 
         if (categoryFiltersResponse.manufacturerDTOResponseSet == null||
                 categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
             return ResponseEntity.notFound().build();
 
+        categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
+
         categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
+
+        Object[] totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
+
+        if (totalPriceRange.length==2)
+        {
+            categoryFiltersResponse.priceLowest = Integer.parseInt(totalPriceRange[0].toString());
+            categoryFiltersResponse.priceHighest = Integer.parseInt(totalPriceRange[1].toString());
+        }
 
         return ResponseEntity.ok(categoryFiltersResponse);
 

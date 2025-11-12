@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.responses.CompactProductPagedListResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
@@ -14,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -169,5 +168,26 @@ public class ProductService {
 
     public void saveAll(List<Product> updatedQuantProducts) {
         productRepository.saveAll(updatedQuantProducts);
+    }
+
+    public Set<Integer> getRatingsOfCategory(ProductCategory category) {
+        Set<Integer> dbrResponse =  productRepository.getRatingsByCategory(category).orElse(new HashSet<>());
+
+        Set<Integer>roundResponse = new HashSet<>();
+
+        if (!dbrResponse.isEmpty()) {
+            for (Integer i : dbrResponse) {
+
+                roundResponse.add(Integer.parseInt(String.valueOf(i.toString().charAt(0))));
+            }
+        }
+
+        return roundResponse;
+    }
+
+    public Object[] getTotalPriceRangeOfCategory(ProductCategory category) {
+        Object result = productRepository.getTotalPriceRange(category);
+
+        return (Object[]) result;
     }
 }

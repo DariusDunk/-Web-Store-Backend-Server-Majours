@@ -1,10 +1,23 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Set;
 
 public class CategoryFiltersResponse {
 
+    @JsonProperty("category_attributes")
     public Set<CategoryAttributesResponse> categoryAttributesResponses;
 
+    @JsonProperty("manufacturers")
     public Set<ManufacturerDTOResponse> manufacturerDTOResponseSet;
+
+    @JsonProperty("ratings")
+    public Set<Integer> ratings;
+
+    @JsonProperty("price_lowest")
+    public Integer priceLowest;
+
+    @JsonProperty("price_highest")
+    public Integer priceHighest;
 }

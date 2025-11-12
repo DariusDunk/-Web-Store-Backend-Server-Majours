@@ -11,8 +11,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
@@ -36,13 +38,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     @Query(value =
             "select p.productName " +
-            "from Product p " +
-            "where p.productName ilike %?1% " +
-            "order by p.rating, p.productName " +
-            "limit 7 ")
+                    "from Product p " +
+                    "where p.productName ilike %?1% " +
+                    "order by p.rating, p.productName " +
+                    "limit 7 ")
     List<String> getNameSuggestions(String name);
 
-        @Query(value = "select p " +
+    @Query(value = "select p " +
             "from Product p " +
             "order by p.rating desc " +
             "limit 10")
@@ -53,4 +55,20 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     Page<Product> getByProductCategoryOrderByRatingDesc(ProductCategory productCategory, Pageable pageable);
 
     Optional<Product> getByProductCode(String productCode);
+
+    @Query(value =
+            """
+                    select distinct (p.rating)
+                            from Product p
+                                    where p.productCategory = ?1
+                    """)
+    Optional<Set<Integer>> getRatingsByCategory(ProductCategory productCategory);
+
+    @Query(value = """
+        select MIN (p.salePriceStotinki), MAX (p.salePriceStotinki)
+        from Product p
+        where p.productCategory =?1
+""")
+    Object getTotalPriceRange(ProductCategory productCategory);
+
 }
