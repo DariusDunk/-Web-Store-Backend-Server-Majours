@@ -10,6 +10,7 @@ import com.example.ecomerseapplication.Services.ManufacturerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
 import com.example.ecomerseapplication.Services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,17 +58,15 @@ public class CategoryController {
     }
 
     @GetMapping("filters")
-    public ResponseEntity<CategoryFiltersResponse> getAttributes(@RequestParam String categoryName) {
-//        ProductCategory category = categoryService.findById(categoryId).orElse(null);
+    public ResponseEntity<?> getAttributes(@RequestParam String categoryName) {
         ProductCategory category = categoryService.findByName(categoryName);
 
+//        System.out.println("inside filters endpoint");
+
         if (category==null)
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
 
         Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category);
-
-        if (attributeNameSet.isEmpty())
-            return ResponseEntity.badRequest().build();
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
         categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
@@ -79,9 +78,12 @@ public class CategoryController {
                 categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
             return ResponseEntity.notFound().build();
 
-        categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
+        if (!attributeNameSet.isEmpty())
+        {
+            categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
+        }
 
-        categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
+        categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
 
         Object[] totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
 
