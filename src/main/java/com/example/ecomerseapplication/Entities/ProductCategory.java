@@ -38,4 +38,11 @@ public class ProductCategory {
     @JsonIgnore
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "productCategory")
     private List<CategoryAttribute> categoryAttributes;
+
+    @ManyToMany
+    @JoinTable(name = "attribute_groups_of_category", schema = "online_shop",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "attr_group_id"))
+    private List<AttributeGroup> attributeGroups;
+
 }

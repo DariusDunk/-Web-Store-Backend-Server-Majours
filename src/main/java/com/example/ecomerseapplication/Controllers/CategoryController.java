@@ -60,9 +60,7 @@ public class CategoryController {
     @GetMapping("filters")
     public ResponseEntity<?> getAttributes(@RequestParam String categoryName) {
         ProductCategory category = categoryService.findByName(categoryName);
-
-//        System.out.println("inside filters endpoint");
-
+        
         if (category==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
 
