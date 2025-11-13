@@ -1,8 +1,10 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -31,5 +33,9 @@ public class ProductCategoryService {
 
     public ProductCategory findByName(String name) {
         return productCategoryRepository.findByCategoryName(name).orElse(null);
+    }
+
+    public List<AttributeOptionDTO> getAttributesOfCategory(int categoryId) {
+        return productCategoryRepository.getAttributesOfCategory(categoryId);
     }
 }

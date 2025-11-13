@@ -16,7 +16,7 @@ public class AttributeNameToDTO {
             CategoryAttributesResponse categoryAttributesResponse = new CategoryAttributesResponse();
 
             categoryAttributesResponse.attributeName = attributeName.getAttributeName();
-            categoryAttributesResponse.nameId = attributeName.getId();
+//            categoryAttributesResponse.nameId = attributeName.getId();
 
             for (CategoryAttribute attribute : attributeName.getCategoryAttributeList())
                 categoryAttributesResponse.options.add(attribute.getAttributeOption());

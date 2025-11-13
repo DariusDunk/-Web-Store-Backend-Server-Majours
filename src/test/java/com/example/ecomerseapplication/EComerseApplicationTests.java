@@ -1,10 +1,12 @@
 package com.example.ecomerseapplication;
+import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
+import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
 import com.example.ecomerseapplication.Services.CategoryAttributeService;
 import com.example.ecomerseapplication.Services.CustomerCartService;
 import com.example.ecomerseapplication.Services.CustomerService;
@@ -22,6 +24,8 @@ class EComerseApplicationTests {
 
     @Autowired
     private CategoryAttributeRepository categoryAttributeRepository;
+    @Autowired
+    private ProductCategoryRepository productCategoryRepository;
 
     @Test
     void contextLoads() {
@@ -106,5 +110,14 @@ class EComerseApplicationTests {
 
         System.out.println(sets.size());
         System.out.println(sets);
+    }
+
+    @Test
+    void getAttributesOfCategory(){
+        List<AttributeOptionDTO> attributes = productCategoryRepository.getAttributesOfCategory(5);
+
+        for ( AttributeOptionDTO attributeOptionDTO : attributes) {
+            System.out.println(attributeOptionDTO);
+        }
     }
 }

@@ -1,9 +1,12 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
+import com.example.ecomerseapplication.Entities.AttributeGroup;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -40,5 +43,4 @@ public class CategoryAttributeService {
 //        System.out.println("RESULT: " + result);
         return categoryAttributeRepository.findByNamesAndOptions(names, options);
     }
-
 }

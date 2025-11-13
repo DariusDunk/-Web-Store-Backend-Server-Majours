@@ -1,8 +1,10 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
 import com.example.ecomerseapplication.DTOs.responses.CategoryFiltersResponse;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
+import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Mappers.AttributeNameToDTO;
 import com.example.ecomerseapplication.Mappers.ManufacturerConverter;
 import com.example.ecomerseapplication.Services.AttributeNameService;
@@ -17,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("category/")
@@ -102,7 +101,7 @@ public class CategoryController {
         if (category==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
 
-        Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category);
+//        Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category);
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
         categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
@@ -114,10 +113,21 @@ public class CategoryController {
                 categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
             return ResponseEntity.notFound().build();
 
-        if (!attributeNameSet.isEmpty())
+        Set<CategoryAttributesResponse> attributesResponses = AttributeMapper
+                .attributeOptionListToCatAttrResponseSet(categoryService.getAttributesOfCategory(category.getId()));
+        if (attributesResponses.isEmpty())
         {
-            categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
+            categoryFiltersResponse.categoryAttributesResponses = new HashSet<>();
         }
+
+        else
+            categoryFiltersResponse.categoryAttributesResponses =  attributesResponses;
+
+//        if (!attributeNameSet.isEmpty())
+//        {
+//            categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
+
+//        }
 
         categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
 
