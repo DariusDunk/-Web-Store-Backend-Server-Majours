@@ -57,10 +57,48 @@ public class CategoryController {
         return ResponseEntity.ok(names);
     }
 
+//    @GetMapping("filters")
+//    public ResponseEntity<?> getAttributes(@RequestParam String categoryName) {
+//        ProductCategory category = categoryService.findByName(categoryName);
+//
+//        if (category==null)
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
+//
+//        Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category);
+//
+//        CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
+//        categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
+//                manufacturerService.
+//                        getByCategory(category)
+//        );
+//
+//        if (categoryFiltersResponse.manufacturerDTOResponseSet == null||
+//                categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
+//            return ResponseEntity.notFound().build();
+//
+//        if (!attributeNameSet.isEmpty())
+//        {
+//            categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
+//        }
+//
+//        categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
+//
+//        Object[] totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
+//
+//        if (totalPriceRange.length==2)
+//        {
+//            categoryFiltersResponse.priceLowest = Integer.parseInt(totalPriceRange[0].toString());
+//            categoryFiltersResponse.priceHighest = Integer.parseInt(totalPriceRange[1].toString());
+//        }
+//
+//        return ResponseEntity.ok(categoryFiltersResponse);
+//
+//    }
+
     @GetMapping("filters")
     public ResponseEntity<?> getAttributes(@RequestParam String categoryName) {
         ProductCategory category = categoryService.findByName(categoryName);
-        
+
         if (category==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
 
@@ -92,7 +130,6 @@ public class CategoryController {
         }
 
         return ResponseEntity.ok(categoryFiltersResponse);
-
 
     }
 }

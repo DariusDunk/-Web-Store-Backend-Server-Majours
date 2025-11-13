@@ -28,15 +28,15 @@ public class CategoryAttributeController {
         return categoryAttributeService.getAll();
     }
 
-    @GetMapping("attributebycategory")
-    public ResponseEntity<List<CategoryAttribute>> findByCategory(ProductCategory productCategory) {
-
-        List<CategoryAttribute> attributes = categoryAttributeService.getByCategory(productCategory);
-
-        if (attributes.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(attributes);
-    }
+//    @GetMapping("attributebycategory")
+//    public ResponseEntity<List<CategoryAttribute>> findByCategory(ProductCategory productCategory) {
+//
+//        List<CategoryAttribute> attributes = categoryAttributeService.getByCategory(productCategory);
+//
+//        if (attributes.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        return ResponseEntity.ok(attributes);
+//    }
 }

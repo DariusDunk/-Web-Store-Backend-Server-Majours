@@ -121,7 +121,7 @@ public class ProductController {
     public ResponseEntity<PageResponse<CompactProductResponse>> getProductsByCategory(@PathVariable String name,
                                                                                       @PathVariable int page) {
 
-        if (name.equals("Бензинови машини") || name.equals("електрически машини"))
+        if (name.equals("Бензинови машини") || name.equals("електрически машини"))//TODO TOVA 6TE TRQBVA DA GO MAHA6 KATO SLOJI6 NOVITE RODITELSKI KATEGORII
             return ResponseEntity.notFound().build();
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
