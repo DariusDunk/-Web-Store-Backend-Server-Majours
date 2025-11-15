@@ -5,14 +5,17 @@ import com.example.ecomerseapplication.Entities.AttributeGroup;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
+import com.example.ecomerseapplication.Specifications.AttributeSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryAttributeService {
@@ -33,14 +36,12 @@ public class CategoryAttributeService {
         return categoryAttributeRepository.findByProductCategory(productCategory);
     }
 
-    public Set<CategoryAttribute> getByNamesAndOptions(Map<String, String> stringMap) {
+    public Set<CategoryAttribute> getByNamesAndOptions(Map<String, List<String>> stringMap) {
 
-//        System.out.println(stringMap);
-        Set<String> names = stringMap.keySet();
 
-        Set<String> options = new HashSet<>(stringMap.values());
+        Specification<CategoryAttribute> specification = AttributeSpecifications.getAttributesByNameAndOption(stringMap);
 
-//        System.out.println("RESULT: " + result);
-        return categoryAttributeRepository.findByNamesAndOptions(names, options);
+        return new HashSet<>(categoryAttributeRepository.findAll(specification));
+
     }
 }

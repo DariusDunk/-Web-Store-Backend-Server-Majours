@@ -102,8 +102,8 @@ class EComerseApplicationTests {
 //
 //        options.add("1000-1200");
 
-        Map<String, String > attMap = new HashMap<>();
-        attMap.put("Широчина на фрезоване", "1000-1200");
+        Map<String, List<String> > attMap = new HashMap<>();
+        attMap.put("Широчина на фрезоване", List.of( "1000-1200", "1200-1400"));
 
 //        Set<CategoryAttribute> sets = categoryAttributeRepository.findByNamesAndOptions(names, options);
         Set<CategoryAttribute> sets = categoryAttributeService.getByNamesAndOptions(attMap);

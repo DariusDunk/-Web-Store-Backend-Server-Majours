@@ -151,16 +151,10 @@ public class ProductController {
             categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
         }
 
-//        Manufacturer manufacturer = manufacturerService.findByName(productFilterRequest.manufacturerName);
-
-        List<Manufacturer> manufacturerList = new ArrayList<>();
+         List<Manufacturer> manufacturerList = new ArrayList<>();
 
         if (productFilterRequest.manufacturerNames != null)
             manufacturerList = manufacturerService.getByNames(productFilterRequest.manufacturerNames);
-
-//        if (manufacturer == null) {
-//            return ResponseEntity.badRequest().build();
-//        }
 
         ProductCategory productCategory = productCategoryService.findByName(productFilterRequest.productCategory);
 

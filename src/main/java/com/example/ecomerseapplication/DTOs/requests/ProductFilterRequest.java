@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ProductFilterRequest {
     @JsonProperty("filter_attributes")
-    public Map<String, String> filterAttributes;
+    public Map<String, List<String>> filterAttributes;
     @JsonProperty("product_category")
     public String productCategory;
     @JsonProperty("price_lowest")

@@ -12,7 +12,7 @@ import java.util.List;
 @Table(name = "product_categories", schema = "online_shop")
 @Data
 @EqualsAndHashCode(exclude = {"categoryAttributes", "products"})
-@ToString(exclude = {"products","categoryAttributes"} )
+@ToString(exclude = {"products","categoryAttributes", "attributeGroups"} )
 public class ProductCategory {
 
     @Id
