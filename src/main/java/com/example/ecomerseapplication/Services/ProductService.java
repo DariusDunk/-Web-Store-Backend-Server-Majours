@@ -146,10 +146,9 @@ public class ProductService {
         }
 
         if (ratings != null&& !ratings.isEmpty()) {
-            System.out.println("Ratings: ");
-            for (Integer rating : ratings) {
-                System.out.println(rating);
-            }
+
+            ratings.replaceAll(integer -> (integer) * 10);
+
             productSpec = productSpec.and(ProductSpecifications.ratingIn(ratings));
         }
 

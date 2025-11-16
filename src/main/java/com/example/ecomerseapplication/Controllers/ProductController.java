@@ -78,9 +78,14 @@ public class ProductController {
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode,
                                                                        @RequestParam long id) {
 
+
+
         Customer customer = customerService.findById(id);
         ResponseEntity<DetailedProductResponse> detailedProductResponse = productService
                 .getByNameAndCode(productCode, customer);
+
+        assert detailedProductResponse.getBody() != null;
+        System.out.println("PRODUCT: " + detailedProductResponse.getBody().categoryName);
 
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
     }
@@ -144,6 +149,8 @@ public class ProductController {
     @PostMapping("filter/{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
+
+//        System.out.println("REQUEST CONTENT: " + productFilterRequest);
 
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 

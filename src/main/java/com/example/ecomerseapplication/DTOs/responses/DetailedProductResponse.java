@@ -2,9 +2,12 @@ package com.example.ecomerseapplication.DTOs.responses;
 
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.ProductImage;
+import lombok.ToString;
+
 import java.util.List;
 import java.util.Set;
 
+@ToString
 public class DetailedProductResponse {
     public String name;
     public String categoryName;
