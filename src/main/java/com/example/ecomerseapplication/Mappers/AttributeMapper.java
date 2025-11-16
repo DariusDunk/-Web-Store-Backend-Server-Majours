@@ -1,7 +1,9 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
+import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
+import com.example.ecomerseapplication.Entities.CategoryAttribute;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,4 +38,12 @@ public class AttributeMapper {
 
         return categoryAttributesResponses;
     }
+
+//    public static AttributeOptionResponse attributeOptionToResponse(CategoryAttribute entity) {
+//        AttributeOptionResponse response = new AttributeOptionDTO(
+//          entity.getAttributeName().getAttributeName(),
+//          entity.getAttributeOption(),
+//          entity.get
+//        );
+//    }
 }

@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,12 +28,14 @@ public class ProductService {
     private final CustomerCartService customerCartService;
 
     private final ReviewService reviewService;
+    private final ProductCategoryService productCategoryService;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService) {
+    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService) {
         this.productRepository = productRepository;
         this.customerCartService = customerCartService;
         this.reviewService = reviewService;
+        this.productCategoryService = productCategoryService;
     }
 
 
@@ -59,7 +63,16 @@ public class ProductService {
         if (product == null)
             return ResponseEntity.notFound().build();
 
-        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product);
+        List<AttributeName> attributeNames = new ArrayList<>();
+
+        for (CategoryAttribute categoryAttribute : product.getCategoryAttributeSet()) {
+            attributeNames.add(categoryAttribute.getAttributeName());
+        }
+
+        List<String[]> attributeNameMUnitPairs = productCategoryService
+                .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
+
+        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
 
         if (customerCartService.cartExists(customer, product))
             detailedProductResponse.inCart = true;

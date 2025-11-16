@@ -1,7 +1,7 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
-import com.example.ecomerseapplication.Entities.ProductImage;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.ToString;
 
 import java.util.List;
@@ -15,12 +15,14 @@ public class DetailedProductResponse {
     public int salePriceStotinki;
     public String productCode;
     public String manufacturer;
-    public Set<CategoryAttribute> attributes;
+//    public Set<CategoryAttribute> attributes;
+    public Set<AttributeOptionResponse> attributes;
     public String productDescription;
     public short rating;
     public short deliveryCost;
     public String model;
-    public List<ProductImage> productImages;
+    @JsonProperty("productImages")
+    public List<String> productImageURLs;
     public List<ReviewResponse> reviews;
     public boolean inFavourites = false;
     public boolean inCart = false;

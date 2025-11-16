@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFilterRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
+import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
@@ -81,11 +82,12 @@ public class ProductController {
 
 
         Customer customer = customerService.findById(id);
+
         ResponseEntity<DetailedProductResponse> detailedProductResponse = productService
                 .getByNameAndCode(productCode, customer);
 
         assert detailedProductResponse.getBody() != null;
-        System.out.println("PRODUCT: " + detailedProductResponse.getBody().categoryName);
+//        System.out.println("PRODUCT: " + detailedProductResponse.getBody().categoryName);
 
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
     }

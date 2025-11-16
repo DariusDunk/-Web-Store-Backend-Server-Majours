@@ -1,20 +1,20 @@
 package com.example.ecomerseapplication;
 import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
-import com.example.ecomerseapplication.Entities.CategoryAttribute;
-import com.example.ecomerseapplication.Entities.Customer;
-import com.example.ecomerseapplication.Entities.CustomerCart;
-import com.example.ecomerseapplication.Entities.ProductCategory;
+import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
+import com.example.ecomerseapplication.Repositories.AttributeNameRepository;
 import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
 import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
 import com.example.ecomerseapplication.Services.CategoryAttributeService;
 import com.example.ecomerseapplication.Services.CustomerCartService;
 import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
+import com.nimbusds.jose.util.Pair;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.mindrot.jbcrypt.BCrypt;
+import org.yaml.snakeyaml.util.Tuple;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -26,6 +26,8 @@ class EComerseApplicationTests {
     private CategoryAttributeRepository categoryAttributeRepository;
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
+    @Autowired
+    private AttributeNameRepository attributeNameRepository;
 
     @Test
     void contextLoads() {
@@ -118,6 +120,20 @@ class EComerseApplicationTests {
 
         for ( AttributeOptionDTO attributeOptionDTO : attributes) {
             System.out.println(attributeOptionDTO);
+        }
+    }
+
+    @Test
+    void getAttributeMeasurementByNameAndCategory() {
+
+        List<AttributeName> names = attributeNameRepository.getAllByIdIn(List.of(
+                1, 2, 3, 4, 5));
+
+       List<String > units = productCategoryRepository.getMeasurementUnitsOfCategoryAttributes(5,names );
+
+
+        for ( String unit : units) {
+            System.out.println(unit);
         }
     }
 }

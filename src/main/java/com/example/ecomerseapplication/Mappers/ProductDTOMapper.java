@@ -1,14 +1,20 @@
 package com.example.ecomerseapplication.Mappers;
 
+import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductPagedListResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
+import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.Product;
+import com.example.ecomerseapplication.Entities.ProductImage;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ProductDTOMapper {
@@ -34,7 +40,7 @@ public class ProductDTOMapper {
                 productPage.getTotalElements());
     }
 
-    public static DetailedProductResponse entityToDetailedResponse(Product product) {
+    public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs) {
 
         DetailedProductResponse detailedProductResponse = new DetailedProductResponse();
 
@@ -42,11 +48,18 @@ public class ProductDTOMapper {
         detailedProductResponse.name = product.getProductName();
         detailedProductResponse.categoryName = product.getProductCategory().getCategoryName();
         detailedProductResponse.manufacturer = product.getManufacturer().getManufacturerName();
-        detailedProductResponse.attributes = product.getCategoryAttributeSet();
+        detailedProductResponse.attributes = formAttributeOptionResponses(product, attributeNameMUnitPairs);
         detailedProductResponse.productDescription = product.getProductDescription();
         detailedProductResponse.deliveryCost = product.getDeliveryCost();
         detailedProductResponse.model = product.getModel();
-        detailedProductResponse.productImages = product.getProductImages();
+        detailedProductResponse.productImageURLs = product
+                .getProductImages()
+                .stream()
+                .map((ProductImage::getImageFileName))
+                .toList();
+
+        System.out.println("IMAGE URLS: "+detailedProductResponse.productImageURLs);
+
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         detailedProductResponse.salePriceStotinki = product.getSalePriceStotinki();
@@ -56,6 +69,28 @@ public class ProductDTOMapper {
                 .collect(Collectors.toList());
 
         return detailedProductResponse;
+    }
+
+    private static Set<AttributeOptionResponse> formAttributeOptionResponses(Product product, List<String[]> attributeNameMUnitPairs) {
+        Set<CategoryAttribute> categoryAttributes = product.getCategoryAttributeSet();
+
+        Set<AttributeOptionResponse> attributeOptionResponses=new HashSet<>();
+
+        if (categoryAttributes.size() == attributeNameMUnitPairs.size()) {
+            for (CategoryAttribute categoryAttribute : categoryAttributes) {
+                for (String[] pair: attributeNameMUnitPairs) {
+                    if (pair[0].equals(categoryAttribute
+                            .getAttributeName()
+                            .getAttributeName())) {
+
+                         attributeOptionResponses.add(new AttributeOptionResponse(pair[0],
+                                 categoryAttribute.getAttributeOption(),
+                                 pair[1]));
+                    }
+                }
+            }
+        }
+        return attributeOptionResponses;
     }
 
     public static CompactProductPagedListResponse pagedListToDtoResponse(List<Product> productList,

@@ -1,11 +1,14 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
+import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
+import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,5 +40,26 @@ public class ProductCategoryService {
 
     public List<AttributeOptionDTO> getAttributesOfCategory(int categoryId) {
         return productCategoryRepository.getAttributesOfCategory(categoryId);
+    }
+
+    public List<String[]> getSpecificAttributesOfCategory(int categoryId,
+                                                                         List<AttributeName> attributeNames) {
+        List<String> combinations = productCategoryRepository.getMeasurementUnitsOfCategoryAttributes(categoryId, attributeNames);
+
+        if (combinations.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String[]> attributeOptionResponses = new ArrayList<>();
+
+        for (String combination : combinations) {
+            String[] split = combination.split(",");
+
+            if (split.length == 2) {
+                attributeOptionResponses.add(split);
+            }
+        }
+
+        return attributeOptionResponses;
     }
 }
