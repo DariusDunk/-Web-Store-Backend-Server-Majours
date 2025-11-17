@@ -2,10 +2,8 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
 import com.example.ecomerseapplication.DTOs.responses.CategoryFiltersResponse;
-import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
-import com.example.ecomerseapplication.Mappers.AttributeNameToDTO;
 import com.example.ecomerseapplication.Mappers.ManufacturerConverter;
 import com.example.ecomerseapplication.Services.AttributeNameService;
 import com.example.ecomerseapplication.Services.ManufacturerService;
@@ -27,24 +25,15 @@ public class CategoryController {
 
 
     private final ProductCategoryService categoryService;
-
-    private final AttributeNameService attributeNameService;
-
     private final ManufacturerService manufacturerService;
     private final ProductService productService;
 
     @Autowired
     public CategoryController(ProductCategoryService categoryService, AttributeNameService attributeNameService, ManufacturerService manufacturerService, ProductService productService) {
         this.categoryService = categoryService;
-        this.attributeNameService = attributeNameService;
         this.manufacturerService = manufacturerService;
         this.productService = productService;
     }
-
-//    @GetMapping("")
-//    public List<ProductCategory> getAll() {
-//        return categoryService.findAll();
-//    }
 
     @GetMapping("names")
     public ResponseEntity<List<String>> getAllNames() {
@@ -56,52 +45,12 @@ public class CategoryController {
         return ResponseEntity.ok(names);
     }
 
-//    @GetMapping("filters")
-//    public ResponseEntity<?> getAttributes(@RequestParam String categoryName) {
-//        ProductCategory category = categoryService.findByName(categoryName);
-//
-//        if (category==null)
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
-//
-//        Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category);
-//
-//        CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
-//        categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
-//                manufacturerService.
-//                        getByCategory(category)
-//        );
-//
-//        if (categoryFiltersResponse.manufacturerDTOResponseSet == null||
-//                categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
-//            return ResponseEntity.notFound().build();
-//
-//        if (!attributeNameSet.isEmpty())
-//        {
-//            categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
-//        }
-//
-//        categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
-//
-//        Object[] totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
-//
-//        if (totalPriceRange.length==2)
-//        {
-//            categoryFiltersResponse.priceLowest = Integer.parseInt(totalPriceRange[0].toString());
-//            categoryFiltersResponse.priceHighest = Integer.parseInt(totalPriceRange[1].toString());
-//        }
-//
-//        return ResponseEntity.ok(categoryFiltersResponse);
-//
-//    }
-
     @GetMapping("filters")
     public ResponseEntity<?> getAttributes(@RequestParam String categoryName) {
         ProductCategory category = categoryService.findByName(categoryName);
 
         if (category==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
-
-//        Set<AttributeName> attributeNameSet = attributeNameService.getNameSetByCategory(category);
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
         categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
@@ -123,12 +72,6 @@ public class CategoryController {
         else
             categoryFiltersResponse.categoryAttributesResponses =  attributesResponses;
 
-//        if (!attributeNameSet.isEmpty())
-//        {
-//            categoryFiltersResponse.categoryAttributesResponses = AttributeNameToDTO.nameSetToResponseSet(attributeNameSet);
-
-//        }
-
         categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
 
         Object[] totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
@@ -140,6 +83,5 @@ public class CategoryController {
         }
 
         return ResponseEntity.ok(categoryFiltersResponse);
-
     }
 }
