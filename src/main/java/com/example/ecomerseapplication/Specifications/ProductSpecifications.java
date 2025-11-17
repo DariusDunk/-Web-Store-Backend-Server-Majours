@@ -7,7 +7,6 @@ import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.MetaModels.Product_;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,15 +14,6 @@ import java.util.Set;
 
 @Component
 public class ProductSpecifications {
-
-    public static Specification<Product> equalsManufacturer(Manufacturer manufacturer) {
-        if (manufacturer == null) {
-            return null;
-        }
-
-        return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get(Product_.MANUFACTURER), manufacturer));
-    }
 
     public static Specification<Product> manufacturerIn(List<Manufacturer> manufacturers) {
         if (manufacturers == null) {
@@ -65,10 +55,13 @@ public class ProductSpecifications {
         );
     }
 
-    public static Specification<Product> ratingIn(List<Integer> ratings) {
+    public static Specification<Product> ratingEqualOrHigher(Integer rating) {
         return ((root, query, criteriaBuilder) ->
-                (ratings == null || ratings.isEmpty())
-                        ? criteriaBuilder.conjunction()
-                        : root.get(Product_.RATING).in(ratings));
+        {
+            if (rating == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.greaterThanOrEqualTo(root.get(Product_.RATING), rating);
+        });
     }
 }

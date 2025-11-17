@@ -18,6 +18,6 @@ public class ProductFilterRequest {
     public int priceHighest;
     @JsonProperty("manufacturer_names")
     public List<String> manufacturerNames;
-    @JsonProperty("ratings")
-    public List<Integer> ratings;
+    @JsonProperty("rating")
+    public Integer rating;
 }

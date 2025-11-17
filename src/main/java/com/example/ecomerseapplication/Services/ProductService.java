@@ -138,13 +138,14 @@ public class ProductService {
                                                                                       int priceLowest,
                                                                                       int priceHighest,
                                                                                       List<Manufacturer> manufacturers,
-                                                                                      List<Integer> ratings,
+                                                                                      Integer rating,
                                                                                       Pageable pageable) {
 
 
         Specification<Product> productSpec =
                 ProductSpecifications.equalsCategory(productCategory)
-                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
+                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest))
+                        .and(ProductSpecifications.ratingEqualOrHigher(rating));
 
         if (!manufacturers.isEmpty()) {
             System.out.println("Manufacturers: ");
@@ -158,14 +159,9 @@ public class ProductService {
             productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
         }
 
-        if (ratings != null&& !ratings.isEmpty()) {
+//        productSpec = productSpec
 
-            ratings.replaceAll(integer -> (integer) * 10);
-
-            productSpec = productSpec.and(ProductSpecifications.ratingIn(ratings));
-        }
-
-        Page<Product> products = productRepository.findAll(productSpec,pageable);
+        Page<Product> products = productRepository.findAll(productSpec, pageable);
 
         return ProductDTOMapper.productPageToDtoPage(products);
     }
@@ -183,9 +179,9 @@ public class ProductService {
     }
 
     public Set<Integer> getRatingsOfCategory(ProductCategory category) {
-        Set<Integer> dbrResponse =  productRepository.getRatingsByCategory(category).orElse(new HashSet<>());
+        Set<Integer> dbrResponse = productRepository.getRatingsByCategory(category).orElse(new HashSet<>());
 
-        Set<Integer>roundResponse = new HashSet<>();
+        Set<Integer> roundResponse = new HashSet<>();
 
         if (!dbrResponse.isEmpty()) {
             for (Integer i : dbrResponse) {

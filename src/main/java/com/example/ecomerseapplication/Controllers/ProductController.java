@@ -180,7 +180,7 @@ public class ProductController {
                         productFilterRequest.priceLowest,
                         productFilterRequest.priceHighest,
                         manufacturerList,
-                        productFilterRequest.ratings,
+                        productFilterRequest.rating,
                         pageRequest)));
     }
 
