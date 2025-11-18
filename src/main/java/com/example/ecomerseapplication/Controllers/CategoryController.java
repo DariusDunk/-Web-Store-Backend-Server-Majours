@@ -53,14 +53,21 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
-        categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
-                manufacturerService.
-                        getByCategory(category)
-        );
 
-        if (categoryFiltersResponse.manufacturerDTOResponseSet == null||
-                categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
-            return ResponseEntity.notFound().build();
+        categoryFiltersResponse.manufacturerNames = manufacturerService.getNamesByCategory(category);
+
+//        categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
+//                manufacturerService.
+//                        getByCategory(category)
+//        );
+
+//        if (categoryFiltersResponse.manufacturerDTOResponseSet == null||
+//                categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
+//            return ResponseEntity.notFound().build();
+
+        if (categoryFiltersResponse.manufacturerNames.isEmpty()) {
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("MANUFACTURERS NOT FOUND");
+        }
 
         Set<CategoryAttributesResponse> attributesResponses = AttributeMapper
                 .attributeOptionListToCatAttrResponseSet(categoryService.getAttributesOfCategory(category.getId()));

@@ -151,9 +151,6 @@ public class ProductController {
     @PostMapping("filter/{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
-
-//        System.out.println("REQUEST CONTENT: " + productFilterRequest);
-
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
         if (productFilterRequest.filterAttributes != null) {

@@ -34,4 +34,8 @@ public class ManufacturerService {
     public List<Manufacturer> getByNames(List<String> manufacturerNames) {
         return repository.findAllByManufacturerNameIn(manufacturerNames);
     }
+
+    public Set<String> getNamesByCategory(ProductCategory category) {
+        return repository.getNamesByCategory(category);
+    }
 }

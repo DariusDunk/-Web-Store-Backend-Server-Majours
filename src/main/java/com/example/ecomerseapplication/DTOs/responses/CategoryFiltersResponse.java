@@ -9,8 +9,9 @@ public class CategoryFiltersResponse {
     @JsonProperty("category_attributes")
     public Set<CategoryAttributesResponse> categoryAttributesResponses;
 
+    //    public Set<ManufacturerDTOResponse> manufacturerDTOResponseSet;
     @JsonProperty("manufacturers")
-    public Set<ManufacturerDTOResponse> manufacturerDTOResponseSet;
+    public Set<String> manufacturerNames;
 
     @JsonProperty("ratings")
     public Set<Integer> ratings;

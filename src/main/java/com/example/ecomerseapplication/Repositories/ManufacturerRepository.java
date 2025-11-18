@@ -24,4 +24,13 @@ public interface ManufacturerRepository extends JpaRepository<Manufacturer, Inte
     Optional<Manufacturer> findByManufacturerName(String name);
 
     List<Manufacturer> findAllByManufacturerNameIn(Collection<String> manufacturerNames);
+
+    @Query(value = """
+            select m.manufacturerName
+            from Manufacturer m
+            join Product p on p.manufacturer = m
+            join ProductCategory pc on pc = p.productCategory
+            where p.productCategory = ?1
+            """)
+    Set<String> getNamesByCategory(ProductCategory category);
 }
