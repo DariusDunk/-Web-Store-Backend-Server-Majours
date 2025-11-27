@@ -29,8 +29,13 @@ public class CustomerService {
 
     public ResponseEntity<String> registration(CustomerAccountRequest customerAccountRequest) {
 
+        if (customerAccountRequest.email.isEmpty()
+                || customerAccountRequest.password.isEmpty()
+                || customerAccountRequest.userName.isEmpty())
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Има непопълнени полета!");
+
         if (customerExists(customerAccountRequest.email))
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Този имейл вече съществува!");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Акаунт с този имейл вече съществува!");
 
         if (incorrectPassword(customerAccountRequest.password.toCharArray()))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
