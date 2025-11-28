@@ -136,4 +136,9 @@ public class CustomerService {
 
         return ResponseEntity.ok().body("Паролата бе убновена успешно!");
     }
+
+
+    public String getPfpUrl(int customerId) {
+        return customerRepository.getCustomerPfp(customerId);
+    }
 }

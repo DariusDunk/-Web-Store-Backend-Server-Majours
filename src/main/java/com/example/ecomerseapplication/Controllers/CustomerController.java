@@ -15,6 +15,7 @@ import com.example.ecomerseapplication.enums.UserRole;
 import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -205,9 +206,18 @@ public class CustomerController {
     @PostMapping("login/customer")
     public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) throws VerificationException {
 
-        if (request.identifier()==null)
+        if (request.identifier() == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Няма подадени данни за имейл или потребителско име");
 
         return keycloakService.loginUser(request);
+    }
+
+    @GetMapping("getPfp")
+    public ResponseEntity<String> getUserPfp(@RequestParam int id) {
+        String pfp = customerService.getPfpUrl(id);
+
+        if (pfp== null|| pfp.isEmpty()) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(pfp);
     }
 }
