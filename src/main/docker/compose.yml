@@ -92,6 +92,30 @@
       networks:
         - si
 
+    browser-bff:
+      container_name: browser_bff
+#      image: node:24
+      build:
+        context: ../../../src/main/nodeJs/browserBFF
+        dockerfile: Dockerfile
+      working_dir: /app
+      volumes:
+        - ../../../src/main/nodeJs/browserBFF:/app:cached         # <-- mount local BFF folder
+        - browser_bff_node_modules:/app/node_modules    # <-- container keeps node_modules
+      ports:
+        - "3000:3000"          # <-- BFF port exposed outside
+      command: npm run dev
+      environment:
+        BACKEND_BASE_URL: http://host.docker.internal:1620
+      depends_on:
+        main-db:
+          condition: service_healthy
+      networks:
+        - si
+
   volumes:
     webstore_keycloak_db_data:
     webstore_main_db_data:
+    browser_bff_node_modules:
+
+
