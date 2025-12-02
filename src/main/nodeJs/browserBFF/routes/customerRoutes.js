@@ -64,7 +64,7 @@ router.post('/registration', async (req, res)=>{
       body: JSON.stringify(req.body)
     });
     const responseData = await response.text();
-    console.log(`response: status: ${response.status} data: ${responseData}`);
+    // console.log(`response: status: ${response.status} data: ${responseData}`);
     res.status(response.status).send(responseData);
   }
   catch (error) {
@@ -116,7 +116,7 @@ router.get('/getUserPfp/:id', async (req, res) =>
 
       const responseText = await response.text();
 
-      console.log("RESPONSE: " + responseText);
+      // console.log("RESPONSE: " + responseText);
       res.status(response.status).send(responseText);
     }
     catch (error) {

@@ -120,8 +120,8 @@ router.get(`/search/:text/:page`, async (req, res)=>{
   const page = queryParts[3];
   // console.log("search");
   try {
-    console.log(`front end url: ${req.url}`);
-    console.log(`fetch url: ${Backend_Url}/product/search?name=${searchText}&page=${page}`);
+    // console.log(`front end url: ${req.url}`);
+    // console.log(`fetch url: ${Backend_Url}/product/search?name=${searchText}&page=${page}`);
     const response = await fetch(`${Backend_Url}/product/search?name=${searchText}&page=${page}`);
     if (response.status === 404) {
       res.redirect('/404.html');
@@ -193,7 +193,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
     }
   });
 
-  console.log("attributes: " + JSON.stringify(attributes));
+  // console.log("attributes: " + JSON.stringify(attributes));
 
   // Construct request body for backend (adjust keys as needed for your backend API)
   const requestBody = {
@@ -206,7 +206,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
   };
 
-  console.log("request body: " + JSON.stringify(requestBody));
+  // console.log("request body: " + JSON.stringify(requestBody));
 
   try {
     const response = await fetch(`${Backend_Url}/product/filter/${page}`, {

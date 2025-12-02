@@ -6,7 +6,7 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
 
   const queryParts = req.url.split("/");
   const categoryName = queryParts[2];
-  console.log(`category name: ${categoryName}`)
+  // console.log(`category name: ${categoryName}`)
   try
   {
     const response = await fetch(`${Backend_Url}/category/filters?categoryName=${categoryName}`,

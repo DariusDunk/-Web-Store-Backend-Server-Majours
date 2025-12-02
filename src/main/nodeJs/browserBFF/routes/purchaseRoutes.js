@@ -5,7 +5,7 @@ const { Backend_Url } = require('./config.js');
 router.post('/complete', async (req, res)=>{
   try{
 
-    console.log("inside purchase complete");
+    // console.log("inside purchase complete");
     const response = await fetch(`${Backend_Url}/purchase/complete`,{
       method: 'POST',
       headers: {

@@ -7,11 +7,13 @@ import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductImage;
+import com.example.ecomerseapplication.Entities.Review;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +42,7 @@ public class ProductDTOMapper {
                 productPage.getTotalElements());
     }
 
-    public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs) {
+    public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs, long id) {
 
         DetailedProductResponse detailedProductResponse = new DetailedProductResponse();
 
@@ -63,10 +65,15 @@ public class ProductDTOMapper {
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         detailedProductResponse.salePriceStotinki = product.getSalePriceStotinki();
-        detailedProductResponse.reviews = product.getReviews()
-                .stream()
-                .map(ReviewEntToDTO::entityToResponse)
-                .collect(Collectors.toList());
+//        detailedProductResponse.reviews = product.getReviews()
+//                .stream()
+//                .map(ReviewEntToDTO::entityToResponse)
+//                .collect(Collectors.toList());
+        detailedProductResponse.reviews = new ArrayList<>();
+        for ( Review review : product.getReviews())
+        {
+            detailedProductResponse.reviews.add(ReviewEntToDTO.entityToResponse2(review, id));
+        }
 
         return detailedProductResponse;
     }

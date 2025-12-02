@@ -3,7 +3,7 @@ const router = express.Router();
 const { Backend_Url } = require('./config.js');
 
 router.get('/names', async (req, res)=> {
-  console.log("category names");
+  // console.log("category names");
   try {
     const response = await fetch(`${Backend_Url}/category/names`);
     if (response.status === 404) {

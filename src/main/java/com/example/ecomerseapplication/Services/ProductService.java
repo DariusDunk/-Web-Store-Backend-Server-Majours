@@ -72,7 +72,7 @@ public class ProductService {
         List<String[]> attributeNameMUnitPairs = productCategoryService
                 .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
 
-        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
+        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs, customer.getId());
 
         if (customerCartService.cartExists(customer, product))
             detailedProductResponse.inCart = true;
