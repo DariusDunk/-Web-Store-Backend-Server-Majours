@@ -229,5 +229,33 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
   }
 });
 
+router.get('/reviews/:productCode/:userId', async (req, res) => {
+    // const page = parseInt(req.params.page, 10);
+    const productCode = req.params.productCode;
+    const userId = req.params.userId;
+
+    // console.log("Code: " + productCode + " User: " + userId);
+
+    try {
+        const response = await fetch(`${Backend_Url}/product/reviews?productCode=${productCode}&userId=${userId}`);
+
+        if (!response.ok) {
+            const text = response.text();
+            console.error(`Backend error: ${response.status} - ${text}`);
+            return res.status(response.status).json({ error: 'Error from backend' });
+        }
+
+        const responseData = await response.json();
+
+        console.log(responseData);
+
+        res.status(response.status).json(responseData);
+    }
+    catch (error) {
+        console.error('Reviews: Error fetching data: ', error);
+    }
+
+})
+
 
 module.exports = router

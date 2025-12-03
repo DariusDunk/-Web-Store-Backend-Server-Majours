@@ -60,7 +60,7 @@ public class ProductDTOMapper {
                 .map((ProductImage::getImageFileName))
                 .toList();
 
-        System.out.println("IMAGE URLS: "+detailedProductResponse.productImageURLs);
+//        System.out.println("IMAGE URLS: "+detailedProductResponse.productImageURLs);
 
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
