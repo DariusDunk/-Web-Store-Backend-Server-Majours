@@ -23,7 +23,7 @@ public class DetailedProductResponse {
     public String model;
     @JsonProperty("productImages")
     public List<String> productImageURLs;
-    public List<ReviewResponse> reviews;
+//    public List<ReviewResponse> reviews;
     public boolean inFavourites = false;
     public boolean inCart = false;
     public boolean reviewed = false;

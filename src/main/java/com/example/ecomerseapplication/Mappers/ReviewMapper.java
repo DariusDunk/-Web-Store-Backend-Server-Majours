@@ -55,7 +55,8 @@ public class ReviewMapper {
                             new CustomerDetailsForReview(review.customer().name(),
                                     review.customer().customerPfp(),
                                     currUser,
-                                    verified)
+                                    verified,
+                                    review.customer().customerId())
                     );
 
         }).toList();

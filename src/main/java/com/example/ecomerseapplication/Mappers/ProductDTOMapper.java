@@ -60,20 +60,14 @@ public class ProductDTOMapper {
                 .map((ProductImage::getImageFileName))
                 .toList();
 
-//        System.out.println("IMAGE URLS: "+detailedProductResponse.productImageURLs);
-
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         detailedProductResponse.salePriceStotinki = product.getSalePriceStotinki();
-//        detailedProductResponse.reviews = product.getReviews()
-//                .stream()
-//                .map(ReviewEntToDTO::entityToResponse)
-//                .collect(Collectors.toList());
-        detailedProductResponse.reviews = new ArrayList<>();
-        for ( Review review : product.getReviews())
-        {
-            detailedProductResponse.reviews.add(ReviewMapper.entityToResponse2(review, id));
-        }
+//        detailedProductResponse.reviews = new ArrayList<>();
+//        for ( Review review : product.getReviews())
+//        {
+//            detailedProductResponse.reviews.add(ReviewMapper.entityToResponse2(review, id));
+//        }
 
         return detailedProductResponse;
     }
