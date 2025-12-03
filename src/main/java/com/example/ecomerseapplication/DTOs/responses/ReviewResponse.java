@@ -8,6 +8,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewResponse {
+    public long reviewId;
     public String reviewText;
     public short rating;
     public CustomerDetailsForReview customerDetailsForReview;

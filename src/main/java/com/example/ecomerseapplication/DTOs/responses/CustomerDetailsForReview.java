@@ -12,7 +12,6 @@ public class CustomerDetailsForReview {
     public String customerPfp;
     public boolean currentUser;
     public boolean isVerified;
-    public Long userId;
 
     public CustomerDetailsForReview(String name, String customerPfp) {
         this.name = name;

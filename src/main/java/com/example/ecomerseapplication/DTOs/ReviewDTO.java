@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.DTOs;
 
-public record ReviewDTO(String reviewText,
+public record ReviewDTO(long reviewId,
+                        String reviewText,
                         short rating,
                         ReviewCustomerDTO customer) {
 }

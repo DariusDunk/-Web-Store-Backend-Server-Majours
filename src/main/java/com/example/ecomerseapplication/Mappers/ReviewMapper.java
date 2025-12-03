@@ -50,13 +50,13 @@ public class ReviewMapper {
             boolean verified =  verifiedCustSet.contains(currentCustomerId);
 
             return new ReviewResponse
-                    (review.reviewText(),
+                    (review.reviewId(),
+                            review.reviewText(),
                             review.rating(),
                             new CustomerDetailsForReview(review.customer().name(),
                                     review.customer().customerPfp(),
                                     currUser,
-                                    verified,
-                                    review.customer().customerId())
+                                    verified)
                     );
 
         }).toList();

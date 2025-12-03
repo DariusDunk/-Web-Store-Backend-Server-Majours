@@ -36,6 +36,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 //    List<ReviewResponse> getByProductCode(String productCode);
 
     @Query(value = "select new com.example.ecomerseapplication.DTOs.ReviewDTO(" +
+            "r.id," +
             "r.reviewText, " +
             "r.rating, " +
             "new com.example.ecomerseapplication.DTOs.ReviewCustomerDTO(" +
