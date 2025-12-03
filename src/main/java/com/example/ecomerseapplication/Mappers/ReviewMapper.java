@@ -1,10 +1,15 @@
 package com.example.ecomerseapplication.Mappers;
 
-import com.example.ecomerseapplication.DTOs.requests.CustomerDetailsForReview;
+import com.example.ecomerseapplication.DTOs.ReviewDTO;
+import com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Review;
 
-public class ReviewEntToDTO {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+public class ReviewMapper {
 
     public static ReviewResponse entityToResponse(Review review) {
         ReviewResponse reviewResponse = new ReviewResponse();
@@ -33,5 +38,26 @@ public class ReviewEntToDTO {
         reviewResponse.customerDetailsForReview = customerDetailsForReview;
 
         return reviewResponse;
+    }
+
+    public static List<ReviewResponse> revDtoListToResponseList(List<ReviewDTO> reviews, List<Long> verifiedCustomers, long currentUserId) {
+
+        Set<Long> verifiedCustSet = Set.copyOf(verifiedCustomers);
+
+        return reviews.stream().map( review ->{
+            long currentCustomerId = review.customer().customerId();
+            boolean currUser =  (currentCustomerId == currentUserId);
+            boolean verified =  verifiedCustSet.contains(currentCustomerId);
+
+            return new ReviewResponse
+                    (review.reviewText(),
+                            review.rating(),
+                            new CustomerDetailsForReview(review.customer().name(),
+                                    review.customer().customerPfp(),
+                                    currUser,
+                                    verified)
+                    );
+
+        }).toList();
     }
 }

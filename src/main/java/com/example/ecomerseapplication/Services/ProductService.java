@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;

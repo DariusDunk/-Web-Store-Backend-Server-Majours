@@ -3,10 +3,7 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFilterRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
-import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
-import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
-import com.example.ecomerseapplication.DTOs.responses.PageResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
@@ -90,6 +87,13 @@ public class ProductController {
 //        System.out.println("PRODUCT: " + detailedProductResponse.getBody().categoryName);
 
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("reviews")
+    public ResponseEntity<List<ReviewResponse>> getReviews(@RequestParam String productCode, @RequestParam long userId) {
+
+        return ResponseEntity.ok(reviewService.getProductReviews(productCode, userId));
+
     }
 
 

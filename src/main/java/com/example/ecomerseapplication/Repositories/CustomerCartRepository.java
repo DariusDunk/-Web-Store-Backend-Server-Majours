@@ -32,4 +32,7 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
     @Query("delete from CustomerCart " +
             "where customerCartId.customer = ?1")
     void deleteAllByCustomer(Customer customer);
+
+
+
 }

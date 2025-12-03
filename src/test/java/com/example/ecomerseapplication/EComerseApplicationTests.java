@@ -1,20 +1,17 @@
 package com.example.ecomerseapplication;
 import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
+import com.example.ecomerseapplication.DTOs.ReviewDTO;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
-import com.example.ecomerseapplication.Repositories.AttributeNameRepository;
-import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
-import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
+import com.example.ecomerseapplication.Repositories.*;
 import com.example.ecomerseapplication.Services.CategoryAttributeService;
 import com.example.ecomerseapplication.Services.CustomerCartService;
 import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
-import com.nimbusds.jose.util.Pair;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.mindrot.jbcrypt.BCrypt;
-import org.yaml.snakeyaml.util.Tuple;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,6 +25,12 @@ class EComerseApplicationTests {
     private ProductCategoryRepository productCategoryRepository;
     @Autowired
     private AttributeNameRepository attributeNameRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
+    @Autowired
+    private CustomerCartRepository customerCartRepository;
+    @Autowired
+    private PurchaseCartRepository purchaseCartRepository;
 
     @Test
     void contextLoads() {
@@ -134,6 +137,32 @@ class EComerseApplicationTests {
 
         for ( String unit : units) {
             System.out.println(unit);
+        }
+    }
+
+    @Test
+    void getReviewsForProductByCodeAndUID() {
+
+        System.out.println("Ревюта: \n");
+        List<ReviewDTO> responses = reviewRepository.getByProductCode("20621301");
+
+        assert !responses.isEmpty();
+
+        List<Long> UIDs = new ArrayList<>();
+
+        for (ReviewDTO response : responses) {
+            System.out.println(response);
+            UIDs.add(response.customer().customerId());
+        }
+
+        System.out.println("Потвърдени купуваччи: \n");
+
+        List<Long> booleans = purchaseCartRepository.isProductPurchased("20621301",UIDs);
+
+//        assert !booleans.isEmpty();
+
+        for (Long id : booleans) {
+            System.out.println(id);
         }
     }
 }

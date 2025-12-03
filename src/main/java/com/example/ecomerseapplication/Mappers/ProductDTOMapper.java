@@ -72,7 +72,7 @@ public class ProductDTOMapper {
         detailedProductResponse.reviews = new ArrayList<>();
         for ( Review review : product.getReviews())
         {
-            detailedProductResponse.reviews.add(ReviewEntToDTO.entityToResponse2(review, id));
+            detailedProductResponse.reviews.add(ReviewMapper.entityToResponse2(review, id));
         }
 
         return detailedProductResponse;

@@ -6,6 +6,7 @@ import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Mappers.CustomerMapper;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
+import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,12 @@ import org.springframework.stereotype.Service;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final PurchaseRepository purchaseRepository;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, PurchaseRepository purchaseRepository) {
         this.customerRepository = customerRepository;
+        this.purchaseRepository = purchaseRepository;
     }
 
     public boolean customerExists(String email) {
@@ -141,4 +144,6 @@ public class CustomerService {
     public String getPfpUrl(int customerId) {
         return customerRepository.getCustomerPfp(customerId);
     }
+
+
 }
