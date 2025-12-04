@@ -1,38 +1,27 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.ReviewCustomerDTO;
-import com.example.ecomerseapplication.DTOs.ReviewDTO;
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
-import com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview;
+import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Review;
-import com.example.ecomerseapplication.Mappers.ReviewMapper;
 import com.example.ecomerseapplication.Repositories.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ReviewService {
 
 
     private final ReviewRepository reviewRepository;
-    private final CustomerService customerService;
-    private final CustomerCartService customerCartService;
-    private final PurchaseCartService purchaseCartService;
 
     @Autowired
     public ReviewService(ReviewRepository reviewRepository, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService) {
         this.reviewRepository = reviewRepository;
-        this.customerService = customerService;
-        this.customerCartService = customerCartService;
-        this.purchaseCartService = purchaseCartService;
     }
 
     public void save(Review review) {
@@ -132,19 +121,15 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    public List<ReviewResponse> getProductReviews(String productCode, long userId) {
-        List<ReviewDTO> reviews = reviewRepository.getByProductCode(productCode);
+    public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable) {
 
-        List<Long> userIds = new ArrayList<>();
-
-        for (ReviewDTO review : reviews) {
-            userIds.add(review.customer().customerId());
-        }
-
-        List<Long> verifiedCustomers = purchaseCartService.isProductPurchased(productCode, userIds);
-        userIds.clear();
-
-        return ReviewMapper.revDtoListToResponseList(reviews, verifiedCustomers, userId);
+        return reviewRepository.getByProductCode(request.productCode(),
+                request.sortOrder().getValue(),
+                request.verifiedOnly(),
+                request.ratingValue(),
+                request.userId(),
+                pageable
+                );
     }
 }
 

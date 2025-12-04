@@ -13,13 +13,4 @@ public class CustomerDetailsForReview {
     public boolean currentUser;
     public boolean isVerified;
 
-    public CustomerDetailsForReview(String name, String customerPfp) {
-        this.name = name;
-        this.customerPfp = customerPfp;
-    }
-
-    public CustomerDetailsForReview(boolean currentUser, boolean isVerified) {
-        this.currentUser = currentUser;
-        this.isVerified = isVerified;
-    }
 }

@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFilterRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
+import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PageContentLimit;
@@ -77,7 +78,6 @@ public class ProductController {
                                                                        @RequestParam long id) {
 
 
-
         Customer customer = customerService.findById(id);
 
         ResponseEntity<DetailedProductResponse> detailedProductResponse = productService
@@ -89,10 +89,14 @@ public class ProductController {
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("reviews")
-    public ResponseEntity<List<ReviewResponse>> getReviews(@RequestParam String productCode, @RequestParam long userId) {
+    @PostMapping("reviews")
+    public ResponseEntity<PageResponse<ReviewResponse>> getReviews(@RequestBody ReviewSortRequest request) {
 
-        return ResponseEntity.ok(reviewService.getProductReviews(productCode, userId));
+        PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit);
+
+        Page<ReviewResponse> reviewPage = reviewService.getProductReviews(request, pageRequest);
+
+        return ResponseEntity.ok(PageResponse.from(reviewPage));
 
     }
 
@@ -161,7 +165,7 @@ public class ProductController {
             categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
         }
 
-         List<Manufacturer> manufacturerList = new ArrayList<>();
+        List<Manufacturer> manufacturerList = new ArrayList<>();
 
         if (productFilterRequest.manufacturerNames != null)
             manufacturerList = manufacturerService.getByNames(productFilterRequest.manufacturerNames);

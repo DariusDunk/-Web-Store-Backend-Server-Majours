@@ -2,14 +2,14 @@ package com.example.ecomerseapplication.enums;
 
 import lombok.Getter;
 
-public enum UserRole {
-    ADMIN("admin"),
-    CUSTOMER("customer");
+public enum SortType {
+    NEWEST("newest"),
+    OLDEST("oldest");
 
     @Getter
     private final String value;
 
-    UserRole(String value) {
+    SortType(String value) {
         this.value = value;
     }
 
@@ -21,8 +21,8 @@ public enum UserRole {
      * @return the status object
      * @see #valueOf(String)
      */
-    public static UserRole fromValue(String value) {
-        for (UserRole status : UserRole.values()) {
+    public static SortType fromValue(String value) {
+        for (SortType status : SortType.values()) {
             if (status.value.equals(value)) {
                 return status;
             }

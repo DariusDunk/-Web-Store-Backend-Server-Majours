@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication;
 import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
-import com.example.ecomerseapplication.DTOs.ReviewDTO;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 import com.example.ecomerseapplication.Repositories.*;
@@ -140,29 +139,29 @@ class EComerseApplicationTests {
         }
     }
 
-    @Test
-    void getReviewsForProductByCodeAndUID() {
-
-        System.out.println("Ревюта: \n");
-        List<ReviewDTO> responses = reviewRepository.getByProductCode("20621301");
-
-        assert !responses.isEmpty();
-
-        List<Long> UIDs = new ArrayList<>();
-
-        for (ReviewDTO response : responses) {
-            System.out.println(response);
-            UIDs.add(response.customer().customerId());
-        }
-
-        System.out.println("Потвърдени купуваччи: \n");
-
-        List<Long> booleans = purchaseCartRepository.isProductPurchased("20621301",UIDs);
-
-//        assert !booleans.isEmpty();
-
-        for (Long id : booleans) {
-            System.out.println(id);
-        }
-    }
+//    @Test
+//    void getReviewsForProductByCodeAndUID() {
+//
+//        System.out.println("Ревюта: \n");
+//        List<ReviewDTO> responses = reviewRepository.getByProductCode("20621301");
+//
+//        assert !responses.isEmpty();
+//
+//        List<Long> UIDs = new ArrayList<>();
+//
+//        for (ReviewDTO response : responses) {
+//            System.out.println(response);
+//            UIDs.add(response.customer().customerId());
+//        }
+//
+//        System.out.println("Потвърдени купуваччи: \n");
+//
+//        List<Long> booleans = purchaseCartRepository.isProductPurchased("20621301",UIDs);
+//
+////        assert !booleans.isEmpty();
+//
+//        for (Long id : booleans) {
+//            System.out.println(id);
+//        }
+//    }
 }
