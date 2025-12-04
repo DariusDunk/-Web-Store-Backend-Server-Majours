@@ -284,6 +284,31 @@ router.post('/getPagedReviews', async (req, res) => {
 
 })
 
+router.post(`/addReview`, async (req, res) => {
+    const userId = req.params.userId;
+    const productCode = req.params.productCode;
+    const rating = req.params.rating;
+    const reviewText = req.params.reviewText;
+
+    console.log(JSON.stringify(req.body))
+    try {
+        const response = await fetch(`${Backend_Url}/product/reviews/add`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: userId,
+                    product_code: productCode,
+                    rating: rating,
+                    review_text: reviewText}),
+            }
+        )
+        return res.status(response.status).json(response.statusText);
+    }
+    catch (error) {
+        console.error('Error creating/updating the review ', error);
+    }
+})
+
 
 
 module.exports = router

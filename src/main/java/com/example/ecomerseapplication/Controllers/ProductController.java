@@ -35,15 +35,17 @@ public class ProductController {
     private final ProductCategoryService productCategoryService;
 
     private final ManufacturerService manufacturerService;
+    private final PurchaseCartService purchaseCartService;
 
     @Autowired
-    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService) {
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService) {
         this.productService = productService;
         this.categoryAttributeService = categoryAttributeService;
         this.customerService = customerService;
         this.reviewService = reviewService;
         this.productCategoryService = productCategoryService;
         this.manufacturerService = manufacturerService;
+        this.purchaseCartService = purchaseCartService;
     }
 
     @GetMapping("findall")
@@ -121,21 +123,9 @@ public class ProductController {
         if (productResponsePage.isEmpty())
             return ResponseEntity.notFound().build();
 
-//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productResponsePage);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }
 
-//    @GetMapping("featured")
-//    public ResponseEntity<List<CompactProductResponse>> featuredProducts() {
-//
-//        List<CompactProductResponse> compactProductResponses = productService.getFeaturedProducts();
-//
-//        if (compactProductResponses.isEmpty())
-//            return ResponseEntity.notFound().build();
-//
-//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(compactProductResponses);
-//
-//    }
 
     @GetMapping("category/{name}/p{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> getProductsByCategory(@PathVariable String name,
@@ -204,14 +194,16 @@ public class ProductController {
         Customer customer = customerService.findById(request.customerId);
 
         if (customer == null)
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         Product product = productService.findByPCode(request.productCode);
 
         if (product == null)
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
-        Product updatedProduct = reviewService.manageReview(product, customer, request);
+        Boolean isVerifiedCustomer = purchaseCartService.isProductPurchased(product.getProductCode(), customer.getId());
+
+        Product updatedProduct = reviewService.manageReview(product, customer, request, isVerifiedCustomer);
 
         if (updatedProduct == null)
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Не беше извършена промяна");

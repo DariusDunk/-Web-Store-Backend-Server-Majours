@@ -14,8 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ReviewService {
@@ -46,18 +46,18 @@ public class ReviewService {
     }
 
     @Transactional
-    public Product manageReview(Product product, Customer customer, ReviewRequest request) {
+    public Product manageReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
 
         Review existingReview = getByProdCust(product, customer);
 
         if (existingReview != null) {
             return updateReview(existingReview, request, product);
         }
-        return createReview(product, customer, request);
+        return createReview(product, customer, request, isVerifiedCustomer);
     }
 
     @Transactional
-    public Product createReview(Product product, Customer customer, ReviewRequest request) {
+    public Product createReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
 
         short adjustedRating = (short) (request.rating * 10);
         Review review = new Review();
@@ -66,6 +66,8 @@ public class ReviewService {
         review.setCustomer(customer);
         review.setReviewText(request.reviewText);
         review.setRating(adjustedRating);
+        review.setPostTimestamp(LocalDateTime.now());
+        review.setVerifiedCustomer(isVerifiedCustomer);
 
         if (product.getReviews().isEmpty())
             product.setRating(adjustedRating);

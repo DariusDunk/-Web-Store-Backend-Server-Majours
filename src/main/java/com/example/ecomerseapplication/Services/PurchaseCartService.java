@@ -28,7 +28,7 @@ public class PurchaseCartService {
         return purchaseCartRepository.getByPurchase(purchase);
     }
 
-    public List<Long> isProductPurchased(String productCode, List<Long> userIds) {
-        return purchaseCartRepository.isProductPurchased(productCode, userIds);
+    public Boolean isProductPurchased(String productCode, Long userId) {
+        return purchaseCartRepository.isProductPurchased(productCode, userId);
     }
 }

@@ -139,29 +139,8 @@ class EComerseApplicationTests {
         }
     }
 
-//    @Test
-//    void getReviewsForProductByCodeAndUID() {
-//
-//        System.out.println("Ревюта: \n");
-//        List<ReviewDTO> responses = reviewRepository.getByProductCode("20621301");
-//
-//        assert !responses.isEmpty();
-//
-//        List<Long> UIDs = new ArrayList<>();
-//
-//        for (ReviewDTO response : responses) {
-//            System.out.println(response);
-//            UIDs.add(response.customer().customerId());
-//        }
-//
-//        System.out.println("Потвърдени купуваччи: \n");
-//
-//        List<Long> booleans = purchaseCartRepository.isProductPurchased("20621301",UIDs);
-//
-////        assert !booleans.isEmpty();
-//
-//        for (Long id : booleans) {
-//            System.out.println(id);
-//        }
-//    }
+    @Test
+    void isReviewerVerifiedCheck() {
+        System.out.println("Result: " + purchaseCartRepository.isProductPurchased("20621301",6L));
+    }
 }

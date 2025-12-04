@@ -19,9 +19,9 @@ public interface PurchaseCartRepository extends JpaRepository<PurchaseCart, Purc
     List<PurchaseCart> getByPurchase(Purchase purchase);
 
     @Query("""
-                select distinct pc.purchaseCartId.purchase.customer.id
+                select exists(select 1
                 from PurchaseCart pc
-                where pc.purchaseCartId.product.productCode = :productCode and pc.purchaseCartId.purchase.customer.id in :userIds
+                where pc.purchaseCartId.product.productCode = :productCode and pc.purchaseCartId.purchase.customer.id = :userId)
             """)
-    List<Long> isProductPurchased(@Param("productCode") String productCode, @Param("userIds") List<Long> userId);
+    Boolean isProductPurchased(@Param("productCode") String productCode, @Param("userId") Long userId);
 }
