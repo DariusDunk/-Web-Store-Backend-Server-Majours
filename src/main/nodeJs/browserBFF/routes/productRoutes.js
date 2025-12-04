@@ -229,15 +229,32 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
   }
 });
 
-router.get('/reviews/:productCode/:userId', async (req, res) => {
+router.post('/getPagedReviews', async (req, res) => {
     // const page = parseInt(req.params.page, 10);
-    const productCode = req.params.productCode;
-    const userId = req.params.userId;
+    const productCode = req.body.productCode;
+    const userId = req.body.userId;
+    const page = req.body.page;
+    const sort = req.body.sortOrder;
+    const verifiedOnly = req.body.verifiedOnly;
+    const ratingValue = req.body.ratingValue
 
     // console.log("Code: " + productCode + " User: " + userId);
 
+    console.log(JSON.stringify(req.body))
+
     try {
-        const response = await fetch(`${Backend_Url}/product/reviews?productCode=${productCode}&userId=${userId}`);
+        const response = await fetch(`${Backend_Url}/product/reviews`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    product_code: productCode,
+                    user_id: userId,
+                    page,
+                    sort_order: sort,
+                    verified_only: verifiedOnly,
+                    rating_value: ratingValue }),
+                headers: { 'Content-Type': 'application/json' }
+            });
 
         if (!response.ok) {
             const text = response.text();
@@ -256,6 +273,7 @@ router.get('/reviews/:productCode/:userId', async (req, res) => {
     }
 
 })
+
 
 
 module.exports = router
