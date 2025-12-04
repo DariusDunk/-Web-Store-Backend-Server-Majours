@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
@@ -10,6 +11,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
@@ -54,4 +58,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             @Param("customerId")
             Long customerId,
             Pageable pageable);
+
+    @Query("""
+            select distinct new com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse(r.rating, count(r))
+            from Review r
+            group by r.rating
+            """)
+    List<RatingOverviewResponse> getRatingOverviewByProductCode(String productCode);
 }

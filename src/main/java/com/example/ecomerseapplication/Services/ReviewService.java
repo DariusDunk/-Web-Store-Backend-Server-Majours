@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
+import com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
@@ -12,6 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReviewService {
@@ -130,6 +134,10 @@ public class ReviewService {
                 request.userId(),
                 pageable
                 );
+    }
+
+    public List<RatingOverviewResponse> getRatingOverview(String productCode) {
+        return reviewRepository.getRatingOverviewByProductCode(productCode);
     }
 }
 

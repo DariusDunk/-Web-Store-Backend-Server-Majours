@@ -81,14 +81,24 @@ router.get('/detail/:productCode', async (req, res)=>{
     return res.status(400).json({ error: 'Missing required parameters' });
   }
   try {
-    const backendUrl = `${Backend_Url}/product/${productCode}?id=${id}`;
-    const response = await fetch(backendUrl);
+    const productDetailsResponse = await fetch(`${Backend_Url}/product/${productCode}?id=${id}`);
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
+    const ratingOverviewResponse = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
+
+
+    if (!ratingOverviewResponse.ok) {
+      throw new Error('Product fetching error: ' + ratingOverviewResponse.statusText);
     }
-    const data = await response.json();
-    res.json(data);
+
+    if (!productDetailsResponse.ok) {
+      throw new Error('Rating overview fetching error: ' + productDetailsResponse.statusText);
+    }
+
+    const productDetails = await productDetailsResponse.json();
+    const ratingOverview = await ratingOverviewResponse.json();
+
+    res.json({productDetails, ratingOverview});
+
   } catch (error) {
     console.error('Error fetching data from backend:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -243,7 +253,7 @@ router.post('/getPagedReviews', async (req, res) => {
     console.log(JSON.stringify(req.body))
 
     try {
-        const response = await fetch(`${Backend_Url}/product/reviews`,
+        const response = await fetch(`${Backend_Url}/product/reviews/paged`,
             {
                 method: 'POST',
                 body: JSON.stringify({
