@@ -1,21 +1,14 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
-import com.example.ecomerseapplication.Entities.AttributeGroup;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
 import com.example.ecomerseapplication.Specifications.AttributeSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryAttributeService {

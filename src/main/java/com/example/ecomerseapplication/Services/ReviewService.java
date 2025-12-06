@@ -48,11 +48,11 @@ public class ReviewService {
     @Transactional
     public Product manageReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
 
-        Review existingReview = getByProdCust(product, customer);
+//        Review existingReview = getByProdCust(product, customer);
 
-        if (existingReview != null) {
-            return updateReview(existingReview, request, product);
-        }
+//        if (existingReview != null) {
+//            return updateReview(existingReview, request, product);TODO kato se razdelqt syzdavaneto i updeita na revuta, tozi method mai 6te stane izli6en
+//        }
         return createReview(product, customer, request, isVerifiedCustomer);
     }
 
@@ -94,6 +94,11 @@ public class ReviewService {
         existingReview.setReviewText(request.reviewText);
         update(existingReview);
 
+        updateProductRating(existingReview, request, product, adjustedRating);
+        return product;
+    }
+
+    private static void updateProductRating(Review existingReview, ReviewRequest request, Product product, short adjustedRating) {
         if (product.getReviews().size() == 1)
             product.setRating(request.rating);
 
@@ -106,7 +111,6 @@ public class ReviewService {
 
             product.setRating(newRating);
         }
-        return product;
     }
 
     public Short updatedRating(Product product, Review review) {

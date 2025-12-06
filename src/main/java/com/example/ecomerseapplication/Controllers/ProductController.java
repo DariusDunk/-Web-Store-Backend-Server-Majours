@@ -6,6 +6,8 @@ import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.Others.ErrorMessage;
+import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,10 +188,14 @@ public class ProductController {
 
     @PostMapping("review/add")
     @Transactional
-    public ResponseEntity<String> addReview(@RequestBody ReviewRequest request) {
+    public ResponseEntity<?> addReview(@RequestBody ReviewRequest request) {
 
-        if (request.rating > 5 || request.rating < 1)
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Само стойности от 1-5 са позволени!");
+        System.out.println(request.toString());
+
+        if (request.rating > 5 || request.rating < 1) {
+            System.out.println("INCORRECT RATING");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
+        }
 
         Customer customer = customerService.findById(request.customerId);
 
@@ -201,19 +207,65 @@ public class ProductController {
         if (product == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
+        Review existingReview = reviewService.getByProdCust(product, customer);
+
+        if (existingReview != null)
+        {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
+                    "Request canceled",
+                    HttpStatus.CONFLICT.value(),
+                    ErrorMessage.REVIEW_EXISTS));
+        }
+
         Boolean isVerifiedCustomer = purchaseCartService.isProductPurchased(product.getProductCode(), customer.getId());
 
-        Product updatedProduct = reviewService.manageReview(product, customer, request, isVerifiedCustomer);
+        Product updatedProduct = reviewService.createReview(product, customer, request, isVerifiedCustomer);
 
         if (updatedProduct == null)
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Не беше извършена промяна");
 
         productService.save(updatedProduct);
 
-        return ResponseEntity.ok().body("Ревюто е качено!");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Ревюто е качено!");
     }
 
-    @DeleteMapping("deletereview")
+    @PatchMapping("review/update")
+    @Transactional
+    public ResponseEntity<?> updateReview(@RequestBody ReviewRequest request) {
+        Customer customer = customerService.findById(request.customerId);
+
+        if (customer == null)
+            return ResponseEntity.notFound().build();
+
+        Product product = productService.findByPCode(request.productCode);
+
+        if (product == null)
+            return ResponseEntity.notFound().build();
+
+        Review review = reviewService.getByProdCust(product, customer);
+
+        if (review==null) {
+            return ResponseEntity.notFound().build();
+        }
+
+       Product updatedProduct = reviewService.updateReview(review, request, product);
+
+        if (updatedProduct == null) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA, "Не бе извършена промяна", HttpStatus.NOT_MODIFIED.value(), ErrorMessage.DUPLICATION_OF_REVIEW_DATA));
+        }
+
+        try {
+            productService.save(updatedProduct);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return ResponseEntity.ok("Успешно променено ревю");
+
+    }
+
+    @DeleteMapping("deletereview")//TODO change to review/delete
     @Transactional
     public ResponseEntity<String> deleteReview(@RequestBody CustomerProductPairRequest pairRequest) {
         Customer customer = customerService.findById(pairRequest.customerId);

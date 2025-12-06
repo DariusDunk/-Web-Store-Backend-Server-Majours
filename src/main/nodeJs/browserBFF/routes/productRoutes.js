@@ -285,16 +285,19 @@ router.post('/getPagedReviews', async (req, res) => {
 })
 
 router.post(`/addReview`, async (req, res) => {
-    const userId = req.params.userId;
-    const productCode = req.params.productCode;
-    const rating = req.params.rating;
-    const reviewText = req.params.reviewText;
+    const userId = req.body.userId;
+    const productCode = req.body.productCode;
+    const rating = req.body.rating;
+    const reviewText = req.body.reviewText;
+
+    console.log( "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
 
     console.log(JSON.stringify(req.body))
     try {
-        const response = await fetch(`${Backend_Url}/product/reviews/add`,
+        const response = await fetch(`${Backend_Url}/product/review/add`,
             {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_id: userId,
                     product_code: productCode,

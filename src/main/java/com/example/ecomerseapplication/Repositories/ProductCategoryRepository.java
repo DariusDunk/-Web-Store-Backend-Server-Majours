@@ -1,17 +1,14 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
-import com.nimbusds.jose.util.Pair;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.yaml.snakeyaml.util.Tuple;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -26,7 +23,7 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     @Query(value =
     """
-    select distinct new com.example.ecomerseapplication.DTOs.AttributeOptionDTO(an.attributeName, ca.attributeOption, aog.measurementUnit)
+    select distinct new com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO(an.attributeName, ca.attributeOption, aog.measurementUnit)
         from ProductCategory pc
     join Product p on p.productCategory = pc
         join p.categoryAttributeSet ca

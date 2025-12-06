@@ -1,5 +1,5 @@
 package com.example.ecomerseapplication;
-import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 import com.example.ecomerseapplication.Repositories.*;

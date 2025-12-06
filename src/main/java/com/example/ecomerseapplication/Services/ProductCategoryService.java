@@ -1,7 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.AttributeOptionDTO;
-import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
