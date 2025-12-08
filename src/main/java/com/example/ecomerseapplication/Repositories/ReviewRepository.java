@@ -63,6 +63,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("""
             select distinct new com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse(r.rating, count(r))
             from Review r
+            where r.product.productCode = ?1
             group by r.rating
             """)
     List<RatingOverviewResponse> getRatingOverviewByProductCode(String productCode);

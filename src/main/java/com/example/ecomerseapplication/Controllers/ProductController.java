@@ -98,7 +98,11 @@ public class ProductController {
 
         PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit);
 
+//        System.out.println(request);
+
         Page<ReviewResponse> reviewPage = reviewService.getProductReviews(request, pageRequest);
+
+//        System.out.println(reviewPage.getContent());
 
         return ResponseEntity.ok(PageResponse.from(reviewPage));
 

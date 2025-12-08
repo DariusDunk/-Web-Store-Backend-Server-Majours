@@ -143,4 +143,9 @@ class EComerseApplicationTests {
     void isReviewerVerifiedCheck() {
         System.out.println("Result: " + purchaseCartRepository.isProductPurchased("20621301",6L));
     }
+
+    @Test
+    void getReviewOverviewByProductCode() {
+        System.out.println(reviewRepository.getRatingOverviewByProductCode("20621303"));
+    }
 }

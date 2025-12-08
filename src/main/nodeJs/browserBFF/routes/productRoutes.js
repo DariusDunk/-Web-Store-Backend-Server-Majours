@@ -97,6 +97,8 @@ router.get('/detail/:productCode', async (req, res)=>{
     const productDetails = await productDetailsResponse.json();
     const ratingOverview = await ratingOverviewResponse.json();
 
+    console.log(JSON.stringify(ratingOverview));
+
     res.json({productDetails, ratingOverview});
 
   } catch (error) {
@@ -242,6 +244,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 router.post('/getPagedReviews', async (req, res) => {
     // const page = parseInt(req.params.page, 10);
     const productCode = req.body.productCode;
+    // const userId = req.body.userId;
     const userId = req.body.userId;
     const page = req.body.page;
     const sort = req.body.sortOrder;
@@ -250,7 +253,7 @@ router.post('/getPagedReviews', async (req, res) => {
 
     // console.log("Code: " + productCode + " User: " + userId);
 
-    console.log(JSON.stringify(req.body))
+    // console.log(JSON.stringify(req.body))
 
     try {
         const response = await fetch(`${Backend_Url}/product/reviews/paged`,
