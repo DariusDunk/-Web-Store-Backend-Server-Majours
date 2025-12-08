@@ -270,7 +270,10 @@ public class ProductController {
        Product updatedProduct = reviewService.updateReview(review, request, product);
 
         if (updatedProduct == null) {
-            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA, "Не бе извършена промяна", HttpStatus.NOT_MODIFIED.value(), ErrorMessage.DUPLICATION_OF_REVIEW_DATA));
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
+                    "Не бе извършена промяна",
+                    HttpStatus.NOT_MODIFIED.value(),
+                    ErrorMessage.DUPLICATION_OF_REVIEW_DATA));
         }
 
         try {
@@ -284,7 +287,7 @@ public class ProductController {
 
     }
 
-    @DeleteMapping("deletereview")//TODO change to review/delete
+    @DeleteMapping("review/delete")
     @Transactional
     public ResponseEntity<String> deleteReview(@RequestBody CustomerProductPairRequest pairRequest) {
         Customer customer = customerService.findById(pairRequest.customerId);
@@ -305,7 +308,7 @@ public class ProductController {
         short newRating = reviewService.updatedRating(product, review);
 
         if (newRating == -1)
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.internalServerError().build();
 
         product.setRating(newRating);
         product.getReviews().remove(review);

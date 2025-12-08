@@ -1,6 +1,7 @@
 const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
+const path = require("node:path");
 
 router.get('/featured/:page', async (req, res)=>{
   const queryParts = req.url.split("/");
@@ -331,6 +332,50 @@ router.post(`/addReview`, async (req, res) => {
     }
 })
 
+router.post(`/updateReview`, async (req, res) => {
+    const userId = req.body.userId;
+    const productCode = req.body.productCode;
+    const rating = req.body.rating;
+    const reviewText = req.body.reviewText;
+
+    try{
+        const response = await fetch(Backend_Url + "/product/review/update",
+            {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userId,
+                    product_code: productCode,
+                    rating: rating,
+                    review_text: reviewText}),
+            })
+
+        return res.status(response.status).json(response.statusText);
+    }
+
+    catch (error) {
+        console.error('Error updating the review ', error);
+    }
+
+})
+
+router.delete(`/deleteReview`, async (req, res) => {
+    const {productCode, customerId} = req.body;
+
+    try{
+        const response = await fetch(`${Backend_Url}/product/review/delete`,
+            {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({productCode, customerId})
+            })
+
+        return res.status(response.status).json(response.statusText);
+    }
+    catch (error) {
+        console.error('Error deleting the review ', error);
+    }
+})
 
 
 module.exports = router
