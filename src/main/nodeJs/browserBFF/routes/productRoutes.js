@@ -284,7 +284,23 @@ router.post('/getPagedReviews', async (req, res) => {
     catch (error) {
         console.error('Reviews: Error fetching data: ', error);
     }
+})
 
+router.get(`/getReview/:productCode/:userId`, async (req, res) => {
+    const {productCode, userId} = req.params;
+
+    try {
+        const response = await fetch(`${Backend_Url}/product/review/specific?userId=${userId}&productCode=${productCode}`);
+
+        // console.log("STATUS: " + response.status);
+
+        const responseData = await response.json();
+        // console.log("STATUS: " + response.status + " DATA: " + JSON.stringify(responseData));
+       return res.status(response.status).json(responseData);
+    }
+    catch (error) {
+        console.error('Reviews: Error fetching specific review data: ', error);
+    }
 })
 
 router.post(`/addReview`, async (req, res) => {

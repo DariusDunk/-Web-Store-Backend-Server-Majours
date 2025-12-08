@@ -6,6 +6,7 @@ import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.Mappers.ReviewMapper;
 import com.example.ecomerseapplication.Others.ErrorMessage;
 import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
@@ -190,6 +191,21 @@ public class ProductController {
                         pageRequest)));
     }
 
+    @GetMapping("review/specific")
+    public ResponseEntity<?> getSpecificReviewData(@RequestParam("userId")Long userId, @RequestParam("productCode")String productCode) {
+
+//        System.out.println("IUD " + userId + " PCODE " + productCode);
+
+        Review review = reviewService.getByUIDAndPCode(productCode, userId);
+
+//        System.out.println("REVIEW: " + review.getId() );
+
+        ReviewContentResponse response = ReviewMapper.entToContentResponse(review);
+
+        return ResponseEntity.ok(response);
+
+    }
+
     @PostMapping("review/add")
     @Transactional
     public ResponseEntity<?> addReview(@RequestBody ReviewRequest request) {
@@ -211,10 +227,9 @@ public class ProductController {
         if (product == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
-        Review existingReview = reviewService.getByProdCust(product, customer);
+//        Review existingReview = reviewService.getByProdCust(product, customer);
 
-        if (existingReview != null)
-        {
+        if (reviewService.exists(product, customer) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
                     "Request canceled",
                     HttpStatus.CONFLICT.value(),
@@ -246,7 +261,7 @@ public class ProductController {
         if (product == null)
             return ResponseEntity.notFound().build();
 
-        Review review = reviewService.getByProdCust(product, customer);
+        Review review = reviewService.getByProdAndCust(product, customer);
 
         if (review==null) {
             return ResponseEntity.notFound().build();
@@ -282,7 +297,7 @@ public class ProductController {
         if (product == null)
             return ResponseEntity.notFound().build();
 
-        Review review = reviewService.getByProdCust(product, customer);
+        Review review = reviewService.getByProdAndCust(product, customer);
 
         if (review == null)
             return ResponseEntity.notFound().build();

@@ -13,13 +13,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    boolean existsByProductAndCustomer(Product product, Customer customer);
+    Boolean existsByProductAndCustomer(Product product, Customer customer);
 
     Optional<Review> getByProductAndCustomer(Product product, Customer customer);
+    Optional<Review> getReviewByCustomer_IdAndProduct_ProductCode(Long customerId, String productCode);
 
     @Modifying
     @Query(value = "update Review " +

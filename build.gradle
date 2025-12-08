@@ -52,9 +52,21 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core:5.20.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
+    doFirst {
+        def mockitoAgent = configurations.testRuntimeClasspath.find { it.name.contains("mockito-core") }
+        if (mockitoAgent != null) {
+            println "Adding Mockito agent: $mockitoAgent"
+            jvmArgs += ["-javaagent:$mockitoAgent"]
+        } else {
+            println "Mockito core jar not found in testRuntimeClasspath!"
+        }
+    }
     useJUnitPlatform()
 }
+
+

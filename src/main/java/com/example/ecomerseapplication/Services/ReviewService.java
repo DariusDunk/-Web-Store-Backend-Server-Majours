@@ -37,24 +37,28 @@ public class ReviewService {
         reviewRepository.updateReview(review.getId(), review.getRating(), review.getReviewText());
     }
 
-    public boolean exists(Product product, Customer customer) {
+    public Boolean exists(Product product, Customer customer) {
         return reviewRepository.existsByProductAndCustomer(product, customer);
     }
 
-    public Review getByProdCust(Product product, Customer customer) {
+    public Review getByProdAndCust(Product product, Customer customer) {
         return reviewRepository.getByProductAndCustomer(product, customer).orElse(null);
     }
 
-    @Transactional
-    public Product manageReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
-
-//        Review existingReview = getByProdCust(product, customer);
-
-//        if (existingReview != null) {
-//            return updateReview(existingReview, request, product);TODO kato se razdelqt syzdavaneto i updeita na revuta, tozi method mai 6te stane izli6en
-//        }
-        return createReview(product, customer, request, isVerifiedCustomer);
+    public Review getByUIDAndPCode(String productCode, Long customerId) {
+        return reviewRepository.getReviewByCustomer_IdAndProduct_ProductCode(customerId, productCode).orElse(null);
     }
+
+    //    @Transactional
+//    public Product manageReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
+//
+////        Review existingReview = getByProdCust(product, customer);
+//
+////        if (existingReview != null) {
+////            return updateReview(existingReview, request, product);TODO kato se razdelqt syzdavaneto i updeita na revuta, tozi method mai 6te stane izli6en
+////        }
+//        return createReview(product, customer, request, isVerifiedCustomer);
+//    }
 
     @Transactional
     public Product createReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {

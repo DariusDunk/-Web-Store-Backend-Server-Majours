@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview;
+import com.example.ecomerseapplication.DTOs.responses.ReviewContentResponse;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Review;
 
@@ -35,4 +36,13 @@ public class ReviewMapper {
         return reviewResponse;
     }
 
+    public static ReviewContentResponse entToContentResponse(Review review) {
+
+        if (review != null) {
+            return new ReviewContentResponse(review.getReviewText(), review.getRating(), true);
+        }
+
+        return new ReviewContentResponse(null, null, false);
+
+    }
 }

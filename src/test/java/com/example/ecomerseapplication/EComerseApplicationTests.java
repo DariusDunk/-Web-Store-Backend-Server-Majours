@@ -3,10 +3,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 import com.example.ecomerseapplication.Repositories.*;
-import com.example.ecomerseapplication.Services.CategoryAttributeService;
-import com.example.ecomerseapplication.Services.CustomerCartService;
-import com.example.ecomerseapplication.Services.CustomerService;
-import com.example.ecomerseapplication.Services.ProductCategoryService;
+import com.example.ecomerseapplication.Services.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +27,10 @@ class EComerseApplicationTests {
     private CustomerCartRepository customerCartRepository;
     @Autowired
     private PurchaseCartRepository purchaseCartRepository;
+    @Autowired
+    private ReviewService reviewService;
+    @Autowired
+    private ProductService productService;
 
     @Test
     void contextLoads() {
@@ -147,5 +148,11 @@ class EComerseApplicationTests {
     @Test
     void getReviewOverviewByProductCode() {
         System.out.println(reviewRepository.getRatingOverviewByProductCode("20621303"));
+    }
+
+    @Test
+    void doesReviewExistTest() {
+
+        System.out.println("Result for product= 20621307 and userId=6 "+ reviewService.exists(productService.findByPCode("20621307"), customerService.findById(6L)));
     }
 }
