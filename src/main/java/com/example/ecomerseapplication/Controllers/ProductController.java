@@ -229,7 +229,7 @@ public class ProductController {
 
 //        Review existingReview = reviewService.getByProdCust(product, customer);
 
-        if (reviewService.exists(product, customer) != null) {
+        if (reviewService.exists(product, customer)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
                     "Request canceled",
                     HttpStatus.CONFLICT.value(),

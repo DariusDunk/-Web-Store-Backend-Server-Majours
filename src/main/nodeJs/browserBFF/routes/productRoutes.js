@@ -361,8 +361,10 @@ router.post(`/updateReview`, async (req, res) => {
 
 })
 
-router.delete(`/deleteReview`, async (req, res) => {
+router.post(`/deleteReview`, async (req, res) => {
     const {productCode, customerId} = req.body;
+
+    console.log( "INSIDE DELETE REVIEW: " + "Product: " + productCode + " Customer: " + customerId)
 
     try{
         const response = await fetch(`${Backend_Url}/product/review/delete`,
