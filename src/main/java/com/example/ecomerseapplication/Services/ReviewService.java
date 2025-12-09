@@ -92,7 +92,7 @@ public class ReviewService {
 
         System.out.println("EXISTING RATING: " + existingReview.getRating() + " NEW RATING: " + adjustedRating);
 
-        if (existingReview.getRating() == adjustedRating)
+        if (existingReview.getRating() == adjustedRating && request.reviewText.equals(existingReview.getReviewText()))
             return null;
 
         existingReview.setRating(adjustedRating);
