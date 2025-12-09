@@ -90,21 +90,22 @@ public class ReviewService {
     public Product updateReview(Review existingReview, ReviewRequest request, Product product) {
         short adjustedRating = (short) (request.rating * 10);
 
-        if (existingReview.getRating() == adjustedRating
-                && existingReview.getReviewText().equals(request.reviewText))
+        System.out.println("EXISTING RATING: " + existingReview.getRating() + " NEW RATING: " + adjustedRating);
+
+        if (existingReview.getRating() == adjustedRating)
             return null;
 
         existingReview.setRating(adjustedRating);
         existingReview.setReviewText(request.reviewText);
         update(existingReview);
 
-        updateProductRating(existingReview, request, product, adjustedRating);
+        updateProductRating(existingReview, product, adjustedRating);
         return product;
     }
 
-    private static void updateProductRating(Review existingReview, ReviewRequest request, Product product, short adjustedRating) {
+    private static void updateProductRating(Review existingReview, Product product, short adjustedRating) {
         if (product.getReviews().size() == 1)
-            product.setRating(request.rating);
+            product.setRating(adjustedRating);
 
         else {
             short oldRating = 0;
@@ -112,6 +113,9 @@ public class ReviewService {
                 oldRating += review.getRating();
 
             short newRating = (short) (((oldRating - existingReview.getRating()) + adjustedRating) / product.getReviews().size());
+
+            System.out.printf("NEW RATING CALCULATION: ((%d - %d) + %d)/%d = %d", oldRating, existingReview.getRating(), adjustedRating, product.getReviews().size(), newRating);
+
 
             product.setRating(newRating);
         }
@@ -132,7 +136,7 @@ public class ReviewService {
 
     @Transactional
     public void delete(Review review) {
-        reviewRepository.delete(review);
+        reviewRepository.delete(review);//TODO sloji logika za obnovqvane na ratinga na produkta
     }
 
     public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable) {

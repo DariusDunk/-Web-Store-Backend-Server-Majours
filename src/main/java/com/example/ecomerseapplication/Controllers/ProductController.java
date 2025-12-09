@@ -251,19 +251,33 @@ public class ProductController {
     @PatchMapping("review/update")
     @Transactional
     public ResponseEntity<?> updateReview(@RequestBody ReviewRequest request) {
+
+        System.out.println(request.toString());
+
+        if (request.rating > 5 || request.rating < 1) {
+            System.out.println("INCORRECT RATING");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
+        }
+
         Customer customer = customerService.findById(request.customerId);
 
-        if (customer == null)
+        if (customer == null) {
+
+            System.out.println("customer not found");
             return ResponseEntity.notFound().build();
+        }
 
         Product product = productService.findByPCode(request.productCode);
 
-        if (product == null)
+        if (product == null) {
+            System.out.println("product not found");
             return ResponseEntity.notFound().build();
+        }
 
         Review review = reviewService.getByProdAndCust(product, customer);
 
         if (review==null) {
+            System.out.println("review not found");
             return ResponseEntity.notFound().build();
         }
 

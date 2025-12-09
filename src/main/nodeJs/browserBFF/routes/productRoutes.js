@@ -333,10 +333,12 @@ router.post(`/addReview`, async (req, res) => {
 })
 
 router.post(`/updateReview`, async (req, res) => {
-    const userId = req.body.userId;
+    const userId = req.body.customerId;
     const productCode = req.body.productCode;
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
+
+    console.log( "INSIDE UPDATE REVIEW: " + "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
 
     try{
         const response = await fetch(Backend_Url + "/product/review/update",
