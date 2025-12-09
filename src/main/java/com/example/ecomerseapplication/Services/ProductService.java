@@ -1,11 +1,9 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
-import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
-import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
 import com.example.ecomerseapplication.Specifications.ProductSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +28,15 @@ public class ProductService {
 
     private final ReviewService reviewService;
     private final ProductCategoryService productCategoryService;
+    private final CustomerRepository customerRepository;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService) {
+    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService, CustomerRepository customerRepository) {
         this.productRepository = productRepository;
         this.customerCartService = customerCartService;
         this.reviewService = reviewService;
         this.productCategoryService = productCategoryService;
+        this.customerRepository = customerRepository;
     }
 
 
@@ -198,5 +198,9 @@ public class ProductService {
         Object result = productRepository.getTotalPriceRange(category);
 
         return (Object[]) result;
+    }
+
+    public PageResponse<CompactProductResponse> getFromFavourites(Customer customer, PageRequest pageRequest) {
+       return PageResponse.from(customerRepository.getFromFavouritesPage(customer, pageRequest));
     }
 }

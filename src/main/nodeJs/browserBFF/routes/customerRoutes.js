@@ -2,6 +2,21 @@ const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
 
+router.get('/getFavourites/:userId/:page', async (req, res)=>{
+  const {userId, page} = req.params
+
+  try{
+    const response = await fetch(`${Backend_Url}/customer/favourites/${userId}/p/${page}`);
+    const responseData = await response.json();
+    res.status(response.status).json(responseData);
+  }
+
+  catch (error) {
+    console.error('Error fetching favourites: ', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
+
 router.post(`/addfavourite`, async (req, res)=>{
   try{
     const response = await fetch(`${Backend_Url}/customer/addfavourite`,{

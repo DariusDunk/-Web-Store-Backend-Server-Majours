@@ -71,21 +71,17 @@ public class CustomerController {
         return customerService.addProductToFavourites(pairRequest.customerId, product);
     }
 
-    @GetMapping("favourites/p/{page}")//PAGING
-    public ResponseEntity<CompactProductPagedListResponse> getFavourites(@RequestParam long id, @PathVariable int page) {
+    @GetMapping("favourites/{id}/p/{page}")//PAGING
+    public ResponseEntity<?> getFavourites(@PathVariable long id, @PathVariable int page) {
         Customer customer = customerService.findById(id);
         if (customer == null)
             return ResponseEntity.notFound().build();
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
-        CompactProductPagedListResponse productResponse = ProductDTOMapper
-                .pagedListToDtoResponse(customer.getFavourites(), pageRequest);
+        PageResponse<CompactProductResponse> response = productService.getFromFavourites(customer,pageRequest);
 
-        if (productResponse.content.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productResponse);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
     @PostMapping("addtocart")

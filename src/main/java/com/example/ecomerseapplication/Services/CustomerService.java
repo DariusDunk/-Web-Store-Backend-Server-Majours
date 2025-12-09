@@ -1,7 +1,9 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
+import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Mappers.CustomerMapper;
@@ -9,6 +11,7 @@ import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -140,10 +143,8 @@ public class CustomerService {
         return ResponseEntity.ok().body("Паролата бе убновена успешно!");
     }
 
-
     public String getPfpUrl(int customerId) {
         return customerRepository.getCustomerPfp(customerId);
     }
-
 
 }
