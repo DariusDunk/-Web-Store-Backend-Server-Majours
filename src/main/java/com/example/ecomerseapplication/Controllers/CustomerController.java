@@ -107,7 +107,7 @@ public class CustomerController {
         if (customer == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Няма такъв потребител");
 
-        return customerCartService.addToOrRemoveFromCart(customer, product, request.quantity);
+        return customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement);
     }
 
     @DeleteMapping("cart/remove")

@@ -25,26 +25,38 @@ public class CustomerCartService {
     }
 
     @Transactional
-    public ResponseEntity<String> addToOrRemoveFromCart(Customer customer, Product product, short quantity) {
+    public ResponseEntity<String> addToOrRemoveFromCart(Customer customer, Product product, Boolean doIncrement) {
 
         CustomerCartId cartId = new CustomerCartId(product, customer);
 
         CustomerCart customerCart = customerCartRepository.findById(cartId).orElse(null);
 
         if (customerCart == null) {
-            customerCart = new CustomerCart(cartId, quantity);
+            customerCart = new CustomerCart(cartId, (short)1);
             customerCartRepository.save(customerCart);
             return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в количката!");
         }
 
-        if (quantity == 0) {
+        if (doIncrement)
+        {
+            short quantity = customerCart.getQuantity();
+            customerCart.setQuantity(++quantity);
+
+            return ResponseEntity.ok("Успешно увелично количество в количката!");
+        }
+
+        else
+
+        if (customerCart.getQuantity() == 1) {
             customerCartRepository.deleteById(cartId);
             return ResponseEntity.status(HttpStatus.OK).body("Успешно премахнат от количката!");
         }
+        else {
+            short quantity = customerCart.getQuantity();
+            customerCart.setQuantity(--quantity);
 
-        customerCartRepository.updateQuantity(quantity, customer.getId(), product.getId());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Промяната е успешна");
+            return ResponseEntity.ok("Успешно намалено количество в коликчата!");
+        }
 
     }
 

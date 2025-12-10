@@ -72,7 +72,7 @@ router.post(`/removeFav/batch`, async (req, res)=>{
 router.post('/addToCart',async  (req, res) =>{
   try{
 
-    const {customerProductPairRequest,quantity} = req.body.data;
+    const {customerProductPairRequest,doIncrement} = req.body.data;
 
     // console.log(req.body);
     //
@@ -84,7 +84,7 @@ router.post('/addToCart',async  (req, res) =>{
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({customerProductPairRequest: customerProductPairRequest, quantity: quantity})
+      body: JSON.stringify({customerProductPairRequest: customerProductPairRequest, doIncrement: doIncrement})
     });
     const responseData = await response.text();
     res.status(response.status).json(responseData);

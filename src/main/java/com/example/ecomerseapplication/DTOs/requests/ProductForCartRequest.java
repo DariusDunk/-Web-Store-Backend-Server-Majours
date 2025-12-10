@@ -5,5 +5,5 @@ import lombok.ToString;
 @ToString
 public class ProductForCartRequest {
     public CustomerProductPairRequest customerProductPairRequest;
-    public short quantity;
+    public Boolean doIncrement;
 }
