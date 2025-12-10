@@ -85,6 +85,16 @@ public class CustomerController {
     @PostMapping("addtocart")
     @Transactional//TODO razdeli na dva metoda
     public ResponseEntity<String> addToCart(@RequestBody ProductForCartRequest request) {
+
+//        System.out.println("REQUEST: "+request);
+
+        if (NullFieldChecker.hasNullFields(request)) {
+
+            System.out.println("Null fields:\n"+NullFieldChecker.getNullFields(request));
+
+            return ResponseEntity.badRequest().build();
+        }
+
         Product product = productService.findByPCode(request.customerProductPairRequest.productCode);
 
         if (product == null)
@@ -119,7 +129,7 @@ public class CustomerController {
     @Transactional
     public ResponseEntity<?> removeFromFavourites(@RequestBody FavoritesBatchRemoveRequest request) {
 
-        System.out.println(request);
+//        System.out.println(request);
 
         if (NullFieldChecker.hasNullFields(request)) {
 

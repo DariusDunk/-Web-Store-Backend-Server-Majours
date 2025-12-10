@@ -88,7 +88,7 @@ public class CustomerService {
 
         customer.getFavourites().add(product);
         customerRepository.save(customer);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Продуктът е добавен в любими!");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в любими!");
     }
 
     public Customer findById(long id) {
@@ -102,7 +102,7 @@ public class CustomerService {
 
         customerRepository.save(customer);
 
-        return ResponseEntity.status(HttpStatus.OK).body("Продуктът е успешно премахнат!");
+        return ResponseEntity.status(HttpStatus.OK).body("Успешно премахнат от любими!");
     }
 
     public Customer getByEmail(String email) {

@@ -27,7 +27,7 @@ router.post(`/addFavourite`, async (req, res)=>{
       body: JSON.stringify(req.body)
     });
     const responseData = await response.text();
-    res.json(responseData);
+    res.status(response.status).json(responseData);
   }
   catch (error) {
     console.error('Error:', error);
@@ -43,7 +43,7 @@ router.post(`/removeFav`, async (req, res)=>{
       body: JSON.stringify(req.body)
     });
     const responseData = await response.text();
-    res.json(responseData);
+    res.status(response.status).json(responseData);
   } catch (error)
   {
     console.error('Error:', error);
@@ -56,7 +56,7 @@ router.post(`/removeFav/batch`, async (req, res)=>{
 
     const {customerId, productCodes} = req.body;
 
-    console.log("inside removeFav/batch. Body: " + JSON.stringify(req.body) + "");
+    // console.log("inside removeFav/batch. Body: " + JSON.stringify(req.body) + "");
 
     const response = await fetch(`${Backend_Url}/customer/favorite/remove/batch`,{
       method: 'DELETE',
@@ -71,15 +71,23 @@ router.post(`/removeFav/batch`, async (req, res)=>{
 
 router.post('/addtocart',async  (req, res) =>{
   try{
+
+    const {customerProductPairRequest,quantity} = req.body.data;
+
+    console.log(req.body);
+
+    console.log("inside addtocart. PAIR: " + JSON.stringify(customerProductPairRequest) + "");
+    console.log("inside addtocart. QUANTITY: " + JSON.stringify(quantity) + "");
+
     const response = await fetch(`${Backend_Url}/customer/addtocart`,{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify({customerProductPairRequest: customerProductPairRequest, quantity: quantity})
     });
     const responseData = await response.text();
-    res.json(responseData);
+    res.status(response.status).json(responseData);
   }
   catch (error) {
     console.error('Error:', error);

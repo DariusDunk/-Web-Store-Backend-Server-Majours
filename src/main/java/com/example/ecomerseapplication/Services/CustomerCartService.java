@@ -33,12 +33,12 @@ public class CustomerCartService {
         if (customerCart==null) {
             customerCart = new CustomerCart(cartId, quantity);
             customerCartRepository.save(customerCart);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Продуктът е добавен в количката!");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в количката!");
         }
 
         if (quantity ==0) {
             customerCartRepository.deleteById(cartId);
-            return ResponseEntity.status(HttpStatus.OK).body("Продукът е премахнат успешно!");
+            return ResponseEntity.status(HttpStatus.OK).body("Успешно премахнат от количката!");
         }
 
         if (customerCart.getQuantity()!=quantity) {
