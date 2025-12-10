@@ -69,17 +69,17 @@ router.post(`/removeFav/batch`, async (req, res)=>{
   {}
 })
 
-router.post('/addtocart',async  (req, res) =>{
+router.post('/addToCart',async  (req, res) =>{
   try{
 
     const {customerProductPairRequest,quantity} = req.body.data;
 
-    console.log(req.body);
+    // console.log(req.body);
+    //
+    // console.log("inside addtocart. PAIR: " + JSON.stringify(customerProductPairRequest) + "");
+    // console.log("inside addtocart. QUANTITY: " + JSON.stringify(quantity) + "");
 
-    console.log("inside addtocart. PAIR: " + JSON.stringify(customerProductPairRequest) + "");
-    console.log("inside addtocart. QUANTITY: " + JSON.stringify(quantity) + "");
-
-    const response = await fetch(`${Backend_Url}/customer/addtocart`,{
+    const response = await fetch(`${Backend_Url}/customer/cart/add`,{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -94,6 +94,24 @@ router.post('/addtocart',async  (req, res) =>{
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+router.post('/removeFromCart',async  (req, res) =>{//TODO testvai
+  try{
+    const {customerId, productCode} = req.body.data;
+    const response = await fetch(`${Backend_Url}/customer/cart/remove`,{
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({customerId: customerId, productCode: productCode})
+    });
+    res.json(await response.json());
+  }
+  catch (error) {
+    console.error('Error removing product from cart:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
 
 router.post('/registration', async (req, res)=>{
   try{

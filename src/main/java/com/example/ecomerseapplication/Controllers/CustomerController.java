@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @RestController
@@ -82,8 +84,8 @@ public class CustomerController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
-    @PostMapping("addtocart")
-    @Transactional//TODO razdeli na dva metoda
+    @PostMapping("cart/add")
+    @Transactional
     public ResponseEntity<String> addToCart(@RequestBody ProductForCartRequest request) {
 
 //        System.out.println("REQUEST: "+request);
@@ -106,6 +108,30 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Няма такъв потребител");
 
         return customerCartService.addToOrRemoveFromCart(customer, product, request.quantity);
+    }
+
+    @DeleteMapping("cart/remove")
+    @Transactional//TODO testvai
+    public ResponseEntity<?> removeFromCart(@RequestBody CustomerProductPairRequest pairRequest) {
+
+        if (NullFieldChecker.hasNullFields(pairRequest)) {
+
+            System.out.println("Null fields from request:" + NullFieldChecker.getNullFields(pairRequest));
+
+            return ResponseEntity.badRequest().build();
+        }
+
+        Customer customer = customerService.findById(pairRequest.customerId);
+        try
+        {
+            customerCartService.removeFromCart(customer, pairRequest.productCode);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error removing from cart: " + e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("favorite/remove")

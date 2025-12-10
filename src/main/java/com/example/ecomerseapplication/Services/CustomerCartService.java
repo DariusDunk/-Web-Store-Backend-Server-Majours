@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -30,23 +31,21 @@ public class CustomerCartService {
 
         CustomerCart customerCart = customerCartRepository.findById(cartId).orElse(null);
 
-        if (customerCart==null) {
+        if (customerCart == null) {
             customerCart = new CustomerCart(cartId, quantity);
             customerCartRepository.save(customerCart);
             return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в количката!");
         }
 
-        if (quantity ==0) {
+        if (quantity == 0) {
             customerCartRepository.deleteById(cartId);
             return ResponseEntity.status(HttpStatus.OK).body("Успешно премахнат от количката!");
         }
 
-        if (customerCart.getQuantity()!=quantity) {
-            customerCartRepository.updateQuantity(quantity, customer.getId(), product.getId());
+        customerCartRepository.updateQuantity(quantity, customer.getId(), product.getId());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("Промяната е успешна");
-        }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body("Промяната е успешна");
+
     }
 
     public boolean cartExists(Customer customer, Product product) {
@@ -59,7 +58,17 @@ public class CustomerCartService {
 
     @Transactional
     public void clearCart(Customer customer) {
-         customerCartRepository.deleteAllByCustomer(customer);
+        customerCartRepository.deleteAllByCustomer(customer);
     }
 
+    public void removeFromCart(Customer customer, String productCode) {
+        List<CustomerCart> cart = cartsByCustomer(customer);
+
+        if (cart.isEmpty()) throw new IllegalArgumentException("Cart is empty!");
+
+        CustomerCart cartItem = cart.stream().filter(c -> c.getCustomerCartId().getProduct().getProductCode().equals(productCode)).findFirst().orElseThrow();
+
+        customerCartRepository.delete(cartItem);
+
+    }
 }
