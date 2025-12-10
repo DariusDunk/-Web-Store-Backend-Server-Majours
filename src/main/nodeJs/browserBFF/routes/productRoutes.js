@@ -98,7 +98,7 @@ router.get('/detail/:productCode', async (req, res)=>{
     const productDetails = await productDetailsResponse.json();
     const ratingOverview = await ratingOverviewResponse.json();
 
-    console.log(JSON.stringify(ratingOverview));
+    // console.log(JSON.stringify(ratingOverview));
 
     res.json({productDetails, ratingOverview});
 
@@ -278,7 +278,7 @@ router.post('/getPagedReviews', async (req, res) => {
 
         const responseData = await response.json();
 
-        console.log(responseData);
+        // console.log(responseData);
 
         res.status(response.status).json(responseData);
     }
@@ -310,9 +310,9 @@ router.post(`/addReview`, async (req, res) => {
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
 
-    console.log( "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
+    // console.log( "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
 
-    console.log(JSON.stringify(req.body))
+    // console.log(JSON.stringify(req.body))
     try {
         const response = await fetch(`${Backend_Url}/product/review/add`,
             {
@@ -338,7 +338,7 @@ router.post(`/updateReview`, async (req, res) => {
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
 
-    console.log( "INSIDE UPDATE REVIEW: " + "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
+    // console.log( "INSIDE UPDATE REVIEW: " + "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
 
     try{
         const response = await fetch(Backend_Url + "/product/review/update",
@@ -364,7 +364,7 @@ router.post(`/updateReview`, async (req, res) => {
 router.post(`/deleteReview`, async (req, res) => {
     const {productCode, customerId} = req.body;
 
-    console.log( "INSIDE DELETE REVIEW: " + "Product: " + productCode + " Customer: " + customerId)
+    // console.log( "INSIDE DELETE REVIEW: " + "Product: " + productCode + " Customer: " + customerId)
 
     try{
         const response = await fetch(`${Backend_Url}/product/review/delete`,

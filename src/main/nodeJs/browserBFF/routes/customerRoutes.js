@@ -17,9 +17,9 @@ router.get('/getFavourites/:userId/:page', async (req, res)=>{
   }
 })
 
-router.post(`/addfavourite`, async (req, res)=>{
+router.post(`/addFavourite`, async (req, res)=>{
   try{
-    const response = await fetch(`${Backend_Url}/customer/addfavourite`,{
+    const response = await fetch(`${Backend_Url}/customer/favorite/add`,{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -35,9 +35,9 @@ router.post(`/addfavourite`, async (req, res)=>{
   }
 });
 
-router.delete(`/removefav`, async (req, res)=>{
+router.post(`/removeFav`, async (req, res)=>{
   try {
-    const response = await fetch(`${Backend_Url}/customer/removefav`,{
+    const response = await fetch(`${Backend_Url}/customer/favorite/remove`,{
       method: 'DELETE',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(req.body)
@@ -49,6 +49,24 @@ router.delete(`/removefav`, async (req, res)=>{
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+})
+
+router.post(`/removeFav/batch`, async (req, res)=>{
+  try {
+
+    const {customerId, productCodes} = req.body;
+
+    console.log("inside removeFav/batch. Body: " + JSON.stringify(req.body) + "");
+
+    const response = await fetch(`${Backend_Url}/customer/favorite/remove/batch`,{
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
+    });
+    const responseData = await response.text();
+    res.status(response.status).json(responseData);
+  } catch (error)
+  {}
 })
 
 router.post('/addtocart',async  (req, res) =>{

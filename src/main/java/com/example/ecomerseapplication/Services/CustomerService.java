@@ -15,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class CustomerService {
@@ -147,4 +150,20 @@ public class CustomerService {
         return customerRepository.getCustomerPfp(customerId);
     }
 
+    @Transactional
+    public void removeFavoritesBatch(Customer customer, List<String> productCodes) {
+
+        int deletedCount = 0;
+
+        for (String productCode : productCodes) {
+            customer.getFavourites().removeIf(product -> product.getProductCode().equals(productCode));
+            deletedCount++;
+        }
+
+        if (deletedCount != productCodes.size())
+            throw new IllegalStateException("The amount of deleted products is not equal to the amount of requested products!");
+
+
+
+    }
 }

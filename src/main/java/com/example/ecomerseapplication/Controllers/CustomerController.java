@@ -1,9 +1,6 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
-import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
-import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
-import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
+import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.CustomerCartResponseMapper;
@@ -11,6 +8,7 @@ import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
+import com.example.ecomerseapplication.Utils.NullFieldChecker;
 import com.example.ecomerseapplication.enums.UserRole;
 import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +59,7 @@ public class CustomerController {
         return customerService.logIn(customerAccountRequest);
     }
 
-    @PostMapping("addfavourite")
+    @PostMapping("favorite/add")
     @Transactional
     public ResponseEntity<String> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
         Product product = productService.findByPCode(pairRequest.productCode);
@@ -85,7 +83,7 @@ public class CustomerController {
     }
 
     @PostMapping("addtocart")
-    @Transactional
+    @Transactional//TODO razdeli na dva metoda
     public ResponseEntity<String> addToCart(@RequestBody ProductForCartRequest request) {
         Product product = productService.findByPCode(request.customerProductPairRequest.productCode);
 
@@ -100,7 +98,7 @@ public class CustomerController {
         return customerCartService.addToOrRemoveFromCart(customer, product, request.quantity);
     }
 
-    @DeleteMapping("removefav")
+    @DeleteMapping("favorite/remove")
     @Transactional
     public ResponseEntity<String> removeFromFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
 
@@ -115,6 +113,38 @@ public class CustomerController {
             return ResponseEntity.notFound().build();
 
         return customerService.removeFromFavourites(customer, product);
+    }
+
+    @DeleteMapping("favorite/remove/batch")
+    @Transactional
+    public ResponseEntity<?> removeFromFavourites(@RequestBody FavoritesBatchRemoveRequest request) {
+
+        System.out.println(request);
+
+        if (NullFieldChecker.hasNullFields(request)) {
+
+            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(request));
+
+            return ResponseEntity.badRequest().build();
+        }
+
+        Customer customer = customerService.findById(request.customerId());
+
+        if (customer == null) {
+            System.out.println("customer not found");
+            return ResponseEntity.notFound().build();
+        }
+
+        try{
+            customerService.removeFavoritesBatch(customer, request.productCodes());
+
+            return ResponseEntity.ok().build();
+        }
+        catch (Exception e){
+            System.out.println("Error deleting favorites: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
     }
 
     @GetMapping("cart")
