@@ -26,7 +26,7 @@ public class ProductDTOMapper {
         compactProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         compactProductResponse.salePriceStotinki = product.getSalePriceStotinki();
         compactProductResponse.reviewCount = product.getReviews().size();
-        compactProductResponse.inFavourites = product.isInStock();
+        compactProductResponse.isInStock = product.isInStock();
 
         return compactProductResponse;
     }
