@@ -1,12 +1,12 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.CustomerCartResponseMapper;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
+import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Utils.NullFieldChecker;
@@ -14,7 +14,6 @@ import com.example.ecomerseapplication.enums.UserRole;
 import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 
 @RestController
@@ -85,8 +83,8 @@ public class CustomerController {
     }
 
     @PostMapping("cart/add")
-    @Transactional
-    public ResponseEntity<String> addToCart(@RequestBody ProductForCartRequest request) {
+    @Transactional//TODO testvai
+    public ResponseEntity<?> addToCart(@RequestBody ProductForCartRequest request) {
 
 //        System.out.println("REQUEST: "+request);
 
@@ -102,12 +100,53 @@ public class CustomerController {
         if (product == null)
             return ResponseEntity.notFound().build();
 
+        if (!product.isInStock()) {
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.OUT_OF_STOCK,
+                    "Продуктът не е наличен", HttpStatus.BAD_REQUEST.value(),
+                    "Този продукт е изчерпан и не беше добавен в количката"));
+        }
+
         Customer customer = customerService.findById(request.customerProductPairRequest.customerId);
 
         if (customer == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Няма такъв потребител");
 
         return customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement);
+    }
+
+    @PostMapping("cart/add/batch")//TODO TESTVAI
+    public ResponseEntity<?> addBatchToCart(@RequestBody BatchProductUserRequest request)
+    {
+
+        if (NullFieldChecker.hasNullFields(request)) {
+            System.out.println("Null fields:\n"+NullFieldChecker.getNullFields(request));
+            return ResponseEntity.badRequest().build();
+        }
+
+        Customer customer = customerService.findById(request.customerId());
+
+        if (customer == null) {
+            System.out.println("customer not found");
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Product> requestProducts = productService.getByCodes(request.productCodes());
+
+        if (requestProducts.isEmpty()) {
+            System.out.println("No products found from request");
+            return ResponseEntity.notFound().build();
+        }
+
+        try
+        {
+          return customerCartService.addBatchToCart(customer, requestProducts);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error adding product batch to cart: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("cart/remove")
@@ -153,7 +192,7 @@ public class CustomerController {
 
     @DeleteMapping("favorite/remove/batch")
     @Transactional
-    public ResponseEntity<?> removeFromFavourites(@RequestBody FavoritesBatchRemoveRequest request) {
+    public ResponseEntity<?> removeFromFavourites(@RequestBody BatchProductUserRequest request) {
 
 //        System.out.println(request);
 
@@ -183,7 +222,7 @@ public class CustomerController {
 
     }
 
-    @GetMapping("cart")
+    @GetMapping("cart")//TODO promeni
     public ResponseEntity<CustomerCartResponse> showCart(@RequestParam long id) {
         Customer customer = customerService.findById(id);
 

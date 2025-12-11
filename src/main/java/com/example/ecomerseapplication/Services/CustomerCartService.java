@@ -1,9 +1,11 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
+import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
+import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CustomerCartService {
@@ -25,7 +30,7 @@ public class CustomerCartService {
     }
 
     @Transactional
-    public ResponseEntity<String> addToOrRemoveFromCart(Customer customer, Product product, Boolean doIncrement) {
+    public ResponseEntity<?> addToOrRemoveFromCart(Customer customer, Product product, Boolean doIncrement) {
 
         CustomerCartId cartId = new CustomerCartId(product, customer);
 
@@ -40,8 +45,15 @@ public class CustomerCartService {
         if (doIncrement)
         {
             short quantity = customerCart.getQuantity();
-            customerCart.setQuantity(++quantity);
+            if (product.getQuantityInStock() < quantity + 1)
+                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.DEMAND_EXCEEDS_SUPPLY,
+                        "Неуспешно увеличение на бройка",
+                        HttpStatus.CONFLICT.value(),
+                        "Изисканото количество надхвърля наличното за този продуктит, той не бе добавен или увеличен в количката "));
 
+
+            customerCart.setQuantity(++quantity);
+            customerCartRepository.save(customerCart);
             return ResponseEntity.ok("Успешно увелично количество в количката!");
         }
 
@@ -81,6 +93,60 @@ public class CustomerCartService {
         CustomerCart cartItem = cart.stream().filter(c -> c.getCustomerCartId().getProduct().getProductCode().equals(productCode)).findFirst().orElseThrow();
 
         customerCartRepository.delete(cartItem);
+
+    }
+
+    @Transactional
+    public ResponseEntity<?> addBatchToCart(Customer customer, List<Product> products) {
+
+        boolean stockExceeded = false;
+
+        List<CustomerCart> cart = cartsByCustomer(customer);
+
+        Map<CustomerCartId, CustomerCart> cartMap = Map.copyOf(cart.stream().collect(HashMap::new,
+                (m, v) -> m.put(v.getCustomerCartId(), v), HashMap::putAll));
+
+        cart = new ArrayList<>();
+
+        System.out.println("CART MAP size: " + cartMap.size());
+
+        StringBuilder sb = new StringBuilder("Количеството в наличност на продуктите: ");
+
+        for (Product product : products) {
+            CustomerCartId cartId = new CustomerCartId(product, customer);
+            CustomerCart cartItem = cartMap.getOrDefault(cartId, new CustomerCart(cartId, (short)0));
+
+            if (cartItem.getCustomerCartId().getProduct().getQuantityInStock() < cartItem.getQuantity() + 1)
+            {
+                if (!stockExceeded) stockExceeded = true;
+
+                sb.append(product.getProductName()).append(", ");
+            }
+            else {
+                cartItem.setQuantity((short) (cartItem.getQuantity() + 1));
+                cart.add(cartItem);
+            }
+        }
+
+        if (stockExceeded)
+        {
+            sb.replace(sb.length() - 2, sb.length(), " ");
+            sb.append("е по-малко от изискваното, те не бяха добавени или с увеличено количество в количката");
+        }
+
+        int savedSize = customerCartRepository.saveAll(cart).size();
+
+        if (stockExceeded && savedSize == 0) {
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.NO_DATA_FOR_QUERY,
+                    "Продуктите не бяха добавени!",
+                    HttpStatus.CONFLICT.value()
+                    , sb.toString()));
+        }
+
+        return stockExceeded? ResponseEntity
+                .status(HttpStatus.MULTI_STATUS)
+                .body(new ErrorResponse(ErrorType.DEMAND_EXCEEDS_SUPPLY,"Не всички продукти бяха добавени",HttpStatus.MULTI_STATUS.value(),sb.toString()))
+                : ResponseEntity.ok("Успешно добавени в количката!");
 
     }
 }

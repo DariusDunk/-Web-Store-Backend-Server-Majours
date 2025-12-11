@@ -86,14 +86,41 @@ router.post('/addToCart',async  (req, res) =>{
       },
       body: JSON.stringify({customerProductPairRequest: customerProductPairRequest, doIncrement: doIncrement})
     });
-    const responseData = await response.text();
-    res.status(response.status).json(responseData);
+
+    if (response.status === 200 || response.status === 201) {
+      res.status(response.status).json({message: await response.text()});
+    }
+    else
+      res.status(response.status).json(await response.json());
   }
   catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+router.post('/addToCart/batch',async  (req, res) =>{
+  try{
+    const {customerId, productCodes} = req.body;
+    const response = await fetch(`${Backend_Url}/customer/cart/add/batch`,{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
+    });
+
+    if (response.status === 200) {
+      res.status(response.status).json({message: await response.text()});
+    }
+    else
+      res.status(response.status).json(await response.json());
+  }
+  catch (error) {
+    console.error('Error batch adding products to cart: ', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
 
 router.post('/removeFromCart',async  (req, res) =>{//TODO testvai
   try{

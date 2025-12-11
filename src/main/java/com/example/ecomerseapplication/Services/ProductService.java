@@ -203,4 +203,8 @@ public class ProductService {
     public PageResponse<CompactProductResponse> getFromFavourites(Customer customer, PageRequest pageRequest) {
        return PageResponse.from(customerRepository.getFromFavouritesPage(customer, pageRequest));
     }
+
+    public List<Product> getByCodes(List<String> codes) {
+        return productRepository.getAllByProductCodeIn(codes);
+    }
 }

@@ -6,4 +6,7 @@ public class ErrorType {
     public static final String RESOURCE_ALREADY_EXISTS = "https://example.com/problems/resource-already-exists";
     public static final String RESOURCE_CONFLICT = "https://example.com/problems/resource-conflict";
     public static final String DUPLICATION_OF_DATA = "https://example.com/problems/duplicate-data";
+    public static final String DEMAND_EXCEEDS_SUPPLY = "https://example.com/problems/demand-exeeds-supply";
+    public static final String NO_DATA_FOR_QUERY = "https://example.com/problems/no-data-for-query";
+    public static final String OUT_OF_STOCK = "https://example.com/problems/resource-out-of-stock";
 }

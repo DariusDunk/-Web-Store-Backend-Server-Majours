@@ -70,4 +70,8 @@ public class Product {
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product")
     private List<Review> reviews;
 
+    public boolean isInStock() {
+        return quantityInStock > 0;
+    }
+
 }

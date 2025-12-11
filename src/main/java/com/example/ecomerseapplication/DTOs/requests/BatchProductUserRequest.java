@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public record FavoritesBatchRemoveRequest(
+public record BatchProductUserRequest(
         @JsonProperty("customer_id")
         Long customerId,
         @JsonProperty("product_codes")
