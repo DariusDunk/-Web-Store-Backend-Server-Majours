@@ -25,7 +25,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
                     "order by p.rating, p.id ")
     Page<Product> getByNameLike(@Param("name") String name, Pageable pageable);
 
-    @Query("select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse (p.productCode, p.productName, p.originalPriceStotinki, p.salePriceStotinki, p.rating, SIZE(p.reviews) , p.mainImageUrl) " +
+    @Query("select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse (p.productCode," +
+            " p.productName, " +
+            "p.originalPriceStotinki, " +
+            "p.salePriceStotinki, " +
+            "p.rating, SIZE(p.reviews), " +
+            "p.mainImageUrl,  " +
+            "case when p.quantityInStock>0 then true else false end) " +
             "from Product p " +
             "order by p.rating desc ")
     Page<CompactProductResponse> findAllAsResponseSortByRating(Pageable pageable);

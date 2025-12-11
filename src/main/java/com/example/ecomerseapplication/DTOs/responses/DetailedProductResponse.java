@@ -27,4 +27,5 @@ public class DetailedProductResponse {
     public boolean inFavourites = false;
     public boolean inCart = false;
     public boolean reviewed = false;
+    public boolean isInStock = false;
 }

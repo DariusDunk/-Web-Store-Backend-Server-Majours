@@ -43,7 +43,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
                         p.salePriceStotinki,
                         p.rating,
                         SIZE(p.reviews),
-                        p.mainImageUrl)
+                        p.mainImageUrl,
+                        case when p.quantityInStock>0 then true else false end)
                         from Product p
                          where :customer MEMBER OF p.favouredBy
             """)

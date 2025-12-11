@@ -13,5 +13,6 @@ public class CompactProductResponse {
     public short rating;
     public int reviewCount;
     public String imageUrl;
+    public boolean inFavourites = false;
 //TODO boolean za nali4nost
 }

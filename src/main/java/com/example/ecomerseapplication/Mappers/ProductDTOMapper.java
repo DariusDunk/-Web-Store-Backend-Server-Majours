@@ -1,19 +1,14 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductPagedListResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductImage;
-import com.example.ecomerseapplication.Entities.Review;
-import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +26,7 @@ public class ProductDTOMapper {
         compactProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         compactProductResponse.salePriceStotinki = product.getSalePriceStotinki();
         compactProductResponse.reviewCount = product.getReviews().size();
+        compactProductResponse.inFavourites = product.isInStock();
 
         return compactProductResponse;
     }
@@ -63,11 +59,7 @@ public class ProductDTOMapper {
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         detailedProductResponse.salePriceStotinki = product.getSalePriceStotinki();
-//        detailedProductResponse.reviews = new ArrayList<>();
-//        for ( Review review : product.getReviews())
-//        {
-//            detailedProductResponse.reviews.add(ReviewMapper.entityToResponse2(review, id));
-//        }
+        detailedProductResponse.isInStock = product.isInStock();
 
         return detailedProductResponse;
     }
@@ -94,30 +86,4 @@ public class ProductDTOMapper {
         return attributeOptionResponses;
     }
 
-    public static CompactProductPagedListResponse pagedListToDtoResponse(List<Product> productList,
-                                                                         Pageable pageable) {
-        CompactProductPagedListResponse productPagedListDto = new CompactProductPagedListResponse();
-
-        List<CompactProductResponse> compactProductResponseList = productList
-                .stream()
-                .map(ProductDTOMapper::entityToCompactResponse)
-                .toList();
-
-        PagedListHolder<CompactProductResponse> productPage = new PagedListHolder<>(compactProductResponseList);
-
-        if ((pageable.getPageNumber()) > productPage.getPageCount())
-            productPage.setPage(0);
-        else
-            productPage.setPage(pageable.getPageNumber());
-
-        productPage.setPageSize(pageable.getPageSize());
-
-        productPagedListDto.content = productPage.getPageList();
-        productPagedListDto.page.number = productPage.getPage();
-        productPagedListDto.page.totalPages = productPage.getPageCount();
-        productPagedListDto.page.size = productPage.getPageSize();
-        productPagedListDto.page.totalElements = productPage.getNrOfElements();
-
-        return productPagedListDto;
-    }
 }
