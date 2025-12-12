@@ -2,9 +2,8 @@ package com.example.ecomerseapplication.Specifications;
 
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
+import com.example.ecomerseapplication.Entities.Product;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -13,29 +12,32 @@ import java.util.Map;
 
 public class AttributeSpecifications {
 
-    public static Specification<CategoryAttribute> getAttributesByNameAndOption(Map<String, List<String>> options) {
+    public static Specification<CategoryAttribute> filterByAttributes(Map<String, List<String>> filters) {
 
+        return (root, query, cb) -> {
 
-        return ((root, criteriaQuery, cb)
-                -> {
-           List<Predicate> predicates = new ArrayList<>();
+            Join<CategoryAttribute, AttributeName> nameJoin = root.join("attributeName");
 
-            Join<CategoryAttribute, AttributeName>  attrNameJoin = root.join("attributeName");
+            List<Predicate> predicates = new ArrayList<>();
 
-            for (var entry : options.entrySet()) {
+            for (var entry : filters.entrySet()) {
+
                 String attributeName = entry.getKey();
-                List<String> values = entry.getValue();
+                List<String> options = entry.getValue();
 
-                Predicate predicate = cb.and(
-                        cb.equal(attrNameJoin.get("attributeName"),attributeName),
-                        root.get("attributeOption").in(values)
-                        );
-                predicates.add(predicate);
+                Predicate p = cb.and(
+                        cb.equal(nameJoin.get("attributeName"), attributeName),
+                        root.get("attributeOption").in(options)
+                );
+
+                predicates.add(p);
             }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        }
 
-        );
+            // return ALL CategoryAttributes matching ANY of the filter groups
+            return cb.or(predicates.toArray(new Predicate[0]));
+        };
     }
+
+
 
 }

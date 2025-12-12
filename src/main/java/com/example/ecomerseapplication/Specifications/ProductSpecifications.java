@@ -6,11 +6,16 @@ import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.MetaModels.Product_;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ProductSpecifications {
@@ -44,16 +49,43 @@ public class ProductSpecifications {
     }
 
     public static Specification<Product> containsAttributes(Set<CategoryAttribute> attributes) {
+        return (root, query, cb) -> {
 
-        return ((root, query, criteriaBuilder) ->
-        {
+            if (attributes == null || attributes.isEmpty()) {
+                return cb.conjunction();
+            }
+
             assert query != null;
             query.distinct(true);
-            Join<Product, Set<CategoryAttribute>> join = root.join(Product_.CATEGORY_ATTRIBUTE_SET);
-            return join.in(attributes);
-        }
-        );
+
+            // Group CategoryAttributes by AttributeName
+            Map<Integer, Set<Integer>> groups = attributes.stream()
+                    .collect(Collectors.groupingBy(
+                            a -> a.getAttributeName().getId(), // group by name ID
+                            Collectors.mapping(CategoryAttribute::getId, Collectors.toSet()) // collect option IDs
+                    ));
+
+            List<Predicate> groupPredicates = new ArrayList<>();
+
+            // AND between attribute groups
+            for (var entry : groups.entrySet()) {
+
+                Set<Integer> optionIds = entry.getValue();
+
+                Join<Product, CategoryAttribute> join =
+                        root.join(Product_.CATEGORY_ATTRIBUTE_SET, JoinType.INNER);
+
+                // OR within group (one must match)
+                Predicate groupOr = join.get("id").in(optionIds);
+
+                groupPredicates.add(groupOr);
+            }
+
+            // Final: AND all groups
+            return cb.and(groupPredicates.toArray(new Predicate[0]));
+        };
     }
+
 
     public static Specification<Product> ratingEqualOrHigher(Integer rating) {
         return ((root, query, criteriaBuilder) ->

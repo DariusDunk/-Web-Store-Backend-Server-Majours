@@ -142,19 +142,20 @@ public class ProductService {
                                                                                       Integer rating,
                                                                                       Pageable pageable) {
 
-
         Specification<Product> productSpec =
                 ProductSpecifications.equalsCategory(productCategory)
                         .and(ProductSpecifications.priceBetween(priceLowest, priceHighest))
                         .and(ProductSpecifications.ratingEqualOrHigher(rating));
 
         if (!manufacturers.isEmpty()) {
-            System.out.println("Manufacturers: ");
-            for (Manufacturer manufacturer : manufacturers) {
-                System.out.println(manufacturer.getManufacturerName());
-            }
+//            System.out.println("Manufacturers: ");
+//            for (Manufacturer manufacturer : manufacturers) {
+//                System.out.println(manufacturer.getManufacturerName());
+//            }
             productSpec = productSpec.and(ProductSpecifications.manufacturerIn(manufacturers));
         }
+
+//        System.out.println(categoryAttributes.toString());
 
         if (!categoryAttributes.isEmpty()) {
             productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));

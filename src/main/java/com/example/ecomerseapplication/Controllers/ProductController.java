@@ -180,6 +180,11 @@ public class ProductController {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
 
+        System.out.println("REQUEST: \n"+productFilterRequest);
+        System.out.println("Filtered " +categoryAttributeSet.size()+": "+categoryAttributeSet);
+
+
+
         return ResponseEntity.ok(PageResponse.from(
                 productService.getByCategoryFiltersManufacturerAndPriceRange(
                         categoryAttributeSet,
