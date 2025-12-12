@@ -124,7 +124,7 @@ router.post('/addToCart/batch',async  (req, res) =>{
 
 router.post('/removeFromCart',async  (req, res) =>{//TODO testvai
   try{
-    const {customerId, productCode} = req.body.data;
+    const {customerId, productCode} = req.body;
     const response = await fetch(`${Backend_Url}/customer/cart/remove`,{
       method: 'DELETE',
       headers: {
@@ -132,7 +132,7 @@ router.post('/removeFromCart',async  (req, res) =>{//TODO testvai
       },
       body: JSON.stringify({customerId: customerId, productCode: productCode})
     });
-    res.json(await response.json());
+    res.status(response.status);
   }
   catch (error) {
     console.error('Error removing product from cart:', error);

@@ -222,7 +222,7 @@ public class CustomerController {
 
     }
 
-    @GetMapping("cart")//TODO testvai
+    @GetMapping("cart")
     public ResponseEntity<?> showCart(@RequestParam long id) {
         Customer customer = customerService.findById(id);
 
