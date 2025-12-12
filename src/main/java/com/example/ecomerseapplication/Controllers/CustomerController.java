@@ -61,7 +61,7 @@ public class CustomerController {
 
     @PostMapping("favorite/add")
     @Transactional
-    public ResponseEntity<String> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
+    public ResponseEntity<?> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
         Product product = productService.findByPCode(pairRequest.productCode);
 
         if (product == null)
@@ -83,7 +83,7 @@ public class CustomerController {
     }
 
     @PostMapping("cart/add")
-    @Transactional//TODO testvai
+    @Transactional
     public ResponseEntity<?> addToCart(@RequestBody ProductForCartRequest request) {
 
 //        System.out.println("REQUEST: "+request);
@@ -114,7 +114,7 @@ public class CustomerController {
         return customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement);
     }
 
-    @PostMapping("cart/add/batch")//TODO TESTVAI
+    @PostMapping("cart/add/batch")
     public ResponseEntity<?> addBatchToCart(@RequestBody BatchProductUserRequest request)
     {
 
@@ -222,18 +222,16 @@ public class CustomerController {
 
     }
 
-    @GetMapping("cart")//TODO promeni i dobavi stranici
-    public ResponseEntity<?> showCart(@RequestParam long id, int page) {
+    @GetMapping("cart")//TODO testvai
+    public ResponseEntity<?> showCart(@RequestParam long id) {
         Customer customer = customerService.findById(id);
 
         if (customer == null)
             return ResponseEntity.notFound().build();
 
-        PageRequest pageRequest = PageRequest.of(page, 3);
+        List<CartItemResponse> customerCarts = customerCartService.pagedCartsByCustomer(customer);
 
-        PageResponse<CartItemResponse> customerCarts = customerCartService.pagedCartsByCustomer(customer, pageRequest);
-
-        return ResponseEntity//TODO page responsa trqbva da vry6ta CustomerCartResponse
+        return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(customerCarts);

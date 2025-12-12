@@ -66,7 +66,7 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
             order by cc.dateAdded desc
             """
     )
-    Page<CartItemResponse> findByCustomerPaged(Customer customer, Pageable pageable);
+    List<CartItemResponse> findByCustomerPaged(Customer customer);
 
     @Modifying
     @Query("delete from CustomerCart " +

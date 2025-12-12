@@ -177,12 +177,12 @@ router.post('/login', async (req, res)=>{
   }
 });
 
-router.get('/getCart/:id/:page',async (req,res)=>
+router.get('/getCart/:id',async (req,res)=>
 {
-  const {id, page} = req.params;
+  const {id} = req.params;
 
   try{
-    const response = await fetch(`${Backend_Url}/customer/cart?id=${id}&page=${page}`);
+    const response = await fetch(`${Backend_Url}/customer/cart?id=${id}`);
     const responseData = await response.json();
     const status = response.status;
     res.status(status).json(responseData);

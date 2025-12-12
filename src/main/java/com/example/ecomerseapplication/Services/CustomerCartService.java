@@ -8,6 +8,7 @@ import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
+import com.example.ecomerseapplication.Others.CartLimit;
 import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import jakarta.transaction.Transactional;
@@ -41,6 +42,14 @@ public class CustomerCartService {
         CustomerCart customerCart = customerCartRepository.findById(cartId).orElse(null);
 
         if (customerCart == null) {
+
+            if (cartsByCustomer(customer).size() >= CartLimit.limit)
+                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
+                        "Неуспешно добавяне на продукт",
+                        HttpStatus.CONFLICT.value(),
+                        "Достигнахте лимита на количката"));
+
+
             customerCart = new CustomerCart(cartId, (short)1);
             customerCartRepository.save(customerCart);
             return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в количката!");
@@ -84,8 +93,8 @@ public class CustomerCartService {
         return customerCartRepository.findByCustomer(customer);
     }
 
-    public PageResponse<CartItemResponse> pagedCartsByCustomer(Customer customer, Pageable pageable) {
-        return PageResponse.from(customerCartRepository.findByCustomerPaged(customer, pageable));
+    public List<CartItemResponse> pagedCartsByCustomer(Customer customer) {
+        return customerCartRepository.findByCustomerPaged(customer);
     }
 
     @Transactional
@@ -111,6 +120,8 @@ public class CustomerCartService {
 
         List<CustomerCart> cart = cartsByCustomer(customer);
 
+        int originalSize = cart.size();
+
         Map<CustomerCartId, CustomerCart> cartMap = Map.copyOf(cart.stream().collect(HashMap::new,
                 (m, v) -> m.put(v.getCustomerCartId(), v), HashMap::putAll));
 
@@ -120,9 +131,15 @@ public class CustomerCartService {
 
         StringBuilder sb = new StringBuilder("Количеството в наличност на продуктите: ");
 
+        int newProductsCount = 0;
+
         for (Product product : products) {
             CustomerCartId cartId = new CustomerCartId(product, customer);
             CustomerCart cartItem = cartMap.getOrDefault(cartId, new CustomerCart(cartId, (short)0));
+
+            if (cartItem.getQuantity() == 0) {
+                newProductsCount++;
+            }
 
             if (cartItem.getCustomerCartId().getProduct().getQuantityInStock() < cartItem.getQuantity() + 1)
             {
@@ -140,6 +157,13 @@ public class CustomerCartService {
         {
             sb.replace(sb.length() - 2, sb.length(), " ");
             sb.append("е по-малко от изискваното, те не бяха добавени или с увеличено количество в количката");
+        }
+
+        if (newProductsCount + originalSize > CartLimit.limit) {
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
+                    "Неуспешно добавяне на продукт",
+                    HttpStatus.CONFLICT.value(),
+                    "Достигнахте лимита на количката"));
         }
 
         int savedSize = customerCartRepository.saveAll(cart).size();

@@ -3,10 +3,12 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
+import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Mappers.CustomerMapper;
+import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import org.mindrot.jbcrypt.BCrypt;
@@ -79,16 +81,27 @@ public class CustomerService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    public ResponseEntity<String > addProductToFavourites(long customerId, Product product) {
+    public ResponseEntity<?> addProductToFavourites(long customerId, Product product) {
 
         Customer customer = customerRepository.findById(customerId).orElse(null);
 
         if (customer == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
-        customer.getFavourites().add(product);
-        customerRepository.save(customer);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в любими!");
+        if (!customer.getFavourites().contains(product)) {
+
+            if (customer.getFavourites().size() == 100)
+                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
+                        "Достигнат лимит на любими",
+                        HttpStatus.CONFLICT.value(), "Достигнахте максималният лимит на списъка с любими!"));
+
+            customer.getFavourites().add(product);
+            customerRepository.save(customer);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в любими!");
+        }
+        else
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+
     }
 
     public Customer findById(long id) {

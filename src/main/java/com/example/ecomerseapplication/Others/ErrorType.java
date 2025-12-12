@@ -9,4 +9,5 @@ public class ErrorType {
     public static final String DEMAND_EXCEEDS_SUPPLY = "https://example.com/problems/demand-exeeds-supply";
     public static final String NO_DATA_FOR_QUERY = "https://example.com/problems/no-data-for-query";
     public static final String OUT_OF_STOCK = "https://example.com/problems/resource-out-of-stock";
+    public static final String SIZE_LIMIT_REACHED = "https://example.com/problems/size-limit-reached";
 }
