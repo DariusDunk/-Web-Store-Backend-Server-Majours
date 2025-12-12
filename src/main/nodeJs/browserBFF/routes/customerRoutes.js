@@ -177,15 +177,15 @@ router.post('/login', async (req, res)=>{
   }
 });
 
-router.get('/cart/:id',async (req,res)=>
+router.get('/getCart/:id/:page',async (req,res)=>
 {
-  const queryParts = req.url.split("/");
-  const id = queryParts[2];
+  const {id, page} = req.params;
 
   try{
-    const response = await fetch(`${Backend_Url}/customer/cart?id=${id}`);
+    const response = await fetch(`${Backend_Url}/customer/cart?id=${id}&page=${page}`);
     const responseData = await response.json();
-    res.json(responseData);
+    const status = response.status;
+    res.status(status).json(responseData);
   }
   catch (error) {
     console.error('Error:', error);

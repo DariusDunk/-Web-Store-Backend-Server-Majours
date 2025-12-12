@@ -2,9 +2,9 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
 import com.example.ecomerseapplication.DTOs.responses.CategoryFiltersResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
-import com.example.ecomerseapplication.Mappers.ManufacturerConverter;
 import com.example.ecomerseapplication.Services.AttributeNameService;
 import com.example.ecomerseapplication.Services.ManufacturerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
@@ -56,24 +56,15 @@ public class CategoryController {
 
         categoryFiltersResponse.manufacturerNames = manufacturerService.getNamesByCategory(category);
 
-//        categoryFiltersResponse.manufacturerDTOResponseSet = ManufacturerConverter.objectArrSetToDtoSet(
-//                manufacturerService.
-//                        getByCategory(category)
-//        );
-
-//        if (categoryFiltersResponse.manufacturerDTOResponseSet == null||
-//                categoryFiltersResponse.manufacturerDTOResponseSet.isEmpty())
-//            return ResponseEntity.notFound().build();
-
         if (categoryFiltersResponse.manufacturerNames.isEmpty()) {
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("MANUFACTURERS NOT FOUND");
         }
 
-        Set<CategoryAttributesResponse> attributesResponses = AttributeMapper
-                .attributeOptionListToCatAttrResponseSet(categoryService.getAttributesOfCategory(category.getId()));
+        List<CategoryAttributesResponse> attributesResponses = AttributeMapper
+                .attributeOptionListToCatAttrResponseList(categoryService.getAttributesOfCategory(category.getId()));
         if (attributesResponses.isEmpty())
         {
-            categoryFiltersResponse.categoryAttributesResponses = new HashSet<>();
+            categoryFiltersResponse.categoryAttributesResponses = new ArrayList<>();
         }
 
         else

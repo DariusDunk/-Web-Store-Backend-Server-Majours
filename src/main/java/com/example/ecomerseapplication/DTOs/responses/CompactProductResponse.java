@@ -14,5 +14,4 @@ public class CompactProductResponse {
     public int reviewCount;
     public String imageUrl;
     public boolean isInStock = false;
-//TODO boolean za nali4nost
 }

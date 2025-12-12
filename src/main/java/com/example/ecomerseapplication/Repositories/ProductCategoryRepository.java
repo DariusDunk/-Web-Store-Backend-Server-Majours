@@ -18,7 +18,8 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     @Query(value = "select c.categoryName " +
             "from ProductCategory c " +
-            "where c.categoryName!= 'електрически машини' AND c.categoryName!= 'Бензинови машини'")
+            "where c.categoryName!= 'електрически машини' AND c.categoryName!= 'Бензинови машини' " +
+            "order by c.categoryName asc")
     List<String> getAllNames();
 
     @Query(value =
@@ -32,6 +33,7 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
                     join AttributesOfGroup aog on aog.attributesOfGroupId.attributeGroup.id = ag.id
                         where pc.id=:categoryId
                             and aog.attributesOfGroupId.attributeName = an
+                                order by an.attributeName asc
     """)
     List<AttributeOptionDTO>getAttributesOfCategory(@Param("categoryId") int productCategoryId);
 

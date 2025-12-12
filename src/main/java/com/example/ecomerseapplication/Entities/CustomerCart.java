@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "customer_carts",schema = "online_shop")
 @Getter
@@ -17,6 +19,8 @@ public class CustomerCart {
     private CustomerCartId customerCartId;
 
     private short quantity;
+    @Column(name = "date_added")
+    private LocalDateTime dateAdded;
 
     public CustomerCart(CustomerCartId customerCartId, short quantity) {
         this.customerCartId = customerCartId;

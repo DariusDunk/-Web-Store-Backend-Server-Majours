@@ -3,7 +3,7 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.Mappers.CustomerCartResponseMapper;
+import com.example.ecomerseapplication.Mappers.CustomerCartMapper;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Others.ErrorType;
@@ -222,19 +222,21 @@ public class CustomerController {
 
     }
 
-    @GetMapping("cart")//TODO promeni
-    public ResponseEntity<CustomerCartResponse> showCart(@RequestParam long id) {
+    @GetMapping("cart")//TODO promeni i dobavi stranici
+    public ResponseEntity<?> showCart(@RequestParam long id, int page) {
         Customer customer = customerService.findById(id);
 
         if (customer == null)
             return ResponseEntity.notFound().build();
 
-        List<CustomerCart> customerCarts = customerCartService.cartsByCustomer(customer);
+        PageRequest pageRequest = PageRequest.of(page, 3);
 
-        return ResponseEntity
+        PageResponse<CartItemResponse> customerCarts = customerCartService.pagedCartsByCustomer(customer, pageRequest);
+
+        return ResponseEntity//TODO page responsa trqbva da vry6ta CustomerCartResponse
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(CustomerCartResponseMapper.listToResponse(customerCarts));
+                .body(customerCarts);
     }
 
     @GetMapping("purchase_history")

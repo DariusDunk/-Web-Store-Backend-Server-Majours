@@ -1,7 +1,10 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
+import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductQuantityPairResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
+import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
@@ -9,6 +12,7 @@ import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -78,6 +82,10 @@ public class CustomerCartService {
 
     public List<CustomerCart> cartsByCustomer(Customer customer) {
         return customerCartRepository.findByCustomer(customer);
+    }
+
+    public PageResponse<CartItemResponse> pagedCartsByCustomer(Customer customer, Pageable pageable) {
+        return PageResponse.from(customerCartRepository.findByCustomerPaged(customer, pageable));
     }
 
     @Transactional
