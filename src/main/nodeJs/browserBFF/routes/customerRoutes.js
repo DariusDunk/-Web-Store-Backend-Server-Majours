@@ -132,7 +132,7 @@ router.post('/removeFromCart',async  (req, res) =>{//TODO testvai
       },
       body: JSON.stringify({customerId: customerId, productCode: productCode})
     });
-    res.status(response.status);
+    res.status(response.status).end();
   }
   catch (error) {
     console.error('Error removing product from cart:', error);
