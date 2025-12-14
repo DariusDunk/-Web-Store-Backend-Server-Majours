@@ -18,5 +18,10 @@ public record TokenResponse(
         @JsonProperty("session_state")
         String sessionState,
         @JsonProperty("scope")
-        String scope) {
+        String scope,
+        @JsonProperty("id_token")
+        String idToken
+        //TOOD Moje da e vremenno nz
+
+) {
 }

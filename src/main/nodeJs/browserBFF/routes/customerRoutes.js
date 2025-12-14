@@ -161,6 +161,62 @@ router.post(`/removeFromCart/batch`, async (req, res) =>{
   }
 })
 
+router.post(`/keyk/register`, async (req, res) => {
+
+  const {name, familyName, email, password} = req.body;
+
+  console.log("Node register" +
+    "\nName: " + name +
+    "\nFamily name: " + familyName +
+    "\nEmail: " + email +
+    "\nPassword: " + password)
+
+
+  try{
+    const response = await fetch(`${Backend_Url}/customer/register/customer`,{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({first_name: name, last_name: familyName, email: email, password: password})
+    });
+    res.status(response.status).end();
+  }
+  catch (error) {
+    console.error('Error with registration: ', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
+
+
+router.post(`/keyk/login`, async (req, res) => {
+  const {email, password} = req.body;
+
+  console.log("Node login: " + email + " " + password)
+
+  const response = await fetch(`${Backend_Url}/customer/login/customer`,{
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({identifier: email, password: password})
+  })
+
+  const responseData = await response.json();
+
+  console.log("Node response: " + JSON.stringify(responseData))
+
+
+  if (response.status === 400) {
+
+    const text = await response.text();
+    res.status(response.status).send(text);
+  }
+
+  else
+    res.status(response.status).json(responseData);
+})
+
 router.post('/registration', async (req, res)=>{
   try{
     const response = await fetch(`${Backend_Url}/customer/registration`,{

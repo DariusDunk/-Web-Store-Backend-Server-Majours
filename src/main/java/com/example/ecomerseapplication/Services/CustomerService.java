@@ -38,28 +38,28 @@ public class CustomerService {
         return customerRepository.existsByEmail(email);
     }
 
-    public ResponseEntity<String> registration(CustomerAccountRequest customerAccountRequest) {
-
-        if (customerAccountRequest.email.isEmpty()
-                || customerAccountRequest.password.isEmpty()
-                || customerAccountRequest.userName.isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Има непопълнени полета!");
-
-        if (customerExists(customerAccountRequest.email))
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Акаунт с този имейл вече съществува!");
-
-        if (incorrectPassword(customerAccountRequest.password.toCharArray()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Паролата трябва да е поне 8 символа дълга и да има поне един символ от следните: главни букви, малки букви и цифри!");
-
-        Customer customer = CustomerMapper.requestToEntity(customerAccountRequest);
-
-        customer.setCustomerPfp("deffault_pfp.jpg");
-
-        customerRepository.save(customer);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Регистрацията е успешна!");
-    }
+//    public ResponseEntity<String> registration(CustomerAccountRequest customerAccountRequest) {
+//
+//        if (customerAccountRequest.email.isEmpty()
+//                || customerAccountRequest.password.isEmpty()
+//                || customerAccountRequest.userName.isEmpty())
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Има непопълнени полета!");
+//
+//        if (customerExists(customerAccountRequest.email))
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body("Акаунт с този имейл вече съществува!");
+//
+//        if (incorrectPassword(customerAccountRequest.password.toCharArray()))
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body("Паролата трябва да е поне 8 символа дълга и да има поне един символ от следните: главни букви, малки букви и цифри!");
+//
+//        Customer customer = CustomerMapper.requestToEntity(customerAccountRequest);
+//
+//        customer.setCustomerPfp("deffault_pfp.jpg");
+//
+//        customerRepository.save(customer);
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body("Регистрацията е успешна!");
+//    }
 
     public ResponseEntity<CustomerResponse> logIn(CustomerAccountRequest customerAccountRequest) {
 
@@ -178,5 +178,9 @@ public class CustomerService {
 
 
 
+    }
+
+    public Long getByKId(String userId) {
+        return customerRepository.getIdByKeycloakId(userId);
     }
 }

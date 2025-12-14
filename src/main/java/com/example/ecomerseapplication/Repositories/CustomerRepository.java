@@ -50,4 +50,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             """)
     Page<CompactProductResponse> getFromFavouritesPage(@Param("customer") Customer customer, Pageable pageable);
 
+    @Query("select c.id from Customer c where c.keycloakId = ?1")
+    Long getIdByKeycloakId(String keycloakId);
 }

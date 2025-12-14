@@ -1,22 +1,25 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
+import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenResponse;
+import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.enums.UserRole;
+import com.nimbusds.jwt.JWT;
 import jakarta.annotation.PostConstruct;
+import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.Form;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.*;
 import org.apache.http.HttpStatus;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.JsonWebToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -26,10 +29,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class KeycloakService {
 
+    private final CustomerService customerService;
     private Keycloak keycloak;
 
     @Value("${keycloak.server-url}")
@@ -49,6 +54,10 @@ public class KeycloakService {
     @Value("${spring.security.oauth2.client.registration.keycloak.client-secret}")
     private String secret;
 
+    public KeycloakService(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
     @PostConstruct
     public void init() {
         //login kato admin za da moje da se syzdavat potrebiteli
@@ -61,11 +70,19 @@ public class KeycloakService {
                 .build();
     }
 
-    public void registerUser(String username, String password, String email, UserRole userRole) {
+    public ResponseEntity<?> registerUser(String firstname,String lastName , String password, String email, UserRole userRole) {
+
+        boolean realmUserCreated = false;
+        String userId = "";
+
         UserRepresentation user = new UserRepresentation();
-        user.setUsername(username);
         user.setEmail(email);
+        user.setUsername(email);
         user.setEnabled(true);
+        user.setFirstName(firstname);
+        user.setLastName(lastName);
+
+//        System.out.println("User information set");
 
         CredentialRepresentation cred = new CredentialRepresentation();
         cred.setTemporary(false);
@@ -73,32 +90,69 @@ public class KeycloakService {
         cred.setValue(password);
         user.setCredentials(Collections.singletonList(cred));
 
+//        System.out.println("Credentials set");
+
+
+        if (!keycloak.realm(userRealm).users().search(email).isEmpty())
+           return ResponseEntity.status(HttpStatus.SC_MULTI_STATUS).body(
+                   new ErrorResponse(ErrorType.USER_ALREADY_EXISTS,
+                           "Съществуващ потребител",
+                           HttpStatus.SC_CONFLICT,
+                           "Потребител с този имейл адрес вече съществува")
+           );
+
         //Syzdavane na potrebitel v potrebitelskiq realm
-        var response = keycloak.realm(userRealm).users().create(user);
+      try ( var response = keycloak.realm(userRealm).users().create(user))
+      {
+//          keycloak.realm(userRealm).users().delete(userId);
+          //Pri polu4avane na rezultat se polu4ava celiq url za potrebitelq i vsi4ko do poslednata 4ast, koqto e potrebitelskoto id
+          if (response.getStatus() == org.apache.http.HttpStatus.SC_CREATED) {
+              userId = response.getLocation()
+                      .getPath()
+                      .replaceAll(".*/([^/]+)$", "$1");
 
-        //Pri polu4avane na rezultat se polu4ava celiq url za potrebitelq i vsi4ko do poslednata 4ast, koqto e potrebitelskoto id
-        if (response.getStatus() == org.apache.http.HttpStatus.SC_CREATED) {
-            String userId = response.getLocation()
-                    .getPath()
-                    .replaceAll(".*/([^/]+)$", "$1");
+              realmUserCreated = true;
+//              System.out.println("User created successfully");
 
-            //Vzemane na rolqta na dadeniq potrebitel ot keycloak
-            RoleRepresentation role = keycloak.realm(userRealm)
-                    .roles()
-                    .get(userRole.getValue())
-                    .toRepresentation();
+              //Vzemane na rolqta na dadeniq potrebitel ot keycloak
+              RoleRepresentation role = keycloak.realm(userRealm)
+                      .roles()
+                      .get(userRole.getValue())
+                      .toRepresentation();
 
-            //dobavqne na izbraniq potrebitel kym spisyka s izbranata rolq. Demek na potrebitelq mu se dava izbranata rolq
-            keycloak.realm(userRealm)
-                    .users()
-                    .get(userId)
-                    .roles()
-                    .realmLevel()
-                    .add(Collections.singletonList(role));
-        } else {
-            //pri neuspe6na registraciq
-            throw new RuntimeException("Неуспешна регистрация в Keycloak: " + response.getStatusInfo());
-        }
+              //dobavqne na izbraniq potrebitel kym spisyka s izbranata rolq. Demek na potrebitelq mu se dava izbranata rolq
+              keycloak.realm(userRealm)
+                      .users()
+                      .get(userId)
+                      .roles()
+                      .realmLevel()
+                      .add(Collections.singletonList(role));
+
+              return ResponseEntity.status(HttpStatus.SC_CREATED).build();//TODO dobavi logika za dobavqne v bazata
+          } else {
+              //pri neuspe6na registraciq
+//              System.out.println("response:" + response);
+              throw new RuntimeException("Неуспешна регистрация в Keycloak: " + response.getStatusInfo());
+          }
+      }
+      catch (Exception e) {
+
+          if (realmUserCreated) {
+
+              System.out.println("Keycloak error after creating a user: " + e.getMessage());
+
+              keycloak.realm(userRealm)
+                      .users()
+                      .get(userId)
+                      .remove();
+          }
+
+          else {
+              System.out.println("Keycloak error before creating a user: " + e.getMessage());
+          }
+
+          return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).build();
+      }
     }
 
 
@@ -128,24 +182,51 @@ public class KeycloakService {
         formParams.add("client_secret", secret);
         formParams.add("username", request.identifier());
         formParams.add("password", request.password());
+        //todo vremenno
+        formParams.add("scope", "openid profile email");
 
-        Response response = ClientBuilder.newClient()
-                .target(tokenAddress)
+       try (Client client = ClientBuilder.newClient();
+            Response response =  client.target(tokenAddress)
                 .request()
-                .post(Entity.form(new Form(formParams)));
+                .post(Entity.form(new Form(formParams)))
+       ) {
+           if (response.getStatus() == HttpStatus.SC_OK) {
 
-        if (response.getStatus() == HttpStatus.SC_OK) {
+               TokenResponse tokenResponse = response.readEntity(TokenResponse.class);
 
-            TokenResponse tokenResponse = response.readEntity(TokenResponse.class);
+               Response userInfoResponse = client.target(serverUrl +"/realms/" + userRealm+ "/protocol/openid-connect/userinfo")
+                       .request()
+                       .header("Authorization", "Bearer " + tokenResponse.accessToken())
+                       .get();
 
-            return ResponseEntity.ok(
-                    new LoginResponse(request.identifier(),
-                    getRoleByUserId(getUserIdFromToken(tokenResponse.accessToken())), tokenResponse)
-            );
+               System.out.println("token: " + tokenResponse.accessToken());
 
-        }
+               System.out.println("response: " + userInfoResponse.getStatus());
 
-        return ResponseEntity.status(response.getStatus()).build();
+               if (userInfoResponse.getStatus() == 200) {
+                   Map<String, Object> userInfo = userInfoResponse.readEntity(new GenericType<>() {
+                   });
+                   String userId = (String) userInfo.get("sub");
+                   String firstName = (String) userInfo.get("given_name");
+                   String lastName = (String) userInfo.get("family_name");
+
+                   System.out.println("ID: " + userId);
+
+                   return ResponseEntity.ok(
+                           new LoginResponse(firstName+ " " + lastName,
+                                   getRoleByUserId(getUserIdFromToken(tokenResponse.accessToken())), tokenResponse,
+                                   customerService.getByKId(userId))
+                   );
+
+               }
+           }
+
+           return ResponseEntity.status(response.getStatus()).build();
+       }
+       catch (Exception e) {
+           System.out.println("Error logging in user: " + e.getMessage());
+           return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).build();
+       }
 
     }
 }

@@ -19,6 +19,9 @@ public class Customer {
     @Column(name = "customer_id")
     private long id;
 
+    @Column(name = "k_id")
+    private String keycloakId;
+
     @Column(columnDefinition = "character varying(50)")
     private String name;
     @Column(columnDefinition = "character varying(50)")

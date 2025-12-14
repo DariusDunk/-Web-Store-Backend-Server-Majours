@@ -48,11 +48,11 @@ public class CustomerController {
         this.keycloakService = keycloakService;
     }
 
-    @PostMapping("registration")
-    @Transactional
-    public ResponseEntity<String> register(@RequestBody CustomerAccountRequest customerAccountRequest) {
-        return customerService.registration(customerAccountRequest);
-    }
+//    @PostMapping("registration")
+//    @Transactional
+//    public ResponseEntity<String> register(@RequestBody CustomerAccountRequest customerAccountRequest) {
+//        return customerService.registration(customerAccountRequest);
+//    }
 
     @PostMapping("login")
     public ResponseEntity<CustomerResponse> logIn(@RequestBody CustomerAccountRequest customerAccountRequest) {
@@ -314,17 +314,26 @@ public class CustomerController {
     @Transactional
     public ResponseEntity<?> registerUserKeycloak(@RequestBody CustomerAccountRequest customerAccountRequest) {
 
+        if (NullFieldChecker.hasNullFields(customerAccountRequest)) {
+            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(customerAccountRequest));
+            return ResponseEntity.badRequest().build();
+        }
+
+
+        System.out.println("Registering user: " + customerAccountRequest);
+
         try {
-            keycloakService.registerUser(customerAccountRequest.userName,
+          return  keycloakService.registerUser(customerAccountRequest.firstName,
+                    customerAccountRequest.familyName,
                     customerAccountRequest.password,
                     customerAccountRequest.email,
                     UserRole.CUSTOMER);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error: "+e.getMessage());
             return ResponseEntity.badRequest().build();
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+//        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("login/customer")
