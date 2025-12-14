@@ -150,7 +150,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("cart/remove")
-    @Transactional//TODO testvai
+    @Transactional
     public ResponseEntity<?> removeFromCart(@RequestBody CustomerProductPairRequest pairRequest) {
 
         if (NullFieldChecker.hasNullFields(pairRequest)) {
@@ -171,6 +171,29 @@ public class CustomerController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("cart/remove/batch")
+    @Transactional
+    public ResponseEntity<?> removeBatchFromCart(@RequestBody BatchProductUserRequest request) {
+
+        if (NullFieldChecker.hasNullFields(request)) {
+            System.out.println("Null fields from request:" + NullFieldChecker.getNullFields(request));
+            return ResponseEntity.badRequest().build();
+        }
+
+        Customer customer = customerService.findById(request.customerId());
+
+        try
+        {
+           return customerCartService.removeBatchFromCart(customer, request.productCodes());
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error removing product batch from cart: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
     }
 
     @DeleteMapping("favorite/remove")

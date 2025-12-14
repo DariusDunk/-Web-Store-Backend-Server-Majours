@@ -122,7 +122,7 @@ router.post('/addToCart/batch',async  (req, res) =>{
   }
 })
 
-router.post('/removeFromCart',async  (req, res) =>{//TODO testvai
+router.post('/removeFromCart',async  (req, res) =>{
   try{
     const {customerId, productCode} = req.body;
     const response = await fetch(`${Backend_Url}/customer/cart/remove`,{
@@ -137,6 +137,27 @@ router.post('/removeFromCart',async  (req, res) =>{//TODO testvai
   catch (error) {
     console.error('Error removing product from cart:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+})
+
+router.post(`/removeFromCart/batch`, async (req, res) =>{
+  try{
+    const {customerId, productCodes} = req.body;
+
+    const response = await fetch(`${Backend_Url}/customer/cart/remove/batch`,{
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
+    });
+
+    res.status(response.status).end();
+
+  }
+  catch (error) {
+    console.error('Error removing product from cart:', error);
+    res.status(500).json({ error: 'Node server error' });
   }
 })
 

@@ -181,4 +181,31 @@ public class CustomerCartService {
                 : ResponseEntity.ok("Успешно добавени в количката!");
 
     }
+
+    @Transactional
+    public ResponseEntity<?> removeBatchFromCart(Customer customer, List<String> productCodes) {
+
+        List<CustomerCart> cartContent = cartsByCustomer(customer);
+
+        List<CustomerCart> entriesForDeletion = new ArrayList<>();
+
+        for (String productCode : productCodes) {
+            cartContent.stream().filter(c -> c
+                    .getCustomerCartId()
+                    .getProduct()
+                    .getProductCode()
+                    .equals(productCode))
+                    .findFirst()
+                    .ifPresent(entriesForDeletion::add);
+        }
+
+        if (entriesForDeletion.size() != productCodes.size()) {
+            throw new IllegalArgumentException("Not all products were found in the cart!");
+        }
+
+        customerCartRepository.deleteAll(entriesForDeletion);
+
+        return ResponseEntity.ok().build();
+
+    }
 }
