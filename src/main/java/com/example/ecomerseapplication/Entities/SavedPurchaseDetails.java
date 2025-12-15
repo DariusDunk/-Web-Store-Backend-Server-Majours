@@ -24,7 +24,7 @@ public class SavedPurchaseDetails {
 
     private String address;
 
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_keyk_id", referencedColumnName = "k_id")
     @OneToOne
     private Customer customer;
 

@@ -59,8 +59,8 @@ public class PurchaseController {
         return purchaseDetailsService.saveDetails(purchaseDetails);
     }
 
-    @GetMapping("getdetails")
-    public ResponseEntity<SavedPurchaseDetailsResponse> getPurchaseInformation(long id) {
+    @GetMapping("recipientTemplates/get")
+    public ResponseEntity<?> getPurchaseInformation(long id) {
         Customer customer = customerService.findById(id);
 
         if (customer == null)
@@ -69,9 +69,9 @@ public class PurchaseController {
         return purchaseDetailsService.getByCustomer(customer);
     }
 
-    @PostMapping("complete")
-    @Transactional
-    public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
+//    @PostMapping("complete") TODO opravi
+//    @Transactional
+//    public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
 
 //        Customer customer = customerService.findById(purchaseRequest.customerId);
 //
@@ -155,6 +155,6 @@ public class PurchaseController {
 //
 //        customerCartService.clearCart(customer);
 
-        return purchaseService.completePurchase(purchaseRequest);
-    }
+//        return purchaseService.completePurchase(purchaseRequest);
+//    }
 }

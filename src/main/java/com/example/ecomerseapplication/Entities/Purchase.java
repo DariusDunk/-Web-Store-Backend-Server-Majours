@@ -14,7 +14,7 @@ public class Purchase {
     @Column(name = "purchase_id")
     private long id;
 
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id_keyk", referencedColumnName = "k_id")
     @ManyToOne
     private Customer customer;
 

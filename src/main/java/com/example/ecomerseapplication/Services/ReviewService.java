@@ -38,7 +38,8 @@ public class ReviewService {
     }
 
     public Boolean exists(Product product, Customer customer) {
-        return reviewRepository.existsByProductAndCustomer(product, customer);
+//        return reviewRepository.existsByProductAndCustomer_KeycloakId(product, customer.getKeycloakId());
+        return reviewRepository.existsByProductAndKID(product, customer.getKeycloakId());
     }
 
     public Review getByProdAndCust(Product product, Customer customer) {

@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SavedPurchaseDetailsService {
 
@@ -27,14 +29,9 @@ public class SavedPurchaseDetailsService {
         return ResponseEntity.status(HttpStatus.CREATED).body("Информацията е запазена!");
     }
 
-    public ResponseEntity<SavedPurchaseDetailsResponse> getByCustomer(Customer customer) {
+    public ResponseEntity<?> getByCustomer(Customer customer) {
 
-        SavedPurchaseDetails purchaseDetails = savedPurchaseDetailsRepo.getByCustomer(customer).orElse(null);
-
-        if (purchaseDetails==null)
-            return ResponseEntity.notFound().build();
-
-        SavedPurchaseDetails savedPurchaseDetails = savedPurchaseDetailsRepo.getByCustomer(customer).orElse(null);
+        List<SavedPurchaseDetails> savedPurchaseDetails = savedPurchaseDetailsRepo.getByCustomer(customer.getKeycloakId());
 
         if (savedPurchaseDetails == null)
             return ResponseEntity.notFound().build();
@@ -42,7 +39,6 @@ public class SavedPurchaseDetailsService {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(SavedPurchaseDetailsMapper
-                        .entityToResponse(savedPurchaseDetails));
+                .body(savedPurchaseDetails.stream().map(SavedPurchaseDetailsMapper::entityToResponse));
     }
 }

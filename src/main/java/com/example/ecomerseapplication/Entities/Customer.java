@@ -49,7 +49,7 @@ public class Customer {
     private SavedPurchaseDetails savedPurchaseDetails;
 
     @JoinTable(name = "favourites", schema = "online_shop",
-    joinColumns = @JoinColumn(name="customer_id"),
+    joinColumns = @JoinColumn(name="customer_id", referencedColumnName = "k_id"),//TODO update when the id migration is finished
     inverseJoinColumns = @JoinColumn(name = "product_id"))
     @ManyToMany()
     List<Product> favourites;

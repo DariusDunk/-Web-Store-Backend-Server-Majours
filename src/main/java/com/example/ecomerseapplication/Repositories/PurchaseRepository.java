@@ -11,7 +11,21 @@ import java.util.List;
 @Repository
 public interface PurchaseRepository extends JpaRepository<Purchase,Long> {
 
-    List<Purchase> getByCustomer(Customer customer);
+    @Query("""
+        select p
+                from Purchase p
+                        where p.customer.keycloakId= :keycloakId
+        """
+            )
+    List<Purchase> getByCustomer(@Param("keycloakId")String  customer);
+    //TODO zameni noviq metod s tozi, kogato migraciqta priklu4i
+//    @Query("""
+//        select p
+//                from Purchase p
+//                        where p.customer.keycloakId=
+//        """
+//    )
+//    List<Purchase> getByCustomer(Customer customer);
 
 
 }

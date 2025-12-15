@@ -202,7 +202,7 @@ public class ProductService {
     }
 
     public PageResponse<CompactProductResponse> getFromFavourites(Customer customer, PageRequest pageRequest) {
-       return PageResponse.from(customerRepository.getFromFavouritesPage(customer, pageRequest));
+       return PageResponse.from(customerRepository.getFromFavouritesPage(customer.getKeycloakId(), pageRequest));
     }
 
     public List<Product> getByCodes(List<String> codes) {
