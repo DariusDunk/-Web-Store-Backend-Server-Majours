@@ -33,7 +33,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "r.rating, " +
             "r.postTimestamp, " +
             "new com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview(" +
-            "r.customer.name," +
+            "r.customer.firstName||' '||r.customer.lastName," +
             "r.customer.customerPfp," +
             "case " +
             "when r.customer.id = :customerId then true " +

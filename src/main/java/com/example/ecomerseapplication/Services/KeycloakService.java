@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenResponse;
 import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.enums.UserRole;
-import com.nimbusds.jwt.JWT;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -16,10 +15,8 @@ import org.apache.http.HttpStatus;
 import org.keycloak.TokenVerifier;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.JsonWebToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -128,6 +125,8 @@ public class KeycloakService {
                       .realmLevel()
                       .add(Collections.singletonList(role));
 
+              customerService.createByRepresentation(user, userId);
+
               return ResponseEntity.status(HttpStatus.SC_CREATED).build();//TODO dobavi logika za dobavqne v bazata
           } else {
               //pri neuspe6na registraciq
@@ -140,11 +139,14 @@ public class KeycloakService {
           if (realmUserCreated) {
 
               System.out.println("Keycloak error after creating a user: " + e.getMessage());
-
-              keycloak.realm(userRealm)
-                      .users()
-                      .get(userId)
-                      .remove();
+              try {
+                  keycloak.realm(userRealm)
+                          .users()
+                          .get(userId)
+                          .remove();
+              } catch (Exception cleanEx) {
+                  System.out.println("Error cleaning up user: " + cleanEx.getMessage());
+              }
           }
 
           else {
@@ -199,9 +201,9 @@ public class KeycloakService {
                        .header("Authorization", "Bearer " + tokenResponse.accessToken())
                        .get();
 
-               System.out.println("token: " + tokenResponse.accessToken());
-
-               System.out.println("response: " + userInfoResponse.getStatus());
+//               System.out.println("token: " + tokenResponse.accessToken());
+//
+//               System.out.println("response: " + userInfoResponse.getStatus());
 
                if (userInfoResponse.getStatus() == 200) {
                    Map<String, Object> userInfo = userInfoResponse.readEntity(new GenericType<>() {
@@ -209,13 +211,14 @@ public class KeycloakService {
                    String userId = (String) userInfo.get("sub");
                    String firstName = (String) userInfo.get("given_name");
                    String lastName = (String) userInfo.get("family_name");
-
-                   System.out.println("ID: " + userId);
+                   Long oldId = customerService.getByKId(userId);
+//                   System.out.println("ID: " + userId);
+//                   System.out.println("oldId: " + oldId);
 
                    return ResponseEntity.ok(
                            new LoginResponse(firstName+ " " + lastName,
                                    getRoleByUserId(getUserIdFromToken(tokenResponse.accessToken())), tokenResponse,
-                                   customerService.getByKId(userId))
+                                   oldId)
                    );
 
                }

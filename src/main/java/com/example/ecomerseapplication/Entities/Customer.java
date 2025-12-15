@@ -22,6 +22,12 @@ public class Customer {
     @Column(name = "k_id")
     private String keycloakId;
 
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
     @Column(columnDefinition = "character varying(50)")
     private String name;
     @Column(columnDefinition = "character varying(50)")

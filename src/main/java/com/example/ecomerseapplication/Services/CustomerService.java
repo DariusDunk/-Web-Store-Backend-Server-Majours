@@ -1,24 +1,22 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
-import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
-import com.example.ecomerseapplication.Mappers.CustomerMapper;
 import com.example.ecomerseapplication.Others.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -182,5 +180,15 @@ public class CustomerService {
 
     public Long getByKId(String userId) {
         return customerRepository.getIdByKeycloakId(userId);
+    }
+
+    public void createByRepresentation(UserRepresentation user, String userId) {
+        Customer customer = new Customer();
+        customer.setEmail(user.getEmail());
+        customer.setFirstName(user.getFirstName());
+        customer.setLastName(user.getLastName());
+        customer.setRegistrationDate(LocalDate.now());
+        customer.setKeycloakId(userId);
+        customerRepository.save(customer);
     }
 }
