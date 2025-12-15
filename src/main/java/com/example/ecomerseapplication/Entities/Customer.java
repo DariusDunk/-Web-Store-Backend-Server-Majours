@@ -29,8 +29,6 @@ public class Customer {
     private String lastName;
 
     @Column(columnDefinition = "character varying(50)")
-    private String name;
-    @Column(columnDefinition = "character varying(50)")
     private String email;
 
     private char[] password;

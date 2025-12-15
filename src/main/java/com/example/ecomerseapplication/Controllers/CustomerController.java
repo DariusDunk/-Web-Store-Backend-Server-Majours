@@ -54,10 +54,10 @@ public class CustomerController {
 //        return customerService.registration(customerAccountRequest);
 //    }
 
-    @PostMapping("login")
-    public ResponseEntity<CustomerResponse> logIn(@RequestBody CustomerAccountRequest customerAccountRequest) {
-        return customerService.logIn(customerAccountRequest);
-    }
+//    @PostMapping("login")
+//    public ResponseEntity<CustomerResponse> logIn(@RequestBody CustomerAccountRequest customerAccountRequest) {
+//        return customerService.logIn(customerAccountRequest);
+//    }
 
     @PostMapping("favorite/add")
     @Transactional

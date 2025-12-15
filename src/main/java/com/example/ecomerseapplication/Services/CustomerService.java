@@ -59,25 +59,25 @@ public class CustomerService {
 //        return ResponseEntity.status(HttpStatus.CREATED).body("Регистрацията е успешна!");
 //    }
 
-    public ResponseEntity<CustomerResponse> logIn(CustomerAccountRequest customerAccountRequest) {
-
-        if (!customerExists(customerAccountRequest.email))
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        if (BCrypt.checkpw(customerAccountRequest.password, String.valueOf(customerRepository
-                .getPassword(customerAccountRequest.email)))) {
-            Customer customer = customerRepository.getCustomerByEmail(customerAccountRequest.email).orElse(null);
-            if (customer == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            CustomerResponse customerResponse = new CustomerResponse();
-            customerResponse.customerName = customer.getName();
-            customerResponse.customerId = customer.getId();
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(customerResponse);
-        }
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
+//    public ResponseEntity<CustomerResponse> logIn(CustomerAccountRequest customerAccountRequest) {
+//
+//        if (!customerExists(customerAccountRequest.email))
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//
+//        if (BCrypt.checkpw(customerAccountRequest.password, String.valueOf(customerRepository
+//                .getPassword(customerAccountRequest.email)))) {
+//            Customer customer = customerRepository.getCustomerByEmail(customerAccountRequest.email).orElse(null);
+//            if (customer == null) {
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//            }
+//            CustomerResponse customerResponse = new CustomerResponse();
+//            customerResponse.customerName = customer.getName();
+//            customerResponse.customerId = customer.getId();
+//            return ResponseEntity.status(HttpStatus.ACCEPTED).body(customerResponse);
+//        }
+//
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//    }
 
     public ResponseEntity<?> addProductToFavourites(long customerId, Product product) {
 
