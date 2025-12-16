@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.Others;
+package com.example.ecomerseapplication.CustomErrorHelpers;
 
 public class ErrorMessage {
 

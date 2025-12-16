@@ -1,10 +1,10 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
+import com.example.ecomerseapplication.DTOs.responses.AuthTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
-import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
-import com.example.ecomerseapplication.DTOs.responses.TokenResponse;
-import com.example.ecomerseapplication.Others.ErrorType;
+import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
+import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.enums.UserRole;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.client.Client;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class KeycloakService {
@@ -38,8 +37,8 @@ public class KeycloakService {
     private String serverUrl;
     @Value("${keycloak.admin-realm}")
     private String adminRealm;
-    @Value("${keycloak.client-id}")
-    private String clientId;
+    @Value("${keycloak.admin.client-id}")
+    private String adminCliendId;
     @Value("${keycloak.admin-username}")
     private String adminUsername;
     @Value("${keycloak.admin-password}")
@@ -50,6 +49,10 @@ public class KeycloakService {
     private String tokenAddress;
     @Value("${spring.security.oauth2.client.registration.keycloak.client-secret}")
     private String secret;
+    @Value("${keycloak.ream.name}")
+    private String realmName;
+    @Value("${keycloak.regular-client-id}")
+    private String regularClientId;
 
     public KeycloakService(CustomerService customerService) {
         this.customerService = customerService;
@@ -61,7 +64,7 @@ public class KeycloakService {
         keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(adminRealm)
-                .clientId(clientId)
+                .clientId(adminCliendId)
                 .username(adminUsername)
                 .password(adminPassword)
                 .build();
@@ -180,7 +183,7 @@ public class KeycloakService {
 
         MultivaluedMap<String, String> formParams = new MultivaluedHashMap<>();
         formParams.add("grant_type", "password");
-        formParams.add("client_id", "backend-service");
+        formParams.add("client_id", regularClientId);
         formParams.add("client_secret", secret);
         formParams.add("username", request.identifier());
         formParams.add("password", request.password());
@@ -194,34 +197,37 @@ public class KeycloakService {
        ) {
            if (response.getStatus() == HttpStatus.SC_OK) {
 
-               TokenResponse tokenResponse = response.readEntity(TokenResponse.class);
+               KeycloakTokenResponse keycloakTokenResponse = response.readEntity(KeycloakTokenResponse.class);
 
-               Response userInfoResponse = client.target(serverUrl +"/realms/" + userRealm+ "/protocol/openid-connect/userinfo")
-                       .request()
-                       .header("Authorization", "Bearer " + tokenResponse.accessToken())
-                       .get();
 
-//               System.out.println("token: " + tokenResponse.accessToken());
-//
-//               System.out.println("response: " + userInfoResponse.getStatus());
+               return ResponseEntity.ok(new AuthTokenResponse(keycloakTokenResponse.accessToken(),
+                       keycloakTokenResponse.expiresIn(),
+                       keycloakTokenResponse.refreshExpiresIn(),
+                       keycloakTokenResponse.refreshToken()));
 
-               if (userInfoResponse.getStatus() == 200) {
-                   Map<String, Object> userInfo = userInfoResponse.readEntity(new GenericType<>() {
-                   });
-                   String userId = (String) userInfo.get("sub");
-                   String firstName = (String) userInfo.get("given_name");
-                   String lastName = (String) userInfo.get("family_name");
-                   Long oldId = customerService.getByKId(userId);
-//                   System.out.println("ID: " + userId);
-//                   System.out.println("oldId: " + oldId);
+//               Response userInfoResponse = client.target(serverUrl +"/realms/" + userRealm+ "/protocol/openid-connect/userinfo")
+//                       .request()
+//                       .header("Authorization", "Bearer " + keycloakTokenResponse.accessToken())
+//                       .get();
 
-                   return ResponseEntity.ok(
-                           new LoginResponse(firstName+ " " + lastName,
-                                   getRoleByUserId(getUserIdFromToken(tokenResponse.accessToken())), tokenResponse,
-                                   oldId)
-                   );
+//               if (userInfoResponse.getStatus() == 200) {
+//                   Map<String, Object> userInfo = userInfoResponse.readEntity(new GenericType<>() {
+//                   });
+//                   String userId = (String) userInfo.get("sub");
+//                   String firstName = (String) userInfo.get("given_name");
+//                   String lastName = (String) userInfo.get("family_name");
+//                   Long oldId = customerService.getLongIdByKId(userId);
 
-               }
+
+//                   return ResponseEntity.ok(
+//                           new LoginResponse(firstName+ " " + lastName,
+//                                   getRoleByUserId(getUserIdFromToken(keycloakTokenResponse.accessToken())), keycloakTokenResponse,
+//                                   oldId)
+//                   );
+
+
+
+//               }
            }
 
            return ResponseEntity.status(response.getStatus()).build();
@@ -230,6 +236,38 @@ public class KeycloakService {
            System.out.println("Error logging in user: " + e.getMessage());
            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).build();
        }
+
+    }
+
+    public Integer invalidateRefreshToken(String refreshToken) {
+
+        String logoutUrl = serverUrl + "realms/" + realmName + "/protocol/openid-connect/logout";
+
+//        System.out.println("URL: " + logoutUrl);
+
+        MultivaluedMap<String, String> formParams = new MultivaluedHashMap<>();
+        formParams.add("client_id", regularClientId);
+        formParams.add("client_secret", secret); // omit if public client
+        formParams.add("refresh_token", refreshToken);
+
+        try (Client client = ClientBuilder.newClient();
+             Response response = client.target(logoutUrl)
+                     .request()
+                     .post(Entity.form(new Form(formParams)))) {
+
+            String responseText = response.readEntity(String.class);
+
+
+            int status = response.getStatus();
+//            System.out.println("STATUS: "+ status);
+            if (status >= 200 && status < 300) {
+                System.out.println("Logout successful");
+                return status;
+            }
+            else
+                throw new RuntimeException("Failed to logout from Keycloak: " + responseText);
+
+        }
 
     }
 }

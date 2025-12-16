@@ -69,4 +69,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("select c.id from Customer c where c.keycloakId = ?1")
     Long getIdByKeycloakId(String keycloakId);
+
+    Customer getCustomerByKeycloakId(String keycloakId);
 }

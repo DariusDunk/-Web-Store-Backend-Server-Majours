@@ -165,11 +165,11 @@ router.post(`/keyk/register`, async (req, res) => {
 
   const {name, familyName, email, password} = req.body;
 
-  console.log("Node register" +
-    "\nName: " + name +
-    "\nFamily name: " + familyName +
-    "\nEmail: " + email +
-    "\nPassword: " + password)
+  // console.log("Node register" +
+  //   "\nName: " + name +
+  //   "\nFamily name: " + familyName +
+  //   "\nEmail: " + email +
+  //   "\nPassword: " + password)
 
 
   try{
@@ -189,6 +189,34 @@ router.post(`/keyk/register`, async (req, res) => {
 })
 
 
+// router.post(`/keyk/login`, async (req, res) => {
+//   const {email, password} = req.body;
+//
+//   console.log("Node login: " + email + " " + password)
+//
+//   const response = await fetch(`${Backend_Url}/customer/login/customer`,{
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify({identifier: email, password: password})
+//   })
+//
+//   const responseData = await response.json();
+//
+//   console.log("Node response: " + JSON.stringify(responseData))
+//
+//
+//   if (response.status === 400) {
+//
+//     const text = await response.text();
+//     res.status(response.status).send(text);
+//   }
+//
+//   else
+//     res.status(response.status).json(responseData);
+// })
+
 router.post(`/keyk/login`, async (req, res) => {
   const {email, password} = req.body;
 
@@ -202,19 +230,64 @@ router.post(`/keyk/login`, async (req, res) => {
     body: JSON.stringify({identifier: email, password: password})
   })
 
-  const responseData = await response.json();
+  if (response.status !== 200)
+  {
+    if (response.status === 400) {
 
-  console.log("Node response: " + JSON.stringify(responseData))
+      const text = await response.text();
+      res.status(response.status).send(text);
+      return
+    }
 
+    else {
+      res.status(response.status).end();
+      return
+    }
 
-  if (response.status === 400) {
-
-    const text = await response.text();
-    res.status(response.status).send(text);
   }
 
-  else
-    res.status(response.status).json(responseData);
+  const responseData = await response.json();
+  const { access_token, refresh_token, expires_in, refresh_expires_in } = responseData;
+
+  // console.log("Node response: " + JSON.stringify(responseData))
+
+  res.cookie('access_token', access_token,
+      {
+        maxAge: expires_in * 1000,
+        secure: false,
+        path: '/',
+        httpOnly: true
+      })
+
+  res.cookie('refresh_token', refresh_token,
+      { maxAge: refresh_expires_in * 1000,
+        secure: false,
+        path: '/refresh',
+        httpOnly: true });
+
+  const userDataResponse = await fetch(`${Backend_Url}/customer/me`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${access_token}`
+        }
+      });
+
+  if (userDataResponse.status !== 200)
+  {
+    // console.log("Error fetching user data: " + userDataResponse.status);
+
+    res.status(userDataResponse.status).end();
+    return
+  }
+
+    const userData = await userDataResponse.json();
+
+    // console.log("userData: " + JSON.stringify(userData));
+
+    res.status(userDataResponse.status).json(userData);
+
+
 })
 
 router.post('/registration', async (req, res)=>{

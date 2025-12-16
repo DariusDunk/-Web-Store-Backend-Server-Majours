@@ -7,7 +7,7 @@ import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Others.CartLimit;
-import com.example.ecomerseapplication.Others.ErrorType;
+import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

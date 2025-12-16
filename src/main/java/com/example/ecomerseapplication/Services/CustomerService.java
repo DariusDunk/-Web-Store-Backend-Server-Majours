@@ -1,11 +1,9 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
-import com.example.ecomerseapplication.DTOs.responses.CustomerResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
-import com.example.ecomerseapplication.Others.ErrorType;
+import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -178,7 +176,7 @@ public class CustomerService {
 
     }
 
-    public Long getByKId(String userId) {
+    public Long getLongIdByKId(String userId) {
         return customerRepository.getIdByKeycloakId(userId);
     }
 
@@ -190,5 +188,9 @@ public class CustomerService {
         customer.setRegistrationDate(LocalDate.now());
         customer.setKeycloakId(userId);
         customerRepository.save(customer);
+    }
+
+    public Customer getByKID(String userId) {
+        return customerRepository.getCustomerByKeycloakId(userId);
     }
 }

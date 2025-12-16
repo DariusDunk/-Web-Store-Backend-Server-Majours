@@ -104,7 +104,7 @@
         - browser_bff_node_modules:/app/node_modules    # <-- container keeps node_modules
       ports:
         - "3000:3000"          # <-- BFF port exposed outside
-      command: npm run dev
+      command: sh -c "npm install && npm run dev"
       environment:
         BACKEND_BASE_URL: http://host.docker.internal:1620
       depends_on:

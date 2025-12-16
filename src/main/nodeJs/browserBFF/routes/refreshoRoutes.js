@@ -1,0 +1,44 @@
+const express =require( 'express');
+const router = express.Router();
+const { Backend_Url } = require('./config.js');
+
+router.post('/logout', async (req, res) => {//TODO testvai
+    // Clear access token
+    const refreshToken = req.cookies.refresh_token;
+
+    // console.log("REFRESH TOKEN: " + refreshToken);
+    if (!refreshToken) {
+        return res.status(400).send('No refresh token');
+    }
+
+    const response = await fetch(`${Backend_Url}/customer/invalidate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        body: JSON.stringify({refresh_token: refreshToken})
+        }
+    )
+
+    console.log("response: " + JSON.stringify(response));
+    res.cookie('access_token', '', {
+        httpOnly: true,
+        secure: false, // same as when you set it
+        path: '/',
+        maxAge: 0
+    });
+
+    // Clear refresh token
+    res.cookie('refresh_token', '', {
+        httpOnly: true,
+        secure: false,
+        path: '/refresh',
+        maxAge: 0
+    });
+
+    console.log("response status: "+ response.status)
+
+    res.status(response.status).end();
+});
+
+module.exports = router;

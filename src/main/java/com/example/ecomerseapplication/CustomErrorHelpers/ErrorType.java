@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.Others;
+package com.example.ecomerseapplication.CustomErrorHelpers;
 
 public class ErrorType {
     public static final String VALIDATION_ERROR = "https://example.com/problems/validation-error";

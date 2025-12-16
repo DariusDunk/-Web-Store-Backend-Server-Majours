@@ -1,15 +1,17 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
-import com.example.ecomerseapplication.Others.ErrorType;
+import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Utils.NullFieldChecker;
 import com.example.ecomerseapplication.enums.UserRole;
+import com.fasterxml.jackson.core.util.RecyclerPool;
 import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -27,24 +29,30 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
-
     private final ProductService productService;
-
     private final CustomerCartService customerCartService;
-
     private final PurchaseService purchaseService;
-
     private final PurchaseCartService purchaseCartService;
     private final KeycloakService keycloakService;
+    private final UserIdExtractor userIdExtractor;
+
 
     @Autowired
-    public CustomerController(CustomerService customerService, ProductService productService, CustomerCartService customerCartService, PurchaseService purchaseService, PurchaseCartService purchaseCartService, KeycloakService keycloakService) {
+    public CustomerController(CustomerService customerService,
+                              ProductService productService,
+                              CustomerCartService customerCartService,
+                              PurchaseService purchaseService,
+                              PurchaseCartService purchaseCartService,
+                              KeycloakService keycloakService,
+                              UserIdExtractor userIdExtractor) {
+
         this.customerService = customerService;
         this.productService = productService;
         this.customerCartService = customerCartService;
         this.purchaseService = purchaseService;
         this.purchaseCartService = purchaseCartService;
         this.keycloakService = keycloakService;
+        this.userIdExtractor = userIdExtractor;
     }
 
 //    @PostMapping("registration")
@@ -335,14 +343,56 @@ public class CustomerController {
 //        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping("me")
+    public ResponseEntity<CustomerResponse> getCustomerInfo()
+    {
+        String userId = userIdExtractor.getUserId();
+
+//        System.out.println("userId: " + userId);
+
+        Customer customer = customerService.getByKID(userId);
+
+        if (customer == null) {
+            System.out.println("customer not found");
+            return ResponseEntity.notFound().build();
+        }
+
+        String userRole = keycloakService.getRoleByUserId(userId);
+
+        return ResponseEntity.ok(new CustomerResponse(
+                             customer.getId(),
+                customer.getFirstName() + " " + customer.getLastName(),
+                             customer.getCustomerPfp(),
+                userRole, customer.getId()
+                )
+        );
+    }
+
+    @PostMapping("invalidate")
+    public ResponseEntity<?> invalidateToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+
+        try
+        {
+            System.out.println("Invalidating token: " + refreshTokenRequest.refreshToken());
+            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshTokenRequest.refreshToken()))).build();
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error invalidating token: " + e.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
     @PostMapping("login/customer")
     public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) throws VerificationException {
 
         if (request.identifier() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Няма подадени данни за имейл или потребителско име");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Няма подадени данни за имейл или потребителско име");//TODO smeni tova na multistatus i vyrni custo error response
 
         return keycloakService.loginUser(request);
     }
+
+
 
     @GetMapping("getPfp")
     public ResponseEntity<String> getUserPfp(@RequestParam int id) {

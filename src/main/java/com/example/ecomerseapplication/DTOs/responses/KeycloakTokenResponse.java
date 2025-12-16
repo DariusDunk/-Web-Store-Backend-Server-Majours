@@ -2,7 +2,7 @@ package com.example.ecomerseapplication.DTOs.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record TokenResponse(
+public record KeycloakTokenResponse(
         @JsonProperty("access_token")
         String accessToken,
         @JsonProperty("expires_in")

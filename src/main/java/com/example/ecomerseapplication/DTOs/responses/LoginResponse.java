@@ -8,7 +8,7 @@ public record LoginResponse(
         @JsonProperty("role")
         String role,
         @JsonProperty("TokenResponse")
-        TokenResponse tokenResponse,
+        KeycloakTokenResponse keycloakTokenResponse,
         Long userId
 ) {
 }
