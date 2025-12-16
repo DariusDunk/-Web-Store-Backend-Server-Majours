@@ -3,7 +3,6 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.Mappers.CustomerCartMapper;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Others.ErrorType;
@@ -252,7 +251,7 @@ public class CustomerController {
         if (customer == null)
             return ResponseEntity.notFound().build();
 
-        List<CartItemResponse> customerCarts = customerCartService.pagedCartsByCustomer(customer);
+        List<CartItemResponse> customerCarts = customerCartService.getCartDtoByCustomer(customer);
 
         return ResponseEntity
                 .ok()
