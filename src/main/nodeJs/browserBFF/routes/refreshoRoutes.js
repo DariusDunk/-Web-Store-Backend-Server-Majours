@@ -25,6 +25,7 @@ router.post('/logout', async (req, res) => {//TODO testvai
         httpOnly: true,
         secure: false, // same as when you set it
         path: '/',
+        sameSite: 'lax',
         maxAge: 0
     });
 
@@ -33,6 +34,7 @@ router.post('/logout', async (req, res) => {//TODO testvai
         httpOnly: true,
         secure: false,
         path: '/refresh',
+        sameSite: 'lax',
         maxAge: 0
     });
 

@@ -256,13 +256,16 @@ router.post(`/keyk/login`, async (req, res) => {
         maxAge: expires_in * 1000,
         secure: false,
         path: '/',
+        sameSite: 'lax',
         httpOnly: true
       })
 
   res.cookie('refresh_token', refresh_token,
-      { maxAge: refresh_expires_in * 1000,
+      {
+        maxAge: refresh_expires_in * 1000,
         secure: false,
         path: '/refresh',
+        sameSite: 'lax',
         httpOnly: true });
 
   const userDataResponse = await fetch(`${Backend_Url}/customer/me`,
