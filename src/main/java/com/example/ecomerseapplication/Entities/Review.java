@@ -20,7 +20,7 @@ public class Review {
     @ManyToOne
     private Product product;
 
-    @JoinColumn(name = "customer_id_keyk", referencedColumnName = "k_id", insertable = false, updatable = false)
+    @JoinColumn(name = "customer_id_keyk", referencedColumnName = "k_id", updatable = false)
     @ManyToOne //TODO remove unnecessary details when the id migration in customer is finished
     private Customer customer;
 
@@ -32,5 +32,9 @@ public class Review {
     @Column(name = "post_timestamp")
     private LocalDateTime postTimestamp;
 
+    @Column(name = "verified_customer")
     private Boolean verifiedCustomer;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 }

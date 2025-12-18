@@ -204,10 +204,19 @@ public class ProductController {
         Review review = reviewService.getByUIDAndPCode(productCode, userId);
 
 //        System.out.println("REVIEW: " + review.getId() );
+        if (review!=null)
+        {
+            if (review.getIsDeleted()) {
+                return ResponseEntity.notFound().build();//todo dobavi specifi4na gre6ka za sy6testvuva6to iztrito review
+            }
+            else {
+                ReviewContentResponse response = ReviewMapper.entToContentResponse(review);
+                return ResponseEntity.ok(response);
 
-        ReviewContentResponse response = ReviewMapper.entToContentResponse(review);
+            }
+        }
 
-        return ResponseEntity.ok(response);
+       return ResponseEntity.ok(new ReviewContentResponse("" , null, false));
 
     }
 
@@ -324,15 +333,15 @@ public class ProductController {
         if (review == null)
             return ResponseEntity.notFound().build();
 
-        short newRating = reviewService.updatedRating(product, review);
+//        short newRating = reviewService.updatedRating(product, review);
+//
+//        if (newRating == -1)
+//            return ResponseEntity.internalServerError().build();
 
-        if (newRating == -1)
-            return ResponseEntity.internalServerError().build();
-
-        product.setRating(newRating);
-        product.getReviews().remove(review);
-        productService.save(product);
-        reviewService.delete(review);
+//        product.setRating(newRating);
+//        product.getReviews().remove(review);
+//        productService.save(product); todo tova moje da se sloji za drug method, moje bi adminski, koito specialno iztriva review-ta
+        reviewService.softDelete(review);
 
         return ResponseEntity.ok().body("Ревюто е изтрито");
     }

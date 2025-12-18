@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,16 +51,6 @@ public class ReviewService {
         return reviewRepository.getReviewByCustomer_IdAndProduct_ProductCode(customerId, productCode).orElse(null);
     }
 
-    //    @Transactional
-//    public Product manageReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
-//
-////        Review existingReview = getByProdCust(product, customer);
-//
-////        if (existingReview != null) {
-////            return updateReview(existingReview, request, product);TODO kato se razdelqt syzdavaneto i updeita na revuta, tozi method mai 6te stane izli6en
-////        }
-//        return createReview(product, customer, request, isVerifiedCustomer);
-//    }
 
     @Transactional
     public Product createReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
@@ -73,6 +64,7 @@ public class ReviewService {
         review.setRating(adjustedRating);
         review.setPostTimestamp(LocalDateTime.now());
         review.setVerifiedCustomer(isVerifiedCustomer);
+        review.setIsDeleted(false);
 
         if (product.getReviews().isEmpty())
             product.setRating(adjustedRating);
@@ -142,17 +134,28 @@ public class ReviewService {
 
     public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable) {
 
+        LocalDateTime startDate = LocalDate.now().atStartOfDay();
+        LocalDateTime endDate = LocalDate.now().plusDays(1).atStartOfDay();
+
         return reviewRepository.getByProductCode(request.productCode(),
                 request.sortOrder().getValue(),
                 request.verifiedOnly(),
                 request.ratingValue(),
                 request.userId(),
-                pageable
+                pageable,
+                startDate,
+                endDate
                 );
     }
 
     public List<RatingOverviewResponse> getRatingOverview(String productCode) {
         return reviewRepository.getRatingOverviewByProductCode(productCode);
+    }
+
+    public void softDelete(Review review) {
+        review.setReviewText("");
+        review.setIsDeleted(true);
+        save(review);
     }
 }
 

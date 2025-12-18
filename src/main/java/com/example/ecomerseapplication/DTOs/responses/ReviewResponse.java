@@ -17,7 +17,6 @@ public class ReviewResponse {
     @JsonProperty("post_timestamp")
     public LocalDateTime postTimestamp;
     public CustomerDetailsForReview customerDetailsForReview;
-
-
-
+    @JsonProperty("is_deleted")
+    public Boolean isDeleted;
 }
