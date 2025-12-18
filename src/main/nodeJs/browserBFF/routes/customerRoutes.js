@@ -247,7 +247,7 @@ router.post(`/keyk/login`, async (req, res) => {
   }
 
   const responseData = await response.json();
-  const { access_token, refresh_token, expires_in, refresh_expires_in } = responseData;
+  const { access_token, session_id, expires_in, refresh_expires_in } = responseData;
 
   // console.log("Node response: " + JSON.stringify(responseData))
 
@@ -260,7 +260,15 @@ router.post(`/keyk/login`, async (req, res) => {
         httpOnly: true
       })
 
-  res.cookie('refresh_token', refresh_token,
+  // res.cookie('refresh_token', refresh_token,
+  //     {
+  //       maxAge: refresh_expires_in * 1000,
+  //       secure: false,
+  //       path: '/refresh',
+  //       sameSite: 'lax',
+  //       httpOnly: true });
+
+  res.cookie('session_id', refresh_token,
       {
         maxAge: refresh_expires_in * 1000,
         secure: false,

@@ -57,4 +57,7 @@ public class Customer {
     @OneToMany(mappedBy = "customer")
     private List<Review> reviews;
 
+    @OneToMany(mappedBy = "customer")
+    private List<Session> sessions;
+
 }
