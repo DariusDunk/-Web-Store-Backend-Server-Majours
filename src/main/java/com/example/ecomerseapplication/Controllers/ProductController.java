@@ -94,20 +94,7 @@ public class ProductController {
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("reviews/paged")
-    public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody ReviewSortRequest request) {
 
-        PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit);
-
-//        System.out.println(request);
-
-        Page<ReviewResponse> reviewPage = reviewService.getProductReviews(request, pageRequest);
-
-//        System.out.println(reviewPage.getContent());
-
-        return ResponseEntity.ok(PageResponse.from(reviewPage));
-
-    }
 
     @GetMapping("{productCode}/review/overview")
     public ResponseEntity<?> getReviewsOverview(@PathVariable String productCode) {
@@ -194,6 +181,21 @@ public class ProductController {
                         manufacturerList,
                         productFilterRequest.rating,
                         pageRequest)));
+    }
+
+    @PostMapping("reviews/paged")
+    public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody ReviewSortRequest request) {
+
+        PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit);
+
+//        System.out.println(request);
+
+        Page<ReviewResponse> reviewPage = reviewService.getProductReviews(request, pageRequest);
+
+//        System.out.println(reviewPage.getContent());
+
+        return ResponseEntity.ok(PageResponse.from(reviewPage));
+
     }
 
     @GetMapping("review/specific")

@@ -34,8 +34,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "r.rating, " +
             "r.postTimestamp, " +
             "new com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview(" +
-            "r.customer.firstName||' '||r.customer.lastName," +
-            "r.customer.customerPfp," +
+            "case when " +
+            "r.isDeleted=true then 'Ревюто е изтрито' " +
+            "else r.customer.firstName||' '||r.customer.lastName " +
+            "end, " +
+            "case when " +
+            "r.isDeleted=true then null else " +
+            "r.customer.customerPfp " +
+            "end," +
             "case " +
             "when r.customer.id = :customerId then true " +
             "else false " +
@@ -51,8 +57,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "and (:ratingValue IS NULL OR r.rating=:ratingValue) " +
             "and (:verifiedOnly=false or r.verifiedCustomer=true) " +
             "order by " +
-            "case when :sortOrder = 'newest' then r.postTimestamp end asc, " +
-            "case when :sortOrder = 'oldest' then r.postTimestamp end desc")
+            "case when " +
+            ":sortOrder = 'newest' then r.postTimestamp " +
+            "end asc, " +
+            "case when " +
+            ":sortOrder = 'oldest' then r.postTimestamp " +
+            "end desc")
     Page<ReviewResponse> getByProductCode(
             @Param("productCode")
             String productCode,
