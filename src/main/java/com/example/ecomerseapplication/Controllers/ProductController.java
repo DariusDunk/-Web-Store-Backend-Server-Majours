@@ -337,7 +337,7 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        return ResponseEntity.ok("Успешно променено ревю");
+        return ResponseEntity.ok().build();
 
     }
 
@@ -370,7 +370,7 @@ public class ProductController {
 
         Review review = reviewService.getByProdAndCust(product, customer);
 
-        if (review == null)
+        if (review == null||review.getIsDeleted())
             return ResponseEntity.notFound().build();
 
 //        short newRating = reviewService.updatedRating(product, review);

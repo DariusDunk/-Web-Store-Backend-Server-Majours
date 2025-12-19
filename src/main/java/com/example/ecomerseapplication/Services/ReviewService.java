@@ -107,7 +107,7 @@ public class ReviewService {
 
             short newRating = (short) (((oldRating - existingReview.getRating()) + adjustedRating) / product.getReviews().size());
 
-            System.out.printf("NEW RATING CALCULATION: ((%d - %d) + %d)/%d = %d", oldRating, existingReview.getRating(), adjustedRating, product.getReviews().size(), newRating);
+//            System.out.printf("NEW RATING CALCULATION: ((%d - %d) + %d)/%d = %d", oldRating, existingReview.getRating(), adjustedRating, product.getReviews().size(), newRating);
 
 
             product.setRating(newRating);
