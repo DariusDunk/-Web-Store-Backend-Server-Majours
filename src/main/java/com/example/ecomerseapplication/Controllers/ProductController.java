@@ -20,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 
@@ -209,9 +212,19 @@ public class ProductController {
         if (review!=null)
         {
             if (review.getIsDeleted()) {
-                return ResponseEntity.notFound().build();//todo dobavi specifi4na gre6ka za sy6testvuva6to iztrito review
+                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
+                        "Не може да се добавят повече ревюта",
+                        HttpStatus.FORBIDDEN.value(),
+                        "Не можете да добавяте повече ревюта за този продукт"));
             }
             else {
+
+                if (isUpdateTimeOver(review))
+                    return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
+                            "Не може да се добавят повече ревюта",
+                            HttpStatus.FORBIDDEN.value(),
+                            "Вече сте добавили ревю за този продукт. Срокът за редакция е изтекъл и не могат да се правят промени."));
+
                 ReviewContentResponse response = ReviewMapper.entToContentResponse(review);
                 return ResponseEntity.ok(response);
 
@@ -297,7 +310,18 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         }
 
-       Product updatedProduct = reviewService.updateReview(review, request, product);
+        if (review.getIsDeleted()) {
+            System.out.println("Deleted review");
+            return ResponseEntity.notFound().build();
+        }
+
+        if (isUpdateTimeOver(review))
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
+                    "Не може да се добавят повече ревюта",
+                    HttpStatus.FORBIDDEN.value(),
+                    "Вече сте добавили ревю за този продукт. Срокът за редакция е изтекъл и не могат да се правят промени."));
+
+        Product updatedProduct = reviewService.updateReview(review, request, product);
 
         if (updatedProduct == null) {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
@@ -315,6 +339,20 @@ public class ProductController {
 
         return ResponseEntity.ok("Успешно променено ревю");
 
+    }
+
+    private boolean isUpdateTimeOver(Review review) {
+        ZoneId zone = ZoneId.of("Europe/Sofia"); // Eastern European Time
+
+        ZonedDateTime postTimeInZone = review.getPostTimestamp().atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(zone);
+
+        LocalDate todayInZone = LocalDate.now(zone);
+
+        boolean isUpdatePossible =
+                postTimeInZone.toLocalDate().isEqual(todayInZone);
+
+        return !isUpdatePossible;
     }
 
     @DeleteMapping("review/delete")
@@ -343,7 +381,14 @@ public class ProductController {
 //        product.setRating(newRating);
 //        product.getReviews().remove(review);
 //        productService.save(product); todo tova moje da se sloji za drug method, moje bi adminski, koito specialno iztriva review-ta
-        reviewService.softDelete(review);
+        try
+        {
+            reviewService.softDelete(review);
+        }catch (Exception e)
+        {
+            System.out.println("Error soft deleting review: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         return ResponseEntity.ok().body("Ревюто е изтрито");
     }

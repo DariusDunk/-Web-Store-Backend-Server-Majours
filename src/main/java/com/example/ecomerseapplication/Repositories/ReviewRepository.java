@@ -31,7 +31,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "r.id," +
             "r.reviewText, " +
             "r.rating, " +
-            "r.postTimestamp, " +
+            "case when r.isDeleted=true then null " +
+            "else r.postTimestamp " +
+            "end, " +
             "new com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview(" +
             "case when " +
             "r.isDeleted=true then 'Ревюто е изтрито' " +
@@ -45,7 +47,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "when r.customer.id = :customerId then true " +
             "else false " +
             "end, " +
-            "r.verifiedCustomer, " +
+            "case when r.isDeleted=true " +
+            "then false " +
+            "else r.verifiedCustomer " +
+            "end, " +
             "case " +
             "when r.postTimestamp>=:startDate AND r.postTimestamp<:endDate then false " +
             "else true " +
@@ -54,7 +59,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "from Review r " +
             "where r.product.productCode = :productCode " +
             "and (:ratingValue IS NULL OR r.rating=:ratingValue) " +
-            "and (:verifiedOnly=false or r.verifiedCustomer=true) " +
+            "and (:verifiedOnly=false or r.isDeleted=false and r.verifiedCustomer=true) " +
             "order by " +
             "case when " +
             ":sortOrder = 'newest' then r.postTimestamp " +

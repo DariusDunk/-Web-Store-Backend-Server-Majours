@@ -83,7 +83,7 @@ public class ReviewService {
     public Product updateReview(Review existingReview, ReviewRequest request, Product product) {
         short adjustedRating = (short) (request.rating * 10);
 
-        System.out.println("EXISTING RATING: " + existingReview.getRating() + " NEW RATING: " + adjustedRating);
+//        System.out.println("EXISTING RATING: " + existingReview.getRating() + " NEW RATING: " + adjustedRating);
 
         if (existingReview.getRating() == adjustedRating && request.reviewText.equals(existingReview.getReviewText()))
             return null;
