@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Boolean existsByProductAndCustomer_KeycloakId(Product product, String customerKeycloakId);
 
     Optional<Review> getByProductAndCustomer(Product product, Customer customer);
     Optional<Review> getReviewByCustomer_IdAndProduct_ProductCode(Long customerId, String productCode);
@@ -89,7 +88,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<RatingOverviewResponse> getRatingOverviewByProductCode(String productCode);
 
     @Query("""
-            select exists (select 1 from Review r 
+            select exists (select 1 from Review r
                         where r.product=:product and r.customer.keycloakId =:keycloakId)
             """)
     Boolean existsByProductAndKID(@Param("product")Product product, @Param("keycloakId")String keycloakId);
