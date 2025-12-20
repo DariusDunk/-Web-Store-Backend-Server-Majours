@@ -31,6 +31,7 @@ public class ProfanityService {
             reader.lines()
                     .filter(line -> !line.isEmpty())
                     .map(String::toLowerCase)
+                    .filter(s -> !s.contains("#"))
                     .forEach(swearSet::add);
             reader.close();
 

@@ -21,6 +21,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> getByProductAndCustomer(Product product, Customer customer);
     Optional<Review> getReviewByCustomer_IdAndProduct_ProductCode(Long customerId, String productCode);
 
+    Optional<Review> getReviewByCustomer_KeycloakIdAndProduct_ProductCode(String customerKeycloakId, String productProductCode);
+
     @Modifying
     @Query(value = "update Review " +
             "set rating = :rating, reviewText = :text " +
@@ -44,7 +46,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "r.customer.customerPfp " +
             "end," +
             "case " +
-            "when r.customer.id = :customerId then true " +
+            "when r.customer.keycloakId = :customerId then true " +
             "else false " +
             "end, " +
             "case when r.isDeleted=true " +
@@ -77,7 +79,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             @Param("ratingValue")
             Short ratingValue,
             @Param("customerId")
-            Long customerId,
+//            Long customerId,
+            String customerId,
             Pageable pageable,
             @Param("startDate")
             LocalDateTime startDate,

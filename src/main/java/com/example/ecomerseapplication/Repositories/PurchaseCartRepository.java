@@ -21,7 +21,7 @@ public interface PurchaseCartRepository extends JpaRepository<PurchaseCart, Purc
     @Query("""
                 select exists(select 1
                 from PurchaseCart pc
-                where pc.purchaseCartId.product.productCode = :productCode and pc.purchaseCartId.purchase.customer.id = :userId)
+                where pc.purchaseCartId.product.productCode = :productCode and pc.purchaseCartId.purchase.customer.keycloakId = :userId)
             """)
-    Boolean isProductPurchased(@Param("productCode") String productCode, @Param("userId") Long userId);
+    Boolean isProductPurchased(@Param("productCode") String productCode, @Param("userId") String userId);
 }

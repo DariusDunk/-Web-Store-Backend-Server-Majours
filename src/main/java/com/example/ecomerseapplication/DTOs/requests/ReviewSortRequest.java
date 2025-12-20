@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record ReviewSortRequest(
         @JsonProperty("product_code")
         String productCode,
-        @JsonProperty("user_id")
-        long userId,
         @JsonProperty("page")
         int page,
         @JsonProperty("sort_order")

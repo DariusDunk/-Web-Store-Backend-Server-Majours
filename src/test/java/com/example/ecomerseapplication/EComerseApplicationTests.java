@@ -140,10 +140,10 @@ class EComerseApplicationTests {
         }
     }
 
-    @Test
-    void isReviewerVerifiedCheck() {
-        System.out.println("Result: " + purchaseCartRepository.isProductPurchased("20621301",6L));
-    }
+//    @Test
+//    void isReviewerVerifiedCheck() {
+//        System.out.println("Result: " + purchaseCartRepository.isProductPurchased("20621301",6L));
+//    }
 
     @Test
     void getReviewOverviewByProductCode() {

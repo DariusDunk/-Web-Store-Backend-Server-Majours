@@ -1,7 +1,7 @@
 const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
-const path = require("node:path");
+
 
 router.get('/featured/:page', async (req, res)=>{
   const queryParts = req.url.split("/");
@@ -246,11 +246,12 @@ router.post('/getPagedReviews', async (req, res) => {
     // const page = parseInt(req.params.page, 10);
     const productCode = req.body.productCode;
     // const userId = req.body.userId;
-    const userId = req.body.userId;
     const page = req.body.page;
     const sort = req.body.sortOrder;
     const verifiedOnly = req.body.verifiedOnly;
     const ratingValue = req.body.ratingValue
+    const accessToken = req.cookies['access_token'];
+    // console.log("Token: " + accessToken);
 
     // console.log("Code: " + productCode + " User: " + userId);
 
@@ -262,12 +263,12 @@ router.post('/getPagedReviews', async (req, res) => {
                 method: 'POST',
                 body: JSON.stringify({
                     product_code: productCode,
-                    user_id: userId,
                     page,
                     sort_order: sort,
                     verified_only: verifiedOnly,
                     rating_value: ratingValue }),
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' ,
+                    'Authorization': 'Bearer ' + accessToken}
             });
 
         if (!response.ok) {
@@ -284,14 +285,24 @@ router.post('/getPagedReviews', async (req, res) => {
     }
     catch (error) {
         console.error('Reviews: Error fetching data: ', error);
+        return res.status(500).json({error: 'Internal server error'});
     }
 })
 
-router.get(`/getReview/:productCode/:userId`, async (req, res) => {
-    const {productCode, userId} = req.params;
+router.get(`/getReview/:productCode`, async (req, res) => {
+    const {productCode} = req.params;
+    // const accessToken = req.cookies['access_token'];
+    // console.log("Token: " + accessToken);
+    const accessToken = req.cookies['access_token'];
 
     try {
-        const response = await fetch(`${Backend_Url}/product/review/specific?userId=${userId}&productCode=${productCode}`);
+        const response = await fetch(`${Backend_Url}/product/review/specific?productCode=${productCode}`,
+            {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' ,
+                'Authorization': 'Bearer ' + accessToken
+                }
+            });
 
         // console.log("STATUS: " + response.status);
 
@@ -301,14 +312,16 @@ router.get(`/getReview/:productCode/:userId`, async (req, res) => {
     }
     catch (error) {
         console.error('Reviews: Error fetching specific review data: ', error);
+        return res.status(500).json({error: 'Internal server error'});
     }
 })
 
 router.post(`/addReview`, async (req, res) => {
-    const userId = req.body.userId;
+    // const userId = req.body.userId;
     const productCode = req.body.productCode;
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
+    const accessToken = req.cookies['access_token'];
 
     // console.log( "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
 
@@ -317,9 +330,9 @@ router.post(`/addReview`, async (req, res) => {
         const response = await fetch(`${Backend_Url}/product/review/add`,
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' ,
+                'Authorization': 'Bearer ' + accessToken},
                 body: JSON.stringify({
-                    user_id: userId,
                     product_code: productCode,
                     rating: rating,
                     review_text: reviewText}),
@@ -329,7 +342,7 @@ router.post(`/addReview`, async (req, res) => {
         if (response.status === 207)
         {
             const responseData = await response.json();
-            console.log(responseData);
+            // console.log(responseData);
             return res.status(response.status).json(responseData);
         }
 
@@ -338,6 +351,7 @@ router.post(`/addReview`, async (req, res) => {
     }
     catch (error) {
         console.error('Error creating/updating the review ', error);
+        return res.status(500).json({error: 'Internal server error'});
     }
 })
 
@@ -364,7 +378,7 @@ router.post(`/updateReview`, async (req, res) => {
         if (response.status === 207)
         {
             const responseData = await response.json();
-            console.log(responseData);
+            // console.log(responseData);
             return res.status(response.status).json(responseData);
         }
 
@@ -373,6 +387,7 @@ router.post(`/updateReview`, async (req, res) => {
 
     catch (error) {
         console.error('Error updating the review ', error);
+        return res.status(500).json({error: 'Internal server error'});
     }
 
 })
@@ -394,6 +409,7 @@ router.post(`/deleteReview`, async (req, res) => {
     }
     catch (error) {
         console.error('Error deleting the review ', error);
+        return res.status(500).json({error: 'Internal server error'});
     }
 })
 

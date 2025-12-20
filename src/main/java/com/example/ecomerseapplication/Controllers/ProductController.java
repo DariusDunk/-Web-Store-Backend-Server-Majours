@@ -1,9 +1,7 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.DTOs.requests.CustomerProductPairRequest;
-import com.example.ecomerseapplication.DTOs.requests.ProductFilterRequest;
-import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
-import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
+import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
+import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ReviewMapper;
@@ -18,7 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,10 +42,10 @@ public class ProductController {
 
     private final ManufacturerService manufacturerService;
     private final PurchaseCartService purchaseCartService;
-    private final ProfanityService profanityService;
+    private final UserIdExtractor userIdExtractor;
 
     @Autowired
-    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, ProfanityService profanityService) {
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, ProfanityService profanityService, UserIdExtractor userIdExtractor) {
         this.productService = productService;
         this.categoryAttributeService = categoryAttributeService;
         this.customerService = customerService;
@@ -55,7 +53,7 @@ public class ProductController {
         this.productCategoryService = productCategoryService;
         this.manufacturerService = manufacturerService;
         this.purchaseCartService = purchaseCartService;
-        this.profanityService = profanityService;
+        this.userIdExtractor = userIdExtractor;
     }
 
     @GetMapping("findall")
@@ -191,13 +189,16 @@ public class ProductController {
     }
 
     @PostMapping("reviews/paged")
+    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody ReviewSortRequest request) {
+
+        String customerId = userIdExtractor.getUserId();
 
         PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit);
 
 //        System.out.println(request);
 
-        Page<ReviewResponse> reviewPage = reviewService.getProductReviews(request, pageRequest);
+        Page<ReviewResponse> reviewPage = reviewService.getProductReviews(request, pageRequest, customerId);
 
 //        System.out.println(reviewPage.getContent());
 
@@ -206,11 +207,13 @@ public class ProductController {
     }
 
     @GetMapping("review/specific")
-    public ResponseEntity<?> getSpecificReviewData(@RequestParam("userId")Long userId, @RequestParam("productCode")String productCode) {
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> getSpecificReviewData(@RequestParam("productCode")String productCode) {
 
 //        System.out.println("IUD " + userId + " PCODE " + productCode);
+        String customerId = userIdExtractor.getUserId();
 
-        Review review = reviewService.getByUIDAndPCode(productCode, userId);
+        Review review = reviewService.getByUIDAndPCode(productCode, customerId);
 
 //        System.out.println("REVIEW: " + review.getId() );
         if (review!=null)
@@ -241,26 +244,27 @@ public class ProductController {
 
     @PostMapping("review/add")
     @Transactional
-    public ResponseEntity<?> addReview(@RequestBody ReviewRequest request) {
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> addReview(@RequestBody ReviewCreateRequest request) {
 
         if (NullFieldChecker.hasNullFields(request)) {
             System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
             return ResponseEntity.badRequest().build();
         }
 
-//        System.out.println(request.toString());
+        String userId = userIdExtractor.getUserId();
 
-        ResponseEntity<?> validationResponse = reviewService.requestValidation(request);
+        ResponseEntity<?> validationResponse = reviewService.requestValidation(request.rating(),request.reviewText());
 
         if (validationResponse != null)
             return validationResponse;
 
-        Customer customer = customerService.findById(request.customerId);
+        Customer customer = customerService.getByKID(userId);
 
         if (customer == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
-        Product product = productService.findByPCode(request.productCode);
+        Product product = productService.findByPCode(request.productCode());
 
         if (product == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -274,7 +278,7 @@ public class ProductController {
                     ErrorMessage.REVIEW_EXISTS));
         }
 
-        Boolean isVerifiedCustomer = purchaseCartService.isProductPurchased(product.getProductCode(), customer.getId());
+        Boolean isVerifiedCustomer = purchaseCartService.isProductPurchased(product.getProductCode(), customer.getKeycloakId());
 
         Product updatedProduct = reviewService.createReview(product, customer, request, isVerifiedCustomer);
 
@@ -293,7 +297,7 @@ public class ProductController {
 
 //        System.out.println(request.toString());
 
-        ResponseEntity<?> validationResponse = reviewService.requestValidation(request);
+        ResponseEntity<?> validationResponse = reviewService.requestValidation(request.rating, request.reviewText);
 
         if (validationResponse != null)
             return validationResponse;

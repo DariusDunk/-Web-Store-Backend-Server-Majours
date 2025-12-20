@@ -6,7 +6,7 @@ import lombok.ToString;
 @ToString
 public class ReviewRequest {
     @JsonProperty("user_id")
-    public long customerId;
+    public long customerId;//TODO iztrii
     @JsonProperty("product_code")
     public String productCode;
     @JsonProperty("review_text")

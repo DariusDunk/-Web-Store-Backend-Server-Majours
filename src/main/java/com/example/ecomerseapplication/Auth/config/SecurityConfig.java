@@ -28,8 +28,13 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/attributes/**",
-//                                "/**/**",
-                                "**"
+                                "**",
+                                "/category/**",
+//                                "/product/**",
+                                "/customer/**",
+                                "/manufacturer/**",
+                                "/purchase/**",
+                                "/session/**"
                         ).permitAll() // public endpoints
                         .anyRequest().authenticated() // everything else needs auth
                 )

@@ -386,7 +386,7 @@ public class CustomerController {
     public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) throws VerificationException {
 
         if (request.identifier() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Няма подадени данни за имейл или потребителско име");//TODO smeni tova na multistatus i vyrni custo error response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         return keycloakService.loginUser(request);
     }

@@ -8,6 +8,12 @@ import org.springframework.stereotype.Component;
 public class UserIdExtractor {
 
     public String getUserId() {
+//        Object principal = SecurityContextHolder.getContext()
+//                .getAuthentication()
+//                .getPrincipal();
+
+//        System.out.println(principal.getClass());
+//        System.out.println(principal);
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return jwt.getClaimAsString("sub");
     }

@@ -191,6 +191,6 @@ public class CustomerService {
     }
 
     public Customer getByKID(String userId) {
-        return customerRepository.getCustomerByKeycloakId(userId);
+        return customerRepository.getCustomerByKeycloakId(userId);//TODO kato migrira6 zameni izpolzvaniqta sys getById s novoto id
     }
 }

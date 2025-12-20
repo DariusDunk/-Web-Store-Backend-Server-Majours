@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
+import com.example.ecomerseapplication.DTOs.requests.ReviewCreateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
@@ -31,7 +32,7 @@ public class ReviewService {
     private final ProfanityService profanityService;
 
     @Autowired
-    public ReviewService(ReviewRepository reviewRepository, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService, ProfanityService profanityService) {
+    public ReviewService(ReviewRepository reviewRepository, ProfanityService profanityService) {
         this.reviewRepository = reviewRepository;
         this.profanityService = profanityService;
     }
@@ -54,25 +55,25 @@ public class ReviewService {
         return reviewRepository.getByProductAndCustomer(product, customer).orElse(null);
     }
 
-    public Review getByUIDAndPCode(String productCode, Long customerId) {
-        return reviewRepository.getReviewByCustomer_IdAndProduct_ProductCode(customerId, productCode).orElse(null);
+    public Review getByUIDAndPCode(String productCode, String  customerId) {
+        return reviewRepository.getReviewByCustomer_KeycloakIdAndProduct_ProductCode(customerId, productCode).orElse(null);//TODO vij sled migraciqta
     }
 
     @Nullable
-    public ResponseEntity<?> requestValidation(ReviewRequest request) {
-        if (request.rating > 5 || request.rating < 1) {
+    public ResponseEntity<?> requestValidation(Short rating, String reviewText) {
+        if (rating > 5 || rating < 1) {
             System.out.println("INCORRECT RATING");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
         }
 
-        if (request.reviewText.length() > 500) {
+        if (reviewText.length() > 500) {
             return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
                     "Надвишен лимит",
                     HttpStatus.BAD_REQUEST.value(),
                     "Размера на коментара надвишава максималният размер"));
         }
 
-        if (profanityService.containsProfanity(request.reviewText))
+        if (profanityService.containsProfanity(reviewText))
         {
 //            System.out.println("Нецензорни думи");
             return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
@@ -84,14 +85,14 @@ public class ReviewService {
     }
 
     @Transactional
-    public Product createReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {
+    public Product createReview(Product product, Customer customer, ReviewCreateRequest request, Boolean isVerifiedCustomer) {
 
-        short adjustedRating = (short) (request.rating * 10);
+        short adjustedRating = (short) (request.rating() * 10);
         Review review = new Review();
 
         review.setProduct(product);
         review.setCustomer(customer);
-        review.setReviewText(request.reviewText);
+        review.setReviewText(request.reviewText());
         review.setRating(adjustedRating);
         review.setPostTimestamp(LocalDateTime.now());
         review.setVerifiedCustomer(isVerifiedCustomer);
@@ -160,10 +161,10 @@ public class ReviewService {
 
     @Transactional
     public void delete(Review review) {
-        reviewRepository.delete(review);//TODO sloji logika za obnovqvane na ratinga na produkta
+        reviewRepository.delete(review);//TODO tova trqbva da e dostypno samo za admina i trqbva da ima logika za update na reitinga
     }
 
-    public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable) {
+    public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable, String customerId) {
 
         LocalDateTime startDate = LocalDate.now().atStartOfDay();
         LocalDateTime endDate = LocalDate.now().plusDays(1).atStartOfDay();
@@ -172,7 +173,8 @@ public class ReviewService {
                 request.sortOrder().getValue(),
                 request.verifiedOnly(),
                 request.ratingValue(),
-                request.userId(),
+//                request.userId(),
+                customerId,
                 pageable,
                 startDate,
                 endDate

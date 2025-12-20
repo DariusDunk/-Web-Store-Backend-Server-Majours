@@ -187,6 +187,7 @@ public class KeycloakService {
         formParams.add("client_secret", secret);
         formParams.add("username", request.identifier());
         formParams.add("password", request.password());
+
         //todo vremenno
         formParams.add("scope", "openid profile email");
 
@@ -195,9 +196,11 @@ public class KeycloakService {
                 .request()
                 .post(Entity.form(new Form(formParams)))
        ) {
+           System.out.println("Response status: "+ response.getStatus());
            if (response.getStatus() == HttpStatus.SC_OK) {
 
                KeycloakTokenResponse keycloakTokenResponse = response.readEntity(KeycloakTokenResponse.class);
+
 
 
                return ResponseEntity.ok(new AuthTokenResponse(keycloakTokenResponse.accessToken(),
