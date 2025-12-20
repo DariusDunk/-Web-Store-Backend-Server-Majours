@@ -1,7 +1,9 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
+import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Customer;
@@ -11,6 +13,9 @@ import com.example.ecomerseapplication.Repositories.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +28,12 @@ public class ReviewService {
 
 
     private final ReviewRepository reviewRepository;
+    private final ProfanityService profanityService;
 
     @Autowired
-    public ReviewService(ReviewRepository reviewRepository, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService) {
+    public ReviewService(ReviewRepository reviewRepository, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService, ProfanityService profanityService) {
         this.reviewRepository = reviewRepository;
+        this.profanityService = profanityService;
     }
 
     public void save(Review review) {
@@ -51,6 +58,29 @@ public class ReviewService {
         return reviewRepository.getReviewByCustomer_IdAndProduct_ProductCode(customerId, productCode).orElse(null);
     }
 
+    @Nullable
+    public ResponseEntity<?> requestValidation(ReviewRequest request) {
+        if (request.rating > 5 || request.rating < 1) {
+            System.out.println("INCORRECT RATING");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
+        }
+
+        if (request.reviewText.length() > 500) {
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
+                    "Надвишен лимит",
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Размера на коментара надвишава максималният размер"));
+        }
+
+        if (profanityService.containsProfanity(request.reviewText))
+        {
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+                    "Засечен нецензурен език",
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Засечен нецензурен език, ревюто отказано!"));
+        }
+        return null;
+    }
 
     @Transactional
     public Product createReview(Product product, Customer customer, ReviewRequest request, Boolean isVerifiedCustomer) {

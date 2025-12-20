@@ -11,12 +11,14 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorMessage;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
+import com.example.ecomerseapplication.Utils.NullFieldChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,9 +44,10 @@ public class ProductController {
 
     private final ManufacturerService manufacturerService;
     private final PurchaseCartService purchaseCartService;
+    private final ProfanityService profanityService;
 
     @Autowired
-    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService) {
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, ProfanityService profanityService) {
         this.productService = productService;
         this.categoryAttributeService = categoryAttributeService;
         this.customerService = customerService;
@@ -52,6 +55,7 @@ public class ProductController {
         this.productCategoryService = productCategoryService;
         this.manufacturerService = manufacturerService;
         this.purchaseCartService = purchaseCartService;
+        this.profanityService = profanityService;
     }
 
     @GetMapping("findall")
@@ -239,12 +243,17 @@ public class ProductController {
     @Transactional
     public ResponseEntity<?> addReview(@RequestBody ReviewRequest request) {
 
-        System.out.println(request.toString());
-
-        if (request.rating > 5 || request.rating < 1) {
-            System.out.println("INCORRECT RATING");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
+        if (NullFieldChecker.hasNullFields(request)) {
+            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+            return ResponseEntity.badRequest().build();
         }
+
+//        System.out.println(request.toString());
+
+        ResponseEntity<?> validationResponse = reviewService.requestValidation(request);
+
+        if (validationResponse != null)
+            return validationResponse;
 
         Customer customer = customerService.findById(request.customerId);
 
@@ -277,16 +286,17 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Ревюто е качено!");
     }
 
+
     @PatchMapping("review/update")
     @Transactional
     public ResponseEntity<?> updateReview(@RequestBody ReviewRequest request) {
 
-        System.out.println(request.toString());
+//        System.out.println(request.toString());
 
-        if (request.rating > 5 || request.rating < 1) {
-            System.out.println("INCORRECT RATING");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
-        }
+        ResponseEntity<?> validationResponse = reviewService.requestValidation(request);
+
+        if (validationResponse != null)
+            return validationResponse;
 
         Customer customer = customerService.findById(request.customerId);
 
