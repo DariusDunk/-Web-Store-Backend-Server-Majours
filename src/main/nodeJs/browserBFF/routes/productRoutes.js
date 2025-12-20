@@ -325,6 +325,15 @@ router.post(`/addReview`, async (req, res) => {
                     review_text: reviewText}),
             }
         )
+
+        if (response.status === 207)
+        {
+            const responseData = await response.json();
+            console.log(responseData);
+            return res.status(response.status).json(responseData);
+        }
+
+
         return res.status(response.status).json(response.statusText);
     }
     catch (error) {
@@ -351,6 +360,13 @@ router.post(`/updateReview`, async (req, res) => {
                     rating: rating,
                     review_text: reviewText}),
             })
+
+        if (response.status === 207)
+        {
+            const responseData = await response.json();
+            console.log(responseData);
+            return res.status(response.status).json(responseData);
+        }
 
         return res.status(response.status).json(response.statusText);
     }

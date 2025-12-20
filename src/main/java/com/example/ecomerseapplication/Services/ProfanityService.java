@@ -18,8 +18,8 @@ public class ProfanityService {
 
     @PostConstruct
     public void init() {
-        load("src/main/resources/profanity/bg.txt");
-        load("src/main/resources/profanity/en.txt");
+        load("profanity/bg.txt");
+        load("profanity/en.txt");
     }
 
     private void load(String path) {

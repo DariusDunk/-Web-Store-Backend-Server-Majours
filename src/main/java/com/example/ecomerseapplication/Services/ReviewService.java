@@ -74,6 +74,7 @@ public class ReviewService {
 
         if (profanityService.containsProfanity(request.reviewText))
         {
+//            System.out.println("Нецензорни думи");
             return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
                     "Засечен нецензурен език",
                     HttpStatus.BAD_REQUEST.value(),
