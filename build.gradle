@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.example'
-version = '1.0.6-SNAPSHOT'
+version = '1.0.7-SNAPSHOT'
 
 bootJar {
     archiveBaseName = 'EComersApp'
@@ -45,6 +45,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.keycloak:keycloak-admin-client:26.0.7'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 
     compileOnly 'org.projectlombok:lombok'

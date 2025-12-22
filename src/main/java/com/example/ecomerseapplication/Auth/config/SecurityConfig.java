@@ -34,7 +34,8 @@ public class SecurityConfig {
                                 "/customer/**",
                                 "/manufacturer/**",
                                 "/purchase/**",
-                                "/session/**"
+                                "/session/**",
+                                "/auth/**"
                         ).permitAll() // public endpoints
                         .anyRequest().authenticated() // everything else needs auth
                 )

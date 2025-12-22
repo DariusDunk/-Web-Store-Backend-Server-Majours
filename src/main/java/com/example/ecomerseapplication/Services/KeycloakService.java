@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.DTOs.responses.AuthTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
+import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
 import com.example.ecomerseapplication.enums.UserRole;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.client.Client;
@@ -20,17 +21,24 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.Collections;
 import java.util.List;
 
 @Service
-public class KeycloakService {
+public class KeycloakService {// TODO Rewrite the Keycloak client using Spring WebClient after migration
 
     private final CustomerService customerService;
+    private final WebClient keycloakWebClient;
     private Keycloak keycloak;
 
     @Value("${keycloak.server-url}")
@@ -54,8 +62,10 @@ public class KeycloakService {
     @Value("${keycloak.regular-client-id}")
     private String regularClientId;
 
-    public KeycloakService(CustomerService customerService) {
+    @Autowired
+    public KeycloakService(CustomerService customerService, WebClient keycloakWebClient) {
         this.customerService = customerService;
+        this.keycloakWebClient = keycloakWebClient;
     }
 
     @PostConstruct
@@ -188,7 +198,7 @@ public class KeycloakService {
         formParams.add("username", request.identifier());
         formParams.add("password", request.password());
 
-        //todo vremenno
+        //todo vremenno dokato ne zavy6i migraciqta? Kakvo izob6to prave6e tova??
         formParams.add("scope", "openid profile email");
 
        try (Client client = ClientBuilder.newClient();
@@ -201,36 +211,11 @@ public class KeycloakService {
 
                KeycloakTokenResponse keycloakTokenResponse = response.readEntity(KeycloakTokenResponse.class);
 
-
-
                return ResponseEntity.ok(new AuthTokenResponse(keycloakTokenResponse.accessToken(),
                        keycloakTokenResponse.expiresIn(),
                        keycloakTokenResponse.refreshExpiresIn(),
                        keycloakTokenResponse.refreshToken()));
 
-//               Response userInfoResponse = client.target(serverUrl +"/realms/" + userRealm+ "/protocol/openid-connect/userinfo")
-//                       .request()
-//                       .header("Authorization", "Bearer " + keycloakTokenResponse.accessToken())
-//                       .get();
-
-//               if (userInfoResponse.getStatus() == 200) {
-//                   Map<String, Object> userInfo = userInfoResponse.readEntity(new GenericType<>() {
-//                   });
-//                   String userId = (String) userInfo.get("sub");
-//                   String firstName = (String) userInfo.get("given_name");
-//                   String lastName = (String) userInfo.get("family_name");
-//                   Long oldId = customerService.getLongIdByKId(userId);
-
-
-//                   return ResponseEntity.ok(
-//                           new LoginResponse(firstName+ " " + lastName,
-//                                   getRoleByUserId(getUserIdFromToken(keycloakTokenResponse.accessToken())), keycloakTokenResponse,
-//                                   oldId)
-//                   );
-
-
-
-//               }
            }
 
            return ResponseEntity.status(response.getStatus()).build();
@@ -250,7 +235,7 @@ public class KeycloakService {
 
         MultivaluedMap<String, String> formParams = new MultivaluedHashMap<>();
         formParams.add("client_id", regularClientId);
-        formParams.add("client_secret", secret); // omit if public client
+        formParams.add("client_secret", secret);
         formParams.add("refresh_token", refreshToken);
 
         try (Client client = ClientBuilder.newClient();
@@ -272,5 +257,33 @@ public class KeycloakService {
 
         }
 
+    }
+
+    public ResponseEntity<?> refreshBothTokens(String refreshToken) {
+        String refreshUrl = serverUrl + "realms/" + realmName + "/protocol/openid-connect/token";
+
+        try {
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("grant_type", "refresh_token");
+            formData.add("client_id", regularClientId);
+            formData.add("client_secret", secret);
+            formData.add("refresh_token", refreshToken);
+
+            TokenRefreshResponse response = keycloakWebClient.post()
+                    .uri(refreshUrl)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .body(BodyInserters.fromFormData(formData))
+                    .retrieve()
+                    .bodyToMono(TokenRefreshResponse.class)  // map response to DTO
+                    .block(); // <-- convert Mono to synchronous object
+
+            System.out.println("Response: " + response);
+
+            return ResponseEntity.ok(response);
+
+        } catch (WebClientResponseException e) {
+            // handle errors, e.g., 400, 401
+            throw new RuntimeException("Failed to refresh Keycloak token: " + e.getMessage(), e);
+        }
     }
 }
