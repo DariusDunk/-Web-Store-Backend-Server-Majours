@@ -304,16 +304,16 @@ public class CustomerController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responses);
     }
 
-    @PostMapping("change-passowrd")
-    @Transactional
-    public ResponseEntity<String> resetPassword(@RequestBody CustomerAccountRequest request) {
-        Customer customer = customerService.getByEmail(request.email);
-
-        if (customer == null)
-            return ResponseEntity.notFound().build();
-
-        return customerService.passwordUpdate(customer, request.password);
-    }
+//    @PostMapping("change-passowrd")
+//    @Transactional
+//    public ResponseEntity<String> resetPassword(@RequestBody CustomerAccountRequest request) {TODO syzdai keycloak ekvivalent
+//        Customer customer = customerService.getByEmail(request.email);
+//
+//        if (customer == null)
+//            return ResponseEntity.notFound().build();
+//
+//        return customerService.passwordUpdate(customer, request.password);
+//    }
 
 
 

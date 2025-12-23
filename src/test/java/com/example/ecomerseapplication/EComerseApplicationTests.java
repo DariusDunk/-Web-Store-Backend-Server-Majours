@@ -7,7 +7,7 @@ import com.example.ecomerseapplication.Services.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.mindrot.jbcrypt.BCrypt;
+//import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -54,20 +54,20 @@ class EComerseApplicationTests {
 
         List<CategoryAttribute> categoryAttributeList = categoryAttributeService.getByCategory(productCategory.orElse(null));
 
-        System.out.println(categoryAttributeList.get(0).getAttributeOption());
+        System.out.println(categoryAttributeList.getFirst().getAttributeOption());
     }
 
-    @Test
-    void encryptTest() {
-
-        char[] pass = {'l','u','d','o','t','Z','a','v','e','t'};
-
-        String pwHash = BCrypt.hashpw(Arrays.toString(pass),BCrypt.gensalt(10));
-
-        String candidate = Arrays.toString(pass);
-
-        System.out.println(BCrypt.checkpw(candidate, pwHash));
-    }
+//    @Test
+//    void encryptTest() {
+//
+//        char[] pass = {'l','u','d','o','t','Z','a','v','e','t'};
+//
+//        String pwHash = BCrypt.hashpw(Arrays.toString(pass),BCrypt.gensalt(10));
+//
+//        String candidate = Arrays.toString(pass);
+//
+//        System.out.println(BCrypt.checkpw(candidate, pwHash));
+//    }
 
     @Test
     void codeHashTest() {
@@ -86,17 +86,17 @@ class EComerseApplicationTests {
             System.out.println("Finished");
     }
 
-    @Test
-    void passwordCheck() {
-        Customer customer = customerService.getByEmail("konstantin_aleksandrov@abv.bg");
-
-        String password = "fitnesmaniak200klek";
-
-        String hashedPw = String.valueOf(customer.getPassword());
-        System.out.println(hashedPw);
-
-        System.out.println(BCrypt.checkpw(password,hashedPw));
-    }
+//    @Test
+//    void passwordCheck() {
+//        Customer customer = customerService.getByEmail("konstantin_aleksandrov@abv.bg");
+//
+//        String password = "fitnesmaniak200klek";
+//
+//        String hashedPw = String.valueOf(customer.getPassword());
+//        System.out.println(hashedPw);
+//
+//        System.out.println(BCrypt.checkpw(password,hashedPw));
+//    }
 
     @Test
     void getAttributeByNameAndOption(){

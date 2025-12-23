@@ -7,7 +7,6 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -139,21 +138,21 @@ public class CustomerService {
         return noDigit || noLowercase || noUppercase;
     }
 
-    public ResponseEntity<String> passwordUpdate(Customer customer, String password) {
-
-        if (BCrypt.checkpw(password, String.valueOf(customer.getPassword())))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Новата парола не може да е същата като старата!");
-
-        if (incorrectPassword(password.toCharArray()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Паролата трябва да е поне 8 символа дълга и да има поне един символ от следните: главни букви, малки букви и цифри!");
-
-        customer.setPassword(BCrypt.hashpw(password, BCrypt.gensalt(10)).toCharArray());
-
-        customerRepository.save(customer);
-
-        return ResponseEntity.ok().body("Паролата бе убновена успешно!");
-    }
+//    public ResponseEntity<String> passwordUpdate(Customer customer, String password) {TODO syzdai keycloak re6enie za tozi problem
+//
+//        if (BCrypt.checkpw(password, String.valueOf(customer.getPassword())))
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Новата парола не може да е същата като старата!");
+//
+//        if (incorrectPassword(password.toCharArray()))
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body("Паролата трябва да е поне 8 символа дълга и да има поне един символ от следните: главни букви, малки букви и цифри!");
+//
+//        customer.setPassword(BCrypt.hashpw(password, BCrypt.gensalt(10)).toCharArray());
+//
+//        customerRepository.save(customer);
+//
+//        return ResponseEntity.ok().body("Паролата бе убновена успешно!");
+//    }
 
     public String getPfpUrl(int customerId) {
         return customerRepository.getCustomerPfp(customerId);

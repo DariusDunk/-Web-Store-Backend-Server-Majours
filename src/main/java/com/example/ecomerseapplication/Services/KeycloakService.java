@@ -92,7 +92,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         user.setFirstName(firstname);
         user.setLastName(lastName);
 
-//        System.out.println("User information set");
+        System.out.println("User information set");
 
         CredentialRepresentation cred = new CredentialRepresentation();
         cred.setTemporary(false);
@@ -100,7 +100,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         cred.setValue(password);
         user.setCredentials(Collections.singletonList(cred));
 
-//        System.out.println("Credentials set");
+        System.out.println("Credentials set");
 
 
         if (!keycloak.realm(userRealm).users().search(email).isEmpty())
@@ -114,7 +114,6 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         //Syzdavane na potrebitel v potrebitelskiq realm
       try ( var response = keycloak.realm(userRealm).users().create(user))
       {
-//          keycloak.realm(userRealm).users().delete(userId);
           //Pri polu4avane na rezultat se polu4ava celiq url za potrebitelq i vsi4ko do poslednata 4ast, koqto e potrebitelskoto id
           if (response.getStatus() == org.apache.http.HttpStatus.SC_CREATED) {
               userId = response.getLocation()
@@ -122,7 +121,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                       .replaceAll(".*/([^/]+)$", "$1");
 
               realmUserCreated = true;
-//              System.out.println("User created successfully");
+              System.out.println("User created successfully");
 
               //Vzemane na rolqta na dadeniq potrebitel ot keycloak
               RoleRepresentation role = keycloak.realm(userRealm)
@@ -139,12 +138,17 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                       .add(Collections.singletonList(role));
 
               customerService.createByRepresentation(user, userId);
+              System.out.println("User saved to database");
 
               return ResponseEntity.status(HttpStatus.SC_CREATED).build();//TODO dobavi logika za dobavqne v bazata
           } else {
               //pri neuspe6na registraciq
 //              System.out.println("response:" + response);
-              throw new RuntimeException("Неуспешна регистрация в Keycloak: " + response.getStatusInfo());
+              String errorBody = response.readEntity(String.class);
+              System.out.println("Keycloak create user failed:");
+              System.out.println("Status: " + response.getStatus());
+              System.out.println("Body: " + errorBody);
+              throw new RuntimeException("Неуспешна регистрация в Keycloak: " + errorBody);
           }
       }
       catch (Exception e) {

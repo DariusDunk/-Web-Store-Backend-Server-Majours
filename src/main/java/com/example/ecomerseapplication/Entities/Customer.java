@@ -31,7 +31,6 @@ public class Customer {
     @Column(columnDefinition = "character varying(50)")
     private String email;
 
-    private char[] password;
     @Column(name = "phone_number", columnDefinition = "character varying(10)")
     private String phoneNumber;
 
@@ -39,8 +38,8 @@ public class Customer {
     @Column(name = "registration_date")
     private LocalDate registrationDate;
 
-    @Column(name = "customer_pfp", columnDefinition = "character varying(255) default 'default_pfp.jpg'")
-    private String customerPfp;
+    @Column(name = "customer_pfp")
+    private String customerPfp = "default_pfp.png";
 
     @OneToMany(mappedBy = "customer")
     private List<Purchase> purchases;
