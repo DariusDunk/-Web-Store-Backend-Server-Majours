@@ -7,7 +7,7 @@ const categoryRoutes = require( './routes/categoryRoutes.js');
 const customerRoutes = require( './routes/customerRoutes.js');
 const purchaseRoutes = require( './routes/purchaseRoutes.js');
 const attributeRoutes = require( './routes/attributeRoutes.js');
-const refreshRoutes = require( './routes/refreshoRoutes.js');
+const authRoutes = require( './routes/authRoutes.js');
 const http = require('http');
 const url = require('url');
 const {response, request} = require("express");
@@ -22,7 +22,7 @@ app.use('/category', categoryRoutes)
 app.use('/customer', customerRoutes)
 app.use('/purchase', purchaseRoutes)
 app.use('/attribute', attributeRoutes)
-app.use('/refresh', refreshRoutes)
+app.use('/auth', authRoutes)
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

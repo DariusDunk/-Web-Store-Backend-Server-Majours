@@ -226,7 +226,7 @@ router.post(`/keyk/login`, async (req, res) => {
       {
         maxAge: refresh_expires_in * 1000,
         secure: false,
-        path: '/refresh',
+        path: '/auth',
         sameSite: 'lax',
         httpOnly: true });
 

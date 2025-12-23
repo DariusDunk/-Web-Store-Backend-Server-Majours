@@ -33,7 +33,7 @@ router.post('/logout', async (req, res) => {
     res.cookie('refresh_token', '', {
         httpOnly: true,
         secure: false,
-        path: '/refresh',
+        path: '/auth',
         sameSite: 'lax',
         maxAge: 0
     });
@@ -43,7 +43,7 @@ router.post('/logout', async (req, res) => {
     res.status(200).end();
 });
 
-router.post('/token', async (req, res) => {
+router.post('/refresh', async (req, res) => {
     const refreshToken = req.cookies.refresh_token;
 
     // console.log("token: " + refreshToken);
@@ -76,7 +76,7 @@ router.post('/token', async (req, res) => {
             res.cookie('refresh_token', refresh_token, {
                 httpOnly: true,
                 secure: false,
-                path: '/refresh',
+                path: '/auth',
                 sameSite: `lax`,
                 maxAge: refresh_token_lifeTime * 1000
             })
