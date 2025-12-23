@@ -1,13 +1,14 @@
 const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
+const AuthURL = `${Backend_Url}/auth`;
 
 router.post('/logout', async (req, res) => {
     const refreshToken = req.cookies.refresh_token;
 
     if (refreshToken)
     {
-        const response = await fetch(`${Backend_Url}/customer/invalidate`, {
+        const response = await fetch(`${AuthURL}/invalidate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -45,11 +46,11 @@ router.post('/logout', async (req, res) => {
 router.post('/token', async (req, res) => {
     const refreshToken = req.cookies.refresh_token;
 
-    console.log("token: " + refreshToken);
+    // console.log("token: " + refreshToken);
 
     if (refreshToken)
     {
-        const response = await fetch(`${Backend_Url}/auth/refresh`,
+        const response = await fetch(`${AuthURL}/refresh`,
             {
                 method: 'POST',
                 headers: {
@@ -58,7 +59,7 @@ router.post('/token', async (req, res) => {
                 body: JSON.stringify({refresh_token: refreshToken})
             });
 
-        console.log("response status: " + response.status)
+        // console.log("response status: " + response.status)
 
         if (response.status >= 200 && response.status <= 300) {
             const responseData = await response.json();
@@ -85,6 +86,7 @@ router.post('/token', async (req, res) => {
             res.status(response.status).end();
 
     }
+    return res.status(401).end();
 })
 
 module.exports = router;

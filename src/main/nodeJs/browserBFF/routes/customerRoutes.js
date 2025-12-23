@@ -188,35 +188,6 @@ router.post(`/keyk/register`, async (req, res) => {
   }
 })
 
-
-// router.post(`/keyk/login`, async (req, res) => {
-//   const {email, password} = req.body;
-//
-//   console.log("Node login: " + email + " " + password)
-//
-//   const response = await fetch(`${Backend_Url}/customer/login/customer`,{
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify({identifier: email, password: password})
-//   })
-//
-//   const responseData = await response.json();
-//
-//   console.log("Node response: " + JSON.stringify(responseData))
-//
-//
-//   if (response.status === 400) {
-//
-//     const text = await response.text();
-//     res.status(response.status).send(text);
-//   }
-//
-//   else
-//     res.status(response.status).json(responseData);
-// })
-
 router.post(`/keyk/login`, async (req, res) => {
   const {email, password} = req.body;
 
@@ -230,7 +201,7 @@ router.post(`/keyk/login`, async (req, res) => {
     body: JSON.stringify({identifier: email, password: password})
   })
 
-  console.log("Node response: " + response.status)
+  // console.log("Node response: " + response.status)
 
   if (response.status !== 200)
   {

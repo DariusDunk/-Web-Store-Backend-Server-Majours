@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("auth/")
-public class SessionController {
+public class AuthController {
 
     private final KeycloakService keycloakService;
 
     @Autowired
-    public SessionController(KeycloakService keycloakService) {
+    public AuthController(KeycloakService keycloakService) {
         this.keycloakService = keycloakService;
     }
 
@@ -37,6 +37,23 @@ public class SessionController {
         catch (Exception e)
         {
             System.out.println("Error refreshing tokens: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+    }
+
+    @PostMapping("invalidate")
+    public ResponseEntity<?> invalidateToken(@RequestBody RefreshTokenRequest refreshTokenRequest)
+    {
+
+        try
+        {
+//            System.out.println("Invalidating token: " + refreshTokenRequest.refreshToken());
+            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshTokenRequest.refreshToken()))).build();
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error invalidating token: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 

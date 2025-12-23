@@ -367,20 +367,7 @@ public class CustomerController {
         );
     }
 
-    @PostMapping("invalidate")
-    public ResponseEntity<?> invalidateToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
 
-        try
-        {
-            System.out.println("Invalidating token: " + refreshTokenRequest.refreshToken());
-            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshTokenRequest.refreshToken()))).build();
-        }
-        catch (Exception e)
-        {
-            System.out.println("Error invalidating token: " + e.getMessage());
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
 
     @PostMapping("login/customer")
     public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) throws VerificationException {
