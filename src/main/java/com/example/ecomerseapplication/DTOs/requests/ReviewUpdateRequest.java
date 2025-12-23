@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.ToString;
 
 @ToString
-public class ReviewRequest {
-    @JsonProperty("user_id")
-    public long customerId;//TODO iztrii
+public class ReviewUpdateRequest {
     @JsonProperty("product_code")
     public String productCode;
     @JsonProperty("review_text")

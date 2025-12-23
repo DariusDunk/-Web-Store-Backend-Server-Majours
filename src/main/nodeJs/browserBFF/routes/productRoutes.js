@@ -317,7 +317,6 @@ router.get(`/getReview/:productCode`, async (req, res) => {
 })
 
 router.post(`/addReview`, async (req, res) => {
-    // const userId = req.body.userId;
     const productCode = req.body.productCode;
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
@@ -356,7 +355,7 @@ router.post(`/addReview`, async (req, res) => {
 })
 
 router.post(`/updateReview`, async (req, res) => {
-    const userId = req.body.customerId;
+    const accessToken = req.cookies['access_token'];
     const productCode = req.body.productCode;
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
@@ -367,9 +366,9 @@ router.post(`/updateReview`, async (req, res) => {
         const response = await fetch(Backend_Url + "/product/review/update",
             {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' ,
+                'Authorization': 'Bearer ' + accessToken},
                 body: JSON.stringify({
-                    user_id: userId,
                     product_code: productCode,
                     rating: rating,
                     review_text: reviewText}),

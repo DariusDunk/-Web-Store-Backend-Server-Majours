@@ -45,7 +45,7 @@ public class ProductController {
     private final UserIdExtractor userIdExtractor;
 
     @Autowired
-    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, ProfanityService profanityService, UserIdExtractor userIdExtractor) {
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, UserIdExtractor userIdExtractor) {
         this.productService = productService;
         this.categoryAttributeService = categoryAttributeService;
         this.customerService = customerService;
@@ -293,7 +293,13 @@ public class ProductController {
 
     @PatchMapping("review/update")
     @Transactional
-    public ResponseEntity<?> updateReview(@RequestBody ReviewRequest request) {
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> updateReview(@RequestBody ReviewUpdateRequest request) {
+
+        if (NullFieldChecker.hasNullFields(request)) {
+            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+            return ResponseEntity.badRequest().build();
+        }
 
 //        System.out.println(request.toString());
 
@@ -302,7 +308,9 @@ public class ProductController {
         if (validationResponse != null)
             return validationResponse;
 
-        Customer customer = customerService.findById(request.customerId);
+        String customerId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(customerId);
 
         if (customer == null) {
 

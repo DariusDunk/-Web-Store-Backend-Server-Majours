@@ -2,7 +2,7 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.requests.ReviewCreateRequest;
-import com.example.ecomerseapplication.DTOs.requests.ReviewRequest;
+import com.example.ecomerseapplication.DTOs.requests.ReviewUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse;
@@ -112,7 +112,7 @@ public class ReviewService {
     }
 
     @Transactional
-    public Product updateReview(Review existingReview, ReviewRequest request, Product product) {
+    public Product updateReview(Review existingReview, ReviewUpdateRequest request, Product product) {
         short adjustedRating = (short) (request.rating * 10);
 
 //        System.out.println("EXISTING RATING: " + existingReview.getRating() + " NEW RATING: " + adjustedRating);

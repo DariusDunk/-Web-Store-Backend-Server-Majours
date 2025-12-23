@@ -20,7 +20,7 @@ public class Review {
     @ManyToOne
     private Product product;
 
-    @JoinColumn(name = "customer_id_keyk", referencedColumnName = "k_id", updatable = false)
+    @JoinColumn(name = "customer_id_keyk", referencedColumnName = "k_id")
     @ManyToOne //TODO remove unnecessary details when the id migration in customer is finished
     private Customer customer;
 
