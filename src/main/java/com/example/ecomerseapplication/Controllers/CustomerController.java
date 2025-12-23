@@ -316,31 +316,6 @@ public class CustomerController {
     }
 
 
-    @PostMapping("register/customer")
-    @Transactional
-    public ResponseEntity<?> registerUserKeycloak(@RequestBody CustomerAccountRequest customerAccountRequest) {
-
-        if (NullFieldChecker.hasNullFields(customerAccountRequest)) {
-            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(customerAccountRequest));
-            return ResponseEntity.badRequest().build();
-        }
-
-
-        System.out.println("Registering user: " + customerAccountRequest);
-
-        try {
-          return  keycloakService.registerUser(customerAccountRequest.firstName,
-                    customerAccountRequest.familyName,
-                    customerAccountRequest.password,
-                    customerAccountRequest.email,
-                    UserRole.CUSTOMER);
-        } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-
-//        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
 
     @GetMapping("me")
     public ResponseEntity<CustomerResponse> getCustomerInfo()
@@ -366,12 +341,6 @@ public class CustomerController {
                 )
         );
     }
-
-
-
-
-
-
 
     @GetMapping("getPfp")
     public ResponseEntity<String> getUserPfp(@RequestParam int id) {

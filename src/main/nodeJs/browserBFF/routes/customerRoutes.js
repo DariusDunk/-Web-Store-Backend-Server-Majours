@@ -161,69 +161,7 @@ router.post(`/removeFromCart/batch`, async (req, res) =>{
   }
 })
 
-router.post(`/keyk/register`, async (req, res) => {
 
-  const {name, familyName, email, password} = req.body;
-
-  // console.log("Node register" +
-  //   "\nName: " + name +
-  //   "\nFamily name: " + familyName +
-  //   "\nEmail: " + email +
-  //   "\nPassword: " + password)
-
-
-  try{
-    const response = await fetch(`${Backend_Url}/customer/register/customer`,{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({first_name: name, last_name: familyName, email: email, password: password})
-    });
-    res.status(response.status).end();
-  }
-  catch (error) {
-    console.error('Error with registration: ', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-})
-
-router.post('/registration', async (req, res)=>{
-  try{
-    const response = await fetch(`${Backend_Url}/customer/registration`,{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(req.body)
-    });
-    const responseData = await response.text();
-    // console.log(`response: status: ${response.status} data: ${responseData}`);
-    res.status(response.status).send(responseData);
-  }
-  catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-router.post('/login', async (req, res)=>{
-  try{
-    const response = await fetch(`${Backend_Url}/customer/login`,{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(req.body)
-    });
-    const responseData = await response.text();
-    res.status(response.status).send(responseData);
-  }
-  catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 router.get('/getCart/:id',async (req,res)=>
 {

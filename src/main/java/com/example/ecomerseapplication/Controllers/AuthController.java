@@ -1,12 +1,16 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.RefreshTokenRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.Services.KeycloakService;
+import com.example.ecomerseapplication.Utils.NullFieldChecker;
+import com.example.ecomerseapplication.enums.UserRole;
 import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +44,31 @@ public class AuthController {
         {
             System.out.println("Error refreshing tokens: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+    }
+
+    @PostMapping("register")
+    @Transactional
+    public ResponseEntity<?> registerUserKeycloak(@RequestBody CustomerAccountRequest customerAccountRequest) {
+
+        if (NullFieldChecker.hasNullFields(customerAccountRequest)) {
+            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(customerAccountRequest));
+            return ResponseEntity.badRequest().build();
+        }
+
+
+        System.out.println("Registering user: " + customerAccountRequest);
+
+        try {
+            return  keycloakService.registerUser(customerAccountRequest.firstName,
+                    customerAccountRequest.familyName,
+                    customerAccountRequest.password,
+                    customerAccountRequest.email,
+                    UserRole.CUSTOMER);
+        } catch (Exception e) {
+            System.out.println("Error: "+e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
 
     }
