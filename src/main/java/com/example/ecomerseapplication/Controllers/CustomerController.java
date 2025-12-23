@@ -369,14 +369,7 @@ public class CustomerController {
 
 
 
-    @PostMapping("login/customer")
-    public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) throws VerificationException {
 
-        if (request.identifier() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
-        return keycloakService.loginUser(request);
-    }
 
 
 
