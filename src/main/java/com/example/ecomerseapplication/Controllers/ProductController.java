@@ -379,13 +379,23 @@ public class ProductController {
 
     @DeleteMapping("review/delete")
     @Transactional
-    public ResponseEntity<String> deleteReview(@RequestBody CustomerProductPairRequest pairRequest) {
-        Customer customer = customerService.findById(pairRequest.customerId);
+    public ResponseEntity<String> deleteReview(@RequestParam("product_code") String productCode) {
+
+        if (productCode == null)  {
+            System.out.println("Product code is null");
+            return ResponseEntity.badRequest().build();
+        }
+
+        String customerId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByKID(customerId);
 
         if (customer == null)
+        {
+            System.out.println("Customer not found (token/ keycloak id might be null");
             return ResponseEntity.notFound().build();
+        }
 
-        Product product = productService.findByPCode(pairRequest.productCode);
+        Product product = productService.findByPCode(productCode);
 
         if (product == null)
             return ResponseEntity.notFound().build();

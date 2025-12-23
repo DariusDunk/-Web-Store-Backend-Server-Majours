@@ -392,16 +392,17 @@ router.post(`/updateReview`, async (req, res) => {
 })
 
 router.post(`/deleteReview`, async (req, res) => {
-    const {productCode, customerId} = req.body;
+    const {productCode} = req.body;
+    const accessToken = req.cookies['access_token'];
 
     // console.log( "INSIDE DELETE REVIEW: " + "Product: " + productCode + " Customer: " + customerId)
 
     try{
-        const response = await fetch(`${Backend_Url}/product/review/delete`,
+        const response = await fetch(`${Backend_Url}/product/review/delete?product_code=${productCode}`,
             {
                 method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({productCode, customerId})
+                headers: {'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + accessToken}
             })
 
         return res.status(response.status).json(response.statusText);

@@ -173,7 +173,6 @@ public class ReviewService {
                 request.sortOrder().getValue(),
                 request.verifiedOnly(),
                 request.ratingValue(),
-//                request.userId(),
                 customerId,
                 pageable,
                 startDate,
