@@ -33,6 +33,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class KeycloakService {// TODO Rewrite the Keycloak client using Spring WebClient after migration
@@ -92,7 +93,21 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         user.setFirstName(firstname);
         user.setLastName(lastName);
 
-        System.out.println("User information set");
+//        System.out.println("User information set");
+
+        if (password.length() < 12) {
+            return ResponseEntity.status(HttpStatus.SC_MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+                    "Кратка парола!",
+                    HttpStatus.SC_BAD_REQUEST,
+                    "Паролата не трябва да е по-кратка от 12 символа"));
+        }
+
+        if (Objects.equals(password, email)) {
+            return ResponseEntity.status(HttpStatus.SC_MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+                    "Имейлът съвпада с паролата!",
+                    HttpStatus.SC_BAD_REQUEST,
+                    "Имейлът и паролата не трябва да съвпадат!"));
+        }
 
         CredentialRepresentation cred = new CredentialRepresentation();
         cred.setTemporary(false);
@@ -100,7 +115,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         cred.setValue(password);
         user.setCredentials(Collections.singletonList(cred));
 
-        System.out.println("Credentials set");
+//        System.out.println("Credentials set");
 
 
         if (!keycloak.realm(userRealm).users().search(email).isEmpty())
@@ -121,7 +136,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                       .replaceAll(".*/([^/]+)$", "$1");
 
               realmUserCreated = true;
-              System.out.println("User created successfully");
+//              System.out.println("User created successfully");
 
               //Vzemane na rolqta na dadeniq potrebitel ot keycloak
               RoleRepresentation role = keycloak.realm(userRealm)
@@ -138,9 +153,9 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                       .add(Collections.singletonList(role));
 
               customerService.createByRepresentation(user, userId);
-              System.out.println("User saved to database");
+//              System.out.println("User saved to database");
 
-              return ResponseEntity.status(HttpStatus.SC_CREATED).build();//TODO dobavi logika za dobavqne v bazata
+              return ResponseEntity.status(HttpStatus.SC_CREATED).build();
           } else {
               //pri neuspe6na registraciq
 //              System.out.println("response:" + response);
