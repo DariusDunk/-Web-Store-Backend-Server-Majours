@@ -49,11 +49,12 @@ public class ProfanityService {
 
     private String normalize(String text) {
         return text.toLowerCase()
-                .replace("4", "a")
+                .replace("4", "ch")
                 .replace("@", "a")
                 .replace("1", "i")
                 .replace("!", "i")
                 .replace("0", "o")
+                .replace("6", "sh")
                 .replaceAll("[^a-za-я0-9]","");
     }
 }
