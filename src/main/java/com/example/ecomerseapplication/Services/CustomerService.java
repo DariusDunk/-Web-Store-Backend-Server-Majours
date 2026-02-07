@@ -76,9 +76,9 @@ public class CustomerService {
 //        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 //    }
 
-    public ResponseEntity<?> addProductToFavourites(long customerId, Product product) {
+    public ResponseEntity<?> addProductToFavourites(String customerId, Product product) {
 
-        Customer customer = customerRepository.findById(customerId).orElse(null);
+        Customer customer = customerRepository.getCustomerByKeycloakId(customerId);
 
         if (customer == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
@@ -67,12 +68,21 @@ public class CustomerController {
 
     @PostMapping("favorite/add")
     @Transactional
+    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
+
+        if (NullFieldChecker.hasNullFields(pairRequest)) {
+            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(pairRequest));
+            return ResponseEntity.badRequest().build();
+        }
+
+        String userId = userIdExtractor.getUserId();
+
         Product product = productService.findByPCode(pairRequest.productCode);
 
         if (product == null)
             return ResponseEntity.notFound().build();
-        return customerService.addProductToFavourites(pairRequest.customerId, product);
+        return customerService.addProductToFavourites(userId, product);
     }
 
     @GetMapping("favourites/{id}/p/{page}")//PAGING
