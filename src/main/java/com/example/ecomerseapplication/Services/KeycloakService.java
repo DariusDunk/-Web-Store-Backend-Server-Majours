@@ -70,19 +70,6 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         this.keycloakWebClient = keycloakWebClient;
     }
 
-//    @PostConstruct
-//    public void init() {
-//        //login kato admin za da moje da se syzdavat potrebiteli
-////        keycloak = KeycloakBuilder.builder()
-////                .serverUrl(serverUrl)
-////                .realm(adminRealm)
-////                .clientId(adminCliendId)
-////                .username(adminUsername)
-////                .password(adminPassword)
-////                .build();
-//
-//
-//    }
 
     private String getAdminAccessToken() {
         System.out.println("Getting Admin Access Token");
@@ -105,7 +92,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         System.out.println("User check");
 
         UserRepresentation[] existingUsers = keycloakWebClient.get()
-                .uri("/admin/realms/" + userRealm + "/users?username={username}", email)//todo test
+                .uri("/admin/realms/" + userRealm + "/users?username={username}", email)
                 .headers(h -> h.setBearerAuth(adminToken))
                 .retrieve()
                 .bodyToMono(UserRepresentation[].class)
@@ -120,7 +107,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
         try {
            ResponseEntity<?> response = keycloakWebClient.post()
-                    .uri("/admin/realms/" + userRealm + "/users")//todo test
+                    .uri("/admin/realms/" + userRealm + "/users")
                     .headers(h -> h.setBearerAuth(adminToken))
                     .bodyValue(user)
                     .exchangeToMono(clientResponse -> {
@@ -170,7 +157,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
     try
         {
             keycloakWebClient.post()
-                    .uri("/admin/realms/" + userRealm + "/users/{id}/role-mappings/realm", userId)//todo test
+                    .uri("/admin/realms/" + userRealm + "/users/{id}/role-mappings/realm", userId)
                     .headers(h -> h.setBearerAuth(adminToken))
                     .bodyValue(Collections.singletonList(role))
                     .retrieve()
@@ -191,14 +178,14 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 //        String token = getAdminAccessToken();
         System.out.println("Deleting user");
         keycloakWebClient.delete()
-                .uri("/admin/realms/" + userRealm + "/users/{id}", userId)//todo test
+                .uri("/admin/realms/" + userRealm + "/users/{id}", userId)
                 .headers(h -> h.setBearerAuth(adminToken))
                 .retrieve()
                 .toBodilessEntity()
                 .block();
     }
 
-    public ResponseEntity<?> registerUser(String firstname,String lastName , String password, String email, UserRole userRole) {//TODO TEST
+    public ResponseEntity<?> registerUser(String firstname,String lastName , String password, String email, UserRole userRole) {
 
         System.out.println("Registration begining");
 
@@ -273,67 +260,6 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
         }
 
-        //Syzdavane na potrebitel v potrebitelskiq realm
-//      try ( var response = keycloak.realm(userRealm).users().create(user))
-//      {
-//          //Pri polu4avane na rezultat se polu4ava celiq url za potrebitelq i vsi4ko do poslednata 4ast, koqto e potrebitelskoto id
-//          if (response.getStatus() == org.apache.http.HttpStatus.SC_CREATED) {
-//              userId = response.getLocation()
-//                      .getPath()
-//                      .replaceAll(".*/([^/]+)$", "$1");
-//
-//              realmUserCreated = true;
-////              System.out.println("User created successfully");
-//
-//              //Vzemane na rolqta na dadeniq potrebitel ot keycloak
-//              RoleRepresentation role = keycloak.realm(userRealm)
-//                      .roles()
-//                      .get(userRole.getValue())
-//                      .toRepresentation();
-//
-//              //dobavqne na izbraniq potrebitel kym spisyka s izbranata rolq. Demek na potrebitelq mu se dava izbranata rolq
-//              keycloak.realm(userRealm)
-//                      .users()
-//                      .get(userId)
-//                      .roles()
-//                      .realmLevel()
-//                      .add(Collections.singletonList(role));
-//
-//              customerService.createByRepresentation(user, userId);
-////              System.out.println("User saved to database");
-//
-//              return ResponseEntity.status(HttpStatus.SC_CREATED).build();
-//          } else {
-//              //pri neuspe6na registraciq
-////              System.out.println("response:" + response);
-//              String errorBody = response.readEntity(String.class);
-//              System.out.println("Keycloak create user failed:");
-//              System.out.println("Status: " + response.getStatus());
-//              System.out.println("Body: " + errorBody);
-//              throw new RuntimeException("Неуспешна регистрация в Keycloak: " + errorBody);
-//          }
-//      }
-//      catch (Exception e) {
-//
-//          if (realmUserCreated) {
-//
-//              System.out.println("Keycloak error after creating a user: " + e.getMessage());
-//              try {
-//                  keycloak.realm(userRealm)
-//                          .users()
-//                          .get(userId)
-//                          .remove();
-//              } catch (Exception cleanEx) {
-//                  System.out.println("Error cleaning up user: " + cleanEx.getMessage());
-//              }
-//          }
-//
-//          else {
-//              System.out.println("Keycloak error before creating a user: " + e.getMessage());
-//          }
-//
-//          return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).build();
-//      }
         return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
@@ -396,10 +322,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
     public Integer invalidateRefreshToken(String refreshToken) {//TODO TEST
 
-//        String logoutUrl = serverUrl + "realms/" + realmName + "/protocol/openid-connect/logout";
         String logoutUrl = "/realms/" + realmName + "/protocol/openid-connect/logout";//todo test
-
-//        System.out.println("URL: " + logoutUrl);
 
         try {
             MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
@@ -452,12 +375,9 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 //        }
 
 
-
-
     }
 
     public ResponseEntity<?> refreshBothTokens(String refreshToken) {
-//        String refreshUrl = serverUrl + "realms/" + realmName + "/protocol/openid-connect/token";
         String refreshUrl = "/realms/" + realmName + "/protocol/openid-connect/token";//todo test
 
         try {
@@ -472,15 +392,15 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .body(BodyInserters.fromFormData(formData))
                     .retrieve()
-                    .bodyToMono(TokenRefreshResponse.class)  // map response to DTO
-                    .block(); // <-- convert Mono to synchronous object
+                    .bodyToMono(TokenRefreshResponse.class)
+                    .block();
 
             System.out.println("Response: " + response);
 
             return ResponseEntity.ok(response);
 
         } catch (WebClientResponseException e) {
-            // handle errors, e.g., 400, 401
+
             throw new RuntimeException("Failed to refresh Keycloak token: " + e.getMessage(), e);
         }
     }
