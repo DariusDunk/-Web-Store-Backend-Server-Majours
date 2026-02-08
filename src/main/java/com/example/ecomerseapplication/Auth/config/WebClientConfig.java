@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    @Value("${keycloak.token-target-address}")
+    @Value("${keycloak.server-url}")
     private String tokenAddress;
     @Bean
     public WebClient keycloakWebClient() {

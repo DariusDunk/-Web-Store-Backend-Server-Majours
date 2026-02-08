@@ -32,7 +32,7 @@ public class CustomerService {
 
         return customerRepository.existsByEmail(email);
     }
-
+//
 //    public ResponseEntity<String> registration(CustomerAccountRequest customerAccountRequest) {
 //
 //        if (customerAccountRequest.email.isEmpty()
