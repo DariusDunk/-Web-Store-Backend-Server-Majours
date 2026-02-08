@@ -1,26 +1,18 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
+import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
-import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
 import com.example.ecomerseapplication.enums.UserRole;
-//import jakarta.annotation.PostConstruct;
-//import jakarta.ws.rs.client.Client;
-//import jakarta.ws.rs.client.ClientBuilder;
-//import jakarta.ws.rs.client.Entity;
-//import jakarta.ws.rs.core.*;
-//import org.apache.http.HttpStatus;
-import org.springframework.http.HttpStatus;
-import org.keycloak.TokenVerifier;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +23,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -39,9 +31,8 @@ import java.util.Objects;
 @Service
 public class KeycloakService {// TODO Rewrite the Keycloak client using Spring WebClient after migration
 
-    private final CustomerService customerService;
+//    private final CustomerService customerService;
     private final WebClient keycloakWebClient;
-    private Keycloak keycloak;
 
     @Value("${keycloak.server-url}")
     private String serverUrl;
@@ -65,8 +56,11 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
     private String regularClientId;
 
     @Autowired
-    public KeycloakService(CustomerService customerService, WebClient keycloakWebClient) {
-        this.customerService = customerService;
+    public KeycloakService(
+//            CustomerService customerService,
+                           WebClient keycloakWebClient
+    ) {
+//        this.customerService = customerService;
         this.keycloakWebClient = keycloakWebClient;
     }
 
@@ -223,16 +217,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         cred.setValue(password);
         user.setCredentials(Collections.singletonList(cred));
         System.out.println("Password checked");
-//        System.out.println("Credentials set");
 
-
-//        if (!keycloak.realm(userRealm).users().search(email).isEmpty())
-//           return ResponseEntity.status(HttpStatus.SC_MULTI_STATUS).body(
-//                   new ErrorResponse(ErrorType.USER_ALREADY_EXISTS,
-//                           "Съществуващ потребител",
-//                           HttpStatus.SC_CONFLICT,
-//                           "Потребител с този имейл адрес вече съществува")
-//           );
         if (doesUserExist(email, adminToken))
         {
             System.out.println("User already exists");
@@ -252,8 +237,6 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         if (userCreationResponse.getStatusCode().is2xxSuccessful()) {
             ResponseEntity<?> roleAssignResponse = assignUserRole(userId, userRole, adminToken);
 
-//            realmUserCreated = true;
-
             if (roleAssignResponse.getStatusCode().is2xxSuccessful()) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(userId);
             }
@@ -263,62 +246,61 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-
-
-    public String getUserIdFromToken(String token) throws VerificationException {
-        AccessToken accessToken = TokenVerifier.create(token, AccessToken.class).getToken();
-        return accessToken.getSubject();
-    }
-
-    public List<UserRepresentation> getAllUsersOfRole(String roleName) {
-        return keycloak.realm(userRealm).roles().get(roleName).getUserMembers();
+    public List<UserRepresentation> getAllUsersOfRole(String roleName) {//Untested
+        String adminToken = getAdminAccessToken();
+        return keycloakWebClient.get()
+                .uri("/admin/realms/" + userRealm + "/roles/{role}/users", roleName)
+                .headers(h -> h.setBearerAuth(adminToken))
+                .retrieve()
+                .bodyToMono(UserRepresentation[].class)
+                .map(Arrays::asList)
+                .block();
     }
 
     public String getRoleByUserId(String userId) {
-        return keycloak.realm(userRealm).users().get(userId).roles().realmLevel().listAll().getFirst().getName();
+        String adminToken = getAdminAccessToken();
+        String role =  Objects.requireNonNull(keycloakWebClient.get()
+                        .uri("/admin/realms/" + userRealm + "/users/{id}/role-mappings/realm", userId)
+                        .headers(h -> h.setBearerAuth(adminToken))
+                        .retrieve()
+                        .bodyToMono(RoleRepresentation[].class)
+                        .map(Arrays::asList)
+                        .block())
+                .getFirst().getName();
+
+        System.out.println("Role: " + role);
+        return role;
     }
 
-    public UserRepresentation getUserIdByEmail(String username) {
-        return keycloak.realm(userRealm).users().searchByEmail(username, true).getFirst();
+    public ResponseEntity<?> loginUser(UserLoginRequest request) throws VerificationException {
+
+        MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
+        formParams.add("grant_type", "password");
+        formParams.add("client_id", regularClientId);
+        formParams.add("client_secret", secret);
+        formParams.add("username", request.identifier());
+        formParams.add("password", request.password());
+
+        //todo vremenno dokato ne zavy6i migraciqta? Kakvo izob6to prave6e tova??
+        formParams.add("scope", "openid profile email");
+    try
+        {
+            KeycloakTokenResponse response = Objects.requireNonNull(keycloakWebClient.post()
+                    .uri(tokenAddress)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(BodyInserters.fromFormData(formParams))
+                    .retrieve()
+                    .bodyToMono(KeycloakTokenResponse.class)
+                    .block());
+
+            return ResponseEntity.ok(response);
+        }
+    catch (WebClientResponseException e) {
+        System.out.println("Error logging in user: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
-//    public ResponseEntity<?> loginUser(UserLoginRequest request) throws VerificationException {
-//
-//        MultivaluedMap<String, String> formParams = new MultivaluedHashMap<>();
-//        formParams.add("grant_type", "password");
-//        formParams.add("client_id", regularClientId);
-//        formParams.add("client_secret", secret);
-//        formParams.add("username", request.identifier());
-//        formParams.add("password", request.password());
-//
-//        //todo vremenno dokato ne zavy6i migraciqta? Kakvo izob6to prave6e tova??
-//        formParams.add("scope", "openid profile email");
-//
-//       try (Client client = ClientBuilder.newClient();
-//            Response response =  client.target(tokenAddress)
-//                .request()
-//                .post(Entity.form(new Form(formParams)))
-//       ) {
-//           System.out.println("Response status: "+ response.getStatus());
-//           if (response.getStatus() == HttpStatus.SC_OK) {
-//
-//               KeycloakTokenResponse keycloakTokenResponse = response.readEntity(KeycloakTokenResponse.class);
-//
-//               return ResponseEntity.ok(new AuthTokenResponse(keycloakTokenResponse.accessToken(),
-//                       keycloakTokenResponse.expiresIn(),
-//                       keycloakTokenResponse.refreshExpiresIn(),
-//                       keycloakTokenResponse.refreshToken()));
-//
-//           }
-//
-//           return ResponseEntity.status(response.getStatus()).build();
-//       }
-//       catch (Exception e) {
-//           System.out.println("Error logging in user: " + e.getMessage());
-//           return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).build();
-//       }
-//
-//    }
+    }
 
     public Integer invalidateRefreshToken(String refreshToken) {//TODO TEST
 
