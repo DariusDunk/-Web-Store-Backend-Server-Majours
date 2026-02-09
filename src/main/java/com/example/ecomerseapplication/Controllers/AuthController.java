@@ -35,6 +35,9 @@ public class AuthController {
 
     @PostMapping("refresh")
     public ResponseEntity<?> refreshTokens(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+
+//        System.out.println("In refresh endpoint");
+
         try
         {
             System.out.println("Refresh token: "+ refreshTokenRequest.refreshToken());

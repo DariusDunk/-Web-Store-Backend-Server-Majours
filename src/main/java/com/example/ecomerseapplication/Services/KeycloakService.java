@@ -302,9 +302,9 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
     }
 
-    public Integer invalidateRefreshToken(String refreshToken) {//TODO TEST
+    public Integer invalidateRefreshToken(String refreshToken) {
 
-        String logoutUrl = "/realms/" + realmName + "/protocol/openid-connect/logout";//todo test
+        String logoutUrl = "/realms/" + realmName + "/protocol/openid-connect/logout";
 
         try {
             MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
@@ -336,31 +336,13 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                             ", Body: " + responseBody, e
             );
         }
-//
-//        try (Client client = ClientBuilder.newClient();
-//             Response response = client.target(logoutUrl)
-//                     .request()
-//                     .post(Entity.form(new Form(formParams)))) {
-//
-//            String responseText = response.readEntity(String.class);
-//
-//
-//            int status = response.getStatus();
-////            System.out.println("STATUS: "+ status);
-//            if (status >= 200 && status < 300) {
-//                System.out.println("Logout successful");
-//                return status;
-//            }
-//            else
-//                throw new RuntimeException("Failed to logout from Keycloak: " + responseText);
-//
-//        }
-
 
     }
 
     public ResponseEntity<?> refreshBothTokens(String refreshToken) {
-        String refreshUrl = "/realms/" + realmName + "/protocol/openid-connect/token";//todo test
+        String refreshUrl = "/realms/" + realmName + "/protocol/openid-connect/token";
+
+//        System.out.println("Refreshing tokens");
 
         try {
             MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -377,12 +359,12 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                     .bodyToMono(TokenRefreshResponse.class)
                     .block();
 
-            System.out.println("Response: " + response);
+//            System.out.println("Response: " + response);
 
             return ResponseEntity.ok(response);
 
         } catch (WebClientResponseException e) {
-
+//            System.out.println("Failed to refresh tokens:");
             throw new RuntimeException("Failed to refresh Keycloak token: " + e.getMessage(), e);
         }
     }

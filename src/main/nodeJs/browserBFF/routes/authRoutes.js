@@ -146,7 +146,7 @@ router.post('/logout', async (req, res) => {
 router.post('/refresh', async (req, res) => {
     const refreshToken = req.cookies.refresh_token;
 
-    // console.log("token: " + refreshToken);
+    console.log("token: " + refreshToken);
 
     if (refreshToken) {
         const response = await fetch(`${AuthURL}/refresh`,
@@ -158,7 +158,7 @@ router.post('/refresh', async (req, res) => {
                 body: JSON.stringify({refresh_token: refreshToken})
             });
 
-        // console.log("response status: " + response.status)
+        console.log("response status: " + response.status)
 
         if (response.status >= 200 && response.status <= 300) {
             const responseData = await response.json();
