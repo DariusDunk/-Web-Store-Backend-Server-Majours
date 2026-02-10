@@ -55,27 +55,10 @@ public class CustomerController {
         this.userIdExtractor = userIdExtractor;
     }
 
-//    @PostMapping("registration")
-//    @Transactional
-//    public ResponseEntity<String> register(@RequestBody CustomerAccountRequest customerAccountRequest) {
-//        return customerService.registration(customerAccountRequest);
-//    }
-
-//    @PostMapping("login")
-//    public ResponseEntity<CustomerResponse> logIn(@RequestBody CustomerAccountRequest customerAccountRequest) {
-//        return customerService.logIn(customerAccountRequest);
-//    }
-
     @PostMapping("favorite/add")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-//    public ResponseEntity<?> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
     public ResponseEntity<?> addProductToFavourites(@RequestParam String productCode) {
-
-//        if (NullFieldChecker.hasNullFields(pairRequest)) {
-//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(pairRequest));
-//            return ResponseEntity.badRequest().build();
-//        }
 
         String userId = userIdExtractor.getUserId();
 
@@ -86,9 +69,13 @@ public class CustomerController {
         return customerService.addProductToFavourites(userId, product);
     }
 
-    @GetMapping("favourites/{id}/p/{page}")//PAGING
-    public ResponseEntity<?> getFavourites(@PathVariable long id, @PathVariable int page) {
-        Customer customer = customerService.findById(id);
+    @GetMapping("favourites/p/{page}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> getFavourites(@PathVariable int page) {
+
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
         if (customer == null)
             return ResponseEntity.notFound().build();
 

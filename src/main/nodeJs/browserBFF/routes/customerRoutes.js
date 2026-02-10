@@ -2,18 +2,35 @@ const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
 
-router.get('/getFavourites/:userId/:page', async (req, res)=>{
-  const {userId, page} = req.params
+router.get('/getFavourites/:page', async (req, res)=>{
+  const page = req.params.page
+  const accessToken = req.cookies['access_token'];
+
+  // console.log("inside favourites");
+  // console.log(req.body);
+  // console.log("page: " + page + ", accessToken: " + accessToken)
 
   try{
-    const response = await fetch(`${Backend_Url}/customer/favourites/${userId}/p/${page}`);
+    const response = await fetch(`${Backend_Url}/customer/favourites/p/${page}`,
+        {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + accessToken,
+        }
+        });
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
     const responseData = await response.json();
-    res.status(response.status).json(responseData);
+    return res.status(response.status).json(responseData);
   }
 
   catch (error) {
     console.error('Error fetching favourites: ', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 })
 
@@ -31,12 +48,17 @@ router.post(`/addFavourite/:productCode`, async (req, res)=>{
       },
       body: JSON.stringify(req.body)
     });
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+    
     const responseData = await response.text();
-    res.status(response.status).json(responseData);
+    return res.status(response.status).json(responseData);
   }
   catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -47,12 +69,17 @@ router.post(`/removeFav`, async (req, res)=>{
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(req.body)
     });
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
     const responseData = await response.text();
-    res.status(response.status).json(responseData);
+    return res.status(response.status).json(responseData);
   } catch (error)
   {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 })
 
@@ -68,10 +95,18 @@ router.post(`/removeFav/batch`, async (req, res)=>{
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
     });
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
     const responseData = await response.text();
-    res.status(response.status).json(responseData);
+    return res.status(response.status).json(responseData);
   } catch (error)
-  {}
+  {
+    console.error('Error:', error);
+    return res.status(500).json({ error: error.message });
+  }
 })
 
 router.post('/addToCart',async  (req, res) =>{
@@ -92,15 +127,19 @@ router.post('/addToCart',async  (req, res) =>{
       body: JSON.stringify({customerProductPairRequest: customerProductPairRequest, doIncrement: doIncrement})
     });
 
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
     if (response.status === 200 || response.status === 201) {
-      res.status(response.status).json({message: await response.text()});
+      return res.status(response.status).json({message: await response.text()});
     }
     else
-      res.status(response.status).json(await response.json());
+      return res.status(response.status).json(await response.json());
   }
   catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -115,15 +154,19 @@ router.post('/addToCart/batch',async  (req, res) =>{
       body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
     });
 
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
     if (response.status === 200) {
-      res.status(response.status).json({message: await response.text()});
+      return res.status(response.status).json({message: await response.text()});
     }
     else
-      res.status(response.status).json(await response.json());
+      return res.status(response.status).json(await response.json());
   }
   catch (error) {
     console.error('Error batch adding products to cart: ', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 })
 
@@ -137,11 +180,16 @@ router.post('/removeFromCart',async  (req, res) =>{
       },
       body: JSON.stringify({customerId: customerId, productCode: productCode})
     });
-    res.status(response.status).end();
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
+    return res.status(response.status).end();
   }
   catch (error) {
     console.error('Error removing product from cart:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 })
 
@@ -157,12 +205,16 @@ router.post(`/removeFromCart/batch`, async (req, res) =>{
       body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
     });
 
-    res.status(response.status).end();
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
+    return res.status(response.status).end();
 
   }
   catch (error) {
     console.error('Error removing product from cart:', error);
-    res.status(500).json({ error: 'Node server error' });
+    return res.status(500).json({ error: error.message });
   }
 })
 
@@ -174,13 +226,18 @@ router.get('/getCart/:id',async (req,res)=>
 
   try{
     const response = await fetch(`${Backend_Url}/customer/cart?id=${id}`);
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+
     const responseData = await response.json();
     const status = response.status;
-    res.status(status).json(responseData);
+    return res.status(status).json(responseData);
   }
   catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+   return res.status(500).json({ error: error.message });
   }
 });
 
@@ -191,14 +248,18 @@ router.get('/getUserPfp/:id', async (req, res) =>
     try{
       const response = await fetch(`${Backend_Url}/customer/getPfp?id=${userId}`);
 
+      if (!response.ok) {
+        return res.status(response.status).end();
+      }
+
       const responseText = await response.text();
 
       // console.log("RESPONSE: " + responseText);
-      res.status(response.status).send(responseText);
+      return res.status(response.status).send(responseText);
     }
     catch (error) {
       console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: error.message });
     }
   }
 )

@@ -10,21 +10,19 @@ router.get('/featured/:page', async (req, res)=>{
   try {
     const response = await fetch(`${Backend_Url}/product/findall?page=${page}`);
     if (response.status === 404) {
-      res.redirect('/404.html');
+        return res.redirect('/404.html');
     }
-    else
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
-    else
-    {
+      if (!response.ok) {
+          return res.status(response.status).end();
+      }
+
       const data = await response.json();
-      res.json(data);
-    }
+      return res.json(data);
+    // }
   } catch (error)
   {
     console.error('Search: Error fetching data:', error);
-    res.status(500).json({ error: 'Failed to fetch data from the real server' });
+      return res.status(error.status).json({ error: error.message });
   }
 });
 
@@ -34,20 +32,17 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
   try {
     const response = await fetch(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}`);
     if (response.status === 404) {
-      res.redirect('/404.html');
+        return res.redirect('/404.html');
     }
-    else
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
-    else
-    {
+      if (!response.ok) {
+          return res.status(response.status).end();
+      }
       const data = await response.json();
-      res.json(data);
-    }
+      return res.json(data);
+
   } catch (error) {
     console.error('Manufacturer: Error fetching data:', error);
-    res.status(500).json({ error: 'Failed to fetch data from the real server' });
+      return res.status(error.status).json({ error: error.message });
   }
 });
 
@@ -56,21 +51,20 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
   // console.log("category");
   try {
     const response = await fetch(`${Backend_Url}/product/category/${categoryName}/p${page}`);
+
     if (response.status === 404) {
-      res.redirect('/404.html');
+        return res.redirect('/404.html');
     }
-    else
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
-    else
-    {
+      if (!response.ok) {
+          return res.status(response.status).end();
+      }
+
       const data = await response.json();
-      res.json(data);
-    }
+      return res.json(data);
+
   } catch (error) {
     console.error('Category: Error fetching data:', error);
-    res.status(500).json({ error: 'Failed to fetch data from the real server' });
+      return res.status(error.status).json({ error: error.message });
   }
 });
 
@@ -88,11 +82,11 @@ router.get('/detail/:productCode', async (req, res)=>{
 
 
     if (!ratingOverviewResponse.ok) {
-      throw new Error('Product fetching error: ' + ratingOverviewResponse.statusText);
+        return res.status(ratingOverviewResponse.status).end();
     }
 
     if (!productDetailsResponse.ok) {
-      throw new Error('Rating overview fetching error: ' + productDetailsResponse.statusText);
+        return res.status(productDetailsResponse.status).end();
     }
 
     const productDetails = await productDetailsResponse.json();
@@ -100,11 +94,11 @@ router.get('/detail/:productCode', async (req, res)=>{
 
     // console.log(JSON.stringify(ratingOverview));
 
-    res.json({productDetails, ratingOverview});
+      return res.json({productDetails, ratingOverview});
 
   } catch (error) {
     console.error('Error fetching data from backend:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(error.status).json({ error: error.message });
   }
 });
 
@@ -116,14 +110,14 @@ router.get('/suggest/:name', async (req, res)=>{
 
     const response = await fetch(`${Backend_Url}/product/suggest?name=${text}`);
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
+      if (!response.ok) {
+          return res.status(response.status).end();
+      }
     const data = await response.json();
-    res.json(data);
+      return json(data);
   } catch (error) {
     console.error('Suggest: Error fetching data from backend:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -137,20 +131,19 @@ router.get(`/search/:text/:page`, async (req, res)=>{
     // console.log(`fetch url: ${Backend_Url}/product/search?name=${searchText}&page=${page}`);
     const response = await fetch(`${Backend_Url}/product/search?name=${searchText}&page=${page}`);
     if (response.status === 404) {
-      res.redirect('/404.html');
+        return res.redirect('/404.html');
     }
-    else
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
-    else
-    {
+
+      if (!response.ok) {
+          return res.status(response.status).end();
+      }
+
       const data = await response.json();
-      res.json(data);
-    }
+        return res.json(data);
+
   } catch (error) {
     console.error('Search: Error fetching data:', error);
-    res.status(500).json({ error: 'Failed to fetch data from the real server' });
+      return res.status(500).json({ error: 'Failed to fetch data from the real server' });
   }
 });
 
@@ -230,15 +223,15 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
     if (!response.ok) {
       const text = await response.text();
-      console.error(`Backend error: ${response.status} - ${text}`);
+      console.error(`Product filter error: ${response.status} - ${text}`);
       return res.status(response.status).json({ error: 'Error from backend' });
     }
 
     const responseData = await response.json();
-    res.status(200).json(responseData);
+      return res.status(200).json(responseData);
   } catch (error) {
     console.error('Proxy error:', error);
-    res.status(502).json({ error: 'Invalid response from backend' });
+      return res.status(502).json({ error: 'Invalid response from backend' });
   }
 });
 
@@ -273,7 +266,7 @@ router.post('/getPagedReviews', async (req, res) => {
 
         if (!response.ok) {
             const text = response.text();
-            console.error(`Backend error: ${response.status} - ${text}`);
+            console.error(`Review fetch error: ${response.status} - ${text}`);
             return res.status(response.status).json({ error: 'Error from backend' });
         }
 
@@ -281,7 +274,7 @@ router.post('/getPagedReviews', async (req, res) => {
 
         // console.log(responseData);
 
-        res.status(response.status).json(responseData);
+        return res.status(response.status).json(responseData);
     }
     catch (error) {
         console.error('Reviews: Error fetching data: ', error);
@@ -305,7 +298,9 @@ router.get(`/getReview/:productCode`, async (req, res) => {
             });
 
         // console.log("STATUS: " + response.status);
-
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
         const responseData = await response.json();
         // console.log("STATUS: " + response.status + " DATA: " + JSON.stringify(responseData));
        return res.status(response.status).json(responseData);
@@ -337,6 +332,10 @@ router.post(`/addReview`, async (req, res) => {
                     review_text: reviewText}),
             }
         )
+
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
 
         if (response.status === 207)
         {
@@ -374,6 +373,10 @@ router.post(`/updateReview`, async (req, res) => {
                     review_text: reviewText}),
             })
 
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
+
         if (response.status === 207)
         {
             const responseData = await response.json();
@@ -404,6 +407,10 @@ router.post(`/deleteReview`, async (req, res) => {
                 headers: {'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + accessToken}
             })
+
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
 
         return res.status(response.status).json(response.statusText);
     }

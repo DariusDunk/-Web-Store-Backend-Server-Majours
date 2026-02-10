@@ -66,7 +66,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
 
     private String getAdminAccessToken() {
-        System.out.println("Getting Admin Access Token");
+//        System.out.println("Getting Admin Access Token");
         return Objects.requireNonNull(keycloakWebClient.post()
                         .uri("/realms/" + adminRealm + "/protocol/openid-connect/token")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -83,7 +83,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
     private Boolean doesUserExist(String email, String adminToken) {
 
-        System.out.println("User check");
+//        System.out.println("User check");
 
         UserRepresentation[] existingUsers = keycloakWebClient.get()
                 .uri("/admin/realms/" + userRealm + "/users?username={username}", email)
@@ -97,7 +97,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
     private ResponseEntity<String > createUser(UserRepresentation user, String adminToken) {
         String userId;
-        System.out.println("Creating user");
+//        System.out.println("Creating user");
 
         try {
            ResponseEntity<?> response = keycloakWebClient.post()
@@ -122,7 +122,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
            if (response != null&& response.getHeaders().getLocation() != null) {
                String location = response.getHeaders().getLocation().toString();
                userId = location.substring(location.lastIndexOf("/") + 1);
-               System.out.println("Created User with Id: " + userId);
+//               System.out.println("Created User with Id: " + userId);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(userId);
            }
@@ -145,7 +145,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
 
     private ResponseEntity<?> assignUserRole(String userId, UserRole userRole, String adminToken) {
-        System.out.println("Assigning user role: " + userRole);
+//        System.out.println("Assigning user role: " + userRole);
         RoleRepresentation role = getRealmRole(userRole.getValue(), adminToken);
 
     try
@@ -170,7 +170,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
     private void deleteUser(String userId, String adminToken) {
 //        String token = getAdminAccessToken();
-        System.out.println("Deleting user");
+//        System.out.println("Deleting user");
         keycloakWebClient.delete()
                 .uri("/admin/realms/" + userRealm + "/users/{id}", userId)
                 .headers(h -> h.setBearerAuth(adminToken))
@@ -181,7 +181,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
     public ResponseEntity<?> registerUser(String firstname,String lastName , String password, String email, UserRole userRole) {
 
-        System.out.println("Registration begining");
+//        System.out.println("Registration begining");
 
         String adminToken = getAdminAccessToken();
 
@@ -216,11 +216,11 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         cred.setType(CredentialRepresentation.PASSWORD);
         cred.setValue(password);
         user.setCredentials(Collections.singletonList(cred));
-        System.out.println("Password checked");
+//        System.out.println("Password checked");
 
         if (doesUserExist(email, adminToken))
         {
-            System.out.println("User already exists");
+//            System.out.println("User already exists");
             return ResponseEntity.status(HttpStatus.MULTI_STATUS)
                     .body(new ErrorResponse(
                             ErrorType.USER_ALREADY_EXISTS,
@@ -268,7 +268,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                         .block())
                 .getFirst().getName();
 
-        System.out.println("Role: " + role);
+//        System.out.println("Role: " + role);
         return role;
     }
 
@@ -322,7 +322,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
             assert response != null;
             if (response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("Logout successful");
+//                System.out.println("Logout successful");
             }
             return response.getStatusCode().value();
 
