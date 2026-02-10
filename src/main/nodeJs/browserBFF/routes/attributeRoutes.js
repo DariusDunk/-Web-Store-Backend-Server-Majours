@@ -22,11 +22,9 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
 
     let responseData = null
 
-    if (response.status < 300 && response.status >= 200) {
+    if (!response.ok) {
       if (text) {
         try {
-
-
           responseData = JSON.parse(text)
           // console.log(responseData);
         } catch (parseError) {
@@ -36,10 +34,10 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
       }
     }
 
-    res.status(response.status).json(responseData || {})
+    return res.status(response.status).json(responseData || {})
   }catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 
 })

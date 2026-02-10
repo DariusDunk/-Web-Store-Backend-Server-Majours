@@ -400,6 +400,7 @@ router.post(`/deleteReview`, async (req, res) => {
 
     // console.log( "INSIDE DELETE REVIEW: " + "Product: " + productCode + " Customer: " + customerId)
 
+
     try{
         const response = await fetch(`${Backend_Url}/product/review/delete?product_code=${productCode}`,
             {

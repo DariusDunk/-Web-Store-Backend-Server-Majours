@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
+const {response} = require("express");
 const AuthURL = `${Backend_Url}/auth`;
 
 router.post(`/register`, async (req, res) => {
@@ -22,11 +23,11 @@ router.post(`/register`, async (req, res) => {
             },
             body: JSON.stringify({first_name: name, last_name: familyName, email: email, password: password})
         });
-        res.status(response.status).end();
+        return res.status(response.status).end();
     }
     catch (error) {
         console.error('Error with registration: ', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 })
 
@@ -46,7 +47,7 @@ router.post(`/login`, async (req, res) => {
 
     // console.log("Node response: " + response.status)
 
-    if (response.status !== 200) {
+    if (!response.ok) {
         return res.status(response.status).end();
     }
 
@@ -88,19 +89,18 @@ router.post(`/login`, async (req, res) => {
             }
         });
 
-    if (userDataResponse.status !== 200)
+    if (!userDataResponse.ok)
     {
         // console.log("Error fetching user data: " + userDataResponse.status);
 
-        res.status(userDataResponse.status).end();
-        return
+        return res.status(userDataResponse.status).end();
     }
 
     const userData = await userDataResponse.json();
 
     // console.log("userData: " + JSON.stringify(userData));
 
-    res.status(userDataResponse.status).json(userData);
+    return res.status(userDataResponse.status).json(userData);
 
 });
 
@@ -117,10 +117,10 @@ router.post('/logout', async (req, res) => {
                 body: JSON.stringify({refresh_token: refreshToken})
             }
         )
+        if (!response.ok) console.log("Error invalidating token: " + response.statusText);
         // console.log("response status: " + response.status)
         // console.log("response: " + JSON.stringify(response));
     }
-
 
     res.cookie('access_token', '', {
         httpOnly: true,
@@ -130,7 +130,6 @@ router.post('/logout', async (req, res) => {
         maxAge: 0
     });
 
-    // Clear refresh token
     res.cookie('refresh_token', '', {
         httpOnly: true,
         secure: false,
@@ -139,8 +138,7 @@ router.post('/logout', async (req, res) => {
         maxAge: 0
     });
 
-
-    res.status(200).end();
+    return res.status(200).end();
 });
 
 router.post('/refresh', async (req, res) => {
@@ -160,7 +158,7 @@ router.post('/refresh', async (req, res) => {
 
         // console.log("response status: " + response.status)
 
-        if (response.status >= 200 && response.status <= 300) {
+        if (response.ok) {
             const responseData = await response.json();
             const {
                 access_token,
@@ -184,9 +182,9 @@ router.post('/refresh', async (req, res) => {
                 sameSite: `lax`,
                 maxAge: refresh_token_lifeTime * 1000
             })
-            res.status(200).end();
+            return res.status(200).end();
         } else
-            res.status(response.status).end();
+            return res.status(response.status).end();
 
     }
     return res.status(401).end();

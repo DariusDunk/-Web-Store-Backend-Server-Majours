@@ -7,16 +7,18 @@ router.get('/names', async (req, res)=> {
   try {
     const response = await fetch(`${Backend_Url}/category/names`);
     if (response.status === 404) {
-      res.redirect('/404.html');
-    } else if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    } else {
-      const data = await response.json();
-      res.json(data);
+      return res.redirect('/404.html');
     }
+     if (!response.ok) {
+       return res.status(response.status).end();
+     }
+
+      const data = await response.json();
+      return res.json(data);
+
   } catch (error) {
     console.error('Names: Error fetching data:', error);
-    res.status(500).json({error: 'Failed to fetch data from the real server'});
+    return res.status(500).json({error: 'Failed to fetch data from the real server'});
   }
 
 });

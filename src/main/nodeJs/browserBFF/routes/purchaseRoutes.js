@@ -13,8 +13,12 @@ router.post('/complete', async (req, res)=>{
       },
       body: JSON.stringify(req.body)
     });
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
     // const responseData = await response.json();
-    const text = await response.text()
+    const text = await response.text();
     // res.json(responseData);
 
     let responseData = null
@@ -29,11 +33,11 @@ router.post('/complete', async (req, res)=>{
       }
     }
 
-    res.status(response.status).json(responseData|| {})
+    return res.status(response.status).json(responseData|| {})
   }
   catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 })
 

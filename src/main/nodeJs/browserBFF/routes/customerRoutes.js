@@ -231,6 +231,7 @@ router.get('/getCart/:id',async (req,res)=>
       return res.status(response.status).end();
     }
 
+
     const responseData = await response.json();
     const status = response.status;
     return res.status(status).json(responseData);
