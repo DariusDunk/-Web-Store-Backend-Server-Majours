@@ -17,12 +17,17 @@ router.get('/getFavourites/:userId/:page', async (req, res)=>{
   }
 })
 
-router.post(`/addFavourite`, async (req, res)=>{
+router.post(`/addFavourite/:productCode`, async (req, res)=>{
+
+  const accessToken = req.cookies['access_token'];
+  const productCode = req.params.productCode;
+
   try{
-    const response = await fetch(`${Backend_Url}/customer/favorite/add`,{
+    const response = await fetch(`${Backend_Url}/customer/favorite/add?productCode=${productCode}`,{
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken,
       },
       body: JSON.stringify(req.body)
     });

@@ -69,16 +69,17 @@ public class CustomerController {
     @PostMapping("favorite/add")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
+//    public ResponseEntity<?> addProductToFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
+    public ResponseEntity<?> addProductToFavourites(@RequestParam String productCode) {
 
-        if (NullFieldChecker.hasNullFields(pairRequest)) {
-            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(pairRequest));
-            return ResponseEntity.badRequest().build();
-        }
+//        if (NullFieldChecker.hasNullFields(pairRequest)) {
+//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(pairRequest));
+//            return ResponseEntity.badRequest().build();
+//        }
 
         String userId = userIdExtractor.getUserId();
 
-        Product product = productService.findByPCode(pairRequest.productCode);
+        Product product = productService.findByPCode(productCode);
 
         if (product == null)
             return ResponseEntity.notFound().build();
