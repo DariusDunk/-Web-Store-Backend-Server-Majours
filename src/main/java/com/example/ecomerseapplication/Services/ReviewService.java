@@ -20,8 +20,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -165,8 +167,12 @@ public class ReviewService {
 
     public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable, String customerId) {
 
-        LocalDateTime startDate = LocalDate.now().atStartOfDay();
-        LocalDateTime endDate = LocalDate.now().plusDays(1).atStartOfDay();
+//        Instant startDate = Instant.parse(LocalDate.now().atStartOfDay().toString());
+//        Instant endDate = LocalDate.now().plusDays(1).atStartOfDay();
+
+        Instant now = Instant.now();
+        Instant twentyFourHoursAgo = now.minus(24, ChronoUnit.HOURS);
+
 
         return reviewRepository.getByProductCode(request.productCode(),
                 request.sortOrder().getValue(),
@@ -174,8 +180,7 @@ public class ReviewService {
                 request.ratingValue(),
                 customerId,
                 pageable,
-                startDate,
-                endDate
+                twentyFourHoursAgo
                 );
     }
 

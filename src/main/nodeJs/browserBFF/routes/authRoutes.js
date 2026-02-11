@@ -98,7 +98,7 @@ router.post(`/login`, async (req, res) => {
 
     const userData = await userDataResponse.json();
 
-    // console.log("userData: " + JSON.stringify(userData));
+    console.log("userData: " + JSON.stringify(userData));
 
     return res.status(userDataResponse.status).json(userData);
 

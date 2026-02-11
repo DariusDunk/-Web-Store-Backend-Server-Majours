@@ -240,12 +240,19 @@ router.get('/getCart/:id',async (req,res)=>
   }
 });
 
-router.get('/getUserPfp/:id', async (req, res) =>
+router.get('/getUserPfp/', async (req, res) =>
   {
-    const userId = req.url.split("/")[2];
-
+    // const userId = req.url.split("/")[2];
+    const accessToken = req.cookies['access_token'];
     try{
-      const response = await fetch(`${Backend_Url}/customer/getPfp?id=${userId}`);
+      const response = await fetch(`${Backend_Url}/customer/getPfp`,
+          {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + accessToken,
+          }
+          });
 
       if (!response.ok) {
         return res.status(response.status).end();

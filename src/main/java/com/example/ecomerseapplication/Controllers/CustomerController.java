@@ -65,7 +65,7 @@ public class CustomerController {
         Product product = productService.findByPCode(productCode);
         Customer customer = customerService.getByKID(userId);
 
-        if (product == null||customer==null)
+        if (product == null || customer == null)
             return ResponseEntity.notFound().build();
 
 //        return customerService.addProductToFavourites(userId, product);
@@ -84,7 +84,7 @@ public class CustomerController {
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
-        PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromFavourites(customer,pageRequest);
+        PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromFavourites(customer, pageRequest);
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
@@ -116,7 +116,7 @@ public class CustomerController {
 
         if (NullFieldChecker.hasNullFields(request)) {
 
-            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(request));
+            System.out.println("Null fields from request: " + NullFieldChecker.getNullFields(request));
 
             return ResponseEntity.badRequest().build();
         }
@@ -139,7 +139,7 @@ public class CustomerController {
 
         if (NullFieldChecker.hasNullFields(request)) {
 
-            System.out.println("Null fields:\n"+NullFieldChecker.getNullFields(request));
+            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
 
             return ResponseEntity.badRequest().build();
         }
@@ -164,11 +164,10 @@ public class CustomerController {
     }
 
     @PostMapping("cart/add/batch")
-    public ResponseEntity<?> addBatchToCart(@RequestBody BatchProductUserRequest request)
-    {
+    public ResponseEntity<?> addBatchToCart(@RequestBody BatchProductUserRequest request) {
 
         if (NullFieldChecker.hasNullFields(request)) {
-            System.out.println("Null fields:\n"+NullFieldChecker.getNullFields(request));
+            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
             return ResponseEntity.badRequest().build();
         }
 
@@ -186,12 +185,9 @@ public class CustomerController {
             return ResponseEntity.notFound().build();
         }
 
-        try
-        {
-          return customerCartService.addBatchToCart(customer, requestProducts);
-        }
-        catch (Exception e)
-        {
+        try {
+            return customerCartService.addBatchToCart(customer, requestProducts);
+        } catch (Exception e) {
             System.out.println("Error adding product batch to cart: " + e.getMessage());
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -210,12 +206,9 @@ public class CustomerController {
         }
 
         Customer customer = customerService.findById(pairRequest.customerId);
-        try
-        {
+        try {
             customerCartService.removeFromCart(customer, pairRequest.productCode);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Error removing from cart: " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
@@ -233,18 +226,14 @@ public class CustomerController {
 
         Customer customer = customerService.findById(request.customerId());
 
-        try
-        {
-           return customerCartService.removeBatchFromCart(customer, request.productCodes());
-        }
-        catch (Exception e)
-        {
+        try {
+            return customerCartService.removeBatchFromCart(customer, request.productCodes());
+        } catch (Exception e) {
             System.out.println("Error removing product batch from cart: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
     }
-
 
 
     @GetMapping("cart")
@@ -312,10 +301,8 @@ public class CustomerController {
 //    }
 
 
-
     @GetMapping("me")
-    public ResponseEntity<CustomerResponse> getCustomerInfo()
-    {
+    public ResponseEntity<CustomerResponse> getCustomerInfo() {
         String userId = userIdExtractor.getUserId();
 
 //        System.out.println("userId: " + userId);
@@ -327,15 +314,29 @@ public class CustomerController {
             return ResponseEntity.notFound().build();
         }
 
+        System.out.println(customer.getCustomerPfp());
+
         String userRole = keycloakService.getRoleByUserId(userId);
 
         return ResponseEntity.ok(new CustomerResponse(
-                             customer.getId(),
-                customer.getFirstName() + " " + customer.getLastName(),
-                             customer.getCustomerPfp(),
-                userRole, customer.getId()
+                        customer.getId(),
+                        customer.getFirstName() + " " + customer.getLastName(),
+                        customer.getCustomerPfp(),
+                        userRole, customer.getId()
                 )
         );
+    }
+
+    @GetMapping("getPfp")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public  ResponseEntity<String> getPfp() {
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
+        if (customer == null)
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(customer.getCustomerPfp());
     }
 
 }

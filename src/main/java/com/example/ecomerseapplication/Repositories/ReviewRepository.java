@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "else r.verifiedCustomer " +
             "end, " +
             "case " +
-            "when r.postTimestamp>=:startDate AND r.postTimestamp<:endDate then false " +
+            "when r.postTimestamp>=:aDayEarlier then false " +
             "else true " +
             "end)," +
             "r.isDeleted)" +
@@ -82,10 +83,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 //            Long customerId,
             String customerId,
             Pageable pageable,
-            @Param("startDate")
-            LocalDateTime startDate,
-            @Param("endDate")
-            LocalDateTime endDate);
+            @Param("aDayEarlier")
+            Instant dayEarlier);
 
     @Query("""
             select distinct new com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse(r.rating, count(r))
