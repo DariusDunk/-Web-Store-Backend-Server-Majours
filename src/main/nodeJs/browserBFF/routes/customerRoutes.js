@@ -70,12 +70,11 @@ router.post(`/removeFav`, async (req, res)=>{
       body: JSON.stringify(req.body)
     });
 
-    if (!response.ok) {
-      return res.status(response.status).end();
-    }
-
-    const responseData = await response.text();
-    return res.status(response.status).json(responseData);
+    // if (!response.ok) {
+    //   return res.status(response.status).end();
+    // }
+    // const responseData = await response.text();
+    return res.status(response.status).end();
   } catch (error)
   {
     console.error('Error:', error);
@@ -96,12 +95,11 @@ router.post(`/removeFav/batch`, async (req, res)=>{
       body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
     });
 
-    if (!response.ok) {
-      return res.status(response.status).end();
-    }
-
-    const responseData = await response.text();
-    return res.status(response.status).json(responseData);
+    // if (!response.ok) {
+    //   return res.status(response.status).end();
+    // }
+    // const responseData = await response.text();
+    return res.status(response.status).end();
   } catch (error)
   {
     console.error('Error:', error);

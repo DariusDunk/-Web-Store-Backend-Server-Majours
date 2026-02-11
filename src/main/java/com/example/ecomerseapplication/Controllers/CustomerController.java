@@ -35,6 +35,7 @@ public class CustomerController {
     private final PurchaseCartService purchaseCartService;
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
+    private final FavoriteOfCustomerService favoriteOfCustomerService;
 
 
     @Autowired
@@ -44,7 +45,7 @@ public class CustomerController {
                               PurchaseService purchaseService,
                               PurchaseCartService purchaseCartService,
                               KeycloakService keycloakService,
-                              UserIdExtractor userIdExtractor) {
+                              UserIdExtractor userIdExtractor, FavoriteOfCustomerService favoriteOfCustomerService) {
 
         this.customerService = customerService;
         this.productService = productService;
@@ -53,20 +54,24 @@ public class CustomerController {
         this.purchaseCartService = purchaseCartService;
         this.keycloakService = keycloakService;
         this.userIdExtractor = userIdExtractor;
+        this.favoriteOfCustomerService = favoriteOfCustomerService;
     }
 
     @PostMapping("favorite/add")
-    @Transactional
+//    @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addProductToFavourites(@RequestParam String productCode) {
+    public ResponseEntity<?> addProductToFavourites(@RequestParam String productCode) {//TODO test
 
         String userId = userIdExtractor.getUserId();
 
         Product product = productService.findByPCode(productCode);
+        Customer customer = customerService.getByKID(userId);
 
-        if (product == null)
+        if (product == null||customer==null)
             return ResponseEntity.notFound().build();
-        return customerService.addProductToFavourites(userId, product);
+
+//        return customerService.addProductToFavourites(userId, product);
+        return favoriteOfCustomerService.addToFavorite(customer, product);
     }
 
     @GetMapping("favourites/p/{page}")
@@ -81,9 +86,62 @@ public class CustomerController {
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
-        PageResponse<CompactProductResponse> response = productService.getFromFavourites(customer,pageRequest);
+        PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromFavourites(customer,pageRequest);
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
+    }
+
+    @DeleteMapping("favorite/remove")
+//    @Transactional
+    public ResponseEntity<?> removeFromFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
+
+        Customer customer = customerService.findById(pairRequest.customerId);
+
+        if (customer == null)
+            return ResponseEntity.notFound().build();
+
+        Product product = productService.findByPCode(pairRequest.productCode);
+
+        if (product == null)
+            return ResponseEntity.notFound().build();
+
+//        return customerService.removeFromFavourites(customer, product);
+        return favoriteOfCustomerService.removeFromFavorites(customer, product);
+    }
+
+
+    @DeleteMapping("favorite/remove/batch")
+    @Transactional
+    public ResponseEntity<?> removeFromFavourites(@RequestBody BatchProductUserRequest request) {
+
+//        System.out.println(request);
+
+        if (NullFieldChecker.hasNullFields(request)) {
+
+            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(request));
+
+            return ResponseEntity.badRequest().build();
+        }
+
+        Customer customer = customerService.findById(request.customerId());
+
+        if (customer == null) {
+            System.out.println("customer not found");
+            return ResponseEntity.notFound().build();
+        }
+
+        return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes());
+
+//        try{
+//            customerService.removeFavoritesBatch(customer, request.productCodes());
+//
+//            return ResponseEntity.ok().build();
+//        }
+//        catch (Exception e){
+//            System.out.println("Error deleting favorites: " + e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+
     }
 
     @PostMapping("cart/add")
@@ -200,54 +258,7 @@ public class CustomerController {
 
     }
 
-    @DeleteMapping("favorite/remove")
-    @Transactional
-    public ResponseEntity<String> removeFromFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
 
-        Customer customer = customerService.findById(pairRequest.customerId);
-
-        if (customer == null)
-            return ResponseEntity.notFound().build();
-
-        Product product = productService.findByPCode(pairRequest.productCode);
-
-        if (product == null)
-            return ResponseEntity.notFound().build();
-
-        return customerService.removeFromFavourites(customer, product);
-    }
-
-    @DeleteMapping("favorite/remove/batch")
-    @Transactional
-    public ResponseEntity<?> removeFromFavourites(@RequestBody BatchProductUserRequest request) {
-
-//        System.out.println(request);
-
-        if (NullFieldChecker.hasNullFields(request)) {
-
-            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(request));
-
-            return ResponseEntity.badRequest().build();
-        }
-
-        Customer customer = customerService.findById(request.customerId());
-
-        if (customer == null) {
-            System.out.println("customer not found");
-            return ResponseEntity.notFound().build();
-        }
-
-        try{
-            customerService.removeFavoritesBatch(customer, request.productCodes());
-
-            return ResponseEntity.ok().build();
-        }
-        catch (Exception e){
-            System.out.println("Error deleting favorites: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-    }
 
     @GetMapping("cart")
     public ResponseEntity<?> showCart(@RequestParam long id) {
@@ -340,12 +351,12 @@ public class CustomerController {
         );
     }
 
-    @GetMapping("getPfp")
-    public ResponseEntity<String> getUserPfp(@RequestParam int id) {
-        String pfp = customerService.getPfpUrl(id);
-
-        if (pfp== null|| pfp.isEmpty()) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(pfp);
-    }
+//    @GetMapping("getPfp")
+//    public ResponseEntity<String> getUserPfp(@RequestParam int id) {
+//        String pfp = customerService.getPfpUrl(id);
+//
+//        if (pfp== null|| pfp.isEmpty()) return ResponseEntity.notFound().build();
+//
+//        return ResponseEntity.ok(pfp);
+//    }
 }

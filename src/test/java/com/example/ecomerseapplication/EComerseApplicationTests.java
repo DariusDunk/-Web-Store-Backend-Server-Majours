@@ -1,12 +1,17 @@
 package com.example.ecomerseapplication;
+import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 import com.example.ecomerseapplication.Repositories.*;
 import com.example.ecomerseapplication.Services.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 //import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
@@ -31,6 +36,8 @@ class EComerseApplicationTests {
     private ReviewService reviewService;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private FavoriteOfCustomerService favoriteOfCustomerService;
 
     @Test
     void contextLoads() {
@@ -154,5 +161,68 @@ class EComerseApplicationTests {
     void doesReviewExistTest() {
 
         System.out.println("Result for product= 20621307 and userId=6 "+ reviewService.exists(productService.findByPCode("20621307"), customerService.findById(6L)));
+    }
+
+    @Test
+    void checkTimeZones() {
+        System.out.println("Timezone: "+TimeZone.getDefault());
+    }
+
+    @Test
+    void addProductToFavouritesTest() {//TODO test
+//        customerService.addProductToFavourites("6", productService.findByPCode("20621307"));
+        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
+        System.out.println(response);
+    }
+
+    @Test
+    void getFavouritesTest() {
+        Customer customer = customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f");
+        PageResponse<CompactProductResponse> fetchResponse = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
+
+        System.out.println("Fetch result: " +fetchResponse.content());
+    }
+
+    @Test
+    void removeProductFromFavorites() {
+        ResponseEntity<?> response = favoriteOfCustomerService.removeFromFavorites(customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
+        System.out.println(response);
+    }
+
+    @Test
+    void removeFavoritesBatch() {
+        ResponseEntity<?> response = favoriteOfCustomerService.removeFavoritesBatch(customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f"),List.of("20621307"));
+    }
+
+    @Test
+    void testFavorites() {
+
+        Customer customer = customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f");
+
+        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customer, productService.findByPCode("20621307"));
+        System.out.println("Insert 1: " + response);
+        ResponseEntity<?> response2 = favoriteOfCustomerService.addToFavorite(customer, productService.findByPCode("20621308"));
+        System.out.println("Insert 2: " +response2);
+        ResponseEntity<?> response3 = favoriteOfCustomerService.addToFavorite(customer, productService.findByPCode("20621309"));
+        System.out.println("Insert 3: " +response3);
+
+        PageResponse<CompactProductResponse> fetchResponse = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
+
+        System.out.println("Fetch after inserts: " +fetchResponse.content());
+
+        ResponseEntity<?> deleteResponse = favoriteOfCustomerService.removeFromFavorites(customer, productService.findByPCode("20621307"));
+        System.out.println("Single delete response: "+deleteResponse);
+
+        PageResponse<CompactProductResponse> fetchResponse2 = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
+
+        System.out.println("Fetch after single delete: " +fetchResponse2.content());
+
+        ResponseEntity<?> favoritesBatchDeleteResponse = favoriteOfCustomerService.removeFavoritesBatch(customer,List.of("20621308", "20621309"));
+        System.out.println("Batch delete response: "+favoritesBatchDeleteResponse);
+
+        PageResponse<CompactProductResponse> fetchResponse3 = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
+
+        System.out.println("Fetch after batch delete: " +fetchResponse3.content());
+
     }
 }

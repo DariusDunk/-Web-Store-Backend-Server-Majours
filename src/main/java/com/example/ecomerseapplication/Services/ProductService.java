@@ -29,14 +29,16 @@ public class ProductService {
     private final ReviewService reviewService;
     private final ProductCategoryService productCategoryService;
     private final CustomerRepository customerRepository;
+    private final FavoriteOfCustomerService favoriteOfCustomerService;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService, CustomerRepository customerRepository) {
+    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService, CustomerRepository customerRepository, FavoriteOfCustomerService favoriteOfCustomerService) {
         this.productRepository = productRepository;
         this.customerCartService = customerCartService;
         this.reviewService = reviewService;
         this.productCategoryService = productCategoryService;
         this.customerRepository = customerRepository;
+        this.favoriteOfCustomerService = favoriteOfCustomerService;
     }
 
 
@@ -78,8 +80,9 @@ public class ProductService {
         if (customerCartService.cartExists(customer, product))
             detailedProductResponse.inCart = true;
 
-        if (product.getFavouredBy().contains(customer))
-            detailedProductResponse.inFavourites = true;
+//        if (product.getFavouredBy().contains(customer))
+
+        detailedProductResponse.inFavourites = favoriteOfCustomerService.isInFavorites(customer, product);
 
         if (reviewService.exists(product, customer))
             detailedProductResponse.reviewed = true;
@@ -108,31 +111,6 @@ public class ProductService {
                 .productPageToDtoPage(productRepository
                         .getByProductCategoryOrderByRatingDesc(productCategory, pageable));
     }
-
-//    public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
-//                                                                                      ProductCategory productCategory,
-//                                                                                      int priceLowest,
-//                                                                                      int priceHighest,
-//                                                                                      Manufacturer manufacturer,
-//                                                                                      Pageable pageable) {
-//
-//
-//        Specification<Product> productSpec =
-//                ProductSpecifications.equalsCategory(productCategory)
-//                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
-//
-//        if (manufacturer != null) {
-//            productSpec = productSpec.and(ProductSpecifications.equalsManufacturer(manufacturer));
-//        }
-//
-//        if (!categoryAttributes.isEmpty()) {
-//            productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
-//        }
-//
-//        Page<Product> products = productRepository.findAll(productSpec,pageable);
-//
-//        return ProductDTOMapper.productPageToDtoPage(products);
-//    }
 
     public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
                                                                                       ProductCategory productCategory,
@@ -199,10 +177,6 @@ public class ProductService {
         Object result = productRepository.getTotalPriceRange(category);
 
         return (Object[]) result;
-    }
-
-    public PageResponse<CompactProductResponse> getFromFavourites(Customer customer, PageRequest pageRequest) {
-       return PageResponse.from(customerRepository.getFromFavouritesPage(customer.getKeycloakId(), pageRequest));
     }
 
     public List<Product> getByCodes(List<String> codes) {

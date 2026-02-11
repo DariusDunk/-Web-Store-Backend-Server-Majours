@@ -78,4 +78,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     Object getTotalPriceRange(ProductCategory productCategory);
 
     List<Product> getAllByProductCodeIn(List<String> productCode);
+
+
 }

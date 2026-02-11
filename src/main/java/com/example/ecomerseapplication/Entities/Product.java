@@ -10,7 +10,7 @@ import java.util.Set;
 @Entity
 @Table(name = "products", schema = "online_shop")
 @Data
-@EqualsAndHashCode(exclude = {"favouredBy","productImages", "categoryAttributeSet"})
+@EqualsAndHashCode(exclude = {"productImages", "categoryAttributeSet"})
 public class Product {
 
     @Id
@@ -57,9 +57,9 @@ public class Product {
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<CategoryAttribute> categoryAttributeSet;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "favourites")
-    private Set<Customer> favouredBy;
+//    @JsonIgnore
+//    @ManyToMany(mappedBy = "favourites")
+//    private Set<Customer> favouredBy;
 
     @Column(name = "main_image_url")
     private String mainImageUrl;

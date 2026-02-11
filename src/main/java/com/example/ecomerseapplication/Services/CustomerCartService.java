@@ -6,7 +6,7 @@ import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
-import com.example.ecomerseapplication.Others.CartLimit;
+import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import jakarta.transaction.Transactional;
@@ -40,7 +40,7 @@ public class CustomerCartService {
 
         if (customerCart == null) {
 
-            if (cartsByCustomer(customer).size() >= CartLimit.limit)
+            if (cartsByCustomer(customer).size() >= GlobalConstants.cartSizeLimit)
                 return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
                         "Неуспешно добавяне на продукт",
                         HttpStatus.CONFLICT.value(),
@@ -151,7 +151,7 @@ public class CustomerCartService {
             sb.append("е по-малко от изискваното, те не бяха добавени или с увеличено количество в количката");
         }
 
-        if (newProductsCount + originalSize > CartLimit.limit) {
+        if (newProductsCount + originalSize > GlobalConstants.cartSizeLimit) {
             return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
                     "Неуспешно добавяне на продукт",
                     HttpStatus.CONFLICT.value(),

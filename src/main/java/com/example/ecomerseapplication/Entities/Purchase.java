@@ -18,6 +18,7 @@ public class Purchase {
     @ManyToOne
     private Customer customer;
 
+    @Column(name = "purchase_date")
     private LocalDateTime date;
 
     @Column(name = "total_cost")

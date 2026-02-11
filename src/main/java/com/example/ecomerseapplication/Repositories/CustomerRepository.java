@@ -25,21 +25,23 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     String getCustomerPfp(int customerId);
 
 
-    @Query("""
-            select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse(
-                        p.productCode,
-                        p.productName,
-                        p.originalPriceStotinki,
-                        p.salePriceStotinki,
-                        p.rating,
-                        SIZE(p.reviews),
-                        p.mainImageUrl,
-                        case when p.quantityInStock>0 then true else false end)
-                        from Product p
-                        join p.favouredBy c
-                        where c.keycloakId = :customerId
-            """)//TODO zameni tazi zaqvka sys starata zaqvka sled kato priklu4is migriraneto
-    Page<CompactProductResponse> getFromFavouritesPage(@Param("customerId") String  customer, Pageable pageable);
+//    @Query("""
+//            select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse(
+//                        p.productCode,
+//                        p.productName,
+//                        p.originalPriceStotinki,
+//                        p.salePriceStotinki,
+//                        p.rating,
+//                        SIZE(p.reviews),
+//                        p.mainImageUrl,
+//                        case when p.quantityInStock>0 then true else false end)
+//                        from Product p
+//                        join p.favouredBy c
+//                        where c.keycloakId = :customerId
+//            """)//TODO zameni tazi zaqvka sys starata zaqvka sled kato priklu4is migriraneto
+//    Page<CompactProductResponse> getFromFavouritesPage(@Param("customerId") String  customer, Pageable pageable);
+
+
 
 
 // @Query("""
