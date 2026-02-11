@@ -259,7 +259,9 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
 
     public String getRoleByUserId(String userId) {
         String adminToken = getAdminAccessToken();
-        String role =  Objects.requireNonNull(keycloakWebClient.get()
+
+//        System.out.println("Role: " + role);
+        return Objects.requireNonNull(keycloakWebClient.get()
                         .uri("/admin/realms/" + userRealm + "/users/{id}/role-mappings/realm", userId)
                         .headers(h -> h.setBearerAuth(adminToken))
                         .retrieve()
@@ -267,9 +269,6 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                         .map(Arrays::asList)
                         .block())
                 .getFirst().getName();
-
-//        System.out.println("Role: " + role);
-        return role;
     }
 
     public ResponseEntity<?> loginUser(UserLoginRequest request) throws VerificationException {

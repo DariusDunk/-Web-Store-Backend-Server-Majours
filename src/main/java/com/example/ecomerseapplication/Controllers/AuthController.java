@@ -40,7 +40,7 @@ public class AuthController {
 
         try
         {
-            System.out.println("Refresh token: "+ refreshTokenRequest.refreshToken());
+//            System.out.println("Refresh token: "+ refreshTokenRequest.refreshToken());
             return keycloakService.refreshBothTokens(refreshTokenRequest.refreshToken());
         }
         catch (Exception e)
@@ -61,7 +61,7 @@ public class AuthController {
         }
 
 
-        System.out.println("Registering user: " + customerAccountRequest);
+//        System.out.println("Registering user: " + customerAccountRequest);
 
         try {
             return  keycloakService.registerUser(customerAccountRequest.firstName,
