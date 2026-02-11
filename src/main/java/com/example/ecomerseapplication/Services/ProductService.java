@@ -28,7 +28,6 @@ public class ProductService {
 
     private final ReviewService reviewService;
     private final ProductCategoryService productCategoryService;
-    private final CustomerRepository customerRepository;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
 
     @Autowired
@@ -37,7 +36,6 @@ public class ProductService {
         this.customerCartService = customerCartService;
         this.reviewService = reviewService;
         this.productCategoryService = productCategoryService;
-        this.customerRepository = customerRepository;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
     }
 

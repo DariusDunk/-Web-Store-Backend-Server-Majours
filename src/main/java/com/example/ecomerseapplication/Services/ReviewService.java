@@ -94,7 +94,6 @@ public class ReviewService {
         review.setCustomer(customer);
         review.setReviewText(request.reviewText());
         review.setRating(adjustedRating);
-        review.setPostTimestamp(LocalDateTime.now());
         review.setVerifiedCustomer(isVerifiedCustomer);
         review.setIsDeleted(false);
 

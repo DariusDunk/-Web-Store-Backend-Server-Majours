@@ -8,7 +8,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
 
@@ -24,9 +23,4 @@ public class FavoriteOfCustomer {
 
     @Column(name = "date_added")
     private Instant dateAdded;
-
-//
-//    public FavoriteOfCustomer() {
-//
-//    }
 }

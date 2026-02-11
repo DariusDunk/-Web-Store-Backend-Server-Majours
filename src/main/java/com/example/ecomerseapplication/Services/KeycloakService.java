@@ -169,7 +169,6 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
     }
 
     private void deleteUser(String userId, String adminToken) {
-//        String token = getAdminAccessToken();
 //        System.out.println("Deleting user");
         keycloakWebClient.delete()
                 .uri("/admin/realms/" + userRealm + "/users/{id}", userId)
@@ -271,7 +270,7 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                 .getFirst().getName();
     }
 
-    public ResponseEntity<?> loginUser(UserLoginRequest request) throws VerificationException {
+    public ResponseEntity<?> loginUser(UserLoginRequest request) {
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
         formParams.add("grant_type", "password");
@@ -320,9 +319,9 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
                     .block();
 
             assert response != null;
-            if (response.getStatusCode().is2xxSuccessful()) {
-//                System.out.println("Logout successful");
-            }
+//            if (response.getStatusCode().is2xxSuccessful()) {
+////                System.out.println("Logout successful");
+//            }
             return response.getStatusCode().value();
 
         } catch (WebClientResponseException e) {

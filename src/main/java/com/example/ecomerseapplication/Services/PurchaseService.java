@@ -1,22 +1,10 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
-import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductQuantityPairResponse;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
-import com.example.ecomerseapplication.DTOs.responses.PurchaseResponse;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
-import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

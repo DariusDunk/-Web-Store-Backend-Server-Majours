@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

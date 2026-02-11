@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
 import com.example.ecomerseapplication.DTOs.responses.CategoryFiltersResponse;
-import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Services.AttributeNameService;

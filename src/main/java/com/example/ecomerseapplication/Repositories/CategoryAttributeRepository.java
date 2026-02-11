@@ -9,11 +9,6 @@ import java.util.List;
 
 @Repository
 public interface CategoryAttributeRepository extends JpaRepository<CategoryAttribute, Integer>, JpaSpecificationExecutor<CategoryAttribute> {
+
     List<CategoryAttribute> findByProductCategory(ProductCategory productCategory);
-
-//    @Query(value = "select ca " +
-//            "from CategoryAttribute ca " +
-//            "where ca.attributeName.attributeName in :names and ca.attributeOption in :options")
-//    Set<CategoryAttribute> findByNamesAndOptions(@Param("names") Set<String> names, @Param("options") Set<List<String>> options);
-
 }

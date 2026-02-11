@@ -2,9 +2,9 @@ package com.example.ecomerseapplication.Entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "reviews", schema = "online_shop")
@@ -30,7 +30,8 @@ public class Review {
     private short rating;
 
     @Column(name = "post_timestamp")
-    private LocalDateTime postTimestamp;
+    @CreationTimestamp
+    private Instant postTimestamp;
 
     @Column(name = "verified_customer")
     private Boolean verifiedCustomer;

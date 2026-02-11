@@ -2,7 +2,9 @@ package com.example.ecomerseapplication.Entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "purchases", schema = "online_shop")
@@ -18,8 +20,9 @@ public class Purchase {
     @ManyToOne
     private Customer customer;
 
-    @Column(name = "purchase_date")
-    private LocalDateTime date;
+    @Column(name = "purchase_date", updatable = false)
+    @CreationTimestamp
+    private Instant date;//todo kato stigne6 do rabota s pokupkite vij dali nqkyde kydeto se izpolzva tazi promenliva nqma da ima nujda ot promeni
 
     @Column(name = "total_cost")
     private int totalCost;
@@ -34,7 +37,4 @@ public class Purchase {
 
     private String purchaseCode;
 
-    public Purchase() {
-        this.date = LocalDateTime.now();
-    }
 }

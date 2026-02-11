@@ -21,6 +21,7 @@ public class FavoriteOfCustomerId {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @SuppressWarnings("JpaDataSourceORMInspection")
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "k_id")
     private Customer customer;

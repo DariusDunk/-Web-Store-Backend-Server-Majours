@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
-import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.ToString;
 

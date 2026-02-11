@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -56,10 +55,6 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "attribute_id"))
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<CategoryAttribute> categoryAttributeSet;
-
-//    @JsonIgnore
-//    @ManyToMany(mappedBy = "favourites")
-//    private Set<Customer> favouredBy;
 
     @Column(name = "main_image_url")
     private String mainImageUrl;

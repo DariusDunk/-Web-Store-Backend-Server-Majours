@@ -10,8 +10,6 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Utils.NullFieldChecker;
-import com.example.ecomerseapplication.enums.UserRole;
-import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -131,17 +129,6 @@ public class CustomerController {
         }
 
         return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes());
-
-//        try{
-//            customerService.removeFavoritesBatch(customer, request.productCodes());
-//
-//            return ResponseEntity.ok().build();
-//        }
-//        catch (Exception e){
-//            System.out.println("Error deleting favorites: " + e.getMessage());
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-
     }
 
     @PostMapping("cart/add")
@@ -351,12 +338,4 @@ public class CustomerController {
         );
     }
 
-//    @GetMapping("getPfp")
-//    public ResponseEntity<String> getUserPfp(@RequestParam int id) {
-//        String pfp = customerService.getPfpUrl(id);
-//
-//        if (pfp== null|| pfp.isEmpty()) return ResponseEntity.notFound().build();
-//
-//        return ResponseEntity.ok(pfp);
-//    }
 }

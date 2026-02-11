@@ -5,8 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "customer_carts",schema = "online_shop")
@@ -19,8 +20,10 @@ public class CustomerCart {
     private CustomerCartId customerCartId;
 
     private short quantity;
-    @Column(name = "date_added")
-    private LocalDateTime dateAdded;
+
+    @Column(name = "date_added", updatable = false)
+    @CreationTimestamp
+    private Instant dateAdded;
 
     public CustomerCart(CustomerCartId customerCartId, short quantity) {
         this.customerCartId = customerCartId;

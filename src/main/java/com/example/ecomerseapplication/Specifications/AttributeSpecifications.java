@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.Specifications;
 
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
-import com.example.ecomerseapplication.Entities.Product;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
