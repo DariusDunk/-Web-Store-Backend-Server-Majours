@@ -45,7 +45,9 @@ public class FavoriteOfCustomerService {
                     HttpStatus.CONFLICT.value(), "Достигнахте максималният лимит на списъка с любими!"));
 
         if (isInFavorites(customer, product)) {
-            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
+                    "Продуктът вече е в любими",
+                    HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими"));
         }
 
         FavoriteOfCustomerId favId = new FavoriteOfCustomerId(product, customer);

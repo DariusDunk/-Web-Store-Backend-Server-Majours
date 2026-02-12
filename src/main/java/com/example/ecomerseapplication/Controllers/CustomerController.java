@@ -314,7 +314,7 @@ public class CustomerController {
             return ResponseEntity.notFound().build();
         }
 
-        System.out.println(customer.getCustomerPfp());
+//        System.out.println(customer.getCustomerPfp());
 
         String userRole = keycloakService.getRoleByUserId(userId);
 
@@ -322,7 +322,8 @@ public class CustomerController {
                         customer.getId(),
                         customer.getFirstName() + " " + customer.getLastName(),
                         customer.getCustomerPfp(),
-                        userRole, customer.getId()
+                        userRole
+//                customer.getId()
                 )
         );
     }

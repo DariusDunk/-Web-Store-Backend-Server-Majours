@@ -53,8 +53,9 @@ router.post(`/addFavourite/:productCode`, async (req, res)=>{
       return res.status(response.status).end();
     }
     
-    const responseData = await response.text();
-    return res.status(response.status).json(responseData);
+    // const responseData = await response.text();
+    // return res.status(response.status).json(responseData);
+    return res.status(response.status).end();
   }
   catch (error) {
     console.error('Error:', error);
@@ -269,5 +270,33 @@ router.get('/getUserPfp/', async (req, res) =>
     }
   }
 )
+
+router.get('/me', async (req, res) =>
+  {
+    const accessToken = req.cookies['access_token'];
+    try{
+      const response = await fetch(`${Backend_Url}/customer/me`,
+          {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + accessToken,
+          }
+          }
+      )
+
+      if (!response.ok) {
+        return res.status(response.status).end();
+      }
+
+      const responseData = await response.json();
+      // console.log("/Me refetch response: " + JSON.stringify(responseData));
+      return res.status(response.status).json(responseData);
+
+    }catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  })
 
 module.exports = router

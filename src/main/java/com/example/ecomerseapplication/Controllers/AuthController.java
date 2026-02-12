@@ -89,7 +89,6 @@ public class AuthController {
     @PostMapping("invalidate")
     public ResponseEntity<?> invalidateToken(@RequestBody RefreshTokenRequest refreshTokenRequest)
     {
-
         try
         {
 //            System.out.println("Invalidating token: " + refreshTokenRequest.refreshToken());
