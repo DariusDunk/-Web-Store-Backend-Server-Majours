@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.Utils.NullFieldChecker;
 import com.example.ecomerseapplication.enums.UserRole;
-import org.keycloak.common.VerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +25,6 @@ public class AuthController {
     public AuthController(KeycloakService keycloakService) {
         this.keycloakService = keycloakService;
     }
-
-
-//    @PostMapping("create")
-//    public ResponseEntity<?> createSession() {
-//        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-//    }
 
     @PostMapping("refresh")
     public ResponseEntity<?> refreshTokens(@RequestBody RefreshTokenRequest refreshTokenRequest) {
@@ -61,7 +54,7 @@ public class AuthController {
         }
 
 
-//        System.out.println("Registering user: " + customerAccountRequest);
+//        System.out.println("Registering user:" + customerAccountRequest);
 //        ZonedDateTime
 //        LocalDateTime
         try {
@@ -78,7 +71,7 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) throws VerificationException {
+    public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) {
 
         if (request.identifier() == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
