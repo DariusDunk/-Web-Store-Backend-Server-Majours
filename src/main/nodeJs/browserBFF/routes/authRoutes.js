@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
-const {response} = require("express");
 const AuthURL = `${Backend_Url}/auth`;
 
 router.post(`/register`, async (req, res) => {
@@ -98,7 +97,7 @@ router.post(`/login`, async (req, res) => {
 
     const userData = await userDataResponse.json();
 
-    console.log("userData: " + JSON.stringify(userData));
+    // console.log("userData: " + JSON.stringify(userData));
 
     return res.status(userDataResponse.status).json(userData);
 

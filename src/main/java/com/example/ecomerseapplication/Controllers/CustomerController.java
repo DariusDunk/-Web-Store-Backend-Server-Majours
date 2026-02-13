@@ -35,7 +35,6 @@ public class CustomerController {
     private final UserIdExtractor userIdExtractor;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
 
-
     @Autowired
     public CustomerController(CustomerService customerService,
                               ProductService productService,
@@ -58,7 +57,7 @@ public class CustomerController {
     @PostMapping("favorite/add")
 //    @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addProductToFavourites(@RequestParam String productCode) {//TODO test
+    public ResponseEntity<?> addProductToFavourites(@RequestParam String productCode) {
 
         String userId = userIdExtractor.getUserId();
 
@@ -89,46 +88,52 @@ public class CustomerController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
-    @DeleteMapping("favorite/remove")
-//    @Transactional
-    public ResponseEntity<?> removeFromFavourites(@RequestBody CustomerProductPairRequest pairRequest) {
+    @DeleteMapping("favorite/remove/single")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> removeFromFavourites(@RequestBody RemoveOneFavRequest request) {
 
-        Customer customer = customerService.findById(pairRequest.customerId);
+        if (NullFieldChecker.hasNullFields(request)) {
+            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+            return ResponseEntity.badRequest().build();
+        }
 
-        if (customer == null)
+//        System.out.println("Single delete request: "+request);
+
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
+        Product product = productService.findByPCode(request.productCode());
+
+        if (customer == null || product == null)
             return ResponseEntity.notFound().build();
 
-        Product product = productService.findByPCode(pairRequest.productCode);
-
-        if (product == null)
-            return ResponseEntity.notFound().build();
-
-//        return customerService.removeFromFavourites(customer, product);
-        return favoriteOfCustomerService.removeFromFavorites(customer, product);
+        return favoriteOfCustomerService.removeFromFavoritesWRefetch(
+                customer,
+                product,
+                request.currentPage());
     }
 
 
     @DeleteMapping("favorite/remove/batch")
     @Transactional
-    public ResponseEntity<?> removeFromFavourites(@RequestBody BatchProductUserRequest request) {
+    public ResponseEntity<?> removeFromFavourites(@RequestBody RemoveFavBatchRequest request) {
 
-//        System.out.println(request);
+        System.out.println("Batch delete request: "+request);
+
+        String userId = userIdExtractor.getUserId();
 
         if (NullFieldChecker.hasNullFields(request)) {
-
             System.out.println("Null fields from request: " + NullFieldChecker.getNullFields(request));
-
             return ResponseEntity.badRequest().build();
         }
-
-        Customer customer = customerService.findById(request.customerId());
+        Customer customer = customerService.getByKID(userId);
 
         if (customer == null) {
             System.out.println("customer not found");
             return ResponseEntity.notFound().build();
         }
 
-        return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes());
+        return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes(), request.currentPage());
     }
 
     @PostMapping("cart/add")
