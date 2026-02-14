@@ -127,8 +127,8 @@ router.post(`/removeFav/batch`, async (req, res)=>{
 router.post('/addToCart',async  (req, res) =>{
   try{
 
-    const {customerProductPairRequest,doIncrement} = req.body.data;
-
+    const {productCode,doIncrement} = req.body;
+    const accessToken = req.cookies['access_token'];
     // console.log(req.body);
     //
     // console.log("inside addtocart. PAIR: " + JSON.stringify(customerProductPairRequest) + "");
@@ -137,9 +137,10 @@ router.post('/addToCart',async  (req, res) =>{
     const response = await fetch(`${Backend_Url}/customer/cart/add`,{
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
       },
-      body: JSON.stringify({customerProductPairRequest: customerProductPairRequest, doIncrement: doIncrement})
+      body: JSON.stringify({product_code: productCode, do_increment: doIncrement})
     });
 
     if (!response.ok) {
@@ -245,20 +246,23 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) =>{
   }
 })
 
-
-
-
-router.get('/getCart/:id',async (req,res)=>
+router.get('/getCart',async (req,res)=>
 {
-  const {id} = req.params;
+  const accessToken = req.cookies['access_token'];
 
   try{
-    const response = await fetch(`${Backend_Url}/customer/cart?id=${id}`);
+    const response = await fetch(`${Backend_Url}/customer/cart`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + accessToken
+          }
+        });
 
     if (!response.ok) {
       return res.status(response.status).end();
     }
-
 
     const responseData = await response.json();
     const status = response.status;
@@ -266,7 +270,7 @@ router.get('/getCart/:id',async (req,res)=>
   }
   catch (error) {
     console.error('Error:', error);
-   return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 

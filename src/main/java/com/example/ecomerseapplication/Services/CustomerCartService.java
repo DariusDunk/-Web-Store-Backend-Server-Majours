@@ -63,7 +63,7 @@ public class CustomerCartService {
 
             customerCart.setQuantity(++quantity);
             customerCartRepository.save(customerCart);
-            return ResponseEntity.ok("Успешно увелично количество в количката!");
+            return ResponseEntity.ok("Успешно увеличeно количество в количката!");
         }
 
         else

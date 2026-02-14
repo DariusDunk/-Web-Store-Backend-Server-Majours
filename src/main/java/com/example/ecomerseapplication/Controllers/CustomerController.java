@@ -138,6 +138,7 @@ public class CustomerController {
 
     @PostMapping("cart/add")
     @Transactional
+    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addToCart(@RequestBody ProductForCartRequest request) {
 
 //        System.out.println("REQUEST: "+request);
@@ -149,7 +150,7 @@ public class CustomerController {
             return ResponseEntity.badRequest().build();
         }
 
-        Product product = productService.findByPCode(request.customerProductPairRequest.productCode);
+        Product product = productService.findByPCode(request.productCode);
 
         if (product == null)
             return ResponseEntity.notFound().build();
@@ -160,7 +161,9 @@ public class CustomerController {
                     "Този продукт е изчерпан и не беше добавен в количката"));
         }
 
-        Customer customer = customerService.findById(request.customerProductPairRequest.customerId);
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
 
         if (customer == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Няма такъв потребител");
@@ -244,8 +247,13 @@ public class CustomerController {
 
 
     @GetMapping("cart")
-    public ResponseEntity<?> showCart(@RequestParam long id) {
-        Customer customer = customerService.findById(id);
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> showCart() {
+//        Customer customer = customerService.findById(id);
+
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
 
         if (customer == null)
             return ResponseEntity.notFound().build();
