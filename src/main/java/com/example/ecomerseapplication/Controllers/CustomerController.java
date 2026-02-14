@@ -199,25 +199,23 @@ public class CustomerController {
         }
     }
 
-    @DeleteMapping("cart/remove")
-    @Transactional
-    public ResponseEntity<?> removeFromCart(@RequestBody CustomerProductPairRequest pairRequest) {
+    @DeleteMapping("cart/remove/{productCode}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
-        if (NullFieldChecker.hasNullFields(pairRequest)) {
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByKID(userId);
 
-            System.out.println("Null fields from request:" + NullFieldChecker.getNullFields(pairRequest));
-
+        if (productCode == null || customer == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        Customer customer = customerService.findById(pairRequest.customerId);
         try {
-            customerCartService.removeFromCart(customer, pairRequest.productCode);
+           return customerCartService.removeFromCartWFetch(customer, productCode);
         } catch (Exception e) {
             System.out.println("Error removing from cart: " + e.getMessage());
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("cart/remove/batch")

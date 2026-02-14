@@ -9,12 +9,11 @@ import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,15 +92,25 @@ public class CustomerCartService {
     public List<CartItemResponse> getCartDtoByCustomer(Customer customer) {
         return customerCartRepository.findDtoByCustomer(customer.getKeycloakId());
     }
+    @Transactional
+    public ResponseEntity<?> removeFromCartWFetch(Customer customer, String productCode) {
 
-    public void removeFromCart(Customer customer, String productCode) {
-        List<CustomerCart> cart = cartsByCustomer(customer);
+        int affectedRows = customerCartRepository.deleteByCustomerAndProductCode(customer, productCode);
 
-        if (cart.isEmpty()) throw new IllegalArgumentException("Cart is empty!");
+        if (affectedRows==0)
+            throw new IllegalStateException("No rows deleted");
 
-        CustomerCart cartItem = cart.stream().filter(c -> c.getCustomerCartId().getProduct().getProductCode().equals(productCode)).findFirst().orElseThrow();
+        if (affectedRows > 1)
+            throw new IllegalStateException("Multiple rows deleted unexpectedly");
 
-        customerCartRepository.delete(cartItem);
+        return ResponseEntity.ok(getCartDtoByCustomer(customer));
+
+
+//        CustomerCart cartItem = cart.stream().filter(c -> c.getCustomerCartId().getProduct().getProductCode().equals(productCode)).findFirst().orElseThrow();
+
+//        customerCartRepository.delete(cartItem);
+
+
 
     }
 

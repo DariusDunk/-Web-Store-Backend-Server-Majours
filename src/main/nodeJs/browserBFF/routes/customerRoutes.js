@@ -185,22 +185,27 @@ router.post('/addToCart/batch',async  (req, res) =>{
   }
 })
 
-router.post('/removeFromCart',async  (req, res) =>{
+router.post('/removeFromCart/:productCode',async  (req, res) =>{
   try{
-    const {customerId, productCode} = req.body;
-    const response = await fetch(`${Backend_Url}/customer/cart/remove`,{
+    // const {customerId, productCode} = req.body;
+
+    const productCode = req.params.productCode;
+    const accessToken = req.cookies['access_token'];
+    const response = await fetch(`${Backend_Url}/customer/cart/remove/${productCode}`,{
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({customerId: customerId, productCode: productCode})
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
+      }
     });
 
     if (!response.ok) {
       return res.status(response.status).end();
     }
 
-    return res.status(response.status).end();
+    const responseData = await response.json();
+
+    return res.status(response.status).json(responseData);
   }
   catch (error) {
     console.error('Error removing product from cart:', error);
