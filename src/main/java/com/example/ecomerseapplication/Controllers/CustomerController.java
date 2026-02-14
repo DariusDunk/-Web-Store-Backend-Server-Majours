@@ -219,21 +219,25 @@ public class CustomerController {
     }
 
     @DeleteMapping("cart/remove/batch")
-    @Transactional
-    public ResponseEntity<?> removeBatchFromCart(@RequestBody BatchProductUserRequest request) {
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> removeBatchFromCart(@RequestBody List<String> productCodes) {
 
-        if (NullFieldChecker.hasNullFields(request)) {
-            System.out.println("Null fields from request:" + NullFieldChecker.getNullFields(request));
-            return ResponseEntity.badRequest().build();
-        }
+        System.out.println("Product codes: " + productCodes);
 
-        Customer customer = customerService.findById(request.customerId());
+       if (productCodes.isEmpty()) {
+           return ResponseEntity.badRequest().build();
+       }
+
+
+       String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
 
         try {
-            return customerCartService.removeBatchFromCart(customer, request.productCodes());
+            return customerCartService.removeBatchFromCartWFetch(customer, productCodes);
         } catch (Exception e) {
             System.out.println("Error removing product batch from cart: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
     }
