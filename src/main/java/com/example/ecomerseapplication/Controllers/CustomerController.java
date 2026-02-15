@@ -172,21 +172,23 @@ public class CustomerController {
     }
 
     @PostMapping("cart/add/batch")
-    public ResponseEntity<?> addBatchToCart(@RequestBody BatchProductUserRequest request) {
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> addBatchToCart(@RequestBody List<String> productCodes) {
 
-        if (NullFieldChecker.hasNullFields(request)) {
-            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+        if (productCodes.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
-        Customer customer = customerService.findById(request.customerId());
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
 
         if (customer == null) {
             System.out.println("customer not found");
             return ResponseEntity.notFound().build();
         }
 
-        List<Product> requestProducts = productService.getByCodes(request.productCodes());
+        List<Product> requestProducts = productService.getByCodes(productCodes);
 
         if (requestProducts.isEmpty()) {
             System.out.println("No products found from request");

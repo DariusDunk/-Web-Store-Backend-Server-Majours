@@ -161,13 +161,15 @@ router.post('/addToCart',async  (req, res) =>{
 
 router.post('/addToCart/batch',async  (req, res) =>{
   try{
-    const {customerId, productCodes} = req.body;
+    const productCodes = req.body;
+    const accessToken = req.cookies['access_token'];
     const response = await fetch(`${Backend_Url}/customer/cart/add/batch`,{
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
       },
-      body: JSON.stringify({customer_id: customerId, product_codes: productCodes})
+      body: JSON.stringify(productCodes)
     });
 
     if (!response.ok) {
