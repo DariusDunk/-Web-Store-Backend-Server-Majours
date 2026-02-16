@@ -88,6 +88,24 @@ public class CustomerController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
+    @DeleteMapping("favourites/remove/{productCode}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
+
+//        System.out.println("In remove favorite from prod page:");
+
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
+        Product product = productService.findByPCode(productCode);
+        if (customer == null || product == null) {
+            System.out.println("customer or product not found");
+            return ResponseEntity.badRequest().build();
+        }
+
+        return favoriteOfCustomerService.removeFromFavorites(customer, product);
+    }
+
     @DeleteMapping("favorite/remove/single")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromFavourites(@RequestBody RemoveOneFavRequest request) {

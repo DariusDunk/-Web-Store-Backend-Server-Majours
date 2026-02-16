@@ -83,16 +83,18 @@ router.post(`/removeFav/single`, async (req, res)=>{
   }
 })
 
-router.post(`/removeFav/detProd`, async (req, res)=>{
+router.post(`/removeFav/detProd/:productCode`, async (req, res)=>{
+
+  console.log("In fav removal");
 
   const accessToken = req.cookies['access_token'];
+  const productCode = req.params.productCode;
 
   try {
-    const response = await fetch(`${Backend_Url}/customer/favorite/remove`,{//todo dovur6i i syzdai v bekenda endpoint
+    const response = await fetch(`${Backend_Url}/customer/favourites/remove/${productCode}`,{
       method: 'DELETE',
       headers: {'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + accessToken},
-      body: JSON.stringify(req.body)
+        'Authorization': 'Bearer ' + accessToken}
     });
 
     return res.status(response.status).end();

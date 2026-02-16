@@ -65,13 +65,24 @@ public class FavoriteOfCustomerService {
         try {
           repository.deleteFavoriteOfCustomerByFavoriteOfCustomerId_CustomerAndFavoriteOfCustomerId_Product(customer, product);
 
-//            System.out.println("Page Response: " + response);
-
             return calculateNewPageWContent(customer, currentPage);
 
         } catch (Exception e) {
+            System.out.println("Error removing favorite: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @Transactional
+    public ResponseEntity<?> removeFromFavorites(Customer customer, Product product) {
+        try {
+            repository.deleteFavoriteOfCustomerByFavoriteOfCustomerId_CustomerAndFavoriteOfCustomerId_Product(customer, product);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            System.out.println("Error removing favorite: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
     }
 
     private ResponseEntity<?> calculateNewPageWContent(Customer customer, int currentPage){
