@@ -70,16 +70,23 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
 
 router.get('/detail/:productCode', async (req, res)=>{
   const { productCode } = req.params;
-  const { id } = req.query;
 
-  if (!productCode || !id) {
+  const accessToken = req.cookies['access_token'];
+
+  if (!productCode) {
     return res.status(400).json({ error: 'Missing required parameters' });
   }
   try {
-    const productDetailsResponse = await fetch(`${Backend_Url}/product/${productCode}?id=${id}`);
+    const productDetailsResponse = await fetch(`${Backend_Url}/product/${productCode}`,
+        {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + accessToken,
+        }
+        });
 
     const ratingOverviewResponse = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
-
 
     if (!ratingOverviewResponse.ok) {
         return res.status(ratingOverviewResponse.status).end();

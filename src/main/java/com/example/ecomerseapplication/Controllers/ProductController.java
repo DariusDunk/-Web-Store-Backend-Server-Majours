@@ -84,11 +84,12 @@ public class ProductController {
     }
 
     @GetMapping("{productCode}")
-    public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode,
-                                                                       @RequestParam long id) {
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {
 
+        String id = userIdExtractor.getUserId();
 
-        Customer customer = customerService.findById(id);
+        Customer customer = customerService.getByKID(id);
 
         ResponseEntity<DetailedProductResponse> detailedProductResponse = productService
                 .getByNameAndCode(productCode, customer);

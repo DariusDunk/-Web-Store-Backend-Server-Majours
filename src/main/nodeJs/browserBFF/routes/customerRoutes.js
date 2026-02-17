@@ -85,7 +85,7 @@ router.post(`/removeFav/single`, async (req, res)=>{
 
 router.post(`/removeFav/detProd/:productCode`, async (req, res)=>{
 
-  console.log("In fav removal");
+  // console.log("In fav removal");
 
   const accessToken = req.cookies['access_token'];
   const productCode = req.params.productCode;
