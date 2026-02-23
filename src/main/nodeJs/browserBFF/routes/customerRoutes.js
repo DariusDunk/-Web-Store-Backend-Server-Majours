@@ -131,12 +131,8 @@ router.post('/addToCart',async  (req, res) =>{
 
     const {productCode,doIncrement} = req.body;
     const accessToken = req.cookies['access_token'];
-    // console.log(req.body);
-    //
-    // console.log("inside addtocart. PAIR: " + JSON.stringify(customerProductPairRequest) + "");
-    // console.log("inside addtocart. QUANTITY: " + JSON.stringify(quantity) + "");
 
-    const response = await fetch(`${Backend_Url}/customer/cart/add`,{
+    const response = await fetch(`${Backend_Url}/customer/cart/manageQuant`,{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

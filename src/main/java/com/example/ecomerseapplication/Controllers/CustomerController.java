@@ -154,7 +154,7 @@ public class CustomerController {
         return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes(), request.currentPage());
     }
 
-    @PostMapping("cart/add")
+    @PostMapping("cart/manageQuant")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addToCart(@RequestBody ProductForCartRequest request) {

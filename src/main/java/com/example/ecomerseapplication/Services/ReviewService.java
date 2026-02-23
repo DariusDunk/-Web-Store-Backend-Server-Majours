@@ -19,10 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -75,14 +72,14 @@ public class ReviewService {
                     "Размера на коментара надвишава максималният размер"));
         }
 
-        if (profanityService.containsProfanity(reviewText))
-        {
-//            System.out.println("Нецензорни думи");
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
-                    "Засечен нецензурен език",
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Засечен нецензурен език, ревюто отказано!"));
-        }
+//        if (profanityService.containsProfanity(reviewText))
+//        {
+////            System.out.println("Нецензорни думи");
+//            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+//                    "Засечен нецензурен език",
+//                    HttpStatus.BAD_REQUEST.value(),
+//                    "Засечен нецензурен език, ревюто отказано!"));
+//        }
         return null;
     }
 
@@ -94,7 +91,7 @@ public class ReviewService {
 
         review.setProduct(product);
         review.setCustomer(customer);
-        review.setReviewText(request.reviewText());
+        review.setReviewText(profanityService.censorProfanity(request.reviewText()));
         review.setRating(adjustedRating);
         review.setVerifiedCustomer(isVerifiedCustomer);
         review.setIsDeleted(false);
@@ -122,7 +119,7 @@ public class ReviewService {
             return null;
 
         existingReview.setRating(adjustedRating);
-        existingReview.setReviewText(request.reviewText);
+        existingReview.setReviewText(profanityService.censorProfanity(request.reviewText));
         update(existingReview);
 
         updateProductRating(existingReview, product, adjustedRating);
@@ -142,22 +139,8 @@ public class ReviewService {
 
 //            System.out.printf("NEW RATING CALCULATION: ((%d - %d) + %d)/%d = %d", oldRating, existingReview.getRating(), adjustedRating, product.getReviews().size(), newRating);
 
-
             product.setRating(newRating);
         }
-    }
-
-    public Short updatedRating(Product product, Review review) {
-
-        if (review == null)
-            return -1;
-
-        short oldRating = 0;
-
-        for (Review rev : product.getReviews())
-            oldRating += rev.getRating();
-
-        return (short) ((oldRating - review.getRating()) / (product.getReviews().size() - 1));
     }
 
     @Transactional
@@ -167,12 +150,8 @@ public class ReviewService {
 
     public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable, String customerId) {
 
-//        Instant startDate = Instant.parse(LocalDate.now().atStartOfDay().toString());
-//        Instant endDate = LocalDate.now().plusDays(1).atStartOfDay();
-
         Instant now = Instant.now();
         Instant twentyFourHoursAgo = now.minus(24, ChronoUnit.HOURS);
-
 
         return reviewRepository.getByProductCode(request.productCode(),
                 request.sortOrder().getValue(),
