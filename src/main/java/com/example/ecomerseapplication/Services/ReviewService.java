@@ -154,7 +154,6 @@ public class ReviewService {
         Instant twentyFourHoursAgo = now.minus(24, ChronoUnit.HOURS);
 
         return reviewRepository.getByProductCode(request.productCode(),
-                request.sortOrder().getValue(),
                 request.verifiedOnly(),
                 request.ratingValue(),
                 customerId,

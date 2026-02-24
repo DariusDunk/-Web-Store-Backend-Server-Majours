@@ -68,6 +68,30 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
   }
 });
 
+router.get(`/review/overview/:productCode`, async (req, res)=>{
+    const {productCode} = req.params;
+
+    if (!productCode) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    try {
+        const response = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
+
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
+
+        const responseData = await response.json();
+
+        return res.status(response.status).json(responseData);
+    }
+    catch (error) {
+        console.error('Error fetching product review overview from backend:', error);
+        return res.status(error.status).json({ error: error.message });
+    }
+})
+
 router.get('/detail/:productCode', async (req, res)=>{
   const { productCode } = req.params;
 

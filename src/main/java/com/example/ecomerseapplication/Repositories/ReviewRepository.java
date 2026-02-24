@@ -13,14 +13,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Optional<Review> getByProductAndCustomer(Product product, Customer customer);
-    Optional<Review> getReviewByCustomer_IdAndProduct_ProductCode(Long customerId, String productCode);
 
     Optional<Review> getReviewByCustomer_KeycloakIdAndProduct_ProductCode(String customerKeycloakId, String productProductCode);
 
@@ -62,25 +60,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "from Review r " +
             "where r.product.productCode = :productCode " +
             "and (:ratingValue IS NULL OR r.rating=:ratingValue) " +
-            "and (:verifiedOnly=false or r.isDeleted=false and r.verifiedCustomer=true) " +
-            "order by " +
-            "case when " +
-            ":sortOrder = 'newest' then r.postTimestamp " +
-            "end asc, " +
-            "case when " +
-            ":sortOrder = 'oldest' then r.postTimestamp " +
-            "end desc")
+            "and (:verifiedOnly=false or r.isDeleted=false and r.verifiedCustomer=true) "
+    )
     Page<ReviewResponse> getByProductCode(
             @Param("productCode")
             String productCode,
-            @Param("sortOrder")
-            String sortOrder,
             @Param("verifiedOnly")
             Boolean verifiedOnly,
             @Param("ratingValue")
             Short ratingValue,
             @Param("customerId")
-//            Long customerId,
             String customerId,
             Pageable pageable,
             @Param("aDayEarlier")

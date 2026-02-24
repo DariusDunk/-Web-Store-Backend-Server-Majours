@@ -10,9 +10,11 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Utils.NullFieldChecker;
+import com.example.ecomerseapplication.enums.SortType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -193,7 +196,11 @@ public class ProductController {
 
         String customerId = userIdExtractor.getUserId();
 
-        PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit);
+        Sort sort = request.sortOrder().getValue().equalsIgnoreCase(SortType.NEWEST.getValue())
+                ? Sort.by("postTimestamp").descending()
+                : Sort.by("postTimestamp").ascending();
+
+        PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit, sort);
 
 //        System.out.println(request);
 
