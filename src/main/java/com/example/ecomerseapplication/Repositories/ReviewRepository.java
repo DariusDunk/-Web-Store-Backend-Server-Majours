@@ -32,6 +32,56 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "r.id," +
             "r.reviewText, " +
             "r.rating, " +
+            "case " +
+                "when r.isDeleted=true then null " +
+                "else r.postTimestamp " +
+            "end, " +
+            "new com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview(" +
+            "case " +
+                "when r.isDeleted=true then 'Ревюто е изтрито' " +
+                "else r.customer.firstName||' '||r.customer.lastName " +
+            "end, " +
+            "case " +
+                "when r.isDeleted=true then null else " +
+                "r.customer.customerPfp " +
+            "end," +
+            "case " +
+                "when :customerId is not null " +
+                    "and r.customer.keycloakId = :customerId " +
+                "then true " +
+                "else false " +
+            "end, " +
+            "case " +
+                "when r.isDeleted=true " +
+                "then false " +
+                "else r.verifiedCustomer " +
+            "end, " +
+            "case " +
+                "when r.postTimestamp>=:aDayEarlier then false " +
+                "else true " +
+            "end)," +
+            "r.isDeleted)" +
+            "from Review r " +
+            "where r.product.productCode = :productCode " +
+            "and (:ratingValue IS NULL OR r.rating=:ratingValue) " +
+            "and  r.isDeleted=false " +
+            "and r.verifiedCustomer=true "
+    )
+    Page<ReviewResponse> getByProductCodeVerifiedOnly(
+            @Param("productCode")
+            String productCode,
+            @Param("ratingValue")
+            Short ratingValue,
+            @Param("customerId")
+            String customerId,
+            Pageable pageable,
+            @Param("aDayEarlier")
+            Instant dayEarlier);
+
+    @Query(value = "select new com.example.ecomerseapplication.DTOs.responses.ReviewResponse(" +
+            "r.id," +
+            "r.reviewText, " +
+            "r.rating, " +
             "case when r.isDeleted=true then null " +
             "else r.postTimestamp " +
             "end, " +
@@ -59,14 +109,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "r.isDeleted)" +
             "from Review r " +
             "where r.product.productCode = :productCode " +
-            "and (:ratingValue IS NULL OR r.rating=:ratingValue) " +
-            "and (:verifiedOnly=false or r.isDeleted=false and r.verifiedCustomer=true) "
+            "and (:ratingValue IS NULL OR r.rating=:ratingValue) "
     )
-    Page<ReviewResponse> getByProductCode(
+    Page<ReviewResponse> getByProductCodeAll(
             @Param("productCode")
             String productCode,
-            @Param("verifiedOnly")
-            Boolean verifiedOnly,
             @Param("ratingValue")
             Short ratingValue,
             @Param("customerId")

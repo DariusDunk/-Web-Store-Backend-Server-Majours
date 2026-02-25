@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -54,7 +55,7 @@ public class ReviewService {
         return reviewRepository.getByProductAndCustomer(product, customer).orElse(null);
     }
 
-    public Review getByUIDAndPCode(String productCode, String  customerId) {
+    public Review getByUIDAndPCode(String productCode, String customerId) {
         return reviewRepository.getReviewByCustomer_KeycloakIdAndProduct_ProductCode(customerId, productCode).orElse(null);//TODO vij sled migraciqta
     }
 
@@ -143,23 +144,32 @@ public class ReviewService {
         }
     }
 
-    @Transactional
-    public void delete(Review review) {
-        reviewRepository.delete(review);//TODO tova trqbva da e dostypno samo za admina i trqbva da ima logika za update na reitinga
-    }
+//    @Transactional
+//    public void delete(Review review) {
+//        reviewRepository.delete(review);//TODO tova trqbva da e dostypno samo za admina i trqbva da ima logika za update na reitinga
+//    }
 
     public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable, String customerId) {
 
         Instant now = Instant.now();
         Instant twentyFourHoursAgo = now.minus(24, ChronoUnit.HOURS);
 
-        return reviewRepository.getByProductCode(request.productCode(),
-                request.verifiedOnly(),
-                request.ratingValue(),
-                customerId,
-                pageable,
-                twentyFourHoursAgo
-                );
+        if (request.verifiedOnly() == true) {
+            return reviewRepository.getByProductCodeVerifiedOnly(
+                    request.productCode(),
+                    request.ratingValue(),
+                    customerId,
+                    pageable,
+                    twentyFourHoursAgo
+            );
+        } else
+            return reviewRepository.getByProductCodeAll(
+                    request.productCode(),
+                    request.ratingValue(),
+                    customerId,
+                    pageable,
+                    twentyFourHoursAgo);
+
     }
 
     public List<RatingOverviewResponse> getRatingOverview(String productCode) {
