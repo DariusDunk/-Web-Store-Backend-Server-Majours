@@ -18,21 +18,17 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
         body: JSON.stringify(res.body)
       });
 
-    const text = await response.text();
+    // const text = await response.text();
 
-    let responseData = null
+    const responseData = await response.json();
+
+    // let responseData = null
 
     if (!response.ok) {
-      if (text) {
-        try {
-          responseData = JSON.parse(text)
-          // console.log(responseData);
-        } catch (parseError) {
-          console.error("INVALID JSON FROM BACKEND: " + text)
-          return res.status(502).json({error: "Invalid response from backend"})
-        }
-      }
+      return res.status(response.status).end();
     }
+
+    // console.log("responseData: " + JSON.stringify(responseData))
 
     return res.status(response.status).json(responseData || {})
   }catch (error) {

@@ -4,7 +4,6 @@ import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse
 import com.example.ecomerseapplication.DTOs.responses.CategoryFiltersResponse;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
-import com.example.ecomerseapplication.Services.AttributeNameService;
 import com.example.ecomerseapplication.Services.ManufacturerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
 import com.example.ecomerseapplication.Services.ProductService;
@@ -28,7 +27,7 @@ public class CategoryController {
     private final ProductService productService;
 
     @Autowired
-    public CategoryController(ProductCategoryService categoryService, AttributeNameService attributeNameService, ManufacturerService manufacturerService, ProductService productService) {
+    public CategoryController(ProductCategoryService categoryService, ManufacturerService manufacturerService, ProductService productService) {
         this.categoryService = categoryService;
         this.manufacturerService = manufacturerService;
         this.productService = productService;
@@ -78,6 +77,8 @@ public class CategoryController {
             categoryFiltersResponse.priceLowest = Integer.parseInt(totalPriceRange[0].toString());
             categoryFiltersResponse.priceHighest = Integer.parseInt(totalPriceRange[1].toString());
         }
+
+//        System.out.println("Filters: " + categoryFiltersResponse);
 
         return ResponseEntity.ok(categoryFiltersResponse);
     }
