@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class ProductCategoryService {
     }
 
     public ProductCategory findByName(String name) {
-        return productCategoryRepository.findByCategoryName(name).orElse(null);
+        return productCategoryRepository.findByCategoryName(name).orElseThrow(()->new ResourceNotFoundException("Product Category not found with name: " + name));
     }
 
     public List<AttributeOptionDTO> getAttributesOfCategory(int categoryId) {

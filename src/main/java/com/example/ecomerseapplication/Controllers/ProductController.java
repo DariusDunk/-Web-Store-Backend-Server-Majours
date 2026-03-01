@@ -139,9 +139,9 @@ public class ProductController {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         ProductCategory productCategory = productCategoryService.findByName(name);
-        if (productCategory == null) {
-            return ResponseEntity.notFound().build();
-        }
+//        if (productCategory == null) {
+//            return ResponseEntity.notFound().build();
+//        }
 
         Page<CompactProductResponse> productResponsePage = productService.getByCategory(productCategory, pageRequest);
 

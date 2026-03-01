@@ -27,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("refresh")
-    public ResponseEntity<?> refreshTokens(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<?> refreshTokens(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
 
         try
         {
@@ -44,13 +44,7 @@ public class AuthController {
 
     @PostMapping("register")
     @Transactional
-    public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {
-
-//        if (NullFieldChecker.hasNullFields(customerAccountRequest)) {
-//            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(customerAccountRequest));
-//            return ResponseEntity.badRequest().build();
-//        }
-
+    public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {//TODO tuk ili v keycloak servica trqbva sled registraciq v keycloak da se napravi kopie na potrebitelq v bazata danni, kato trqbva da e i kriptirano
 
         try {
             return  keycloakService.registerUser(customerAccountRequest.firstName,
@@ -66,16 +60,13 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> loginUserKeycloak(@RequestBody UserLoginRequest request) {
-
-        if (request.identifier() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) {
 
         return keycloakService.loginUser(request);
     }
 
     @PostMapping("invalidate")
-    public ResponseEntity<?> invalidateToken(@RequestBody RefreshTokenRequest refreshTokenRequest)
+    public ResponseEntity<?> invalidateToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest)//TODO naprvi da ne e requestBody?
     {
         try
         {

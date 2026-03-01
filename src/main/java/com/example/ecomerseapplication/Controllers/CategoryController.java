@@ -7,9 +7,11 @@ import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Services.ManufacturerService;
 import com.example.ecomerseapplication.Services.ProductCategoryService;
 import com.example.ecomerseapplication.Services.ProductService;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 
 @RestController
+@Validated
 @RequestMapping("category/")
 public class CategoryController {
 
@@ -44,11 +47,12 @@ public class CategoryController {
     }
 
     @GetMapping("filters")
-    public ResponseEntity<?> getAttributes(@RequestParam String categoryName) {
-        ProductCategory category = categoryService.findByName(categoryName);
+    public ResponseEntity<?> getAttributes(@RequestParam @NotBlank String categoryName) {
 
-        if (category==null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
+        ProductCategory category = categoryService.findByName(categoryName);//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove
+
+//        if (category==null)
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
 

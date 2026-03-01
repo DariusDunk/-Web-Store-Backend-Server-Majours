@@ -38,12 +38,6 @@ public class ProfanityService {
             System.out.println("Error loading profanity list: " + e.getMessage());}
     }
 
-    public boolean containsProfanity(String text) {
-
-        String normalizedText = normalize(text);
-        return swearSet.contains(normalizedText);
-    }
-
     private String normalize(String text) {
         return text.toLowerCase()
 //                .replace("4", "ch")
