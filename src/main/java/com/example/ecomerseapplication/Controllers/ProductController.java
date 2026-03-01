@@ -9,7 +9,6 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorMessage;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
-import com.example.ecomerseapplication.Utils.NullFieldChecker;
 import com.example.ecomerseapplication.enums.SortType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -176,8 +175,8 @@ public class ProductController {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
 
-        System.out.println("REQUEST: \n"+productFilterRequest);
-        System.out.println("Filtered " +categoryAttributeSet.size()+": "+categoryAttributeSet);
+//        System.out.println("REQUEST: \n"+productFilterRequest);
+//        System.out.println("Filtered " +categoryAttributeSet.size()+": "+categoryAttributeSet);
 
         return ResponseEntity.ok(PageResponse.from(
                 productService.getByCategoryFiltersManufacturerAndPriceRange(
@@ -253,10 +252,10 @@ public class ProductController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addReview(@RequestBody ReviewCreateRequest request) {
 
-        if (NullFieldChecker.hasNullFields(request)) {
-            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-            return ResponseEntity.badRequest().build();
-        }
+//        if (NullFieldChecker.hasNullFields(request)) {
+//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+//            return ResponseEntity.badRequest().build();
+//        }
 
         String userId = userIdExtractor.getUserId();
 
@@ -302,10 +301,10 @@ public class ProductController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> updateReview(@RequestBody ReviewUpdateRequest request) {
 
-        if (NullFieldChecker.hasNullFields(request)) {
-            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-            return ResponseEntity.badRequest().build();
-        }
+//        if (NullFieldChecker.hasNullFields(request)) {
+//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+//            return ResponseEntity.badRequest().build();
+//        }
 
 //        System.out.println(request.toString());
 

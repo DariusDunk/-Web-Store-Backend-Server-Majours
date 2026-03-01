@@ -4,8 +4,8 @@ import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.RefreshTokenRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.Services.KeycloakService;
-import com.example.ecomerseapplication.Utils.NullFieldChecker;
 import com.example.ecomerseapplication.enums.UserRole;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +29,6 @@ public class AuthController {
     @PostMapping("refresh")
     public ResponseEntity<?> refreshTokens(@RequestBody RefreshTokenRequest refreshTokenRequest) {
 
-//        System.out.println("In refresh endpoint");
-
         try
         {
 //            System.out.println("Refresh token: "+ refreshTokenRequest.refreshToken());
@@ -46,17 +44,14 @@ public class AuthController {
 
     @PostMapping("register")
     @Transactional
-    public ResponseEntity<?> registerUserKeycloak(@RequestBody CustomerAccountRequest customerAccountRequest) {
+    public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {
 
-        if (NullFieldChecker.hasNullFields(customerAccountRequest)) {
-            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(customerAccountRequest));
-            return ResponseEntity.badRequest().build();
-        }
+//        if (NullFieldChecker.hasNullFields(customerAccountRequest)) {
+//            System.out.println("Null fields from request: "+ NullFieldChecker.getNullFields(customerAccountRequest));
+//            return ResponseEntity.badRequest().build();
+//        }
 
 
-//        System.out.println("Registering user:" + customerAccountRequest);
-//        ZonedDateTime
-//        LocalDateTime
         try {
             return  keycloakService.registerUser(customerAccountRequest.firstName,
                     customerAccountRequest.familyName,

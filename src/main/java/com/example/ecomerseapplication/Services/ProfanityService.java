@@ -58,7 +58,7 @@ public class ProfanityService {
     public String censorProfanity(String text) {
         String[] words = text.split("\\s+");
         StringBuilder censoredText = new StringBuilder();
-        System.out.println("TEXT for censoring: " + text);
+//        System.out.println("TEXT for censoring: " + text);
         Set<Character> punctuationSet = Set.of('!', '.', '?', ';', ',', ':');
 
         for (String word : words) {
@@ -87,7 +87,7 @@ public class ProfanityService {
 
             censoredText.append(punctuation).append(" ");
         }
-        System.out.println("Censored text: " + censoredText.toString().trim());
+//        System.out.println("Censored text: " + censoredText.toString().trim());
         return censoredText.toString().trim();
     }
 }

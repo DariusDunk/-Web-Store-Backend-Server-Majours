@@ -9,7 +9,7 @@ import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
-import com.example.ecomerseapplication.Utils.NullFieldChecker;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -108,12 +108,12 @@ public class CustomerController {
 
     @DeleteMapping("favorite/remove/single")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> removeFromFavourites(@RequestBody RemoveOneFavRequest request) {
+    public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveOneFavRequest request) {
 
-        if (NullFieldChecker.hasNullFields(request)) {
-            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-            return ResponseEntity.badRequest().build();
-        }
+//        if (NullFieldChecker.hasNullFields(request)) {
+//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+//            return ResponseEntity.badRequest().build();
+//        }
 
 //        System.out.println("Single delete request: "+request);
 
@@ -136,14 +136,14 @@ public class CustomerController {
     @Transactional
     public ResponseEntity<?> removeFromFavourites(@RequestBody RemoveFavBatchRequest request) {
 
-        System.out.println("Batch delete request: "+request);
+//        System.out.println("Batch delete request: "+request);
 
         String userId = userIdExtractor.getUserId();
 
-        if (NullFieldChecker.hasNullFields(request)) {
-            System.out.println("Null fields from request: " + NullFieldChecker.getNullFields(request));
-            return ResponseEntity.badRequest().build();
-        }
+//        if (NullFieldChecker.hasNullFields(request)) {
+//            System.out.println("Null fields from request: " + NullFieldChecker.getNullFields(request));
+//            return ResponseEntity.badRequest().build();
+//        }
         Customer customer = customerService.getByKID(userId);
 
         if (customer == null) {
@@ -161,12 +161,12 @@ public class CustomerController {
 
 //        System.out.println("REQUEST: "+request);
 
-        if (NullFieldChecker.hasNullFields(request)) {
-
-            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-
-            return ResponseEntity.badRequest().build();
-        }
+//        if (NullFieldChecker.hasNullFields(request)) {
+//
+//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
+//
+//            return ResponseEntity.badRequest().build();
+//        }
 
         Product product = productService.findByPCode(request.productCode);
 
@@ -245,7 +245,7 @@ public class CustomerController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeBatchFromCart(@RequestBody List<String> productCodes) {
 
-        System.out.println("Product codes: " + productCodes);
+//        System.out.println("Product codes: " + productCodes);
 
        if (productCodes.isEmpty()) {
            return ResponseEntity.badRequest().build();
