@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -46,25 +43,19 @@ public class CategoryController {
         return ResponseEntity.ok(names);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("filters")
     public ResponseEntity<?> getAttributes(@RequestParam @NotBlank String categoryName) {
 
-        ProductCategory category = categoryService.findByName(categoryName);//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove
-
-//        if (category==null)
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CATEGORY NOT FOUND");
+        ProductCategory category = categoryService.findByName(categoryName);
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
 
         categoryFiltersResponse.manufacturerNames = manufacturerService.getNamesByCategory(category);
 
-        if (categoryFiltersResponse.manufacturerNames.isEmpty()) {
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("MANUFACTURERS NOT FOUND");
-        }
-
         List<CategoryAttributesResponse> attributesResponses = AttributeMapper
                 .attributeOptionListToCatAttrResponseList(categoryService.getAttributesOfCategory(category.getId()));
-        if (attributesResponses.isEmpty())
+        if (attributesResponses.isEmpty())//TODO Tova dali moje da ostane taka se 4udq
         {
             categoryFiltersResponse.categoryAttributesResponses = new ArrayList<>();
         }
@@ -76,11 +67,8 @@ public class CategoryController {
 
         Object[] totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
 
-        if (totalPriceRange.length==2)
-        {
-            categoryFiltersResponse.priceLowest = Integer.parseInt(totalPriceRange[0].toString());
-            categoryFiltersResponse.priceHighest = Integer.parseInt(totalPriceRange[1].toString());
-        }
+        categoryFiltersResponse.priceLowest = Integer.parseInt(totalPriceRange[0].toString());
+        categoryFiltersResponse.priceHighest = Integer.parseInt(totalPriceRange[1].toString());
 
 //        System.out.println("Filters: " + categoryFiltersResponse);
 

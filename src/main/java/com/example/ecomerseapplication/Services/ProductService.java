@@ -9,6 +9,7 @@ import com.example.ecomerseapplication.Specifications.ProductSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -172,9 +173,12 @@ public class ProductService {
     }
 
     public Object[] getTotalPriceRangeOfCategory(ProductCategory category) {
-        Object result = productRepository.getTotalPriceRange(category);
-
-        return (Object[]) result;
+        Object[] result = (Object[]) productRepository.getTotalPriceRange(category);
+        if (result.length!=2)
+        {
+            throw new ResourceNotFoundException("Incorrect or missing price range for category " + category.getCategoryName());
+        }
+        return  result;
     }
 
     public List<Product> getByCodes(List<String> codes) {

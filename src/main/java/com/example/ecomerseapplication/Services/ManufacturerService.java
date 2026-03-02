@@ -4,6 +4,9 @@ import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.ManufacturerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +39,10 @@ public class ManufacturerService {
     }
 
     public Set<String> getNamesByCategory(ProductCategory category) {
-        return repository.getNamesByCategory(category);
+        Set<String> names = repository.getNamesByCategory(category);
+        if (names.isEmpty()) {
+            throw new ResourceNotFoundException("No manufacturers found for category "+ category.getCategoryName());
+        }
+        return names;
     }
 }
