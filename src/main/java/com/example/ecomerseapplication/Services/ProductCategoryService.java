@@ -27,7 +27,10 @@ public class ProductCategoryService {
     }
 
     public List<String> getAllCategoryNames() {
-        return productCategoryRepository.getAllNames();
+        List<String> names = productCategoryRepository.getAllNames();
+        if (names.isEmpty())
+            throw new ResourceNotFoundException("No categories found");
+        return names;
     }
 
     public Optional<ProductCategory> findById(int id) {

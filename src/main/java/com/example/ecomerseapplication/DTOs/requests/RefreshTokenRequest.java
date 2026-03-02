@@ -1,10 +1,10 @@
 package com.example.ecomerseapplication.DTOs.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record RefreshTokenRequest(
-        @NotNull
+        @NotBlank
         @JsonProperty("refresh_token")
         String refreshToken
         ) {

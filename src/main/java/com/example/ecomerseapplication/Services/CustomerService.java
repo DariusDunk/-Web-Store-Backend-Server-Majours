@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,9 +26,9 @@ public class CustomerService {
         return customerRepository.findById(id).orElse(null);
     }
 
-    public Long getLongIdByKId(String userId) {
-        return customerRepository.getIdByKeycloakId(userId);
-    }
+//    public Long getLongIdByKId(String userId) {
+//        return customerRepository.getIdByKeycloakId(userId);
+//    }
 
     public void createByRepresentation(UserRepresentation user, String userId) {
         Customer customer = new Customer();
@@ -40,6 +41,6 @@ public class CustomerService {
     }
 
     public Customer getByKID(String userId) {
-        return customerRepository.getCustomerByKeycloakId(userId);//TODO kato migrira6 zameni izpolzvaniqta sys getById s novoto id
+        return customerRepository.getCustomerByKeycloakId(userId).orElseThrow(() -> new ResourceNotFoundException("No user found with ID "+ userId));//TODO kato migrira6 zameni izpolzvaniqta sys getById s novoto id
     }
 }

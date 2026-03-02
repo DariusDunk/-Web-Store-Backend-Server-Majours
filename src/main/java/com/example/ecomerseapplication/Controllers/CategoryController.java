@@ -32,13 +32,11 @@ public class CategoryController {
         this.manufacturerService = manufacturerService;
         this.productService = productService;
     }
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("names")
     public ResponseEntity<List<String>> getAllNames() {
 
         List<String> names = categoryService.getAllCategoryNames();
-
-        if (names.isEmpty()) return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(names);
     }

@@ -1,13 +1,13 @@
 package com.example.ecomerseapplication.DTOs.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record UserLoginRequest(
-        @NotNull
+        @NotBlank
         @JsonProperty("identifier")
         String identifier,
-        @NotNull
+        @NotBlank
         @JsonProperty("password")
         String password
         ) {

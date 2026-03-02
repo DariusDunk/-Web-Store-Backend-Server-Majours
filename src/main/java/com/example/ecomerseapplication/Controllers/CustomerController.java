@@ -10,6 +10,8 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -17,12 +19,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @RestController
+@Validated
 @RequestMapping("customer/")
 public class CustomerController {
 
@@ -54,23 +58,20 @@ public class CustomerController {
         this.favoriteOfCustomerService = favoriteOfCustomerService;
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("favorite/add")
-//    @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addProductToFavourites(@RequestParam String productCode) {
+    public ResponseEntity<?> addProductToFavourites(@RequestParam @NotBlank String productCode) {
 
         String userId = userIdExtractor.getUserId();
 
         Product product = productService.findByPCode(productCode);
         Customer customer = customerService.getByKID(userId);
 
-        if (product == null || customer == null)
-            return ResponseEntity.notFound().build();
-
-//        return customerService.addProductToFavourites(userId, product);
         return favoriteOfCustomerService.addToFavorite(customer, product);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("favourites/p/{page}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> getFavourites(@PathVariable int page) {
@@ -78,8 +79,6 @@ public class CustomerController {
         String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getByKID(userId);
-        if (customer == null)
-            return ResponseEntity.notFound().build();
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
@@ -88,6 +87,7 @@ public class CustomerController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("favourites/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
@@ -98,32 +98,19 @@ public class CustomerController {
 
         Customer customer = customerService.getByKID(userId);
         Product product = productService.findByPCode(productCode);
-        if (customer == null || product == null) {
-            System.out.println("customer or product not found");
-            return ResponseEntity.badRequest().build();
-        }
 
         return favoriteOfCustomerService.removeFromFavorites(customer, product);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("favorite/remove/single")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveOneFavRequest request) {
-
-//        if (NullFieldChecker.hasNullFields(request)) {
-//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-//            return ResponseEntity.badRequest().build();
-//        }
-
-//        System.out.println("Single delete request: "+request);
 
         String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getByKID(userId);
         Product product = productService.findByPCode(request.productCode());
-
-        if (customer == null || product == null)
-            return ResponseEntity.notFound().build();
 
         return favoriteOfCustomerService.removeFromFavoritesWRefetch(
                 customer,
@@ -131,47 +118,28 @@ public class CustomerController {
                 request.currentPage());
     }
 
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("favorite/remove/batch")
     @Transactional
-    public ResponseEntity<?> removeFromFavourites(@RequestBody RemoveFavBatchRequest request) {
+    public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveFavBatchRequest request) {
 
 //        System.out.println("Batch delete request: "+request);
 
         String userId = userIdExtractor.getUserId();
-
-//        if (NullFieldChecker.hasNullFields(request)) {
-//            System.out.println("Null fields from request: " + NullFieldChecker.getNullFields(request));
-//            return ResponseEntity.badRequest().build();
-//        }
         Customer customer = customerService.getByKID(userId);
-
-        if (customer == null) {
-            System.out.println("customer not found");
-            return ResponseEntity.notFound().build();
-        }
 
         return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes(), request.currentPage());
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("cart/manageQuant")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addToCart(@RequestBody ProductForCartRequest request) {
+    public ResponseEntity<?> addToCart(@RequestBody @Valid ProductForCartRequest request) {
 
 //        System.out.println("REQUEST: "+request);
 
-//        if (NullFieldChecker.hasNullFields(request)) {
-//
-//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-//
-//            return ResponseEntity.badRequest().build();
-//        }
-
         Product product = productService.findByPCode(request.productCode);
-
-        if (product == null)
-            return ResponseEntity.notFound().build();
 
         if (!product.isInStock()) {
             return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.OUT_OF_STOCK,
@@ -183,15 +151,12 @@ public class CustomerController {
 
         Customer customer = customerService.getByKID(userId);
 
-        if (customer == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Няма такъв потребител");
-
         return customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement);
     }
 
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addBatchToCart(@RequestBody List<String> productCodes) {
+    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove
 
         if (productCodes.isEmpty()) {
             return ResponseEntity.badRequest().build();

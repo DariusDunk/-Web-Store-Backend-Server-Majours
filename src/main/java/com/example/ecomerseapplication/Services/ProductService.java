@@ -3,7 +3,6 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
-import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
 import com.example.ecomerseapplication.Specifications.ProductSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -32,7 +30,7 @@ public class ProductService {
     private final FavoriteOfCustomerService favoriteOfCustomerService;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService, CustomerRepository customerRepository, FavoriteOfCustomerService favoriteOfCustomerService) {
+    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService, FavoriteOfCustomerService favoriteOfCustomerService) {
         this.productRepository = productRepository;
         this.customerCartService = customerCartService;
         this.reviewService = reviewService;
@@ -41,9 +39,9 @@ public class ProductService {
     }
 
 
-    public Page<CompactProductResponse> findAllProductsPage(PageRequest pageRequest) {
-        return ProductDTOMapper.productPageToDtoPage(productRepository.findAllSortByRating(pageRequest));
-    }
+//    public Page<CompactProductResponse> findAllProductsPage(PageRequest pageRequest) {
+//        return ProductDTOMapper.productPageToDtoPage(productRepository.findAllSortByRating(pageRequest));
+//    }
 
     public Page<CompactProductResponse> findAllByRatingResponsePage(PageRequest pageRequest) {
         return productRepository.findAllAsResponseSortByRating(pageRequest);
@@ -98,12 +96,12 @@ public class ProductService {
     }
 
 
-    public List<CompactProductResponse> getFeaturedProducts() {
-        return productRepository.getProductsByRating()
-                .stream()
-                .map(ProductDTOMapper::entityToCompactResponse)
-                .collect(Collectors.toList());
-    }
+//    public List<CompactProductResponse> getFeaturedProducts() {
+//        return productRepository.getProductsByRating()
+//                .stream()
+//                .map(ProductDTOMapper::entityToCompactResponse)
+//                .collect(Collectors.toList());
+//    }
 
     public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, Pageable pageable) {
         return ProductDTOMapper
@@ -146,7 +144,7 @@ public class ProductService {
     }
 
     public Product findByPCode(String code) {
-        return productRepository.getByProductCode(code).orElse(null);
+        return productRepository.getByProductCode(code).orElseThrow(()->new ResourceNotFoundException("Product not found with code: " + code));
     }
 
     public void save(Product product) {

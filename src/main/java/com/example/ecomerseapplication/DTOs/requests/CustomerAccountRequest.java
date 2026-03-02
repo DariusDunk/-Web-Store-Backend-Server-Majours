@@ -1,19 +1,19 @@
 package com.example.ecomerseapplication.DTOs.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.ToString;
 
 @ToString
 public class CustomerAccountRequest {
-    @NotNull
+    @NotBlank
     @JsonProperty("first_name")
     public String firstName;
-    @NotNull
+    @NotBlank
     @JsonProperty("last_name")
     public String familyName;
-    @NotNull
+    @NotBlank
     public String email;
-    @NotNull
+    @NotBlank
     public String password;
 }
