@@ -59,9 +59,7 @@ public class ProductService {
     }
 
     public ResponseEntity<DetailedProductResponse> getByNameAndCode(String productCode, Customer customer) {
-        Product product = productRepository.getByProductCode(productCode).orElse(null);
-        if (product == null)
-            return ResponseEntity.notFound().build();
+        Product product = productRepository.getByProductCode(productCode).orElseThrow(() -> new ResourceNotFoundException("Product not found with code: " + productCode));
 
         List<AttributeName> attributeNames = new ArrayList<>();
 
@@ -77,13 +75,10 @@ public class ProductService {
         if (customerCartService.cartExists(customer, product))
             detailedProductResponse.inCart = true;
 
-//        if (product.getFavouredBy().contains(customer))
-
         detailedProductResponse.inFavourites = favoriteOfCustomerService.isInFavorites(customer, product);
 
         if (reviewService.exists(product, customer))
             detailedProductResponse.reviewed = true;
-
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(detailedProductResponse);
     }

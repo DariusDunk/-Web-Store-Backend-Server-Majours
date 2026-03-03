@@ -29,7 +29,7 @@ public class ManufacturerService {
 //    }
 
     public Manufacturer findByName(String manufacturerName) {
-        return repository.findByManufacturerName(manufacturerName).orElse(null);
+        return repository.findByManufacturerName(manufacturerName).orElseThrow(()->new ResourceNotFoundException("Manufacturer not found with name: " + manufacturerName));
     }
 
     public List<Manufacturer> getByNames(List<String> manufacturerNames) {

@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.DTOs.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.ToString;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 public class ProductFilterRequest {
     @JsonProperty("filter_attributes")
     public Map<String, List<String>> filterAttributes;
+    @NotBlank
     @JsonProperty("product_category")
     public String productCategory;
     @JsonProperty("price_lowest")

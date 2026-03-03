@@ -4,8 +4,6 @@ import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
-import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
@@ -21,7 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
+
 import java.util.List;
 
 
@@ -157,7 +155,7 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove
+    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
 
         String userId = userIdExtractor.getUserId();
 

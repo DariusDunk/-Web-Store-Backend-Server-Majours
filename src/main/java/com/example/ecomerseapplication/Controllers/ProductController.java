@@ -10,6 +10,9 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.enums.SortType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.*;
@@ -27,7 +31,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-
+@Validated
 @RestController
 @RequestMapping("product/")
 public class ProductController {
@@ -59,7 +63,7 @@ public class ProductController {
     }
 
     @GetMapping("findall")
-    public ResponseEntity<PageResponse<CompactProductResponse>> findAll(@RequestParam int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> findAll(@RequestParam @NotNull int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         return ResponseEntity.ok(PageResponse.
@@ -67,24 +71,22 @@ public class ProductController {
         );
     }
 
+
     @GetMapping("search")
-    public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam String name, @RequestParam int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam @NotBlank String name, @NotNull @RequestParam int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         Page<CompactProductResponse> responsePages = productService.getProductsLikeName(pageRequest, name);
 
-        if (responsePages.isEmpty())
-            return ResponseEntity.notFound().build();
-
-//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responsePages);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(responsePages));
     }
 
     @GetMapping("suggest")
-    public List<String> getNameSuggestions(@RequestParam String name) {
+    public List<String> getNameSuggestions(@RequestParam @NotBlank String name) {
         return productService.getNameSuggestions(name);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {
@@ -97,7 +99,6 @@ public class ProductController {
                 .getByNameAndCode(productCode, customer);
 
         assert detailedProductResponse.getBody() != null;
-//        System.out.println("PRODUCT: " + detailedProductResponse.getBody().categoryName);
 
         return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
     }
@@ -109,26 +110,19 @@ public class ProductController {
         return ResponseEntity.ok(reviewService.getRatingOverview(productCode));
     }
 
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("manufacturer/{manufacturerName}/p{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productsByManufacturer(@PathVariable String manufacturerName,
                                                                                        @PathVariable int page) {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
         Manufacturer manufacturer = manufacturerService.findByName(manufacturerName);
 
-        if (manufacturer == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         Page<CompactProductResponse> productResponsePage = productService.getByManufacturer(manufacturer, pageRequest);
-
-        if (productResponsePage.isEmpty())
-            return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }
 
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("category/{name}/p{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> getProductsByCategory(@PathVariable String name,
                                                                                       @PathVariable int page) {
@@ -139,22 +133,15 @@ public class ProductController {
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         ProductCategory productCategory = productCategoryService.findByName(name);
-//        if (productCategory == null) {
-//            return ResponseEntity.notFound().build();
-//        }
 
         Page<CompactProductResponse> productResponsePage = productService.getByCategory(productCategory, pageRequest);
 
-        if (productResponsePage.isEmpty())
-            return ResponseEntity.notFound().build();
-
-//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(productResponsePage);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
-
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("filter/{page}")
-    public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody ProductFilterRequest productFilterRequest,
+    public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody @Valid ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
@@ -169,14 +156,7 @@ public class ProductController {
 
         ProductCategory productCategory = productCategoryService.findByName(productFilterRequest.productCategory);
 
-        if (productCategory == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
         PageRequest pageRequest = PageRequest.of(page, 10);
-
-//        System.out.println("REQUEST: \n"+productFilterRequest);
-//        System.out.println("Filtered " +categoryAttributeSet.size()+": "+categoryAttributeSet);
 
         return ResponseEntity.ok(PageResponse.from(
                 productService.getByCategoryFiltersManufacturerAndPriceRange(
@@ -191,7 +171,7 @@ public class ProductController {
 
     @PostMapping("reviews/paged")
     @PreAuthorize("hasRole(@roles.customer())")//todo tuk trqbva tokena da e optional i da ne se polzva PreAuthorize
-    public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody ReviewSortRequest request) {
+    public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody ReviewSortRequest request) {//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove
 
         String customerId = userIdExtractor.getUserId();
 
