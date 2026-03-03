@@ -154,29 +154,16 @@ public class CustomerController {
         return customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove
-
-        if (productCodes.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
 
         String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getByKID(userId);
 
-        if (customer == null) {
-            System.out.println("customer not found");
-            return ResponseEntity.notFound().build();
-        }
-
         List<Product> requestProducts = productService.getByCodes(productCodes);
-
-        if (requestProducts.isEmpty()) {
-            System.out.println("No products found from request");
-            return ResponseEntity.notFound().build();
-        }
 
         try {
             return customerCartService.addBatchToCart(customer, requestProducts);
@@ -187,16 +174,13 @@ public class CustomerController {
         }
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("cart/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByKID(userId);
-
-        if (productCode == null || customer == null) {
-            return ResponseEntity.badRequest().build();
-        }
 
         try {
            return customerCartService.removeFromCartWFetch(customer, productCode);
@@ -206,16 +190,10 @@ public class CustomerController {
         }
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("cart/remove/batch")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> removeBatchFromCart(@RequestBody List<String> productCodes) {
-
-//        System.out.println("Product codes: " + productCodes);
-
-       if (productCodes.isEmpty()) {
-           return ResponseEntity.badRequest().build();
-       }
-
+    public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
 
        String userId = userIdExtractor.getUserId();
 
@@ -230,18 +208,14 @@ public class CustomerController {
 
     }
 
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("cart")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> showCart() {
-//        Customer customer = customerService.findById(id);
 
         String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getByKID(userId);
-
-        if (customer == null)
-            return ResponseEntity.notFound().build();
 
         List<CartItemResponse> customerCarts = customerCartService.getCartDtoByCustomer(customer);
 
@@ -251,43 +225,44 @@ public class CustomerController {
                 .body(customerCarts);
     }
 
-    @GetMapping("purchase_history")
-    public ResponseEntity<List<CompactPurchaseResponse>> showPurchases(@RequestParam long id) {
-
-        Customer customer = customerService.findById(id);
-
-        if (customer == null)
-            return ResponseEntity.notFound().build();
-
-        List<Purchase> purchases = purchaseService.getByCustomer(customer);
-
-        List<CompactPurchaseResponse> responses = new ArrayList<>();
-
-        for (Purchase purchase : purchases) {
-            List<PurchaseCart> purchaseCarts = purchaseCartService.getByPurchase(purchase);
-
-            if (purchaseCarts.isEmpty())
-                continue;
-
-            List<CompactProductQuantityPairResponse> pairs = new ArrayList<>();
-
-
-            for (PurchaseCart cart : purchaseCarts) {
-                CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
-                pair.compactProductResponse = ProductDTOMapper
-                        .entityToCompactResponse(cart.getPurchaseCartId().getProduct());
-//                ProductDTOMapper.addReviewsCountToCompactResponse(pair.compactProductResponse);
-                pair.quantity = cart.getQuantity();
-
-                pairs.add(pair);
-            }
-
-            CompactPurchaseResponse compactPurchaseResponse = PurchaseMapper.purchaseDataToResponse(purchase, pairs);
-
-            responses.add(compactPurchaseResponse);
-        }
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responses);
-    }
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    @GetMapping("purchase_history")//TODO kato go napravi6 trqbva da ima validacii na vhodnite danni i fetch-natite entitiy-ta
+//    public ResponseEntity<List<CompactPurchaseResponse>> showPurchases(@RequestParam long id) {
+//
+//        Customer customer = customerService.findById(id);
+//
+//        if (customer == null)
+//            return ResponseEntity.notFound().build();
+//
+//        List<Purchase> purchases = purchaseService.getByCustomer(customer);
+//
+//        List<CompactPurchaseResponse> responses = new ArrayList<>();
+//
+//        for (Purchase purchase : purchases) {
+//            List<PurchaseCart> purchaseCarts = purchaseCartService.getByPurchase(purchase);
+//
+//            if (purchaseCarts.isEmpty())
+//                continue;
+//
+//            List<CompactProductQuantityPairResponse> pairs = new ArrayList<>();
+//
+//
+//            for (PurchaseCart cart : purchaseCarts) {
+//                CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
+//                pair.compactProductResponse = ProductDTOMapper
+//                        .entityToCompactResponse(cart.getPurchaseCartId().getProduct());
+////                ProductDTOMapper.addReviewsCountToCompactResponse(pair.compactProductResponse);
+//                pair.quantity = cart.getQuantity();
+//
+//                pairs.add(pair);
+//            }
+//
+//            CompactPurchaseResponse compactPurchaseResponse = PurchaseMapper.purchaseDataToResponse(purchase, pairs);
+//
+//            responses.add(compactPurchaseResponse);
+//        }
+//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responses);
+//    }
 
 //    @PostMapping("change-passowrd")
 //    @Transactional
@@ -300,21 +275,12 @@ public class CustomerController {
 //        return customerService.passwordUpdate(customer, request.password);
 //    }
 
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("me")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
         String userId = userIdExtractor.getUserId();
 
-//        System.out.println("userId: " + userId);
-
         Customer customer = customerService.getByKID(userId);
-
-        if (customer == null) {
-            System.out.println("customer not found");
-            return ResponseEntity.notFound().build();
-        }
-
-//        System.out.println(customer.getCustomerPfp());
 
         String userRole = keycloakService.getRoleByUserId(userId);
 
@@ -323,19 +289,17 @@ public class CustomerController {
                         customer.getFirstName() + " " + customer.getLastName(),
                         customer.getCustomerPfp(),
                         userRole
-//                customer.getId()
                 )
         );
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("getPfp")
     @PreAuthorize("hasRole(@roles.customer())")
     public  ResponseEntity<String> getPfp() {
         String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getByKID(userId);
-        if (customer == null)
-            return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(customer.getCustomerPfp());
     }

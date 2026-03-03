@@ -180,6 +180,12 @@ public class ProductService {
     }
 
     public List<Product> getByCodes(List<String> codes) {
-        return productRepository.getAllByProductCodeIn(codes);
+        List<Product> products = productRepository.getAllByProductCodeIn(codes);
+
+        if (products.isEmpty()) {
+           throw new ResourceNotFoundException("No products found with codes: " + codes);
+        }
+
+        return products;
     }
 }
