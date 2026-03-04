@@ -1,15 +1,15 @@
 package com.example.ecomerseapplication.DTOs.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 public record ReviewCreateRequest(
-        @NotNull
+        @NotBlank
         @JsonProperty("product_code")
         String productCode,
-        @NotNull
         @JsonProperty("review_text")
         String reviewText,
-        @NotNull
+        @Positive
         short rating) {
 }

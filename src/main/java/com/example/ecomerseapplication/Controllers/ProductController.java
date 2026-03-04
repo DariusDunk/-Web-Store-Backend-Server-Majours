@@ -171,7 +171,7 @@ public class ProductController {
 
     @PostMapping("reviews/paged")
     @PreAuthorize("hasRole(@roles.customer())")//todo tuk trqbva tokena da e optional i da ne se polzva PreAuthorize
-    public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody ReviewSortRequest request) {//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove
+    public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody @Valid ReviewSortRequest request) {
 
         String customerId = userIdExtractor.getUserId();
 
@@ -191,9 +191,10 @@ public class ProductController {
 
     }
 
+
     @GetMapping("review/specific")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> getSpecificReviewData(@RequestParam("productCode")String productCode) {
+    public ResponseEntity<?> getSpecificReviewData(@RequestParam("productCode") @NotBlank String productCode) {
 
 //        System.out.println("IUD " + userId + " PCODE " + productCode);
         String customerId = userIdExtractor.getUserId();
@@ -227,15 +228,11 @@ public class ProductController {
 
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("review/add")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addReview(@RequestBody ReviewCreateRequest request) {
-
-//        if (NullFieldChecker.hasNullFields(request)) {
-//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-//            return ResponseEntity.badRequest().build();
-//        }
+    public ResponseEntity<?> addReview(@RequestBody @Valid ReviewCreateRequest request) {
 
         String userId = userIdExtractor.getUserId();
 
@@ -246,15 +243,7 @@ public class ProductController {
 
         Customer customer = customerService.getByKID(userId);
 
-        if (customer == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
         Product product = productService.findByPCode(request.productCode());
-
-        if (product == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
-//        Review existingReview = reviewService.getByProdCust(product, customer);
 
         if (reviewService.exists(product, customer)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
@@ -275,18 +264,11 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Ревюто е качено!");
     }
 
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PatchMapping("review/update")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> updateReview(@RequestBody ReviewUpdateRequest request) {
-
-//        if (NullFieldChecker.hasNullFields(request)) {
-//            System.out.println("Null fields:\n" + NullFieldChecker.getNullFields(request));
-//            return ResponseEntity.badRequest().build();
-//        }
-
-//        System.out.println(request.toString());
+    public ResponseEntity<?> updateReview(@RequestBody @Valid ReviewUpdateRequest request) {
 
         ResponseEntity<?> validationResponse = reviewService.requestValidation(request.rating, request.reviewText);
 
@@ -297,25 +279,9 @@ public class ProductController {
 
         Customer customer = customerService.getByKID(customerId);
 
-        if (customer == null) {
-
-            System.out.println("customer not found");
-            return ResponseEntity.notFound().build();
-        }
-
         Product product = productService.findByPCode(request.productCode);
 
-        if (product == null) {
-            System.out.println("product not found");
-            return ResponseEntity.notFound().build();
-        }
-
         Review review = reviewService.getByProdAndCust(product, customer);
-
-        if (review==null) {
-            System.out.println("review not found");
-            return ResponseEntity.notFound().build();
-        }
 
         if (review.getIsDeleted()) {
             System.out.println("Deleted review");
@@ -349,7 +315,7 @@ public class ProductController {
     }
 
     private boolean isUpdateTimeOver(Review review) {
-        ZoneId zone = ZoneId.of("Europe/Sofia"); // Eastern European Time
+        ZoneId zone = ZoneId.of("Europe/Sofia");
 
         ZonedDateTime postTimeInZone = review.getPostTimestamp().atZone(ZoneId.systemDefault())
                 .withZoneSameInstant(zone);
@@ -362,32 +328,17 @@ public class ProductController {
         return !isUpdatePossible;
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("review/delete")
     @Transactional
-    public ResponseEntity<String> deleteReview(@RequestParam("product_code") String productCode) {
-
-        if (productCode == null)  {
-            System.out.println("Product code is null");
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
 
         String customerId = userIdExtractor.getUserId();
         Customer customer = customerService.getByKID(customerId);
-
-        if (customer == null)
-        {
-            System.out.println("Customer not found (token/ keycloak id might be null");
-            return ResponseEntity.notFound().build();
-        }
-
         Product product = productService.findByPCode(productCode);
-
-        if (product == null)
-            return ResponseEntity.notFound().build();
-
         Review review = reviewService.getByProdAndCust(product, customer);
 
-        if (review == null||review.getIsDeleted())
+        if (review.getIsDeleted())
             return ResponseEntity.notFound().build();
 
 //        short newRating = reviewService.updatedRating(product, review);

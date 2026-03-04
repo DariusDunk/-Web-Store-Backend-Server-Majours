@@ -11,6 +11,7 @@ import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Review;
 import com.example.ecomerseapplication.Repositories.ReviewRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,7 +53,7 @@ public class ReviewService {
     }
 
     public Review getByProdAndCust(Product product, Customer customer) {
-        return reviewRepository.getByProductAndCustomer(product, customer).orElse(null);
+        return reviewRepository.getByProductAndCustomer(product, customer).orElseThrow(() -> new EntityNotFoundException("Review not found"));
     }
 
     public Review getByUIDAndPCode(String productCode, String customerId) {
