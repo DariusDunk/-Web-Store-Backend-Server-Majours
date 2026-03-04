@@ -2,14 +2,14 @@ package com.example.ecomerseapplication.enums;
 
 import lombok.Getter;
 
-public enum SortType {
+public enum ReviewSortType {
     NEWEST("newest"),
     OLDEST("oldest");
 
     @Getter
     private final String value;
 
-    SortType(String value) {
+    ReviewSortType(String value) {
         this.value = value;
     }
 
@@ -21,8 +21,8 @@ public enum SortType {
      * @return the status object
      * @see #valueOf(String)
      */
-    public static SortType fromValue(String value) {
-        for (SortType status : SortType.values()) {
+    public static ReviewSortType fromValue(String value) {
+        for (ReviewSortType status : ReviewSortType.values()) {
             if (status.value.equals(value)) {
                 return status;
             }

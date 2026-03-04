@@ -9,7 +9,7 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorMessage;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
-import com.example.ecomerseapplication.enums.SortType;
+import com.example.ecomerseapplication.enums.ReviewSortType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -73,7 +72,7 @@ public class ProductController {
 
 
     @GetMapping("search")
-    public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam @NotBlank String name, @NotNull @RequestParam int page) {
+    public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam @NotBlank String name, @NotNull @RequestParam int page) {//TODO sloji sort
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         Page<CompactProductResponse> responsePages = productService.getProductsLikeName(pageRequest, name);
@@ -175,7 +174,7 @@ public class ProductController {
 
         String customerId = userIdExtractor.getUserId();
 
-        Sort sort = request.sortOrder().getValue().equalsIgnoreCase(SortType.NEWEST.getValue())
+        Sort sort = request.sortOrder().getValue().equalsIgnoreCase(ReviewSortType.NEWEST.getValue())
                 ? Sort.by("postTimestamp").descending()
                 : Sort.by("postTimestamp").ascending();
 
