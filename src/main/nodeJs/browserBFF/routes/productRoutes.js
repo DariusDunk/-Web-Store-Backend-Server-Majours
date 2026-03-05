@@ -49,9 +49,10 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
 
 router.get('/category/:categoryName/p:page', async (req, res) => {
   const {categoryName, page} = req.params;
-  // console.log("category");
+  const sort = req.query.sort;
+  console.log("sort: " + sort);
   try {
-    const response = await fetch(`${Backend_Url}/product/category/${categoryName}/p${page}`);
+    const response = await fetch(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
 
     if (response.status === 404) {
         return res.redirect('/404.html');

@@ -101,7 +101,7 @@ public class ProductService {
     public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, Pageable pageable) {
         return ProductDTOMapper
                 .productPageToDtoPage(productRepository
-                        .getByProductCategoryOrderByRatingDesc(productCategory, pageable));
+                        .getByProductCategory(productCategory, pageable));
     }
 
     public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
@@ -146,9 +146,9 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    public void saveAll(List<Product> updatedQuantProducts) {
-        productRepository.saveAll(updatedQuantProducts);
-    }
+//    public void saveAll(List<Product> updatedQuantProducts) {
+//        productRepository.saveAll(updatedQuantProducts);
+//    }
 
     public Set<Integer> getRatingsOfCategory(ProductCategory category) {
         Set<Integer> dbrResponse = productRepository.getRatingsByCategory(category).orElse(new HashSet<>());

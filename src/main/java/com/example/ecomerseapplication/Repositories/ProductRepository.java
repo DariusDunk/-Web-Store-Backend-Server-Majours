@@ -47,7 +47,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     Page<Product> getByManufacturer(Manufacturer manufacturer, Pageable pageable);
 
-    Page<Product> getByProductCategoryOrderByRatingDesc(ProductCategory productCategory, Pageable pageable);
+//    Page<Product> getByProductCategoryOrderByRatingDesc(ProductCategory productCategory, Pageable pageable);
+
+    Page<Product> getByProductCategory(ProductCategory productCategory, Pageable pageable);
 
     Optional<Product> getByProductCode(String productCode);
 
