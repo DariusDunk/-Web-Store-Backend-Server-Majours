@@ -36,11 +36,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
             "order by p.rating desc ")
     Page<CompactProductResponse> findAllAsResponseSortByRating(Pageable pageable);
 
-    @Query(value = "select p " +
-            "from Product p " +
-            "order by p.rating desc ")
-    Page<Product> findAllSortByRating(Pageable pageable);
-
 
     @Query(value =
             "select p.productName " +
@@ -50,13 +45,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
                     "limit 7 ")
     List<String> getNameSuggestions(String name);
 
-    @Query(value = "select p " +
-            "from Product p " +
-            "order by p.rating desc " +
-            "limit 10")
-    List<Product> getProductsByRating();
-
-    Page<Product> getByManufacturerOrderByRatingDescIdAsc(Manufacturer manufacturer, Pageable pageable);
+    Page<Product> getByManufacturer(Manufacturer manufacturer, Pageable pageable);
 
     Page<Product> getByProductCategoryOrderByRatingDesc(ProductCategory productCategory, Pageable pageable);
 

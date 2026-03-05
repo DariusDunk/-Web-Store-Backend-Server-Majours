@@ -85,7 +85,7 @@ public class ProductService {
 
     public Page<CompactProductResponse> getByManufacturer(Manufacturer manufacturer, Pageable pageable) {
 
-        Page<Product> productPage = productRepository.getByManufacturerOrderByRatingDescIdAsc(manufacturer, pageable);
+        Page<Product> productPage = productRepository.getByManufacturer(manufacturer, pageable);
 
         return ProductDTOMapper.productPageToDtoPage(productPage);
     }

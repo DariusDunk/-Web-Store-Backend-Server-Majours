@@ -108,6 +108,8 @@ public class ReviewService {
 
         save(review);
 
+        product.setReviewCount(product.getReviewCount() + 1);
+
         return product;
     }
 

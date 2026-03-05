@@ -9,6 +9,8 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorMessage;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
+import com.example.ecomerseapplication.Utils.SortHelper;
+import com.example.ecomerseapplication.enums.ProductSortType;
 import com.example.ecomerseapplication.enums.ReviewSortType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -112,11 +114,21 @@ public class ProductController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("manufacturer/{manufacturerName}/p{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productsByManufacturer(@PathVariable String manufacturerName,
-                                                                                       @PathVariable int page) {
-        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
+                                                                                       @PathVariable int page,
+                                                                                       @RequestParam(required = false, name = "sort") String sortOrder) {
+
+//        System.out.println("Chosen sort: " + ((sortOrder!=null&&!sortOrder.isBlank())? sortOrder: "none") );
+
+        Sort sort = (sortOrder!=null&&!sortOrder.isBlank())
+                ?SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
+                :SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+
+        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
         Manufacturer manufacturer = manufacturerService.findByName(manufacturerName);
 
         Page<CompactProductResponse> productResponsePage = productService.getByManufacturer(manufacturer, pageRequest);
+
+//        System.out.println("Sorted content: "+ productResponsePage.getContent());
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }
@@ -254,9 +266,6 @@ public class ProductController {
         Boolean isVerifiedCustomer = purchaseCartService.isProductPurchased(product.getProductCode(), customer.getKeycloakId());
 
         Product updatedProduct = reviewService.createReview(product, customer, request, isVerifiedCustomer);
-
-        if (updatedProduct == null)
-            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Не беше извършена промяна");
 
         productService.save(updatedProduct);
 
