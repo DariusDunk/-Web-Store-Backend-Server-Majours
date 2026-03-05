@@ -363,7 +363,7 @@ public class ProductController {
 
 //        product.setRating(newRating);
 //        product.getReviews().remove(review);
-//        productService.save(product); todo tova moje da se sloji za drug method, moje bi adminski, koito specialno iztriva review-ta
+//        productService.save(product); todo tova moje da se sloji za drug method, moje bi adminski, koito specialno iztriva review-ta ZADULJITELNO SLOJI UPDATE NA POLETO ZA BROI NA REVIEW-TATA KATO SE IZTRIE OKON4ATELNO REVIEW ZA PRODUKTA!!!
         try
         {
             reviewService.softDelete(review);
