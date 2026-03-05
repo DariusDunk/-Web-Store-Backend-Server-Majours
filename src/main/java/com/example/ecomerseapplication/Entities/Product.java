@@ -3,6 +3,9 @@ package com.example.ecomerseapplication.Entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -64,6 +67,13 @@ public class Product {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product")
     private List<Review> reviews;
+
+    @Column(name = "review_count")
+    private int reviewCount;
+
+    @CreationTimestamp
+    @Column(name = "added_at")
+    private Instant creationTimeStamp;
 
     public boolean isInStock() {
         return quantityInStock > 0;
