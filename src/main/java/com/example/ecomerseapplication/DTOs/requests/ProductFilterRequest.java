@@ -22,4 +22,6 @@ public class ProductFilterRequest {
     public List<String> manufacturerNames;
     @JsonProperty("rating")
     public Integer rating;
+    @JsonProperty("sort")
+    public String sortOrder;
 }

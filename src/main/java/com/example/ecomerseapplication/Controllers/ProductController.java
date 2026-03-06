@@ -142,7 +142,7 @@ public class ProductController {
         if (name.equals("Бензинови машини") || name.equals("електрически машини"))//TODO TOVA 6TE TRQBVA DA GO MAHA6 KATO SLOJI6 NOVITE RODITELSKI KATEGORII
             return ResponseEntity.notFound().build();
 
-        System.out.println("Chosen sort: " + ((sortOrder!=null&&!sortOrder.isBlank())? sortOrder: "none") );
+//        System.out.println("Chosen sort: " + ((sortOrder!=null&&!sortOrder.isBlank())? sortOrder: "none") );
 
         Sort sort = (sortOrder!=null&&!sortOrder.isBlank())
                 ?SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
@@ -161,6 +161,15 @@ public class ProductController {
     @PostMapping("filter/{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody @Valid ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
+
+//                System.out.println("Chosen sort: " + ((productFilterRequest.sortOrder!=null&&!productFilterRequest.sortOrder.isBlank())
+//                        ?productFilterRequest.sortOrder
+//                        :"none, applying default popularity sort...") );
+
+        Sort sort = (productFilterRequest.sortOrder!=null&&!productFilterRequest.sortOrder.isBlank())
+                ?SortHelper.buildProdSort(ProductSortType.valueOf(productFilterRequest.sortOrder.toUpperCase()).getValue())
+                :SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
         if (productFilterRequest.filterAttributes != null) {
@@ -174,7 +183,7 @@ public class ProductController {
 
         ProductCategory productCategory = productCategoryService.findByName(productFilterRequest.productCategory);
 
-        PageRequest pageRequest = PageRequest.of(page, 10);
+        PageRequest pageRequest = PageRequest.of(page, 10, sort);
 
         return ResponseEntity.ok(PageResponse.from(
                 productService.getByCategoryFiltersManufacturerAndPriceRange(

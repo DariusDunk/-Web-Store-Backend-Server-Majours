@@ -195,8 +195,9 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
   // console.log('category', category);
 
-  // Parse filter query params (short keys: p, m, r, a*)
-  const filters = req.query;
+  const {filters, sort} = req.query;
+
+  // console.log("sort for filters: " + sort);
 
   // console.log(filters);
 
@@ -242,7 +243,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
     price_highest: maxPrice,
     manufacturer_names: manufacturers,
     rating: rating,
-
+    sort:sort
   };
 
   // console.log("request body: " + JSON.stringify(requestBody));
