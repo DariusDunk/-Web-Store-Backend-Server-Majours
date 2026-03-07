@@ -50,7 +50,7 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
 router.get('/category/:categoryName/p:page', async (req, res) => {
   const {categoryName, page} = req.params;
   const sort = req.query.sort;
-  console.log("sort: " + sort);
+  // console.log("sort: " + sort);
   try {
     const response = await fetch(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
 
@@ -199,7 +199,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
   // console.log("sort for filters: " + sort);
 
-  // console.log(filters);
+  // console.log("filters: "+JSON.stringify(filters));
 
   let minPrice = 0;
   let maxPrice = Infinity;  // Or some default max
@@ -217,7 +217,17 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
   // console.log("price range:" + minPrice +" - "+ maxPrice);
 
-  const manufacturers = filters.m ? filters.m.split(',').map(decodeURIComponent) : [];
+    let manufacturers = [];
+
+    if (filters.m) {
+        if (Array.isArray(filters.m)) {
+            manufacturers = filters.m.map(decodeURIComponent);
+        } else if (filters.m.includes(',')) {
+            manufacturers = filters.m.split(',').map(decodeURIComponent);
+        } else {
+            manufacturers = [decodeURIComponent(filters.m)];
+        }
+    }
 
   // console.log(manufacturers);
 
