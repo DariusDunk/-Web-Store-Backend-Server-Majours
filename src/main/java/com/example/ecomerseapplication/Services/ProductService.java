@@ -114,24 +114,19 @@ public class ProductService {
 
         Specification<Product> productSpec =
                 ProductSpecifications.equalsCategory(productCategory)
-                        .and(ProductSpecifications.priceBetween(priceLowest, priceHighest))
                         .and(ProductSpecifications.ratingEqualOrHigher(rating));
 
-        if (!manufacturers.isEmpty()) {
-//            System.out.println("Manufacturers: ");
-//            for (Manufacturer manufacturer : manufacturers) {
-//                System.out.println(manufacturer.getManufacturerName());
-//            }
-            productSpec = productSpec.and(ProductSpecifications.manufacturerIn(manufacturers));
+        if (priceLowest != 0 && priceHighest != 0) {
+            productSpec = productSpec.and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
         }
 
-//        System.out.println(categoryAttributes.toString());
+        if (!manufacturers.isEmpty()) {
+            productSpec = productSpec.and(ProductSpecifications.manufacturerIn(manufacturers));
+        }
 
         if (!categoryAttributes.isEmpty()) {
             productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
         }
-
-//        productSpec = productSpec
 
         Page<Product> products = productRepository.findAll(productSpec, pageable);
 

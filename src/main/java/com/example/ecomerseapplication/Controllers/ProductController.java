@@ -166,6 +166,8 @@ public class ProductController {
 //                        ?productFilterRequest.sortOrder
 //                        :"none, applying default popularity sort...") );
 
+//        System.out.println("Request body: " + productFilterRequest);
+
         Sort sort = (productFilterRequest.sortOrder!=null&&!productFilterRequest.sortOrder.isBlank())
                 ?SortHelper.buildProdSort(ProductSortType.valueOf(productFilterRequest.sortOrder.toUpperCase()).getValue())
                 :SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
@@ -176,6 +178,8 @@ public class ProductController {
             categoryAttributeSet = categoryAttributeService.getByNamesAndOptions(productFilterRequest.filterAttributes);
         }
 
+//        System.out.println("Category attributes: " + categoryAttributeSet );
+
         List<Manufacturer> manufacturerList = new ArrayList<>();
 
         if (productFilterRequest.manufacturerNames != null)
@@ -185,6 +189,7 @@ public class ProductController {
 
         PageRequest pageRequest = PageRequest.of(page, 10, sort);
 
+        //        System.out.println("Response:"+ response.getBody());
         return ResponseEntity.ok(PageResponse.from(
                 productService.getByCategoryFiltersManufacturerAndPriceRange(
                         categoryAttributeSet,
