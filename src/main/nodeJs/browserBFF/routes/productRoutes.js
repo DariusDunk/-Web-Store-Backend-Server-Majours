@@ -195,7 +195,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
   // console.log('category', category);
 
-  const {filters, sort} = req.query;
+  const {filters={}, sort} = req.query;
 
   // console.log("sort for filters: " + sort);
 
