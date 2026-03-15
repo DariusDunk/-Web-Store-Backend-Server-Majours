@@ -74,10 +74,29 @@ public class ProductController {
 
 
     @GetMapping("search")
-    public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam @NotBlank String name, @NotNull @RequestParam int page) {//TODO sloji sort
-        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
+    public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam @NotBlank String name,
+                                                                               @NotNull @RequestParam int page,
+                                                                               @RequestParam(required = false, name = "sort") String sortOrder
+                                                                               ) {
 
-        Page<CompactProductResponse> responsePages = productService.getProductsLikeName(pageRequest, name);
+        if (sortOrder == null || sortOrder.isBlank() || !ProductSortType.isValid(sortOrder)) {
+            sortOrder = ProductSortType.RELEVANCE.getValue();
+        }
+
+        PageRequest pageRequest;
+        Page<CompactProductResponse> responsePages;
+
+        System.out.println("name: " + name + " sort: " + sortOrder + " page: " + page);
+
+        if (sortOrder==null || sortOrder.equals(ProductSortType.RELEVANCE.getValue())) {
+            pageRequest = PageRequest.of(page, PageContentLimit.limit);
+//            productService.testRelevance(name);
+            responsePages = productService.getProductsByRelevance(pageRequest, name);
+        }
+        else {
+            pageRequest = PageRequest.of(page, PageContentLimit.limit);
+            responsePages = productService.getProductsLikeNameSort(pageRequest, name, sortOrder);
+        }
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(responsePages));
     }

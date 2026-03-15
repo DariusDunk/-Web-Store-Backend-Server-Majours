@@ -147,25 +147,46 @@ router.get('/suggest/:name', async (req, res)=>{
           return res.status(response.status).end();
       }
     const data = await response.json();
-      return json(data);
+      return res.status(response.status).json(data);
   } catch (error) {
-    console.error('Suggest: Error fetching data from backend:', error);
+    console.error('Suggest: Error fetching suggestions from backend:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-router.get(`/search/:text/:page`, async (req, res)=>{
-  const queryParts = req.url.split("/");
-  const searchText = queryParts[2];
-  const page = queryParts[3];
+router.get(`/search`, async (req, res)=>{
+  // const queryParts = req.url.split("/");
+  // const searchText = queryParts[2];
+  // const page = queryParts[3];
+  // const sort = req.query.sort;
+  //
+
+    const {searchText, page, sort} = req.query;
+
   // console.log("search");
   try {
     // console.log(`front end url: ${req.url}`);
     // console.log(`fetch url: ${Backend_Url}/product/search?name=${searchText}&page=${page}`);
-    const response = await fetch(`${Backend_Url}/product/search?name=${searchText}&page=${page}`);
-    if (response.status === 404) {
-        return res.redirect('/404.html');
-    }
+    // const response = await fetch(`${Backend_Url}/product/search?name=${searchText}&page=${page}`);
+
+      const params = new URLSearchParams({
+          name: searchText,
+          page: page.toString(),
+          sort: sort || ''
+      });
+
+      const url = new URL('/product/search', Backend_Url);
+
+      url.searchParams.set('name', searchText);
+      url.searchParams.set('page', page); // number is fine, URLSearchParams converts it
+      url.searchParams.set('sort', sort || '');
+
+      const response = await fetch(url.toString());
+
+      // const response = await fetch(`${Backend_Url}/product/search?${params.toString()}`);
+    // if (response.status === 404) {
+    //     return res.redirect('/404.html');
+    // }
 
       if (!response.ok) {
           return res.status(response.status).end();
