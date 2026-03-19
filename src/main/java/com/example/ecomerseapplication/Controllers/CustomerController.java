@@ -283,7 +283,6 @@ public class CustomerController {
         String userRole = keycloakService.getRoleByUserId(userId);
 
         return ResponseEntity.ok(new CustomerResponse(
-                        customer.getId(),
                         customer.getFirstName() + " " + customer.getLastName(),
                         customer.getCustomerPfp(),
                         userRole

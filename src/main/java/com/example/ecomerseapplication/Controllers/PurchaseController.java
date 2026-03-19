@@ -1,9 +1,12 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping("purchase/")
-public class PurchaseController {//TODO prodylji ot tuk da slaga6 validaciite i anotaciite za nullove, kogato stigen6 do tuk de
+public class PurchaseController {
 
     private final PurchaseService purchaseService;
 
@@ -24,37 +27,39 @@ public class PurchaseController {//TODO prodylji ot tuk da slaga6 validaciite i 
 
     private final PurchaseCartService purchaseCartService;
     private final ProductService productService;
+    private final UserIdExtractor userIdExtractor;
 
     @Autowired
-    public PurchaseController(PurchaseService purchaseService, SavedPurchaseDetailsService purchaseDetailsService, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService, ProductService productService) {
+    public PurchaseController(PurchaseService purchaseService, SavedPurchaseDetailsService purchaseDetailsService, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService, ProductService productService, UserIdExtractor userIdExtractor) {
         this.purchaseService = purchaseService;
         this.purchaseDetailsService = purchaseDetailsService;
         this.customerService = customerService;
         this.customerCartService = customerCartService;
         this.purchaseCartService = purchaseCartService;
         this.productService = productService;
+        this.userIdExtractor = userIdExtractor;
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("savedetails")
     @Transactional
-    public ResponseEntity<String> savePurchaseInformation(@RequestBody SavedRecipientDetailsRequest savedPurchaseDetailsResponse,
-                                                          long id) {
-        Customer customer = customerService.findById(id);
+    public ResponseEntity<String> savePurchaseInformation(@RequestBody @Valid SavedRecipientDetailsRequest savedPurchaseDetailsResponse) {
 
-        if (customer == null)
-            return ResponseEntity.notFound().build();
+        String userId = userIdExtractor.getUserId();
+
+        Customer customer = customerService.getByKID(userId);
 
         SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsResponse, customer);
 
         return purchaseDetailsService.saveDetails(purchaseDetails);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("recipientTemplates/get")
-    public ResponseEntity<?> getPurchaseInformation(long id) {
-        Customer customer = customerService.findById(id);
+    public ResponseEntity<?> getPurchaseInformation() {
 
-        if (customer == null)
-            return ResponseEntity.notFound().build();
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByKID(userId);
 
         return purchaseDetailsService.getByCustomer(customer);
     }

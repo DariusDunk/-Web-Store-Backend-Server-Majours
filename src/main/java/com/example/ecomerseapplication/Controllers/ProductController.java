@@ -71,8 +71,7 @@ public class ProductController {
                 from(productService.findAllByRatingResponsePage(pageRequest))
         );
     }
-
-
+    
     @GetMapping("search")
     public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam @NotBlank String name,
                                                                                @NotNull @RequestParam int page,

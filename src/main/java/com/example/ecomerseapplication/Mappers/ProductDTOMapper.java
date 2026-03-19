@@ -38,7 +38,7 @@ public class ProductDTOMapper {
                 productPage.getTotalElements());
     }
 
-    public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs, long id) {
+    public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs) {
 
         DetailedProductResponse detailedProductResponse = new DetailedProductResponse();
 

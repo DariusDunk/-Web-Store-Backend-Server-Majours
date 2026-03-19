@@ -22,10 +22,6 @@ public class CustomerService {
         this.purchaseRepository = purchaseRepository;
     }
 
-    public Customer findById(long id) {
-        return customerRepository.findById(id).orElse(null);
-    }
-
 //    public Long getLongIdByKId(String userId) {
 //        return customerRepository.getIdByKeycloakId(userId);
 //    }

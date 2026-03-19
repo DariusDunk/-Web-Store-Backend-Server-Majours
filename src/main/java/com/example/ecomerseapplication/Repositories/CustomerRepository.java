@@ -8,20 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
-//    boolean existsByEmail(String email);
-//
-//    Optional<Customer> getByEmail(String email);
-//
-//    @Query("""
-//            select c.customerPfp
-//            from Customer c
-//            where c.id=?1
-//            """)
-//    String getCustomerPfp(int customerId);
-
-    @Query("select c.id from Customer c where c.keycloakId = ?1")
-    Long getIdByKeycloakId(String keycloakId);
+public interface CustomerRepository extends JpaRepository<Customer, String> {
 
     Optional<Customer> getCustomerByKeycloakId(String keycloakId);
 }
