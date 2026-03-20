@@ -20,7 +20,7 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
 //    @Query(value = "select cc " +
 //            "from CustomerCart cc " +
 //            "where cc.customerCartId.customer = ?1")
-//    List<CustomerCart> findByCustomer(Customer customer);TODO vyrni tova sled kato priklu4i migraciqta
+//    List<CustomerCart> findByCustomer(Customer customer);
 
     @Query(value = "select cc " +
             "from CustomerCart cc " +
@@ -59,10 +59,10 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
     )
     List<CartItemResponse> findDtoByCustomer(@Param("keycloakId") String customer);
 
-    @Modifying
-    @Query("delete from CustomerCart " +
-            "where customerCartId.customer = ?1")
-    void deleteAllByCustomer(Customer customer);
+//    @Modifying
+//    @Query("delete from CustomerCart " +
+//            "where customerCartId.customer = ?1")
+//    void deleteAllByCustomer(Customer customer);
 
 
     @Modifying

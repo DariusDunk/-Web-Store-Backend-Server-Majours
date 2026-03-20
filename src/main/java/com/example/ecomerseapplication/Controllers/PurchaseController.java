@@ -47,7 +47,7 @@ public class PurchaseController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsResponse, customer);
 
@@ -59,12 +59,12 @@ public class PurchaseController {
     public ResponseEntity<?> getPurchaseInformation() {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         return purchaseDetailsService.getByCustomer(customer);
     }
 
-//    @PostMapping("complete") TODO opravi
+//    @PostMapping("complete") TODO napravi
 //    @Transactional
 //    public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
 

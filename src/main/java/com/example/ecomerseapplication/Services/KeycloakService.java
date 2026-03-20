@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
 import com.example.ecomerseapplication.enums.UserRole;
-import org.keycloak.common.VerificationException;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -29,13 +28,13 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class KeycloakService {// TODO Rewrite the Keycloak client using Spring WebClient after migration
+public class KeycloakService {
 
 //    private final CustomerService customerService;
     private final WebClient keycloakWebClient;
 
-    @Value("${keycloak.server-url}")
-    private String serverUrl;
+//    @Value("${keycloak.server-url}")
+//    private String serverUrl;
     @Value("${keycloak.admin-realm}")
     private String adminRealm;
     @Value("${keycloak.admin.client-id}")
@@ -279,8 +278,8 @@ public class KeycloakService {// TODO Rewrite the Keycloak client using Spring W
         formParams.add("username", request.identifier());
         formParams.add("password", request.password());
 
-        //todo vremenno dokato ne zavy6i migraciqta? Kakvo izob6to prave6e tova??
-        formParams.add("scope", "openid profile email");
+
+//        formParams.add("scope", "openid profile email");
     try
         {
             KeycloakTokenResponse response = Objects.requireNonNull(keycloakWebClient.post()

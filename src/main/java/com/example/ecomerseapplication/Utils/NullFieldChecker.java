@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NullFieldChecker {
+public class NullFieldChecker { //todo tova ne mi trqbva za sega, moje bi 6te se iztrie v byde6te ako ne mu namerq upotreba
 
     /**
      * Returns true if the object has at least one null field.

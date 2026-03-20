@@ -60,7 +60,6 @@ public class CustomerCartService {
                         HttpStatus.CONFLICT.value(),
                         "Изисканото количество надхвърля наличното за този продуктит, той не бе добавен или увеличен в количката "));
 
-//todo tuk ako se iztrie, trqbva da se refetchne
             customerCart.setQuantity(++quantity);
             customerCartRepository.save(customerCart);
             return ResponseEntity.ok("Успешно увеличeно количество в количката!");

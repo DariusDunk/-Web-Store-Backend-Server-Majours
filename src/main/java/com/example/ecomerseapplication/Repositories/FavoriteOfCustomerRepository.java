@@ -44,6 +44,6 @@ public interface FavoriteOfCustomerRepository extends JpaRepository<FavoriteOfCu
                         from FavoriteOfCustomer foc
                         where foc.favoriteOfCustomerId.customer.keycloakId = :customerId
                         order by foc.dateAdded desc
-            """)//TODO zameni tazi zaqvka sys starata zaqvka sled kato priklu4is migriraneto
-    Page<CompactProductResponse> getFromFavouritesPage(@Param("customerId") String  customer, Pageable pageable);//todo premesti v repositorito na lubimite, opravi i servica sled tova, kakto i kontrolera
+            """)
+    Page<CompactProductResponse> getFromFavouritesPage(@Param("customerId") String  customer, Pageable pageable);
 }

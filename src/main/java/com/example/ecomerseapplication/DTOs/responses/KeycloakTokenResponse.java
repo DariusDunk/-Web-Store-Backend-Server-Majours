@@ -16,12 +16,12 @@ public record KeycloakTokenResponse(
         @JsonProperty("not-before-policy")
         int notBeforePolicy,
         @JsonProperty("session_state")
-        String sessionState,
-        @JsonProperty("scope")
-        String scope,
-        @JsonProperty("id_token")
-        String idToken
-        //TOOD Moje da e vremenno nz
+        String sessionState
+//        ,@JsonProperty("scope")
+//        String scope,
+//        @JsonProperty("id_token")
+//        String idToken
+//        //TODO Moje da e vremenno nz
 
 ) {
 }

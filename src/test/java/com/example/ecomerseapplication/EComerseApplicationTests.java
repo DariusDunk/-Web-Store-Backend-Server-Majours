@@ -81,18 +81,6 @@ class EComerseApplicationTests {
         System.out.println(PurchaseCodeGenerator.generateCode(LocalDateTime.now()));
     }
 
-    @Test
-    void cartsByCustomer() {
-
-
-        List<CustomerCart> customerCarts = customerCartService.cartsByCustomer(customerService.findById(6));
-
-        if (customerCarts.isEmpty())
-            System.out.println("Error");
-        else
-            System.out.println("Finished");
-    }
-
 //    @Test
 //    void passwordCheck() {
 //        Customer customer = customerService.getByEmail("konstantin_aleksandrov@abv.bg");
@@ -158,26 +146,20 @@ class EComerseApplicationTests {
     }
 
     @Test
-    void doesReviewExistTest() {
-
-        System.out.println("Result for product= 20621307 and userId=6 "+ reviewService.exists(productService.findByPCode("20621307"), customerService.findById(6L)));
-    }
-
-    @Test
     void checkTimeZones() {
         System.out.println("Timezone: "+TimeZone.getDefault());
     }
 
     @Test
-    void addProductToFavouritesTest() {//TODO test
+    void addProductToFavouritesTest() {
 //        customerService.addProductToFavourites("6", productService.findByPCode("20621307"));
-        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
+        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
         System.out.println(response);
     }
 
     @Test
     void getFavouritesTest() {
-        Customer customer = customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f");
+        Customer customer = customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f");
         PageResponse<CompactProductResponse> fetchResponse = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
 
         System.out.println("Fetch result: " +fetchResponse.content());

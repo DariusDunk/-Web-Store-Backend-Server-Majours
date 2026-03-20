@@ -20,8 +20,8 @@ public class Review {
     @ManyToOne
     private Product product;
 
-    @JoinColumn(name = "customer_id_keyk", referencedColumnName = "k_id")
-    @ManyToOne //TODO remove unnecessary details when the id migration in customer is finished
+    @JoinColumn(name = "customer_id_keyk")
+    @ManyToOne
     private Customer customer;
 
     @Column(name = "review_text", columnDefinition = "character varying(500)")

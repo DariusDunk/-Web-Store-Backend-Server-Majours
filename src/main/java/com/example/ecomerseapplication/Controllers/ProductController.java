@@ -112,7 +112,7 @@ public class ProductController {
 
         String id = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(id);
+        Customer customer = customerService.getById(id);
 
         ResponseEntity<DetailedProductResponse> detailedProductResponse = productService
                 .getByNameAndCode(productCode, customer);
@@ -291,7 +291,7 @@ public class ProductController {
         if (validationResponse != null)
             return validationResponse;
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         Product product = productService.findByPCode(request.productCode());
 
@@ -324,7 +324,7 @@ public class ProductController {
 
         String customerId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(customerId);
+        Customer customer = customerService.getById(customerId);
 
         Product product = productService.findByPCode(request.productCode);
 
@@ -381,7 +381,7 @@ public class ProductController {
     public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
 
         String customerId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByKID(customerId);
+        Customer customer = customerService.getById(customerId);
         Product product = productService.findByPCode(productCode);
         Review review = reviewService.getByProdAndCust(product, customer);
 

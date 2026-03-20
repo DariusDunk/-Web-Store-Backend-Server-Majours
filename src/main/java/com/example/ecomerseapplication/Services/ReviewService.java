@@ -57,7 +57,7 @@ public class ReviewService {
     }
 
     public Review getByUIDAndPCode(String productCode, String customerId) {
-        return reviewRepository.getReviewByCustomer_KeycloakIdAndProduct_ProductCode(customerId, productCode).orElse(null);//TODO vij sled migraciqta
+        return reviewRepository.getReviewByCustomer_KeycloakIdAndProduct_ProductCode(customerId, productCode).orElse(null);
     }
 
     @Nullable

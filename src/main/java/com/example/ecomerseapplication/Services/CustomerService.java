@@ -22,10 +22,6 @@ public class CustomerService {
         this.purchaseRepository = purchaseRepository;
     }
 
-//    public Long getLongIdByKId(String userId) {
-//        return customerRepository.getIdByKeycloakId(userId);
-//    }
-
     public void createByRepresentation(UserRepresentation user, String userId) {
         Customer customer = new Customer();
         customer.setEmail(user.getEmail());
@@ -36,7 +32,8 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
-    public Customer getByKID(String userId) {
-        return customerRepository.getCustomerByKeycloakId(userId).orElseThrow(() -> new ResourceNotFoundException("No user found with ID "+ userId));//TODO kato migrira6 zameni izpolzvaniqta sys getById s novoto id
+    public Customer getById(String userId) {
+
+        return customerRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No user found with ID "+ userId));
     }
 }

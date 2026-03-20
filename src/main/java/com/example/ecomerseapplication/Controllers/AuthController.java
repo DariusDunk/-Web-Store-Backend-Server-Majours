@@ -70,7 +70,6 @@ public class AuthController {
     {
         try
         {
-//            System.out.println("Invalidating token: " + refreshTokenRequest.refreshToken());
             return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshTokenRequest.refreshToken()))).build();
         }
         catch (Exception e)

@@ -64,7 +64,7 @@ public class CustomerController {
         String userId = userIdExtractor.getUserId();
 
         Product product = productService.findByPCode(productCode);
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         return favoriteOfCustomerService.addToFavorite(customer, product);
     }
@@ -76,7 +76,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
@@ -94,7 +94,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(productCode);
 
         return favoriteOfCustomerService.removeFromFavorites(customer, product);
@@ -107,7 +107,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(request.productCode());
 
         return favoriteOfCustomerService.removeFromFavoritesWRefetch(
@@ -124,7 +124,7 @@ public class CustomerController {
 //        System.out.println("Batch delete request: "+request);
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes(), request.currentPage());
     }
@@ -147,7 +147,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         return customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement);
     }
@@ -159,7 +159,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         List<Product> requestProducts = productService.getByCodes(productCodes);
 
@@ -178,7 +178,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         try {
            return customerCartService.removeFromCartWFetch(customer, productCode);
@@ -195,7 +195,7 @@ public class CustomerController {
 
        String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         try {
             return customerCartService.removeBatchFromCartWFetch(customer, productCodes);
@@ -213,7 +213,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         List<CartItemResponse> customerCarts = customerCartService.getCartDtoByCustomer(customer);
 
@@ -278,7 +278,7 @@ public class CustomerController {
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         String userRole = keycloakService.getRoleByUserId(userId);
 
@@ -296,7 +296,7 @@ public class CustomerController {
     public  ResponseEntity<String> getPfp() {
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByKID(userId);
+        Customer customer = customerService.getById(userId);
 
         return ResponseEntity.ok(customer.getCustomerPfp());
     }

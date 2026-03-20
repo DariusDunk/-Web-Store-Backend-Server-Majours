@@ -16,7 +16,7 @@ public class Session {
     private String sessionId;
 
     @ManyToOne()
-    @JoinColumn(name = "customer_id", referencedColumnName = "k_id")//TODO update when the id migration is finished
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @ManyToOne()

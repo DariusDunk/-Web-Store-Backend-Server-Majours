@@ -20,8 +20,7 @@ public class CustomerCartId implements Serializable {
     @ManyToOne
     private Product product;
 
-    @SuppressWarnings("JpaDataSourceORMInspection")
-    @JoinColumn(name = "customer_id", referencedColumnName = "k_id")
+    @JoinColumn(name = "customer_id")
     @ManyToOne
     private Customer customer;
 
