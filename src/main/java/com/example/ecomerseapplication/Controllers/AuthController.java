@@ -23,12 +23,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final KeycloakService keycloakService;
-    private final CustomerService customerService;
 
     @Autowired
     public AuthController(KeycloakService keycloakService, CustomerService customerService) {
         this.keycloakService = keycloakService;
-        this.customerService = customerService;
     }
 
     @PostMapping("refresh")
@@ -57,27 +55,12 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
 
-//            ResponseEntity<?> response = keycloakService.registerUser(customerAccountRequest.firstName,
-//                    customerAccountRequest.familyName,
-//                    customerAccountRequest.password,
-//                    customerAccountRequest.email,
-//                    UserRole.CUSTOMER);
-
-//            Customer customer = new Customer(customerAccountRequest.firstName,
-//                    customerAccountRequest.familyName,
-//                    customerAccountRequest.email);
-//
-//            customerService.save(customer);
-
-//            return response;
-
-
     }
 
     @PostMapping("login")
     public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) {
 
-        return keycloakService.loginUser(request);
+        return ResponseEntity.ok(keycloakService.loginUser(request));
     }
 
     @PostMapping("invalidate")

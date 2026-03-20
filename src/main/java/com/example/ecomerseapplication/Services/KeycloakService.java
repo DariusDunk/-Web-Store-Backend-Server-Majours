@@ -4,6 +4,7 @@ import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
 import com.example.ecomerseapplication.Entities.Customer;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
 import com.example.ecomerseapplication.enums.UserRole;
@@ -310,7 +311,7 @@ public class KeycloakService {
                 .getFirst().getName();
     }
 
-    public ResponseEntity<?> loginUser(UserLoginRequest request) {
+    public KeycloakTokenResponse loginUser(UserLoginRequest request) {
 
         MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
         formParams.add("grant_type", "password");
@@ -322,7 +323,7 @@ public class KeycloakService {
 
 //        formParams.add("scope", "openid profile email");
         try {
-            KeycloakTokenResponse response = Objects.requireNonNull(keycloakWebClient.post()
+            return Objects.requireNonNull(keycloakWebClient.post()
                     .uri(tokenAddress)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(BodyInserters.fromFormData(formParams))
@@ -330,10 +331,9 @@ public class KeycloakService {
                     .bodyToMono(KeycloakTokenResponse.class)
                     .block());
 
-            return ResponseEntity.ok(response);
         } catch (WebClientResponseException e) {
             System.out.println("Error logging in user: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            throw new LoginFailedException("Login exception: " + e.getMessage());
         }
 
     }
