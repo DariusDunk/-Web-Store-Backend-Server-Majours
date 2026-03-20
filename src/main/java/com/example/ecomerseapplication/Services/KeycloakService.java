@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RefreshRequestFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
 import com.example.ecomerseapplication.enums.UserRole;
@@ -357,9 +358,6 @@ public class KeycloakService {
                     .block();
 
             assert response != null;
-//            if (response.getStatusCode().is2xxSuccessful()) {
-////                System.out.println("Logout successful");
-//            }
             return response.getStatusCode().value();
 
         } catch (WebClientResponseException e) {
@@ -375,10 +373,8 @@ public class KeycloakService {
 
     }
 
-    public ResponseEntity<?> refreshBothTokens(String refreshToken) {
+    public TokenRefreshResponse refreshBothTokens(String refreshToken) {
         String refreshUrl = "/realms/" + realmName + "/protocol/openid-connect/token";
-
-//        System.out.println("Refreshing tokens");
 
         try {
             MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -387,7 +383,9 @@ public class KeycloakService {
             formData.add("client_secret", secret);
             formData.add("refresh_token", refreshToken);
 
-            TokenRefreshResponse response = keycloakWebClient.post()
+            //            System.out.println("Response: " + response);
+
+            return keycloakWebClient.post()
                     .uri(refreshUrl)
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .body(BodyInserters.fromFormData(formData))
@@ -395,13 +393,8 @@ public class KeycloakService {
                     .bodyToMono(TokenRefreshResponse.class)
                     .block();
 
-//            System.out.println("Response: " + response);
-
-            return ResponseEntity.ok(response);
-
         } catch (WebClientResponseException e) {
-//            System.out.println("Failed to refresh tokens:");
-            throw new RuntimeException("Failed to refresh Keycloak token: " + e.getMessage(), e);
+            throw new RefreshRequestFailedException("Failed to refresh Keycloak token: " + e.getMessage(), e);
         }
     }
 }

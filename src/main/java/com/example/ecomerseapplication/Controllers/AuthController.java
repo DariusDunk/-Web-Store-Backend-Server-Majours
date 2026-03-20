@@ -3,17 +3,12 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.RefreshTokenRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
-import com.example.ecomerseapplication.Entities.Customer;
-import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.enums.UserRole;
 import jakarta.validation.Valid;
-import jakarta.xml.bind.ValidationException;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +20,7 @@ public class AuthController {
     private final KeycloakService keycloakService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService, CustomerService customerService) {
+    public AuthController(KeycloakService keycloakService) {
         this.keycloakService = keycloakService;
     }
 
@@ -33,8 +28,7 @@ public class AuthController {
     public ResponseEntity<?> refreshTokens(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
 
         try {
-//            System.out.println("Refresh token: "+ refreshTokenRequest.refreshToken());
-            return keycloakService.refreshBothTokens(refreshTokenRequest.refreshToken());
+            return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshTokenRequest.refreshToken()));
         } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

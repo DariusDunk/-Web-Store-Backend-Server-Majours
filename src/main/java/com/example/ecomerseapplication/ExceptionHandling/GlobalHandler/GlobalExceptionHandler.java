@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.ExceptionHandling.GlobalHandler;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RefreshRequestFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
 import jakarta.validation.ValidationException;
@@ -51,6 +52,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LoginFailedException.class)
     public ResponseEntity<?> handleAllExceptions() {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(RefreshRequestFailedException.class)
+    public ResponseEntity<?> handleAllRefreshExceptions() {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

@@ -21,7 +21,7 @@ public record KeycloakTokenResponse(
 //        String scope,
 //        @JsonProperty("id_token")
 //        String idToken
-//        //TODO Moje da e vremenno nz
+
 
 ) {
 }
