@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "customers", schema = "online_shop")
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(exclude = {"reviews","savedPurchaseDetails", "purchases"})
 public class Customer {
 
@@ -49,4 +51,10 @@ public class Customer {
     @OneToMany(mappedBy = "customer")
     private List<Session> sessions;
 
+    public Customer(String keycloakId, String firstName, String lastName, String email) {
+        this.keycloakId = keycloakId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+    }
 }

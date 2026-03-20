@@ -3,39 +3,41 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.RefreshTokenRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
+import com.example.ecomerseapplication.Entities.Customer;
+import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.enums.UserRole;
 import jakarta.validation.Valid;
+import jakarta.xml.bind.ValidationException;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("auth/")
 public class AuthController {
 
     private final KeycloakService keycloakService;
+    private final CustomerService customerService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService) {
+    public AuthController(KeycloakService keycloakService, CustomerService customerService) {
         this.keycloakService = keycloakService;
+        this.customerService = customerService;
     }
 
     @PostMapping("refresh")
     public ResponseEntity<?> refreshTokens(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
 
-        try
-        {
+        try {
 //            System.out.println("Refresh token: "+ refreshTokenRequest.refreshToken());
             return keycloakService.refreshBothTokens(refreshTokenRequest.refreshToken());
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -43,19 +45,32 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    @Transactional
     public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {//TODO tuk ili v keycloak servica trqbva sled registraciq v keycloak da se napravi kopie na potrebitelq v bazata danni, kato trqbva da e i kriptirano
 
-        try {
-            return  keycloakService.registerUser(customerAccountRequest.firstName,
-                    customerAccountRequest.familyName,
-                    customerAccountRequest.password,
-                    customerAccountRequest.email,
-                    UserRole.CUSTOMER);
-        } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        System.out.println("Register request: "+customerAccountRequest);
+
+        keycloakService.registerFlow(customerAccountRequest.firstName,
+                customerAccountRequest.familyName,
+                customerAccountRequest.password,
+                customerAccountRequest.email,
+                UserRole.CUSTOMER);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+
+//            ResponseEntity<?> response = keycloakService.registerUser(customerAccountRequest.firstName,
+//                    customerAccountRequest.familyName,
+//                    customerAccountRequest.password,
+//                    customerAccountRequest.email,
+//                    UserRole.CUSTOMER);
+
+//            Customer customer = new Customer(customerAccountRequest.firstName,
+//                    customerAccountRequest.familyName,
+//                    customerAccountRequest.email);
+//
+//            customerService.save(customer);
+
+//            return response;
+
 
     }
 
@@ -68,12 +83,9 @@ public class AuthController {
     @PostMapping("invalidate")
     public ResponseEntity<?> invalidateToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest)//TODO naprvi da ne e requestBody?
     {
-        try
-        {
+        try {
             return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshTokenRequest.refreshToken()))).build();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Error invalidating token: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

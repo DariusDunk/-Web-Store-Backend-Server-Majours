@@ -36,4 +36,13 @@ public class CustomerService {
 
         return customerRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No user found with ID "+ userId));
     }
+
+    public Customer save(Customer customer) {
+        try {
+            return customerRepository.save(customer);
+        } catch (Exception e) {
+            System.out.println("Error saving customer in DB: " + e.getMessage());
+            throw e;
+        }
+    }
 }

@@ -11,4 +11,5 @@ public class ErrorType {
     public static final String OUT_OF_STOCK = "https://example.com/problems/resource-out-of-stock";
     public static final String SIZE_LIMIT_REACHED = "https://example.com/problems/size-limit-reached";
     public static final String USER_ALREADY_EXISTS = "https://example.com/problems/user-already-exists" ;
+    public static final String REGISTRATION_FAILED = "https://example.com/problems/registration-failed";
 }

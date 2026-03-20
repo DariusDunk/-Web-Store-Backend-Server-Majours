@@ -1,11 +1,13 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
-import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
+import com.example.ecomerseapplication.Entities.Customer;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
 import com.example.ecomerseapplication.enums.UserRole;
+import jakarta.validation.ValidationException;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -22,18 +24,21 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+
 @Service
 public class KeycloakService {
 
-//    private final CustomerService customerService;
+    //    private final CustomerService customerService;
     private final WebClient keycloakWebClient;
+    private final CustomerService customerService;
 
-//    @Value("${keycloak.server-url}")
+    //    @Value("${keycloak.server-url}")
 //    private String serverUrl;
     @Value("${keycloak.admin-realm}")
     private String adminRealm;
@@ -56,13 +61,46 @@ public class KeycloakService {
 
     @Autowired
     public KeycloakService(
-//            CustomerService customerService,
-                           WebClient keycloakWebClient
-    ) {
-//        this.customerService = customerService;
+            WebClient keycloakWebClient,
+            CustomerService customerService) {
         this.keycloakWebClient = keycloakWebClient;
+        this.customerService = customerService;
     }
 
+    public void registerFlow(String firstname, String lastName, String password, String email, UserRole userRole) throws ValidationException {
+        String userId = null;
+        try {
+             userId = registerUser(firstname, lastName, password, email, userRole);
+
+            if (userId != null)
+            {
+                Customer customer = new Customer(userId, firstname, lastName, email);
+
+                customerService.save(customer);
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("Error registering user: " + e.getMessage());
+            if (userId != null) {
+                try {
+                    System.out.println("Rolling back user creation");
+                    deleteUser(userId);
+                } catch (Exception ex) {
+                    System.out.println("Error rollback deleting user: " + ex.getMessage());
+                }
+            }
+
+            if (e instanceof ValidationException
+            || e instanceof UserAlreadyExistsException
+            || e instanceof RegistrationFailedException) {
+                throw e;
+
+            }
+            throw new RegistrationFailedException("Registration failed");
+
+        }
+    }
 
     private String getAdminAccessToken() {
 //        System.out.println("Getting Admin Access Token");
@@ -94,12 +132,12 @@ public class KeycloakService {
         return existingUsers != null && existingUsers.length > 0;
     }
 
-    private ResponseEntity<String > createUser(UserRepresentation user, String adminToken) {
+    private ResponseEntity<String> createUser(UserRepresentation user, String adminToken) {
         String userId;
 //        System.out.println("Creating user");
 
         try {
-           ResponseEntity<?> response = keycloakWebClient.post()
+            ResponseEntity<?> response = keycloakWebClient.post()
                     .uri("/admin/realms/" + userRealm + "/users")
                     .headers(h -> h.setBearerAuth(adminToken))
                     .bodyValue(user)
@@ -108,8 +146,7 @@ public class KeycloakService {
                             return Mono.just(ResponseEntity.status(clientResponse.statusCode())
                                     .headers(clientResponse.headers().asHttpHeaders())
                                     .build());
-                        }
-                        else {
+                        } else {
                             return clientResponse.bodyToMono(String.class)
                                     .flatMap(body -> Mono.error(new RuntimeException(
                                             "Failed to create user in Keycloak: " + body
@@ -118,17 +155,15 @@ public class KeycloakService {
                     })
                     .block();
 
-           if (response != null&& response.getHeaders().getLocation() != null) {
-               String location = response.getHeaders().getLocation().toString();
-               userId = location.substring(location.lastIndexOf("/") + 1);
+            if (response != null && response.getHeaders().getLocation() != null) {
+                String location = response.getHeaders().getLocation().toString();
+                userId = location.substring(location.lastIndexOf("/") + 1);
 //               System.out.println("Created User with Id: " + userId);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(userId);
-           }
-           else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (WebClientResponseException e) {
-            String responseBody = e.getResponseBodyAsString();
-            throw new RuntimeException("Failed to create user in Keycloak: " + responseBody, e);
+                return ResponseEntity.status(HttpStatus.CREATED).body(userId);
+            } else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            throw new RegistrationFailedException("Failed to create user in Keycloak: " + e.getMessage(), e);
         }
 
     }
@@ -147,8 +182,7 @@ public class KeycloakService {
 //        System.out.println("Assigning user role: " + userRole);
         RoleRepresentation role = getRealmRole(userRole.getValue(), adminToken);
 
-    try
-        {
+        try {
             keycloakWebClient.post()
                     .uri("/admin/realms/" + userRealm + "/users/{id}/role-mappings/realm", userId)
                     .headers(h -> h.setBearerAuth(adminToken))
@@ -158,17 +192,19 @@ public class KeycloakService {
                     .block();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(role);
+        } catch (WebClientResponseException e) {
+            String responseBody = e.getResponseBodyAsString();
+            deleteUser(userId);
+            throw new RuntimeException("Failed to create user in Keycloak: " + responseBody, e);
         }
-    catch (WebClientResponseException e) {
-        String responseBody = e.getResponseBodyAsString();
-        deleteUser(userId, adminToken);
-        throw new RuntimeException("Failed to create user in Keycloak: " + responseBody, e);
-    }
 
     }
 
-    private void deleteUser(String userId, String adminToken) {
+    private void deleteUser(String userId) {
 //        System.out.println("Deleting user");
+
+        String adminToken = getAdminAccessToken();
+
         keycloakWebClient.delete()
                 .uri("/admin/realms/" + userRealm + "/users/{id}", userId)
                 .headers(h -> h.setBearerAuth(adminToken))
@@ -177,7 +213,7 @@ public class KeycloakService {
                 .block();
     }
 
-    public ResponseEntity<?> registerUser(String firstname,String lastName , String password, String email, UserRole userRole) {
+    public String registerUser(String firstname, String lastName, String password, String email, UserRole userRole) throws ValidationException {
 
 //        System.out.println("Registration begining");
 
@@ -196,17 +232,21 @@ public class KeycloakService {
 //        System.out.println("User information set");
 
         if (password.length() < 12) {
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
-                    "Кратка парола!",
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Паролата не трябва да е по-кратка от 12 символа"));
+//            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+//                    "Кратка парола!",
+//                    HttpStatus.BAD_REQUEST.value(),
+//                    "Паролата не трябва да е по-кратка от 12 символа"));
+
+            throw new ValidationException("Паролата не трябва да е по-кратка от 12 символа");
         }
 
         if (Objects.equals(password, email)) {
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
-                    "Имейлът съвпада с паролата!",
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Имейлът и паролата не трябва да съвпадат!"));
+//            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+//                    "Имейлът съвпада с паролата!",
+//                    HttpStatus.BAD_REQUEST.value(),
+//                    "Имейлът и паролата не трябва да съвпадат!"));
+
+            throw new ValidationException("Имейлът и паролата не трябва да съвпадат!");
         }
 
         CredentialRepresentation cred = new CredentialRepresentation();
@@ -216,16 +256,17 @@ public class KeycloakService {
         user.setCredentials(Collections.singletonList(cred));
 //        System.out.println("Password checked");
 
-        if (doesUserExist(email, adminToken))
-        {
+        if (doesUserExist(email, adminToken)) {
 //            System.out.println("User already exists");
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-                    .body(new ErrorResponse(
-                            ErrorType.USER_ALREADY_EXISTS,
-                            "Съществуващ потребител",
-                            HttpStatus.CONFLICT.value(),
-                            "Потребител с този имейл адрес вече съществува"
-                    ));
+//            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+//                    .body(new ErrorResponse(
+//                            ErrorType.USER_ALREADY_EXISTS,
+//                            "Съществуващ потребител",
+//                            HttpStatus.CONFLICT.value(),
+//                            "Потребител с този имейл адрес вече съществува"
+//                    ));
+
+            throw new UserAlreadyExistsException("Потребител с този имейл адрес вече съществува");
         }
 
         ResponseEntity<String> userCreationResponse = createUser(user, adminToken);
@@ -236,12 +277,12 @@ public class KeycloakService {
             ResponseEntity<?> roleAssignResponse = assignUserRole(userId, userRole, adminToken);
 
             if (roleAssignResponse.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.status(HttpStatus.CREATED).body(userId);
+                return userId;
             }
 
         }
 
-        return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        return null;
     }
 
     public List<UserRepresentation> getAllUsersOfRole(String roleName) {//Untested
@@ -280,8 +321,7 @@ public class KeycloakService {
 
 
 //        formParams.add("scope", "openid profile email");
-    try
-        {
+        try {
             KeycloakTokenResponse response = Objects.requireNonNull(keycloakWebClient.post()
                     .uri(tokenAddress)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -291,11 +331,10 @@ public class KeycloakService {
                     .block());
 
             return ResponseEntity.ok(response);
+        } catch (WebClientResponseException e) {
+            System.out.println("Error logging in user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-    catch (WebClientResponseException e) {
-        System.out.println("Error logging in user: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
 
     }
 
@@ -309,12 +348,12 @@ public class KeycloakService {
             formParams.add("client_secret", secret);
             formParams.add("refresh_token", refreshToken);
 
-           ResponseEntity<?> response = keycloakWebClient.post()
+            ResponseEntity<?> response = keycloakWebClient.post()
                     .uri(logoutUrl)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(BodyInserters.fromFormData(formParams))
                     .retrieve()
-                   .toBodilessEntity()
+                    .toBodilessEntity()
                     .block();
 
             assert response != null;

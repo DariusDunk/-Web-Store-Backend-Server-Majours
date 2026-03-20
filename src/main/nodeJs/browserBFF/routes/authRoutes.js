@@ -22,6 +22,16 @@ router.post(`/register`, async (req, res) => {
             },
             body: JSON.stringify({first_name: name, last_name: familyName, email: email, password: password})
         });
+
+        if (response.status!==201)
+        {
+            const responseData = await response.json();
+
+            if (responseData != null) {
+                return res.status(response.status).json(responseData);
+            }
+        }
+
         return res.status(response.status).end();
     }
     catch (error) {
