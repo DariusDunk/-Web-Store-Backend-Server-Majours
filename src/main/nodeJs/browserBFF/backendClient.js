@@ -3,7 +3,7 @@ const { Backend_Url } = require('../browserBFF/routes/config.js');
 
 const backendClient = axios.create({ baseURL: Backend_Url });
 
-backendClient.interceptors.response.use(
+backendClient.interceptors.response.use(//TODO kogato stigne6 do tuk, vij interceptora ot frontenda, tyi kato tozi tam e po-nova versiq
     response => response,
     async error => {
         const originalRequest = error.config;

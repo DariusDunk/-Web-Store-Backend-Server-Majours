@@ -149,13 +149,13 @@ class EComerseApplicationTests {
     void checkTimeZones() {
         System.out.println("Timezone: "+TimeZone.getDefault());
     }
-
-    @Test
-    void addProductToFavouritesTest() {
-//        customerService.addProductToFavourites("6", productService.findByPCode("20621307"));
-        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
-        System.out.println(response);
-    }
+//
+//    @Test
+//    void addProductToFavouritesTest() {
+////        customerService.addProductToFavourites("6", productService.findByPCode("20621307"));
+//        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
+//        System.out.println(response);
+//    }
 
     @Test
     void getFavouritesTest() {

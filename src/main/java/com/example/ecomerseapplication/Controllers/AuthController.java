@@ -25,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("refresh")
-    public ResponseEntity<?> refreshTokens(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<?> refreshTokens(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {//TODO naprvi da ne e requestBody
 
         try {
             return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshTokenRequest.refreshToken()));
@@ -37,7 +37,7 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {//TODO tuk ili v keycloak servica trqbva sled registraciq v keycloak da se napravi kopie na potrebitelq v bazata danni, kato trqbva da e i kriptirano
+    public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {//TODO ZAPISVANETO V BAZATA TRQBVA DA SE KRIPTIRA!!!
 
         System.out.println("Register request: "+customerAccountRequest);
 
@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @PostMapping("invalidate")
-    public ResponseEntity<?> invalidateToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest)//TODO naprvi da ne e requestBody?
+    public ResponseEntity<?> invalidateToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest)//TODO naprvi da ne e requestBody
     {
         try {
             return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshTokenRequest.refreshToken()))).build();

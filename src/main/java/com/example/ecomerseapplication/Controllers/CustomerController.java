@@ -66,13 +66,15 @@ public class CustomerController {
         Product product = productService.findByPCode(productCode);
         Customer customer = customerService.getById(userId);
 
-        return favoriteOfCustomerService.addToFavorite(customer, product);
+        favoriteOfCustomerService.addToFavorite(customer, product);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("favourites/p/{page}")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> getFavourites(@PathVariable int page) {
+    public ResponseEntity<?> getFavourites(@PathVariable int page) {//TODO prodylji da slaga6 custom exceptions i da maha6 http ot service ot tuk natatyk
 
         String userId = userIdExtractor.getUserId();
 

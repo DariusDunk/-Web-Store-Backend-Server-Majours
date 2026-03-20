@@ -1,6 +1,7 @@
 const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
+const { safeJson } = require('../safeJsonFunc.js');
 
 router.get('/getFavourites/:page', async (req, res)=>{
   const page = req.params.page
@@ -46,6 +47,12 @@ router.post(`/addFavourite/:productCode`, async (req, res)=>{
     });
 
     if (!response.ok) {
+      const responseData = await safeJson(response);
+
+      if (responseData) {
+        return res.status(response.status).json(responseData);
+      }
+
       return res.status(response.status).end();
     }
 

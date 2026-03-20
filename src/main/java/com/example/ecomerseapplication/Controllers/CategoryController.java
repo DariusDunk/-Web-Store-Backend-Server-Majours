@@ -53,7 +53,7 @@ public class CategoryController {
 
         List<CategoryAttributesResponse> attributesResponses = AttributeMapper
                 .attributeOptionListToCatAttrResponseList(categoryService.getAttributesOfCategory(category.getId()));
-        if (attributesResponses.isEmpty())//TODO Tova dali moje da ostane taka se 4udq
+        if (attributesResponses.isEmpty())
         {
             categoryFiltersResponse.categoryAttributesResponses = new ArrayList<>();
         }

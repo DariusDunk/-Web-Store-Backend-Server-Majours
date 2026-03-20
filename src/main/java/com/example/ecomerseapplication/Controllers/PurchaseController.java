@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping("purchase/")
-public class PurchaseController {
+public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izpolzvane na http response entity-ta vyv service klasovete i slagai custom exceptions
 
     private final PurchaseService purchaseService;
 

@@ -2,10 +2,7 @@ package com.example.ecomerseapplication.ExceptionHandling.GlobalHandler;
 
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RefreshRequestFailedException;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.*;
 import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,4 +58,27 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    @ExceptionHandler(FavouriteInsertFailedException.class)
+    public ResponseEntity<?> handleGenericFavouriteExceptions() {
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @ExceptionHandler(FavouriteSizeLimitReachedException.class)
+    public ResponseEntity<?> handleFavouriteLimitReachedExceptions() {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
+                    "Достигнат лимит на любими",
+                    HttpStatus.CONFLICT.value(), "Достигнахте максималният лимит на списъка с любими!"));
+    }
+
+    @ExceptionHandler(ProductAlreadyInFavouritesException.class)
+    public ResponseEntity<?> handleFavouriteDuplicationExceptions() {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
+                    "Продуктът вече е в любими",
+                    HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими"));
+    }
+
 }

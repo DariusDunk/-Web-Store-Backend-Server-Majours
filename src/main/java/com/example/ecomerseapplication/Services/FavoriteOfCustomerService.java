@@ -8,6 +8,9 @@ import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.FavoriteOfCustomer;
 import com.example.ecomerseapplication.Entities.Product;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.FavouriteInsertFailedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.FavouriteSizeLimitReachedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.ProductAlreadyInFavouritesException;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.FavoriteOfCustomerRepository;
@@ -36,28 +39,23 @@ public class FavoriteOfCustomerService {
     }
 
     @Transactional
-    public ResponseEntity<?> addToFavorite(Customer customer, Product product) {
+    public void addToFavorite(Customer customer, Product product) {
 
         if (repository.countAllByFavoriteOfCustomerId_Customer_keycloakId(customer.getKeycloakId()) >= GlobalConstants.favoritesSizeLimit)
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
-                    "Достигнат лимит на любими",
-                    HttpStatus.CONFLICT.value(), "Достигнахте максималният лимит на списъка с любими!"));
+            throw new FavouriteSizeLimitReachedException("Favourites limit reached");
 
         if (isInFavorites(customer, product)) {
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
-                    "Продуктът вече е в любими",
-                    HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими"));
+            throw new ProductAlreadyInFavouritesException("Product already in favorites");
         }
 
         FavoriteOfCustomerId favId = new FavoriteOfCustomerId(product, customer);
         FavoriteOfCustomer favoriteEntry = new FavoriteOfCustomer(favId, Instant.now());
         try {
             repository.save(favoriteEntry);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
         }
         catch (Exception e)
         {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new FavouriteInsertFailedException("Failed to save favorite: " + e.getMessage(), e);
         }
     }
     @Transactional
