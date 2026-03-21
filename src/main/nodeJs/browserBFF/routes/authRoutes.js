@@ -118,22 +118,15 @@ router.post('/logout', async (req, res) => {
     const refreshToken = req.cookies.refresh_token;
 
     if (refreshToken) {
-        const response = await fetch(`${AuthURL}/invalidate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({refresh_token: refreshToken})
-            }
+        const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}`
         )
         if (!response.ok) console.log("Error invalidating token: " + response.statusText);
-        // console.log("response status: " + response.status)
-        // console.log("response: " + JSON.stringify(response));
+
     }
 
-    res.cookie('access_token', '', {
+    res.cookie('access_token', '', {//TODO tuk zameni refresh_token/access_token sys session_id
         httpOnly: true,
-        secure: false, // same as when you set it
+        secure: false,
         path: '/',
         sameSite: 'lax',
         maxAge: 0

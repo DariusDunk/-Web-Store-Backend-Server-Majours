@@ -1,7 +1,6 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
-import com.example.ecomerseapplication.DTOs.requests.RefreshTokenRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.enums.UserRole;
@@ -57,11 +56,11 @@ public class AuthController {
         return ResponseEntity.ok(keycloakService.loginUser(request));
     }
 
-    @PostMapping("invalidate")
-    public ResponseEntity<?> invalidateToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest)//TODO naprvi da ne e requestBody
+    @GetMapping("invalidate/{token}")
+    public ResponseEntity<?> invalidateToken(@PathVariable("token") String refreshToken)
     {
         try {
-            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshTokenRequest.refreshToken()))).build();
+            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshToken))).build();
         } catch (Exception e) {
             System.out.println("Error invalidating token: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
