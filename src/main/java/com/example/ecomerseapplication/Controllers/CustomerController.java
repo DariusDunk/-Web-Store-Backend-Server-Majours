@@ -74,7 +74,7 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("favourites/p/{page}")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> getFavourites(@PathVariable int page) {//TODO prodylji da slaga6 custom exceptions i da maha6 http ot service ot tuk natatyk
+    public ResponseEntity<?> getFavourites(@PathVariable int page) {
 
         String userId = userIdExtractor.getUserId();
 
@@ -92,14 +92,14 @@ public class CustomerController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
 
-//        System.out.println("In remove favorite from prod page:");
-
         String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(productCode);
 
-        return favoriteOfCustomerService.removeFromFavorites(customer, product);
+        favoriteOfCustomerService.removeFromFavorites(customer, product);
+
+        return ResponseEntity.noContent().build();
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

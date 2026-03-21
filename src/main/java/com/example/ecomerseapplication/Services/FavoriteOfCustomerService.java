@@ -8,12 +8,14 @@ import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.FavoriteOfCustomer;
 import com.example.ecomerseapplication.Entities.Product;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.EntityDeletionFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.FavouriteInsertFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.FavouriteSizeLimitReachedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.ProductAlreadyInFavouritesException;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.FavoriteOfCustomerRepository;
+import org.hibernate.action.internal.EntityActionVetoException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -72,13 +74,11 @@ public class FavoriteOfCustomerService {
     }
 
     @Transactional
-    public ResponseEntity<?> removeFromFavorites(Customer customer, Product product) {
+    public void removeFromFavorites(Customer customer, Product product) {
         try {
             repository.deleteFavoriteOfCustomerByFavoriteOfCustomerId_CustomerAndFavoriteOfCustomerId_Product(customer, product);
-            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            System.out.println("Error removing favorite: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new EntityDeletionFailedException("Error removing favorite: " + e.getMessage());
         }
 
     }

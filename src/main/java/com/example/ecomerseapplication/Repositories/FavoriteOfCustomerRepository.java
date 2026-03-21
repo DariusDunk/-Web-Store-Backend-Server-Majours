@@ -22,6 +22,7 @@ public interface FavoriteOfCustomerRepository extends JpaRepository<FavoriteOfCu
 
     Boolean existsByFavoriteOfCustomerId_CustomerAndFavoriteOfCustomerId_Product(Customer customer, Product product);
 
+    @Modifying
     void deleteFavoriteOfCustomerByFavoriteOfCustomerId_CustomerAndFavoriteOfCustomerId_Product(Customer favoriteOfCustomerIdCustomer, Product favoriteOfCustomerIdProduct);
 
     @Query("""

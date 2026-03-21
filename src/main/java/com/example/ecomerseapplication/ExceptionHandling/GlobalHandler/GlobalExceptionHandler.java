@@ -81,4 +81,11 @@ public class GlobalExceptionHandler {
                     HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими"));
     }
 
+    @ExceptionHandler(EntityDeletionFailedException.class)
+    public ResponseEntity<?> handleDeletionFailedExceptions() {
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+
 }
