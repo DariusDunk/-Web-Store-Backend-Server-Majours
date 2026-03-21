@@ -69,16 +69,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleFavouriteLimitReachedExceptions() {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
-                    "Достигнат лимит на любими",
-                    HttpStatus.CONFLICT.value(), "Достигнахте максималният лимит на списъка с любими!"));
+                "Достигнат лимит на любими",
+                HttpStatus.CONFLICT.value(), "Достигнахте максималният лимит на списъка с любими!"));
     }
 
     @ExceptionHandler(ProductAlreadyInFavouritesException.class)
     public ResponseEntity<?> handleFavouriteDuplicationExceptions() {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
-                    "Продуктът вече е в любими",
-                    HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими"));
+                "Продуктът вече е в любими",
+                HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими"));
     }
 
     @ExceptionHandler(EntityDeletionFailedException.class)
@@ -93,6 +93,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
+    @ExceptionHandler(CartLimitReachedException.class)
+    public ResponseEntity<?> handleCartLimitReachedExceptions() {
 
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
+                "Неуспешно добавяне на продукт",
+                HttpStatus.CONFLICT.value(),
+                "Достигнахте лимита на количката"));
+    }
 
+    @ExceptionHandler(StockExceededException.class)
+    public ResponseEntity<?> handleStockExceededExceptions() {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.DEMAND_EXCEEDS_SUPPLY,
+                "Неуспешно увеличение на бройка",
+                HttpStatus.CONFLICT.value(),
+                "Изисканото количество надхвърля наличното за този продуктит, той не бе добавен или увеличен в количката "));
+    }
 }

@@ -148,15 +148,14 @@ router.post('/addToCart',async  (req, res) =>{
       body: JSON.stringify({product_code: productCode, do_increment: doIncrement})
     });
 
-    if (!response.ok) {
-      return res.status(response.status).end();
-    }
-
-    if (response.status === 200 || response.status === 201) {
+    if (response.ok) {
       return res.status(response.status).json({message: await response.text()});
     }
-    else
-      return res.status(response.status).json(await response.json());
+    else {
+      const responseData = await safeJson(response);
+
+      return res.status(response.status).json(responseData);
+    }
   }
   catch (error) {
     console.error('Error:', error);
@@ -177,15 +176,16 @@ router.post('/addToCart/batch',async  (req, res) =>{
       body: JSON.stringify(productCodes)
     });
 
-    if (!response.ok) {
-      return res.status(response.status).end();
-    }
 
-    if (response.status === 200) {
+    if (response.ok) {
       return res.status(response.status).json({message: await response.text()});
     }
-    else
-      return res.status(response.status).json(await response.json());
+    else {
+
+      const responseData = await safeJson(response);
+
+      return res.status(response.status).json(responseData);
+    }
   }
   catch (error) {
     console.error('Error batch adding products to cart: ', error);

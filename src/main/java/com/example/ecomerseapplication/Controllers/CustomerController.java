@@ -145,7 +145,7 @@ public class CustomerController {
         Product product = productService.findByPCode(request.productCode);
 
         if (!product.isInStock()) {
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.OUT_OF_STOCK,
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ErrorType.OUT_OF_STOCK,
                     "Продуктът не е наличен", HttpStatus.BAD_REQUEST.value(),
                     "Този продукт е изчерпан и не беше добавен в количката"));
         }
@@ -154,7 +154,7 @@ public class CustomerController {
 
         Customer customer = customerService.getById(userId);
 
-        return customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement);
+        return ResponseEntity.ok(customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

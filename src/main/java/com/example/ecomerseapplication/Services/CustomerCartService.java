@@ -6,6 +6,8 @@ import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.CartLimitReachedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockExceededException;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
@@ -31,53 +33,53 @@ public class CustomerCartService {
     }
 
     @Transactional
-    public ResponseEntity<?> addToOrRemoveFromCart(Customer customer, Product product, Boolean doIncrement) {
+    public String  addToOrRemoveFromCart(Customer customer, Product product, Boolean doIncrement) {
 
         CustomerCartId cartId = new CustomerCartId(product, customer);
 
         CustomerCart customerCart = customerCartRepository.findById(cartId).orElse(null);
 
-        if (customerCart == null) {
-
-            if (cartsByCustomer(customer).size() >= GlobalConstants.cartSizeLimit)
-                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
-                        "Неуспешно добавяне на продукт",
-                        HttpStatus.CONFLICT.value(),
-                        "Достигнахте лимита на количката"));
-
-
-            customerCart = new CustomerCart(cartId, (short)1);
-            customerCartRepository.save(customerCart);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Успешно добавен в количката!");
-        }
-
-        if (doIncrement)
+        try
         {
-            short quantity = customerCart.getQuantity();
-            if (product.getQuantityInStock() < quantity + 1)
-                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.DEMAND_EXCEEDS_SUPPLY,
-                        "Неуспешно увеличение на бройка",
-                        HttpStatus.CONFLICT.value(),
-                        "Изисканото количество надхвърля наличното за този продуктит, той не бе добавен или увеличен в количката "));
+            if (customerCart == null) {
 
-            customerCart.setQuantity(++quantity);
-            customerCartRepository.save(customerCart);
-            return ResponseEntity.ok("Успешно увеличeно количество в количката!");
+                if (cartsByCustomer(customer).size() >= GlobalConstants.cartSizeLimit)
+                    throw new CartLimitReachedException("Cart limit reached!");
+
+                customerCart = new CustomerCart(cartId, (short) 1);
+                customerCartRepository.save(customerCart);
+                return "Успешно добавен в количката!";
+            }
+
+            if (doIncrement) {
+                short quantity = customerCart.getQuantity();
+                if (product.getQuantityInStock() < quantity + 1)
+                    throw new StockExceededException("Stock exceeded for product " + product.getProductName() + "!");
+
+                customerCart.setQuantity(++quantity);
+                customerCartRepository.save(customerCart);
+                return "Успешно увеличeно количество в количката!";
+            }
+
+            if (customerCart.getQuantity() == 1) {
+                customerCartRepository.deleteById(cartId);
+                return "Успешно премахнат от количката!";
+            } else {
+                short quantity = customerCart.getQuantity();
+                customerCart.setQuantity(--quantity);
+
+                return "Успешно намалено количество в коликчата!";
+            }
         }
+        catch (Exception e)
+        {
+            if (e instanceof CartLimitReachedException
+                    || e instanceof StockExceededException) {
+                throw e;
+            }
 
-        else
-
-        if (customerCart.getQuantity() == 1) {
-            customerCartRepository.deleteById(cartId);
-            return ResponseEntity.status(HttpStatus.OK).body("Успешно премахнат от количката!");
+            throw new RuntimeException(e);
         }
-        else {
-            short quantity = customerCart.getQuantity();
-            customerCart.setQuantity(--quantity);
-
-            return ResponseEntity.ok("Успешно намалено количество в коликчата!");
-        }
-
     }
 
     public boolean cartExists(Customer customer, Product product) {
