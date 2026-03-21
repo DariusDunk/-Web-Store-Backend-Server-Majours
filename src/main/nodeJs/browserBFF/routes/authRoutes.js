@@ -156,14 +156,7 @@ router.post('/refresh', async (req, res) => {
     // console.log("token: " + refreshToken);
 
     if (refreshToken) {
-        const response = await fetch(`${AuthURL}/refresh`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({refresh_token: refreshToken})
-            });
+        const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken)}`);
 
         // console.log("response status: " + response.status)
 

@@ -24,11 +24,11 @@ public class AuthController {
         this.keycloakService = keycloakService;
     }
 
-    @PostMapping("refresh")
-    public ResponseEntity<?> refreshTokens(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {//TODO naprvi da ne e requestBody
+    @GetMapping("refresh/{token}")
+    public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken) {
 
         try {
-            return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshTokenRequest.refreshToken()));
+            return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshToken));
         } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
