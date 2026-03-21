@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 //import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
@@ -160,7 +159,7 @@ class EComerseApplicationTests {
     @Test
     void getFavouritesTest() {
         Customer customer = customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f");
-        PageResponse<CompactProductResponse> fetchResponse = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
+        PageResponse<CompactProductResponse> fetchResponse = favoriteOfCustomerService.getFromCustomerPaged(customer, PageRequest.of(0, PageContentLimit.limit));
 
         System.out.println("Fetch result: " +fetchResponse.content());
     }

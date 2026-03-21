@@ -87,5 +87,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
+    @ExceptionHandler(EmptyRequestException.class)
+    public ResponseEntity<?> handleEmptyRequestExceptions() {
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
+
 
 }

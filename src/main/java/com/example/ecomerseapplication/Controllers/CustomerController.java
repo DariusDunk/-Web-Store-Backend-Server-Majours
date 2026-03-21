@@ -82,7 +82,7 @@ public class CustomerController {
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
-        PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromFavourites(customer, pageRequest);
+        PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromCustomerPaged(customer, pageRequest);
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
@@ -112,23 +112,26 @@ public class CustomerController {
         Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(request.productCode());
 
-        return favoriteOfCustomerService.removeFromFavoritesWRefetch(
+        return ResponseEntity.ok(favoriteOfCustomerService.removeFromFavoritesWRefetch(
                 customer,
                 product,
-                request.currentPage());
+                request.currentPage()));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("favorite/remove/batch")
     @Transactional
-    public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveFavBatchRequest request) {
+    public ResponseEntity<?> removeFromFavouritesBatch(@RequestBody @Valid RemoveFavBatchRequest request) {
 
 //        System.out.println("Batch delete request: "+request);
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);
 
-        return favoriteOfCustomerService.removeFavoritesBatch(customer, request.productCodes(), request.currentPage());
+        return ResponseEntity.ok(favoriteOfCustomerService.removeFavoritesBatch(
+                customer,
+                request.productCodes(),
+                request.currentPage()));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

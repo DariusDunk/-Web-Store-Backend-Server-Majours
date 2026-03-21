@@ -1,26 +1,18 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.CompositeIdClasses.FavoriteOfCustomerId;
-import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
-import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.FavoriteOfCustomer;
 import com.example.ecomerseapplication.Entities.Product;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.EntityDeletionFailedException;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.FavouriteInsertFailedException;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.FavouriteSizeLimitReachedException;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.ProductAlreadyInFavouritesException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.*;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.FavoriteOfCustomerRepository;
-import org.hibernate.action.internal.EntityActionVetoException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,15 +53,14 @@ public class FavoriteOfCustomerService {
         }
     }
     @Transactional
-    public ResponseEntity<?> removeFromFavoritesWRefetch(Customer customer, Product product, int currentPage) {
+    public PageResponse<CompactProductResponse> removeFromFavoritesWRefetch(Customer customer, Product product, int currentPage) {
         try {
           repository.deleteFavoriteOfCustomerByFavoriteOfCustomerId_CustomerAndFavoriteOfCustomerId_Product(customer, product);
 
             return calculateNewPageWContent(customer, currentPage);
 
         } catch (Exception e) {
-            System.out.println("Error removing favorite: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new EntityDeletionFailedException("Error removing favorite with re-fetch: " + e.getMessage());
         }
     }
 
@@ -78,22 +69,22 @@ public class FavoriteOfCustomerService {
         try {
             repository.deleteFavoriteOfCustomerByFavoriteOfCustomerId_CustomerAndFavoriteOfCustomerId_Product(customer, product);
         } catch (Exception e) {
-            throw new EntityDeletionFailedException("Error removing favorite: " + e.getMessage());
+            throw new EntityDeletionFailedException("Error removing favorite from prod page request: " + e.getMessage());
         }
 
     }
 
-    private ResponseEntity<?> calculateNewPageWContent(Customer customer, int currentPage){
+    private PageResponse<CompactProductResponse> calculateNewPageWContent(Customer customer, int currentPage){
 
         int favoritesCount = getFavoritesCount(customer);
 
         if (favoritesCount == 0) {
-            return ResponseEntity.ok(new PageResponse<>(new ArrayList<>(),
+            return new PageResponse<>(new ArrayList<>(),
                     0,
                     0,
                     0L,
                     0,
-                    true));
+                    true);
         }
 
         int totalPages = (int) Math.ceil((double) favoritesCount / PageContentLimit.limit);
@@ -102,22 +93,22 @@ public class FavoriteOfCustomerService {
 
         PageRequest pageRequest = PageRequest.of(safePage, PageContentLimit.limit);
 
-        return ResponseEntity.ok(getFromFavourites(customer, pageRequest));
+        return getFromCustomerPaged(customer, pageRequest);
 
     }
 
     @Transactional
-    public ResponseEntity<?> removeFavoritesBatch(Customer customer, List<String> productCodes, int currentPage) {
+    public PageResponse<CompactProductResponse> removeFavoritesBatch(Customer customer, List<String> productCodes, int currentPage) {
 
         if (productCodes.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            throw new EmptyRequestException("No product codes provided for batch favourite deletion");
         }
         try {
             repository.deleteBatch(customer, productCodes);
           return calculateNewPageWContent(customer, currentPage);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new EntityDeletionFailedException("Error batch removing favorites with re-fetch: " + e.getMessage());
         }
     }
 
@@ -125,7 +116,7 @@ public class FavoriteOfCustomerService {
         return repository.countAllByFavoriteOfCustomerId_Customer_keycloakId(customer.getKeycloakId());
     }
 
-    public PageResponse<CompactProductResponse> getFromFavourites(Customer customer, PageRequest pageRequest) {
+    public PageResponse<CompactProductResponse> getFromCustomerPaged(Customer customer, PageRequest pageRequest) {
         return PageResponse.from(repository.getFromFavouritesPage(customer.getKeycloakId(), pageRequest));
     }
 
