@@ -160,7 +160,7 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {//TODO produlji ot tuk custom exceptionite i premahvaneto na HTTP responses ot servicite
+    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
 
         String userId = userIdExtractor.getUserId();
 
@@ -175,13 +175,13 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("cart/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
+    public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {//TODO produlji ot tuk custom exceptionite i premahvaneto na HTTP responses ot servicite
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);
 
         try {
-            return customerCartService.removeFromCartWFetch(customer, productCode);
+            return ResponseEntity.ok(customerCartService.removeFromCartWFetch(customer, productCode));
         } catch (Exception e) {
             System.out.println("Error removing from cart: " + e.getMessage());
             return ResponseEntity.badRequest().build();

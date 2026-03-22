@@ -97,7 +97,7 @@ public class CustomerCartService {
         return customerCartRepository.findDtoByCustomer(customer.getKeycloakId());
     }
     @Transactional
-    public ResponseEntity<?> removeFromCartWFetch(Customer customer, String productCode) {
+    public List<CartItemResponse> removeFromCartWFetch(Customer customer, String productCode) {
 
         int affectedRows = customerCartRepository.deleteByCustomerAndProductCode(customer, productCode);
 
@@ -107,8 +107,7 @@ public class CustomerCartService {
         if (affectedRows > 1)
             throw new IllegalStateException("Multiple rows deleted unexpectedly");
 
-        return ResponseEntity.ok(getCartDtoByCustomer(customer));
-
+        return getCartDtoByCustomer(customer);
     }
 
     @Transactional
