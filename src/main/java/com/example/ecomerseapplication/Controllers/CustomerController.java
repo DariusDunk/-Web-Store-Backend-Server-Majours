@@ -184,7 +184,7 @@ public class CustomerController {
             return ResponseEntity.ok(customerCartService.removeFromCartWFetch(customer, productCode));
         } catch (Exception e) {
             System.out.println("Error removing from cart: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
+            throw e;
         }
     }
 
@@ -194,16 +194,14 @@ public class CustomerController {
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
 
         String userId = userIdExtractor.getUserId();
-
         Customer customer = customerService.getById(userId);
 
         try {
-            return customerCartService.removeBatchFromCartWFetch(customer, productCodes);
+            return ResponseEntity.ok(customerCartService.removeBatchFromCartWFetch(customer, productCodes));
         } catch (Exception e) {
             System.out.println("Error removing product batch from cart: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            throw e;
         }
-
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

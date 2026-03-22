@@ -200,7 +200,7 @@ public class CustomerCartService {
     }
 
     @Transactional
-    public ResponseEntity<?> removeBatchFromCartWFetch(Customer customer, List<String> productCodes) {
+    public List<CartItemResponse> removeBatchFromCartWFetch(Customer customer, List<String> productCodes) {
 
         int deletedCount = customerCartRepository.deleteBatchByCustomerAndPCodes(customer, productCodes);
 
@@ -208,6 +208,6 @@ public class CustomerCartService {
             throw new IllegalArgumentException("Not all products were found in the cart!");
         }
 
-      return ResponseEntity.ok(customerCartRepository.findDtoByCustomer(customer.getKeycloakId()));
+      return customerCartRepository.findDtoByCustomer(customer.getKeycloakId());
     }
 }
