@@ -210,9 +210,7 @@ public class CustomerController {
     public ResponseEntity<?> showCart() {
 
         String userId = userIdExtractor.getUserId();
-
         Customer customer = customerService.getById(userId);
-
         List<CartItemResponse> customerCarts = customerCartService.getCartDtoByCustomer(customer);
 
         return ResponseEntity
@@ -274,10 +272,9 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("me")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
+
         String userId = userIdExtractor.getUserId();
-
         Customer customer = customerService.getById(userId);
-
         String userRole = keycloakService.getRoleByUserId(userId);
 
         return ResponseEntity.ok(new CustomerResponse(
@@ -288,15 +285,15 @@ public class CustomerController {
         );
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @GetMapping("getPfp")
-    @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<String> getPfp() {
-        String userId = userIdExtractor.getUserId();
-
-        Customer customer = customerService.getById(userId);
-
-        return ResponseEntity.ok(customer.getCustomerPfp());
-    }
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    @GetMapping("getPfp")
+//    @PreAuthorize("hasRole(@roles.customer())")
+//    public ResponseEntity<String> getPfp() {
+//        String userId = userIdExtractor.getUserId();
+//
+//        Customer customer = customerService.getById(userId);
+//
+//        return ResponseEntity.ok(customer.getCustomerPfp());
+//    }
 
 }

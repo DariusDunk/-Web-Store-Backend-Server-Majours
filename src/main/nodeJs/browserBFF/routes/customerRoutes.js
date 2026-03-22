@@ -271,34 +271,34 @@ router.get('/getCart', async (req, res) => {
     }
 });
 
-router.get('/getUserPfp/', async (req, res) => {
-        // const userId = req.url.split("/")[2];
-        const accessToken = req.cookies['access_token'];
-
-        try {
-            const response = await fetch(`${Backend_Url}/customer/getPfp`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + accessToken,
-                    }
-                });
-
-            if (!response.ok) {
-                return res.status(response.status).end();
-            }
-
-            const responseText = await response.text();
-
-            // console.log("RESPONSE: " + responseText);
-            return res.status(response.status).send(responseText);
-        } catch (error) {
-            console.error('Error:', error);
-            return res.status(500).json({error: error.message});
-        }
-    }
-)
+// router.get('/getUserPfp/', async (req, res) => {
+//         // const userId = req.url.split("/")[2];
+//         const accessToken = req.cookies['access_token'];
+//
+//         try {
+//             const response = await fetch(`${Backend_Url}/customer/getPfp`,
+//                 {
+//                     method: 'GET',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'Authorization': 'Bearer ' + accessToken,
+//                     }
+//                 });
+//
+//             if (!response.ok) {
+//                 return res.status(response.status).end();
+//             }
+//
+//             const responseText = await response.text();
+//
+//             // console.log("RESPONSE: " + responseText);
+//             return res.status(response.status).send(responseText);
+//         } catch (error) {
+//             console.error('Error:', error);
+//             return res.status(500).json({error: error.message});
+//         }
+//     }
+// )
 
 router.get('/me', async (req, res) => {
     const accessToken = req.cookies['access_token'];
