@@ -175,7 +175,7 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("cart/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {//TODO produlji ot tuk custom exceptionite i premahvaneto na HTTP responses ot servicite
+    public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);
@@ -284,16 +284,4 @@ public class CustomerController {
                 )
         );
     }
-
-//    @ResponseStatus(HttpStatus.NOT_FOUND)
-//    @GetMapping("getPfp")
-//    @PreAuthorize("hasRole(@roles.customer())")
-//    public ResponseEntity<String> getPfp() {
-//        String userId = userIdExtractor.getUserId();
-//
-//        Customer customer = customerService.getById(userId);
-//
-//        return ResponseEntity.ok(customer.getCustomerPfp());
-//    }
-
 }

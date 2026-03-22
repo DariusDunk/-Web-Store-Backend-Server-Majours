@@ -38,15 +38,10 @@ import java.util.*;
 public class ProductController {
 
     private final ProductService productService;
-
     private final CategoryAttributeService categoryAttributeService;
-
     private final CustomerService customerService;
-
     private final ReviewService reviewService;
-
     private final ProductCategoryService productCategoryService;
-
     private final ManufacturerService manufacturerService;
     private final PurchaseCartService purchaseCartService;
     private final UserIdExtractor userIdExtractor;
@@ -238,9 +233,7 @@ public class ProductController {
 //        System.out.println(reviewPage.getContent());
 
         return ResponseEntity.ok(PageResponse.from(reviewPage));
-
     }
-
 
     @GetMapping("review/specific")
     @PreAuthorize("hasRole(@roles.customer())")
@@ -323,11 +316,8 @@ public class ProductController {
             return validationResponse;
 
         String customerId = userIdExtractor.getUserId();
-
         Customer customer = customerService.getById(customerId);
-
         Product product = productService.findByPCode(request.productCode);
-
         Review review = reviewService.getByProdAndCust(product, customer);
 
         if (review.getIsDeleted()) {
@@ -341,7 +331,7 @@ public class ProductController {
                     HttpStatus.FORBIDDEN.value(),
                     "Вече сте добавили ревю за този продукт. Срокът за редакция е изтекъл и не могат да се правят промени."));
 
-        Product updatedProduct = reviewService.updateReview(review, request, product);
+        Product updatedProduct = reviewService.updateReview(review, request, product);//todo po4i cqlata logika po update-a trqbva da e tuk
 
         if (updatedProduct == null) {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,

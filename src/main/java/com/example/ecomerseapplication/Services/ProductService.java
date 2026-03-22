@@ -283,7 +283,7 @@ public class ProductService {
     }
 
     public ResponseEntity<DetailedProductResponse> getByNameAndCode(String productCode, Customer customer) {
-        Product product = productRepository.getByProductCode(productCode).orElseThrow(() -> new ResourceNotFoundException("Product not found with code: " + productCode));
+        Product product = findByPCode(productCode);
 
         List<AttributeName> attributeNames = new ArrayList<>();
 
