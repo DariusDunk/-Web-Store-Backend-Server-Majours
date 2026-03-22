@@ -160,7 +160,7 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
+    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {//TODO produlji ot tuk custom exceptionite i premahvaneto na HTTP responses ot servicite
 
         String userId = userIdExtractor.getUserId();
 
@@ -168,13 +168,8 @@ public class CustomerController {
 
         List<Product> requestProducts = productService.getByCodes(productCodes);
 
-        try {
-            return customerCartService.addBatchToCart(customer, requestProducts);
-        } catch (Exception e) {
-            System.out.println("Error adding product batch to cart: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerCartService.addBatchToCart(customer, requestProducts));
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -186,7 +181,7 @@ public class CustomerController {
         Customer customer = customerService.getById(userId);
 
         try {
-           return customerCartService.removeFromCartWFetch(customer, productCode);
+            return customerCartService.removeFromCartWFetch(customer, productCode);
         } catch (Exception e) {
             System.out.println("Error removing from cart: " + e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -198,7 +193,7 @@ public class CustomerController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
 
-       String userId = userIdExtractor.getUserId();
+        String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getById(userId);
 
@@ -254,7 +249,8 @@ public class CustomerController {
 //                CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
 //                pair.compactProductResponse = ProductDTOMapper
 //                        .entityToCompactResponse(cart.getPurchaseCartId().getProduct());
-////                ProductDTOMapper.addReviewsCountToCompactResponse(pair.compactProductResponse);
+
+    /// /                ProductDTOMapper.addReviewsCountToCompactResponse(pair.compactProductResponse);
 //                pair.quantity = cart.getQuantity();
 //
 //                pairs.add(pair);
@@ -277,7 +273,6 @@ public class CustomerController {
 //
 //        return customerService.passwordUpdate(customer, request.password);
 //    }
-
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("me")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
@@ -298,7 +293,7 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("getPfp")
     @PreAuthorize("hasRole(@roles.customer())")
-    public  ResponseEntity<String> getPfp() {
+    public ResponseEntity<String> getPfp() {
         String userId = userIdExtractor.getUserId();
 
         Customer customer = customerService.getById(userId);

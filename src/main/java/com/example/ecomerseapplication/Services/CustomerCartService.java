@@ -3,14 +3,17 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
+import com.example.ecomerseapplication.DTOs.responses.MessageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.CartLimitReachedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoStockForCartException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockExceededException;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
+import com.example.ecomerseapplication.enums.ResultTypes;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -106,17 +109,10 @@ public class CustomerCartService {
 
         return ResponseEntity.ok(getCartDtoByCustomer(customer));
 
-
-//        CustomerCart cartItem = cart.stream().filter(c -> c.getCustomerCartId().getProduct().getProductCode().equals(productCode)).findFirst().orElseThrow();
-
-//        customerCartRepository.delete(cartItem);
-
-
-
     }
 
     @Transactional
-    public ResponseEntity<?> addBatchToCart(Customer customer, List<Product> products) {
+    public MessageResponse addBatchToCart(Customer customer, List<Product> products) {
 
         boolean stockExceeded = false;
 
@@ -131,13 +127,13 @@ public class CustomerCartService {
 
 //        System.out.println("CART MAP size: " + cartMap.size());
 
-        StringBuilder sb = new StringBuilder("Количеството в наличност на продуктите: ");
+        StringBuilder sb = new StringBuilder();
 
         int newProductsCount = 0;
-
-        for (Product product : products) {
-            CustomerCartId cartId = new CustomerCartId(product, customer);
-            CustomerCart cartItem = cartMap.getOrDefault(cartId, new CustomerCart(cartId, (short)0));
+        List<String> outOfStockProducts = new ArrayList<>();
+        for (int i =0; i < products.size(); i++) {
+            CustomerCartId newCartId = new CustomerCartId(products.get(i), customer);
+            CustomerCart cartItem = cartMap.getOrDefault(newCartId, new CustomerCart(newCartId, (short)0));
 
             if (cartItem.getQuantity() == 0) {
                 newProductsCount++;
@@ -147,7 +143,7 @@ public class CustomerCartService {
             {
                 if (!stockExceeded) stockExceeded = true;
 
-                sb.append(product.getProductName()).append(", ");
+                outOfStockProducts.add(products.get(i).getProductName());
             }
             else {
                 cartItem.setQuantity((short) (cartItem.getQuantity() + 1));
@@ -157,30 +153,50 @@ public class CustomerCartService {
 
         if (stockExceeded)
         {
-            sb.replace(sb.length() - 2, sb.length(), " ");
-            sb.append("е по-малко от изискваното, те не бяха добавени или с увеличено количество в количката");
+
+            sb.append("Поради недостатъчна или липсваща наличност, ");
+
+            sb.append(outOfStockProducts.size() > 1
+                    ? "продуктите: "
+                    : "продуктът: ");
+
+            for (int i = 0; i < outOfStockProducts.size(); i++) {
+                String separator = switch (outOfStockProducts.size() - (i+1)) {
+                    case 0 -> "";
+                    case 1 -> " и ";
+                    default -> ", ";
+                };
+                sb.append(outOfStockProducts.get(i)).append(separator);
+            }
+
+            if (outOfStockProducts.size() > 1)
+                sb.append(" не бяха добавени или увеличени в количката!");
+            else sb.append(" не беше добавен или увеличен в количката!");
         }
 
         if (newProductsCount + originalSize > GlobalConstants.cartSizeLimit) {
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
-                    "Неуспешно добавяне на продукт",
-                    HttpStatus.CONFLICT.value(),
-                    "Достигнахте лимита на количката"));
+            throw new CartLimitReachedException("Cart limit reached!");
         }
 
-        int savedSize = customerCartRepository.saveAll(cart).size();
+        try {
+            int savedSize = customerCartRepository.saveAll(cart).size();
 
-        if (stockExceeded && savedSize == 0) {
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.NO_DATA_FOR_QUERY,
-                    "Продуктите не бяха добавени!",
-                    HttpStatus.CONFLICT.value()
-                    , sb.toString()));
+            if (stockExceeded) {
+                if (savedSize == 0)
+                    throw new NoStockForCartException(sb.toString());
+
+                return new MessageResponse(ResultTypes.PARTIAL_SUCCESS.getValue(), "Не всички продукти бяха добавени", sb.toString());
+            }
+
+            return new MessageResponse(ResultTypes.SUCCESS.getValue(), "", "Успешно добавени в количката!");
+
+        } catch (Exception e) {
+            if (e instanceof NoStockForCartException) {
+                throw e;
+            }
+
+            throw new RuntimeException(e);
         }
-
-        return stockExceeded? ResponseEntity
-                .status(HttpStatus.MULTI_STATUS)
-                .body(new ErrorResponse(ErrorType.DEMAND_EXCEEDS_SUPPLY,"Не всички продукти бяха добавени",HttpStatus.MULTI_STATUS.value(),sb.toString()))
-                : ResponseEntity.ok("Успешно добавени в количката!");
 
     }
 

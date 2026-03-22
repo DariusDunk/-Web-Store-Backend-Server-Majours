@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
                 "Продуктът вече е в любими",
-                HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими"));
+                HttpStatus.CONFLICT.value(), "Избраният продукт вече е в списъка ви с любими!"));
     }
 
     @ExceptionHandler(EntityDeletionFailedException.class)
@@ -97,9 +97,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleCartLimitReachedExceptions() {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
-                "Неуспешно добавяне на продукт",
+                "Неуспешно добавяне на продукт/и",
                 HttpStatus.CONFLICT.value(),
-                "Достигнахте лимита на количката"));
+                "Достигнахте лимита на количката!"));
     }
 
     @ExceptionHandler(StockExceededException.class)
@@ -108,6 +108,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.DEMAND_EXCEEDS_SUPPLY,
                 "Неуспешно увеличение на бройка",
                 HttpStatus.CONFLICT.value(),
-                "Изисканото количество надхвърля наличното за този продуктит, той не бе добавен или увеличен в количката "));
+                "Изисканото количество надхвърля наличното за този продукт, и той не бе добавен или увеличен в количката!"));
     }
+
+    @ExceptionHandler(NoStockForCartException.class)
+    public ResponseEntity<?> handleNoStockForCartExceptions(NoStockForCartException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.NO_DATA_FOR_QUERY,
+                "Продуктите не бяха добавени",
+                HttpStatus.CONFLICT.value()
+                , ex.getMessage()));
+    }
+
 }
