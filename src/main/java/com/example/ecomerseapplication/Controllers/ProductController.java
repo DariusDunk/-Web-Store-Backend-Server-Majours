@@ -96,8 +96,8 @@ public class ProductController {
     }
 
     @GetMapping("suggest")
-    public List<String> getNameSuggestions(@RequestParam @NotBlank String name) {
-        return productService.getNameSuggestions(name);
+    public ResponseEntity<List<String>> getNameSuggestions(@RequestParam @NotBlank String name) {
+        return ResponseEntity.ok(productService.getNameSuggestions(name));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

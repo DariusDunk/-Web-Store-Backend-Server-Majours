@@ -1,80 +1,79 @@
-const express =require( 'express');
+const express = require('express');
 const router = express.Router();
-const { Backend_Url } = require('./config.js');
+const {Backend_Url} = require('./config.js');
 
 
-router.get('/featured/:page', async (req, res)=>{
-  const queryParts = req.url.split("/");
-  const page = queryParts[2];
-  // console.log("inside featured");
-  try {
-    const response = await fetch(`${Backend_Url}/product/findall?page=${page}`);
-    if (response.status === 404) {
-        return res.redirect('/404.html');
+router.get('/featured/:page', async (req, res) => {
+    const queryParts = req.url.split("/");
+    const page = queryParts[2];
+    // console.log("inside featured");
+    try {
+        const response = await fetch(`${Backend_Url}/product/findall?page=${page}`);
+        if (response.status === 404) {
+            return res.redirect('/404.html');
+        }
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
+
+        const data = await response.json();
+        return res.json(data);
+        // }
+    } catch (error) {
+        console.error('Search: Error fetching data:', error);
+        return res.status(error.status).json({error: error.message});
     }
-      if (!response.ok) {
-          return res.status(response.status).end();
-      }
-
-      const data = await response.json();
-      return res.json(data);
-    // }
-  } catch (error)
-  {
-    console.error('Search: Error fetching data:', error);
-      return res.status(error.status).json({ error: error.message });
-  }
 });
 
 router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
-  const { manufacturerName, page} = req.params;
-  const sort = req.query.sort;
-  // console.log("Manufacturer sort: " + sort);
-  try {
-    const response = await fetch(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
-    if (response.status === 404) {
-        return res.redirect('/404.html');
-    }
-      if (!response.ok) {
-          return res.status(response.status).end();
-      }
-      const data = await response.json();
-      return res.json(data);
+    const {manufacturerName, page} = req.params;
+    const sort = req.query.sort;
+    // console.log("Manufacturer sort: " + sort);
+    try {
+        const response = await fetch(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
+        if (response.status === 404) {
+            return res.redirect('/404.html');
+        }
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
+        const data = await response.json();
+        return res.json(data);
 
-  } catch (error) {
-    console.error('Manufacturer: Error fetching data:', error);
-      return res.status(error.status).json({ error: error.message });
-  }
+    } catch (error) {
+        console.error('Manufacturer: Error fetching data:', error);
+        return res.status(error.status).json({error: error.message});
+    }
 });
 
 router.get('/category/:categoryName/p:page', async (req, res) => {
-  const {categoryName, page} = req.params;
-  const sort = req.query.sort;
-  // console.log("sort: " + sort);
-  try {
-    const response = await fetch(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
+    const {categoryName, page} = req.params;
+    const sort = req.query.sort;
+    // console.log("sort: " + sort);
+    try {
+        const response = await fetch(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
 
-    if (response.status === 404) {
-        return res.redirect('/404.html');
+        if (response.status === 404) {
+            return res.redirect('/404.html');
+        }
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
+
+        const data = await response.json();
+        return res.json(data);
+
+    } catch (error) {
+        console.error('Category: Error fetching data:', error);
+        return res.status(error.status).json({error: error.message});
     }
-      if (!response.ok) {
-          return res.status(response.status).end();
-      }
-
-      const data = await response.json();
-      return res.json(data);
-
-  } catch (error) {
-    console.error('Category: Error fetching data:', error);
-      return res.status(error.status).json({ error: error.message });
-  }
 });
 
-router.get(`/review/overview/:productCode`, async (req, res)=>{
+router.get(`/review/overview/:productCode`, async (req, res) => {
     const {productCode} = req.params;
 
     if (!productCode) {
-        return res.status(400).json({ error: 'Missing required parameters' });
+        return res.status(400).json({error: 'Missing required parameters'});
     }
 
     try {
@@ -87,156 +86,142 @@ router.get(`/review/overview/:productCode`, async (req, res)=>{
         const responseData = await response.json();
 
         return res.status(response.status).json(responseData);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching product review overview from backend:', error);
-        return res.status(error.status).json({ error: error.message });
+        return res.status(error.status).json({error: error.message});
     }
 })
 
-router.get('/detail/:productCode', async (req, res)=>{
-  const { productCode } = req.params;
+router.get('/detail/:productCode', async (req, res) => {
+    const {productCode} = req.params;
 
-  const accessToken = req.cookies['access_token'];
+    const accessToken = req.cookies['access_token'];
 
-  if (!productCode) {
-    return res.status(400).json({ error: 'Missing required parameters' });
-  }
-  try {
-    const productDetailsResponse = await fetch(`${Backend_Url}/product/${productCode}`,
-        {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + accessToken,
+    if (!productCode) {
+        return res.status(400).json({error: 'Missing required parameters'});
+    }
+    try {
+        const productDetailsResponse = await fetch(`${Backend_Url}/product/${productCode}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken,
+                }
+            });
+
+        const ratingOverviewResponse = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
+
+        if (!ratingOverviewResponse.ok) {
+            return res.status(ratingOverviewResponse.status).end();
         }
-        });
 
-    const ratingOverviewResponse = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
+        if (!productDetailsResponse.ok) {
+            return res.status(productDetailsResponse.status).end();
+        }
 
-    if (!ratingOverviewResponse.ok) {
-        return res.status(ratingOverviewResponse.status).end();
+        const productDetails = await productDetailsResponse.json();
+        const ratingOverview = await ratingOverviewResponse.json();
+
+        // console.log(JSON.stringify(ratingOverview));
+
+        return res.json({productDetails, ratingOverview});
+
+    } catch (error) {
+        console.error('Error fetching data from backend:', error);
+        return res.status(error.status).json({error: error.message});
     }
-
-    if (!productDetailsResponse.ok) {
-        return res.status(productDetailsResponse.status).end();
-    }
-
-    const productDetails = await productDetailsResponse.json();
-    const ratingOverview = await ratingOverviewResponse.json();
-
-    // console.log(JSON.stringify(ratingOverview));
-
-      return res.json({productDetails, ratingOverview});
-
-  } catch (error) {
-    console.error('Error fetching data from backend:', error);
-      return res.status(error.status).json({ error: error.message });
-  }
 });
 
-router.get('/suggest/:name', async (req, res)=>{
-  try {
-    // console.log("suggest");
-    const queryParts = req.url.split("/");
-    const text = queryParts[2];
+router.get('/suggest/:name', async (req, res) => {
+    try {
+        // console.log("suggest");
+        const queryParts = req.url.split("/");
+        const text = queryParts[2];
 
-    const response = await fetch(`${Backend_Url}/product/suggest?name=${text}`);
+        const response = await fetch(`${Backend_Url}/product/suggest?name=${text}`);
 
-      if (!response.ok) {
-          return res.status(response.status).end();
-      }
-    const data = await response.json();
-      return res.status(response.status).json(data);
-  } catch (error) {
-    console.error('Suggest: Error fetching suggestions from backend:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-  }
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
+        const data = await response.json();
+
+        return res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Suggest: Error fetching suggestions from backend:', error);
+        return res.status(500).json({error: 'Internal Server Error'});
+    }
 });
 
-router.get(`/search`, async (req, res)=>{
-  // const queryParts = req.url.split("/");
-  // const searchText = queryParts[2];
-  // const page = queryParts[3];
-  // const sort = req.query.sort;
-  //
+router.get(`/search`, async (req, res) => {
 
     const {searchText, page, sort} = req.query;
 
-  // console.log("search");
-  try {
-    // console.log(`front end url: ${req.url}`);
-    // console.log(`fetch url: ${Backend_Url}/product/search?name=${searchText}&page=${page}`);
-    // const response = await fetch(`${Backend_Url}/product/search?name=${searchText}&page=${page}`);
+    // console.log("search");
+    try {
+        const params = new URLSearchParams({
+            name: searchText,
+            page: page.toString(),
+            sort: sort || ''
+        });
 
-      const params = new URLSearchParams({
-          name: searchText,
-          page: page.toString(),
-          sort: sort || ''
-      });
+        const url = new URL('/product/search', Backend_Url);
 
-      const url = new URL('/product/search', Backend_Url);
+        url.searchParams.set('name', searchText);
+        url.searchParams.set('page', page);
+        url.searchParams.set('sort', sort || '');
 
-      url.searchParams.set('name', searchText);
-      url.searchParams.set('page', page); // number is fine, URLSearchParams converts it
-      url.searchParams.set('sort', sort || '');
+        const response = await fetch(url.toString());
 
-      const response = await fetch(url.toString());
+        if (!response.ok) {
+            return res.status(response.status).end();
+        }
 
-      // const response = await fetch(`${Backend_Url}/product/search?${params.toString()}`);
-    // if (response.status === 404) {
-    //     return res.redirect('/404.html');
-    // }
-
-      if (!response.ok) {
-          return res.status(response.status).end();
-      }
-
-      const data = await response.json();
+        const data = await response.json();
         return res.json(data);
 
-  } catch (error) {
-    console.error('Search: Error fetching data:', error);
-      return res.status(500).json({ error: 'Failed to fetch data from the real server' });
-  }
+    } catch (error) {
+        console.error('Search: Error fetching data:', error);
+        return res.status(500).json({error: 'Failed to fetch data from the real server'});
+    }
 });
 
 router.get('/category-filter/:category/pg:page', async (req, res) => {
 
-  // console.log('filter search');
+    // console.log('filter search');
 
-  // Parse page (it's the number after 'p', e.g., '0' for first page)
-  const page = parseInt(req.params.page, 10);
-  if (isNaN(page)) {
-    return res.status(400).json({ error: 'Invalid page parameter' });
-  }
+    // Parse page (it's the number after 'p', e.g., '0' for first page)
+    const page = parseInt(req.params.page, 10);
+    if (isNaN(page)) {
+        return res.status(400).json({error: 'Invalid page parameter'});
+    }
 
-  // Parse category
-  const category = decodeURIComponent(req.params.category);
+    // Parse category
+    const category = decodeURIComponent(req.params.category);
 
-  // console.log('category', category);
+    // console.log('category', category);
 
-  const {filters={}, sort} = req.query;
+    const {filters = {}, sort} = req.query;
 
-  // console.log("sort for filters: " + sort);
+    // console.log("sort for filters: " + sort);
 
-  // console.log("filters: "+JSON.stringify(filters));
+    // console.log("filters: "+JSON.stringify(filters));
 
-  let minPrice = 0;
-  let maxPrice = Infinity;  // Or some default max
+    let minPrice = 0;
+    let maxPrice = Infinity;  // Or some default max
 
 
-  if (filters.pr) {
+    if (filters.pr) {
 
-    // console.log(filters.pr);
+        // console.log(filters.pr);
 
-    const priceRange = filters.pr.split('-');
-    minPrice = parseInt(priceRange[0], 10) || 0;
-    maxPrice = parseInt(priceRange[1], 10) || Infinity;
-    // console.log( "PR: " + priceRange );
-  }
+        const priceRange = filters.pr.split('-');
+        minPrice = parseInt(priceRange[0], 10) || 0;
+        maxPrice = parseInt(priceRange[1], 10) || Infinity;
+        // console.log( "PR: " + priceRange );
+    }
 
-  // console.log("price range:" + minPrice +" - "+ maxPrice);
+    // console.log("price range:" + minPrice +" - "+ maxPrice);
 
     let manufacturers = [];
 
@@ -250,54 +235,54 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         }
     }
 
-  // console.log(manufacturers);
+    // console.log(manufacturers);
 
-  const rating = filters.r ? filters.r: null;  // Assuming ratings are numbers
+    const rating = filters.r ? filters.r : null;  // Assuming ratings are numbers
 
-  // console.log("ratings: "+ ratings);
+    // console.log("ratings: "+ ratings);
 
-  const attributes = {};
-  Object.keys(filters).forEach(key => {
-    if (key.startsWith('a')) {
-      const nameId = key.slice(1);  // e.g., '1' for 'a1'
-      attributes[nameId] = filters[key].split(',').map(decodeURIComponent);
-    }
-  });
-
-  // console.log("attributes: " + JSON.stringify(attributes));
-
-  // Construct request body for backend (adjust keys as needed for your backend API)
-  const requestBody = {
-    filter_attributes: attributes,
-    product_category: category,
-    price_lowest: minPrice,
-    price_highest: maxPrice,
-    manufacturer_names: manufacturers,
-    rating: rating,
-    sort:sort
-  };
-
-  // console.log("request body: " + JSON.stringify(requestBody));
-
-  try {
-    const response = await fetch(`${Backend_Url}/product/filter/${page}`, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: { 'Content-Type': 'application/json' }
+    const attributes = {};
+    Object.keys(filters).forEach(key => {
+        if (key.startsWith('a')) {
+            const nameId = key.slice(1);  // e.g., '1' for 'a1'
+            attributes[nameId] = filters[key].split(',').map(decodeURIComponent);
+        }
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.error(`Product filter error: ${response.status} - ${text}`);
-      return res.status(response.status).json({ error: 'Error from backend' });
-    }
+    // console.log("attributes: " + JSON.stringify(attributes));
 
-    const responseData = await response.json();
-      return res.status(200).json(responseData);
-  } catch (error) {
-    console.error('Proxy error:', error);
-      return res.status(502).json({ error: 'Invalid response from backend' });
-  }
+    // Construct request body for backend (adjust keys as needed for your backend API)
+    const requestBody = {
+        filter_attributes: attributes,
+        product_category: category,
+        price_lowest: minPrice,
+        price_highest: maxPrice,
+        manufacturer_names: manufacturers,
+        rating: rating,
+        sort: sort
+    };
+
+    // console.log("request body: " + JSON.stringify(requestBody));
+
+    try {
+        const response = await fetch(`${Backend_Url}/product/filter/${page}`, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {'Content-Type': 'application/json'}
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            console.error(`Product filter error: ${response.status} - ${text}`);
+            return res.status(response.status).json({error: 'Error from backend'});
+        }
+
+        const responseData = await response.json();
+        return res.status(200).json(responseData);
+    } catch (error) {
+        console.error('Proxy error:', error);
+        return res.status(502).json({error: 'Invalid response from backend'});
+    }
 });
 
 router.post('/getPagedReviews', async (req, res) => {
@@ -324,15 +309,18 @@ router.post('/getPagedReviews', async (req, res) => {
                     page,
                     sort_order: sort,
                     verified_only: verifiedOnly,
-                    rating_value: ratingValue }),
-                headers: { 'Content-Type': 'application/json' ,
-                    'Authorization': 'Bearer ' + accessToken}
+                    rating_value: ratingValue
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
+                }
             });
 
         if (!response.ok) {
             const text = response.text();
             console.error(`Review fetch error: ${response.status} - ${text}`);
-            return res.status(response.status).json({ error: 'Error from backend' });
+            return res.status(response.status).json({error: 'Error from backend'});
         }
 
         const responseData = await response.json();
@@ -340,8 +328,7 @@ router.post('/getPagedReviews', async (req, res) => {
         // console.log(responseData);
 
         return res.status(response.status).json(responseData);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Reviews: Error fetching data: ', error);
         return res.status(500).json({error: 'Internal server error'});
     }
@@ -357,8 +344,9 @@ router.get(`/getReview/:productCode`, async (req, res) => {
         const response = await fetch(`${Backend_Url}/product/review/specific?productCode=${productCode}`,
             {
                 method: 'GET',
-                headers: { 'Content-Type': 'application/json' ,
-                'Authorization': 'Bearer ' + accessToken
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
                 }
             });
 
@@ -368,9 +356,8 @@ router.get(`/getReview/:productCode`, async (req, res) => {
         }
         const responseData = await response.json();
         // console.log("STATUS: " + response.status + " DATA: " + JSON.stringify(responseData));
-       return res.status(response.status).json(responseData);
-    }
-    catch (error) {
+        return res.status(response.status).json(responseData);
+    } catch (error) {
         console.error('Reviews: Error fetching specific review data: ', error);
         return res.status(500).json({error: 'Internal server error'});
     }
@@ -389,12 +376,15 @@ router.post(`/addReview`, async (req, res) => {
         const response = await fetch(`${Backend_Url}/product/review/add`,
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' ,
-                'Authorization': 'Bearer ' + accessToken},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
+                },
                 body: JSON.stringify({
                     product_code: productCode,
                     rating: rating,
-                    review_text: reviewText}),
+                    review_text: reviewText
+                }),
             }
         )
 
@@ -402,8 +392,7 @@ router.post(`/addReview`, async (req, res) => {
             return res.status(response.status).end();
         }
 
-        if (response.status === 207)
-        {
+        if (response.status === 207) {
             const responseData = await response.json();
             // console.log(responseData);
             return res.status(response.status).json(responseData);
@@ -411,8 +400,7 @@ router.post(`/addReview`, async (req, res) => {
 
 
         return res.status(response.status).json(response.statusText);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error creating/updating the review ', error);
         return res.status(500).json({error: 'Internal server error'});
     }
@@ -426,33 +414,33 @@ router.post(`/updateReview`, async (req, res) => {
 
     // console.log( "INSIDE UPDATE REVIEW: " + "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
 
-    try{
+    try {
         const response = await fetch(Backend_Url + "/product/review/update",
             {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' ,
-                'Authorization': 'Bearer ' + accessToken},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
+                },
                 body: JSON.stringify({
                     product_code: productCode,
                     rating: rating,
-                    review_text: reviewText}),
+                    review_text: reviewText
+                }),
             })
 
         if (!response.ok) {
             return res.status(response.status).end();
         }
 
-        if (response.status === 207)
-        {
+        if (response.status === 207) {
             const responseData = await response.json();
             // console.log(responseData);
             return res.status(response.status).json(responseData);
         }
 
         return res.status(response.status).json(response.statusText);
-    }
-
-    catch (error) {
+    } catch (error) {
         console.error('Error updating the review ', error);
         return res.status(500).json({error: 'Internal server error'});
     }
@@ -466,12 +454,14 @@ router.post(`/deleteReview`, async (req, res) => {
     // console.log( "INSIDE DELETE REVIEW: " + "Product: " + productCode + " Customer: " + customerId)
 
 
-    try{
+    try {
         const response = await fetch(`${Backend_Url}/product/review/delete?product_code=${productCode}`,
             {
                 method: 'DELETE',
-                headers: {'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken}
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
+                }
             })
 
         if (!response.ok) {
@@ -479,8 +469,7 @@ router.post(`/deleteReview`, async (req, res) => {
         }
 
         return res.status(response.status).json(response.statusText);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error deleting the review ', error);
         return res.status(500).json({error: 'Internal server error'});
     }
