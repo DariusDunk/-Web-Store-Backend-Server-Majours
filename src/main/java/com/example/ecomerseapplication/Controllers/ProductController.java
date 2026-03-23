@@ -66,12 +66,12 @@ public class ProductController {
                 from(productService.findAllByRatingResponsePage(pageRequest))
         );
     }
-    
+
     @GetMapping("search")
     public ResponseEntity<PageResponse<CompactProductResponse>> findByNameLike(@RequestParam @NotBlank String name,
                                                                                @NotNull @RequestParam int page,
                                                                                @RequestParam(required = false, name = "sort") String sortOrder
-                                                                               ) {
+    ) {
 
         if (sortOrder == null || sortOrder.isBlank() || !ProductSortType.isValid(sortOrder)) {
             sortOrder = ProductSortType.RELEVANCE.getValue();
@@ -82,12 +82,11 @@ public class ProductController {
 
         System.out.println("name: " + name + " sort: " + sortOrder + " page: " + page);
 
-        if (sortOrder==null || sortOrder.equals(ProductSortType.RELEVANCE.getValue())) {
+        if (sortOrder == null || sortOrder.equals(ProductSortType.RELEVANCE.getValue())) {
             pageRequest = PageRequest.of(page, PageContentLimit.limit);
 //            productService.testRelevance(name);
             responsePages = productService.getProductsByRelevance(pageRequest, name);
-        }
-        else {
+        } else {
             pageRequest = PageRequest.of(page, PageContentLimit.limit);
             responsePages = productService.getProductsLikeNameSort(pageRequest, name, sortOrder);
         }
@@ -100,7 +99,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.getNameSuggestions(name));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    //    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {
@@ -109,15 +108,8 @@ public class ProductController {
 
         Customer customer = customerService.getById(id);
 
-        ResponseEntity<DetailedProductResponse> detailedProductResponse = productService
-                .getByNameAndCode(productCode, customer);
-
-        assert detailedProductResponse.getBody() != null;
-
-        return Objects.requireNonNullElseGet(detailedProductResponse, () -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productService.getByNameAndCode(productCode, customer));
     }
-
-
 
     @GetMapping("{productCode}/review/overview")
     public ResponseEntity<?> getReviewsOverview(@PathVariable String productCode) {
@@ -132,9 +124,9 @@ public class ProductController {
 
 //        System.out.println("Chosen sort: " + ((sortOrder!=null&&!sortOrder.isBlank())? sortOrder: "none") );
 
-        Sort sort = (sortOrder!=null&&!sortOrder.isBlank())
-                ?SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
-                :SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+        Sort sort = (sortOrder != null && !sortOrder.isBlank())
+                ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
+                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
         Manufacturer manufacturer = manufacturerService.findByName(manufacturerName);
@@ -157,9 +149,9 @@ public class ProductController {
 
 //        System.out.println("Chosen sort: " + ((sortOrder!=null&&!sortOrder.isBlank())? sortOrder: "none") );
 
-        Sort sort = (sortOrder!=null&&!sortOrder.isBlank())
-                ?SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
-                :SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+        Sort sort = (sortOrder != null && !sortOrder.isBlank())
+                ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
+                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
 
@@ -181,9 +173,9 @@ public class ProductController {
 
 //        System.out.println("Request body: " + productFilterRequest);
 
-        Sort sort = (productFilterRequest.sortOrder!=null&&!productFilterRequest.sortOrder.isBlank())
-                ?SortHelper.buildProdSort(ProductSortType.valueOf(productFilterRequest.sortOrder.toUpperCase()).getValue())
-                :SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+        Sort sort = (productFilterRequest.sortOrder != null && !productFilterRequest.sortOrder.isBlank())
+                ? SortHelper.buildProdSort(ProductSortType.valueOf(productFilterRequest.sortOrder.toUpperCase()).getValue())
+                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
 
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
@@ -245,15 +237,13 @@ public class ProductController {
         Review review = reviewService.getByUIDAndPCode(productCode, customerId);
 
 //        System.out.println("REVIEW: " + review.getId() );
-        if (review!=null)
-        {
+        if (review != null) {
             if (review.getIsDeleted()) {
                 return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
                         "Не може да се добавят повече ревюта",
                         HttpStatus.FORBIDDEN.value(),
                         "Не можете да добавяте повече ревюта за този продукт"));
-            }
-            else {
+            } else {
 
                 if (isUpdateTimeOver(review))
                     return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
@@ -267,7 +257,7 @@ public class ProductController {
             }
         }
 
-       return ResponseEntity.ok(new ReviewContentResponse("" , null, false));
+        return ResponseEntity.ok(new ReviewContentResponse("", null, false));
 
     }
 
@@ -279,7 +269,7 @@ public class ProductController {
 
         String userId = userIdExtractor.getUserId();
 
-        ResponseEntity<?> validationResponse = reviewService.requestValidation(request.rating(),request.reviewText());
+        ResponseEntity<?> validationResponse = reviewService.requestValidation(request.rating(), request.reviewText());
 
         if (validationResponse != null)
             return validationResponse;
@@ -386,11 +376,9 @@ public class ProductController {
 //        product.setRating(newRating);
 //        product.getReviews().remove(review);
 //        productService.save(product); todo tova moje da se sloji za drug method, moje bi adminski, koito specialno iztriva review-ta ZADULJITELNO SLOJI UPDATE NA POLETO ZA BROI NA REVIEW-TATA KATO SE IZTRIE OKON4ATELNO REVIEW ZA PRODUKTA!!!
-        try
-        {
+        try {
             reviewService.softDelete(review);
-        }catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Error soft deleting review: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

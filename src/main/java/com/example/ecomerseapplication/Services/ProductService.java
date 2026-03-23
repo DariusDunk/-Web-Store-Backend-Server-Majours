@@ -6,6 +6,7 @@ import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
 import com.example.ecomerseapplication.Specifications.ProductSpecifications;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.NonNull;
@@ -13,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -282,7 +281,7 @@ public class ProductService {
         return productRepository.getNameSuggestions(name);
     }
 
-    public ResponseEntity<DetailedProductResponse> getByNameAndCode(String productCode, Customer customer) {
+    public DetailedProductResponse getByNameAndCode(String productCode, Customer customer) {
         Product product = findByPCode(productCode);
 
         List<AttributeName> attributeNames = new ArrayList<>();
@@ -304,7 +303,7 @@ public class ProductService {
         if (reviewService.exists(product, customer))
             detailedProductResponse.reviewed = true;
 
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(detailedProductResponse);
+        return detailedProductResponse;
     }
 
     public Page<CompactProductResponse> getByManufacturer(Manufacturer manufacturer, Pageable pageable) {
@@ -358,7 +357,7 @@ public class ProductService {
     }
 
     public Product findByPCode(String code) {
-        return productRepository.getByProductCode(code).orElseThrow(() -> new ResourceNotFoundException("Product not found with code: " + code));
+        return productRepository.getByProductCode(code).orElseThrow(() -> new EntityNotFoundException("Product not found with code: " + code));
     }
 
     public void save(Product product) {
