@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
+const {safeJson} = require("../safeJsonFunc");
 
 
 router.get('/featured/:page', async (req, res) => {
@@ -351,10 +352,8 @@ router.get(`/getReview/:productCode`, async (req, res) => {
             });
 
         // console.log("STATUS: " + response.status);
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-        const responseData = await response.json();
+
+        const responseData = await safeJson(response);
         // console.log("STATUS: " + response.status + " DATA: " + JSON.stringify(responseData));
         return res.status(response.status).json(responseData);
     } catch (error) {

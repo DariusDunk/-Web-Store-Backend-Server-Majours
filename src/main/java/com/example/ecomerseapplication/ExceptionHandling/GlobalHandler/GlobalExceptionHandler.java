@@ -125,4 +125,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity.notFound().build();
     }
+
+
+    @ExceptionHandler(ReviewSoftDeletedException.class)
+    public ResponseEntity<?> handleReviewSoftDeleteExceptions() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
+                "Не може да се добавят повече ревюта",
+                HttpStatus.FORBIDDEN.value(),
+                "Не можете да добавяте повече ревюта за този продукт"));
+    }
+
+    @ExceptionHandler(PostOrUpdateReviewForbiddenException.class)
+    public ResponseEntity<?> handlePostOrUpdateReviewForbiddenExceptions() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
+                "Не може да се добавят повече ревюта",
+                HttpStatus.FORBIDDEN.value(),
+                "Вече сте добавили ревю за този продукт. Срокът за редакция е изтекъл и не могат да се правят промени."));
+    }
 }

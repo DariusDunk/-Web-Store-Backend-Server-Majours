@@ -4,6 +4,8 @@ import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PostOrUpdateReviewForbiddenException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.ReviewSoftDeletedException;
 import com.example.ecomerseapplication.Mappers.ReviewMapper;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorMessage;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
@@ -116,7 +118,6 @@ public class ProductController {
         return ResponseEntity.ok(reviewService.getRatingOverview(productCode));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("manufacturer/{manufacturerName}/p{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productsByManufacturer(@PathVariable String manufacturerName,
                                                                                        @PathVariable int page,
@@ -138,7 +139,6 @@ public class ProductController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("category/{name}/p{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> getProductsByCategory(@PathVariable String name,
                                                                                       @PathVariable int page,
@@ -162,16 +162,9 @@ public class ProductController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("filter/{page}")
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody @Valid ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
-
-//                System.out.println("Chosen sort: " + ((productFilterRequest.sortOrder!=null&&!productFilterRequest.sortOrder.isBlank())
-//                        ?productFilterRequest.sortOrder
-//                        :"none, applying default popularity sort...") );
-
-//        System.out.println("Request body: " + productFilterRequest);
 
         Sort sort = (productFilterRequest.sortOrder != null && !productFilterRequest.sortOrder.isBlank())
                 ? SortHelper.buildProdSort(ProductSortType.valueOf(productFilterRequest.sortOrder.toUpperCase()).getValue())
@@ -229,7 +222,7 @@ public class ProductController {
 
     @GetMapping("review/specific")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> getSpecificReviewData(@RequestParam("productCode") @NotBlank String productCode) {
+    public ResponseEntity<?> getSpecificReviewData(@RequestParam("productCode") @NotBlank String productCode) {//todo produlji custom exception rabotata ot tuk
 
 //        System.out.println("IUD " + userId + " PCODE " + productCode);
         String customerId = userIdExtractor.getUserId();
@@ -239,17 +232,10 @@ public class ProductController {
 //        System.out.println("REVIEW: " + review.getId() );
         if (review != null) {
             if (review.getIsDeleted()) {
-                return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
-                        "Не може да се добавят повече ревюта",
-                        HttpStatus.FORBIDDEN.value(),
-                        "Не можете да добавяте повече ревюта за този продукт"));
+                throw new ReviewSoftDeletedException("Review is soft deleted");
             } else {
-
                 if (isUpdateTimeOver(review))
-                    return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
-                            "Не може да се добавят повече ревюта",
-                            HttpStatus.FORBIDDEN.value(),
-                            "Вече сте добавили ревю за този продукт. Срокът за редакция е изтекъл и не могат да се правят промени."));
+                    throw new PostOrUpdateReviewForbiddenException("This user cannot post a new review for this product, or update the existing one");
 
                 ReviewContentResponse response = ReviewMapper.entToContentResponse(review);
                 return ResponseEntity.ok(response);
