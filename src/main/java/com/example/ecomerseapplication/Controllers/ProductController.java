@@ -239,36 +239,28 @@ public class ProductController {
 
                 ReviewContentResponse response = ReviewMapper.entToContentResponse(review);
                 return ResponseEntity.ok(response);
-
             }
         }
 
         return ResponseEntity.ok(new ReviewContentResponse("", null, false));
-
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("review/add")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addReview(@RequestBody @Valid ReviewCreateRequest request) {
 
+        reviewService.requestValidation(request.rating(), request.reviewText());
+
         String userId = userIdExtractor.getUserId();
-
-        ResponseEntity<?> validationResponse = reviewService.requestValidation(request.rating(), request.reviewText());
-
-        if (validationResponse != null)
-            return validationResponse;
-
         Customer customer = customerService.getById(userId);
-
         Product product = productService.findByPCode(request.productCode());
 
         if (reviewService.exists(product, customer)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
-                    "Request canceled",
+                    "Заявката е отказана",
                     HttpStatus.CONFLICT.value(),
-                    ErrorMessage.REVIEW_EXISTS));
+                    "Вече имате ревю за този продукт"));
         }
 
         Boolean isVerifiedCustomer = purchaseCartService.isProductPurchased(product.getProductCode(), customer.getKeycloakId());
@@ -286,10 +278,7 @@ public class ProductController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> updateReview(@RequestBody @Valid ReviewUpdateRequest request) {
 
-        ResponseEntity<?> validationResponse = reviewService.requestValidation(request.rating, request.reviewText);
-
-        if (validationResponse != null)
-            return validationResponse;
+        reviewService.requestValidation(request.rating, request.reviewText);
 
         String customerId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(customerId);
@@ -297,12 +286,11 @@ public class ProductController {
         Review review = reviewService.getByProdAndCust(product, customer);
 
         if (review.getIsDeleted()) {
-            System.out.println("Deleted review");
             return ResponseEntity.notFound().build();
         }
 
         if (isUpdateTimeOver(review))
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ErrorType.RESOURCE_ALREADY_EXISTS,
                     "Не може да се добавят повече ревюта",
                     HttpStatus.FORBIDDEN.value(),
                     "Вече сте добавили ревю за този продукт. Срокът за редакция е изтекъл и не могат да се правят промени."));

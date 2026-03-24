@@ -428,17 +428,9 @@ router.post(`/updateReview`, async (req, res) => {
                 }),
             })
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
+        const responseData = await safeJson(response);
 
-        if (response.status === 207) {
-            const responseData = await response.json();
-            // console.log(responseData);
-            return res.status(response.status).json(responseData);
-        }
-
-        return res.status(response.status).json(response.statusText);
+        return res.status(response.status).json(responseData);
     } catch (error) {
         console.error('Error updating the review ', error);
         return res.status(500).json({error: 'Internal server error'});

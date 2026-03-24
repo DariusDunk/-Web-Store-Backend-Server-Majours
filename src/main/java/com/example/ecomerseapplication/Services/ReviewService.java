@@ -1,23 +1,20 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.requests.ReviewCreateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ReviewSortRequest;
-import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse;
 import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Review;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.IncorrectRatingException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.ReviewTextLimitReachedException;
 import com.example.ecomerseapplication.Repositories.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,29 +57,14 @@ public class ReviewService {
         return reviewRepository.getReviewByCustomer_KeycloakIdAndProduct_ProductCode(customerId, productCode).orElse(null);
     }
 
-    @Nullable
-    public ResponseEntity<?> requestValidation(Short rating, String reviewText) {
+    public void requestValidation(Short rating, String reviewText) {
         if (rating > 5 || rating < 1) {
-            System.out.println("INCORRECT RATING");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
+            throw new IncorrectRatingException("Incorrect rating for review: '" + rating + "'");
         }
 
         if (reviewText.length() > 500) {
-            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
-                    "Надвишен лимит",
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Размера на коментара надвишава максималният размер"));
+            throw new ReviewTextLimitReachedException("Review text exceeds the limit of 500 characters");
         }
-
-//        if (profanityService.containsProfanity(reviewText))
-//        {
-////            System.out.println("Нецензорни думи");
-//            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
-//                    "Засечен нецензурен език",
-//                    HttpStatus.BAD_REQUEST.value(),
-//                    "Засечен нецензурен език, ревюто отказано!"));
-//        }
-        return null;
     }
 
     @Transactional

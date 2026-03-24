@@ -142,4 +142,17 @@ public class GlobalExceptionHandler {
                 HttpStatus.FORBIDDEN.value(),
                 "Вече сте добавили ревю за този продукт. Срокът за редакция е изтекъл и не могат да се правят промени."));
     }
+
+    @ExceptionHandler(IncorrectRatingException.class)
+    public ResponseEntity<?> handleIncorrectRatingException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Само стойности от 1-5 са позволени!");
+    }
+
+    @ExceptionHandler(ReviewTextLimitReachedException.class)
+    public ResponseEntity<?> handleReviewTextLimitReachedExceptions() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ErrorType.SIZE_LIMIT_REACHED,
+                "Надвишен лимит",
+                HttpStatus.BAD_REQUEST.value(),
+                "Размера на коментара надвишава максималният размер"));
+    }
 }
