@@ -64,7 +64,9 @@ public class ProductController {
 
     @GetMapping("findall")
     public ResponseEntity<PageResponse<CompactProductResponse>> findAll(@RequestParam @NotNull int page) {
-        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
+
+        Sort sort = SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
 
         return ResponseEntity.ok(PageResponse.
                 from(productService.findAllByRatingResponsePage(pageRequest))
@@ -299,9 +301,9 @@ public class ProductController {
         Product updatedProduct = reviewService.updateReview(review, request, product);//todo po4i cqlata logika po update-a trqbva da e tuk
 
         if (updatedProduct == null) {
-            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
                     "Не бе извършена промяна",
-                    HttpStatus.NOT_MODIFIED.value(),
+                    HttpStatus.BAD_REQUEST.value(),
                     ErrorMessage.DUPLICATION_OF_REVIEW_DATA));
         }
 
@@ -317,12 +319,7 @@ public class ProductController {
     }
 
     private boolean isUpdateTimeOver(Review review) {
-//        ZoneId zone = ZoneId.of("Europe/Sofia");
-//
-//        ZonedDateTime postTimeInZone = review.getPostTimestamp().atZone(ZoneId.systemDefault())
-//                .withZoneSameInstant(zone);
         Instant now = Instant.now();
-
         Instant deadline = review.getPostTimestamp().plus(24, ChronoUnit.HOURS);
 
         return now.isAfter(deadline);
@@ -330,7 +327,7 @@ public class ProductController {
 
     @DeleteMapping("review/delete")
     @Transactional
-    public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
+    public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {// TODO prodylji ot tuk
 
         String customerId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(customerId);
@@ -356,5 +353,11 @@ public class ProductController {
         }
 
         return ResponseEntity.ok().body("Ревюто е изтрито");
+    }
+
+    @GetMapping("/rating/{productCode}")
+    public ResponseEntity<Short> getProductRating(@PathVariable String productCode) {
+        Product product = productService.findByPCode(productCode);
+        return ResponseEntity.ok(product.getRating());
     }
 }

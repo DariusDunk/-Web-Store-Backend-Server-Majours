@@ -32,8 +32,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
             "p.rating, SIZE(p.reviews), " +
             "p.mainImageUrl,  " +
             "case when p.quantityInStock>0 then true else false end) " +
-            "from Product p " +
-            "order by p.rating desc ")
+            "from Product p ")
     Page<CompactProductResponse> findAllAsResponseSortByRating(Pageable pageable);
 
 
