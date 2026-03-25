@@ -29,9 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Validated
@@ -272,7 +274,6 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Ревюто е качено!");
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PatchMapping("review/update")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
@@ -316,20 +317,17 @@ public class ProductController {
     }
 
     private boolean isUpdateTimeOver(Review review) {
-        ZoneId zone = ZoneId.of("Europe/Sofia");
+//        ZoneId zone = ZoneId.of("Europe/Sofia");
+//
+//        ZonedDateTime postTimeInZone = review.getPostTimestamp().atZone(ZoneId.systemDefault())
+//                .withZoneSameInstant(zone);
+        Instant now = Instant.now();
 
-        ZonedDateTime postTimeInZone = review.getPostTimestamp().atZone(ZoneId.systemDefault())
-                .withZoneSameInstant(zone);
+        Instant deadline = review.getPostTimestamp().plus(24, ChronoUnit.HOURS);
 
-        LocalDate todayInZone = LocalDate.now(zone);
-
-        boolean isUpdatePossible =
-                postTimeInZone.toLocalDate().isEqual(todayInZone);
-
-        return !isUpdatePossible;
+        return now.isAfter(deadline);
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @DeleteMapping("review/delete")
     @Transactional
     public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
