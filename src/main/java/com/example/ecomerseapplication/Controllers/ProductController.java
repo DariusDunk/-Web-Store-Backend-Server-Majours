@@ -30,9 +30,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -327,7 +324,7 @@ public class ProductController {
 
     @DeleteMapping("review/delete")
     @Transactional
-    public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {// TODO prodylji ot tuk
+    public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
 
         String customerId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(customerId);
@@ -353,11 +350,5 @@ public class ProductController {
         }
 
         return ResponseEntity.ok().body("Ревюто е изтрито");
-    }
-
-    @GetMapping("/rating/{productCode}")
-    public ResponseEntity<Short> getProductRating(@PathVariable String productCode) {
-        Product product = productService.findByPCode(productCode);
-        return ResponseEntity.ok(product.getRating());
     }
 }
