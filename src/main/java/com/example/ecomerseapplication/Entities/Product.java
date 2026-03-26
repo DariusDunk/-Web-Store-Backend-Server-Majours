@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
@@ -20,7 +21,8 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "product_name", columnDefinition = "character varying(100)")
+    @Size(max = 500, message = "Product name exceeds the 500 characters limit")
+    @Column(name = "product_name")
     private String productName;
 
     @JoinColumn(name = "product_category_id")

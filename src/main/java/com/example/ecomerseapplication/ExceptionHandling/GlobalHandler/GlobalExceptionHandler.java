@@ -3,11 +3,12 @@ package com.example.ecomerseapplication.ExceptionHandling.GlobalHandler;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.*;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -40,7 +41,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RegistrationFailedException.class)
-    public ResponseEntity<ErrorResponse> handleAllExceptions(RegistrationFailedException ex) {
+    public ResponseEntity<ErrorResponse> handleRegistrationFailedExceptions() {
 
         ErrorResponse errorResponse = new ErrorResponse(ErrorType.REGISTRATION_FAILED,
                 "Неуспешна регистрация",
@@ -122,7 +123,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex) {
+    public ResponseEntity<?> handleEntityNotFoundExceptions() {
         return ResponseEntity.notFound().build();
     }
 
@@ -154,5 +155,18 @@ public class GlobalExceptionHandler {
                 "Надвишен лимит",
                 HttpStatus.BAD_REQUEST.value(),
                 "Размера на коментара надвишава максималният размер"));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleMethodArgumentNotValidExceptions() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolationExceptions() {
+
+        System.out.println("--------------------Entity or Database constraint violation-----------------");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 }
