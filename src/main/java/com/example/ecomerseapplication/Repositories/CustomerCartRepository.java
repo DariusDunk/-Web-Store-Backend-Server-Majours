@@ -54,7 +54,13 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
                     from CustomerCart cc
                     join Product p on p = cc.customerCartId.product
                     where cc.customerCartId.customer.keycloakId =:keycloakId
-                    order by cc.dateAdded desc
+                    order by
+                    case
+                        when cc.customerCartId.product.quantityInStock>0
+                        then 1
+                        else 0
+                    end desc,
+                    cc.dateAdded desc
                     """
     )
     List<CartItemResponse> findDtoByCustomer(@Param("keycloakId") String customer);
