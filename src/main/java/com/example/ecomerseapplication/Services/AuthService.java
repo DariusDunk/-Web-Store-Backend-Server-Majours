@@ -45,36 +45,49 @@ public class AuthService {
         KeycloakTokenResponse tokenResponse = keycloakService.loginUser(request); //todo tova sled kato vsi4ko sys sesiite e setupnato
         String userId = extractIdFromToken(tokenResponse.accessToken());
         Customer customer = customerService.getById(userId);
-        ClientType clientType = clientTypeService.getByTypeName("web");//todo smeni
-        Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType);
+        ClientType clientType = clientTypeService.getByTypeName("web");//todo smeni ot zaqvkata
+        Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType, false);// todo remember me go vzemi ot zaqvkata
 
         return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
     }
 
     @Transactional
     public void logout(String refreshToken, Session session) {
-        sessionService.logout(session);
+        sessionService.revokeSession(session);
 
         keycloakService.invalidateRefreshToken(refreshToken);
     }
 
     @Transactional
-    public void refresh(String refreshToken, Session session, boolean rememberMe) {//todo tuk da se vry6ta DTO Response sys tokenite i sesiqta
+    public TokenRefreshResponse refresh(String refreshToken, Session session) {//todo tuk da se vry6ta DTO Response sys tokenite i sesiqta
 //todo tova sled kato vsi4ko sys sesiite e setupnato
         if (session.getIsRevoked()|| session.isExpired())
             throw new InvalidSessionException("Session is revoked or expired");
 
         try {
             TokenRefreshResponse tokenRefreshResponse = keycloakService.refreshBothTokens(refreshToken);
-            Instant newTTL = rememberMe
+            Instant newTTL = session.isRememberMeSession()
                     ?Instant.now().plus(tokenRefreshResponse.expiresIn(), ChronoUnit.SECONDS)
                     :Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS);
             session.setExpiresAt(newTTL);
+
+            return tokenRefreshResponse;
         }
         catch (Exception e)
         {
             throw new InvalidSessionException("Session/token refresh failed: "+ e.getMessage());
         }
     }
+
+//    @Transactional
+//    public TokenRefreshResponse tokensOfSession(String sessionId) {
+//
+//        Session session = sessionService.getById(sessionId);
+//
+//        if (session.getIsRevoked()|| session.isExpired())
+//            throw new InvalidSessionException("Session is revoked or expired");
+//
+//        return refresh(session.getRefreshToken(), session);
+//    }
 
 }

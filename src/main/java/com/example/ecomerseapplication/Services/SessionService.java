@@ -8,7 +8,6 @@ import com.example.ecomerseapplication.Repositories.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -27,7 +26,7 @@ public class SessionService {
         this.keycloakService = keycloakService;
     }
 
-    public Session createSession(String refreshToken, Customer customer, ClientType clientType) {
+    public Session createSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe) {
         Session session = new Session();
 
         session.setSessionId(generateSessionId());
@@ -40,6 +39,8 @@ public class SessionService {
         session.setIsGuest(false);// TODO tova 6te se promeni v byde6te
         session.setIsRevoked(false);
 //        session.setClientType(clientType); TODO tova trqbva da go napravi6 sled kato nastroi6 BFF-a
+        session.setRememberMeSession(rememberMe);
+
 
        return sessionRepository.save(session); //todo tova sled kato vi4ko e setupnato
 
@@ -53,7 +54,7 @@ public class SessionService {
     }
 
 //    @Transactional
-    public void logout(Session session) {
+    public void revokeSession(Session session) {
         session.setIsRevoked(true);
         sessionRepository.save(session);
     }

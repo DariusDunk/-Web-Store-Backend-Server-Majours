@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
-const {safeJson} = require('../safeJsonFunc.js');
+const {safeJson} = require('../services/safeJsonFunc.js');
 
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
-const {safeJson} = require("../safeJsonFunc");
+const {safeJson} = require("../services/safeJsonFunc.js");
 
 
 router.get('/featured/:page', async (req, res) => {

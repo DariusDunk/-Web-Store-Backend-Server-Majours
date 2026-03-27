@@ -55,5 +55,8 @@ public class Session {
 
     private boolean isExpired = Instant.now().isAfter(expiresAt);
 
+    @Column(name = "is_remember_me_session")
+    private boolean isRememberMeSession;
+
     //todo v byde6te i za location 6te ima ne6to
 }

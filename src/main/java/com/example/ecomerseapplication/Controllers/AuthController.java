@@ -2,11 +2,8 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
-import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
-import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
-import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
-import com.example.ecomerseapplication.Mappers.LoginResponseMapper;
+import com.example.ecomerseapplication.Services.AuthService;
 import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.Services.SessionService;
@@ -30,19 +27,33 @@ public class AuthController {
     private final KeycloakService keycloakService;
     private final SessionService sessionService;
     private final CustomerService customerService;
+    private final AuthService authService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService, SessionService sessionService, CustomerService customerService) {
+    public AuthController(KeycloakService keycloakService, SessionService sessionService, CustomerService customerService, AuthService authService) {
         this.keycloakService = keycloakService;
         this.sessionService = sessionService;
         this.customerService = customerService;
+        this.authService = authService;
     }
 
-    @GetMapping("refresh/{token}")
-    public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken) {
+    @GetMapping("refresh/{token}"
+//                        +"/{sessionId}"
+    )
+    public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
+//                                               , @PathVariable("sessionId") String sessionId,
+//                                           @RequestParam("rememberMe") boolean rememberMe
+    ) {
 
         try {
+
             return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshToken));
+
+            //todo tova sled kato vsi4ko sys sesiite e setupnato
+
+//            Session session = sessionService.getById(sessionId);
+//
+//            return ResponseEntity.ok(authService.refresh(refreshToken,session,rememberMe));
         } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -104,6 +115,13 @@ public class AuthController {
             System.out.println("Error invalidating token or session: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
 
+    @GetMapping("tokens/{sessionId}")
+    public ResponseEntity<?> getTokensOfSession(@PathVariable String sessionId) {
+
+        Session session = sessionService.getById(sessionId);
+
+        return ResponseEntity.ok(authService.refresh(session.getRefreshToken(), session));
     }
 }
