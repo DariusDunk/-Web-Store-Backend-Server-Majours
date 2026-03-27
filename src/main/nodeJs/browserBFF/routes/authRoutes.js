@@ -63,6 +63,9 @@ router.post(`/login`, async (req, res) => {
     const responseData = await response.json();
     const { access_token, refresh_token, expires_in, refresh_expires_in } = responseData;//TODO tuk zameni refresh_token sys session_id
 
+    // console.log("TTL for access token: " + expires_in + " seconds(?)");
+    // console.log("TTL for refresh token: " + refresh_expires_in + " seconds(?)");
+
     // console.log("Node response: " + JSON.stringify(responseData))
 
     res.cookie('access_token', access_token,

@@ -3,12 +3,19 @@ package com.example.ecomerseapplication.DTOs.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record LoginResponse(
-        @JsonProperty("username")
-        String username,
-        @JsonProperty("role")
-        String role,
-        @JsonProperty("TokenResponse")
-        KeycloakTokenResponse keycloakTokenResponse,
-        Long userId
-) {
+        @JsonProperty("access_token")
+        String accessToken,
+        @JsonProperty("expires_in")
+        int expiresIn,
+        @JsonProperty("refresh_expires_in")
+        int refreshExpiresIn,
+        @JsonProperty("refresh_token")
+        String refreshToken,
+        @JsonProperty("session_id")
+        String sessionId,
+        @JsonProperty("session_expires_in")
+        Long sessionExpiresIn
+//        , @JsonProperty("user_role")
+//        String userRole
+        ) {
 }

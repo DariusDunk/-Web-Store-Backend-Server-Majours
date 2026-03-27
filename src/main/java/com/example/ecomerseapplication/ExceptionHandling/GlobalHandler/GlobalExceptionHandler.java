@@ -169,4 +169,9 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
+
+    @ExceptionHandler(InvalidSessionException.class)
+    public ResponseEntity<?> handleInvalidSessionExceptions() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 }

@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
-import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.DTOs.responses.MessageResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.CustomerCart;
@@ -11,13 +10,10 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.CartLi
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoStockForCartException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockExceededException;
 import com.example.ecomerseapplication.Others.GlobalConstants;
-import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import com.example.ecomerseapplication.enums.ResultTypes;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +42,7 @@ public class CustomerCartService {
         {
             if (customerCart == null) {
 
-                if (cartsByCustomer(customer).size() >= GlobalConstants.cartSizeLimit)
+                if (cartsByCustomer(customer).size() >= GlobalConstants.CART_SIZE_LIMIT)
                     throw new CartLimitReachedException("Cart limit reached!");
 
                 customerCart = new CustomerCart(cartId, (short) 1);
@@ -173,7 +169,7 @@ public class CustomerCartService {
             else sb.append(" не беше добавен или увеличен в количката!");
         }
 
-        if (newProductsCount + originalSize > GlobalConstants.cartSizeLimit) {
+        if (newProductsCount + originalSize > GlobalConstants.CART_SIZE_LIMIT) {
             throw new CartLimitReachedException("Cart limit reached!");
         }
 

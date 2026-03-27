@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -32,6 +33,27 @@ public class Session {
     @Column(name = "expires_at")
     private Instant expiresAt;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;
+
+    @CreationTimestamp
+    @Column(name = "last_activity_at ")
+    private Instant lastActivityAt;
+
+    @Column(name = "ip_address ")
+    private String ipAddress;
+
+    @Column(name = "device_name ")
+    private String deviceName;
+
+    @Column(name = "user_agent ")
+    private String userAgent;
+
+    @Column(name = "is_revoked")
+    private Boolean isRevoked;
+
+    private boolean isExpired = Instant.now().isAfter(expiresAt);
+
+    //todo v byde6te i za location 6te ima ne6to
 }

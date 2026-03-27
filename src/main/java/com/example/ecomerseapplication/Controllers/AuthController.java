@@ -2,8 +2,17 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
+import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
+import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
+import com.example.ecomerseapplication.Entities.Customer;
+import com.example.ecomerseapplication.Entities.Session;
+import com.example.ecomerseapplication.Mappers.LoginResponseMapper;
+import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.KeycloakService;
+import com.example.ecomerseapplication.Services.SessionService;
 import com.example.ecomerseapplication.enums.UserRole;
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,16 +20,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+
 @RestController
 @Validated
 @RequestMapping("auth/")
 public class AuthController {
 
     private final KeycloakService keycloakService;
+    private final SessionService sessionService;
+    private final CustomerService customerService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService) {
+    public AuthController(KeycloakService keycloakService, SessionService sessionService, CustomerService customerService) {
         this.keycloakService = keycloakService;
+        this.sessionService = sessionService;
+        this.customerService = customerService;
     }
 
     @GetMapping("refresh/{token}")
@@ -38,9 +53,9 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {//TODO ZAPISVANETO V BAZATA TRQBVA DA SE KRIPTIRA!!!
 
-        System.out.println("Register request: "+customerAccountRequest);
+//        System.out.println("Register request: "+customerAccountRequest);
 
-        keycloakService.registerFlow(customerAccountRequest.firstName,
+        keycloakService.registerFlow(customerAccountRequest.firstName,// todo sloji tova vyv auth servica
                 customerAccountRequest.familyName,
                 customerAccountRequest.password,
                 customerAccountRequest.email,
@@ -50,19 +65,43 @@ public class AuthController {
 
     }
 
-    @PostMapping("login")
-    public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) {
+    private String extractIdFromToken(String token) throws ParseException {
+        SignedJWT signedJWT = (SignedJWT) JWTParser.parse(token);
+        return signedJWT.getJWTClaimsSet().getSubject();
+    }
+
+    @PostMapping("login")//TODO dobavi kym requesta i tipa na ustroistvoto, toi 6te se zadava ot syotvetniq BFF
+    public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) throws ParseException {//todo wrapper dto za session-a ili po-dobre napravi nov response, koito da ima samo vajnite ne6ta ot keycloak response-a, zaedno sys sesiqta
+//        KeycloakTokenResponse tokenResponse = keycloakService.loginUser(request); //todo tova sled kato vsi4ko sys sesiite e setupnato
+//        String userId = extractIdFromToken(tokenResponse.accessToken());
+//        Customer customer = customerService.getById(userId);
+//
+//       Session session = sessionService.createSession(tokenResponse.refreshToken(), customer);
+
+//        System.out.println("userId : " + userId + "customer name: " + customer.getFirstName() + "");
+
+//        return ResponseEntity.ok(LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session));
 
         return ResponseEntity.ok(keycloakService.loginUser(request));
     }
 
-    @GetMapping("invalidate/{token}")
-    public ResponseEntity<?> invalidateToken(@PathVariable("token") String refreshToken)
-    {
+    @GetMapping("invalidate/{token}"
+//            +"/{sessionId}"
+    )
+    public ResponseEntity<?> invalidateToken(@PathVariable("token") String refreshToken
+//    , @PathVariable("sessionId") String sessionId
+    ) {//TODO tuyk da se invalidira i sesiqta
         try {
+
+//            Session session = sessionService.getById(sessionId); //todo tova sled kato vsi4ko sys sesiite e setupnato
+//
+//            sessionService.logout(session, refreshToken);
+//
+//            return ResponseEntity.noContent().build();
+
             return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshToken))).build();
         } catch (Exception e) {
-            System.out.println("Error invalidating token: " + e.getMessage());
+            System.out.println("Error invalidating token or session: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 

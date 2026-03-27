@@ -35,7 +35,7 @@ public class FavoriteOfCustomerService {
     @Transactional
     public void addToFavorite(Customer customer, Product product) {
 
-        if (repository.countAllByFavoriteOfCustomerId_Customer_keycloakId(customer.getKeycloakId()) >= GlobalConstants.favoritesSizeLimit)
+        if (repository.countAllByFavoriteOfCustomerId_Customer_keycloakId(customer.getKeycloakId()) >= GlobalConstants.FAVORITES_SIZE_LIMIT)
             throw new FavouriteSizeLimitReachedException("Favourites limit reached");
 
         if (isInFavorites(customer, product)) {
