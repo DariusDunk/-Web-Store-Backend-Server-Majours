@@ -148,7 +148,6 @@ public class CustomerController {
 
         return ResponseEntity.ok(customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement));
     }
-
     
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
@@ -164,7 +163,6 @@ public class CustomerController {
 
     }
 
-    
     @DeleteMapping("cart/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
@@ -180,7 +178,6 @@ public class CustomerController {
         }
     }
 
-    
     @DeleteMapping("cart/remove/batch")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {

@@ -24,8 +24,14 @@ router.get('/getFavourites/:page', async (req, res) => {
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
     } catch (error) {
-        console.error('Error fetching favourites: ', error);
-        return res.status(error.response.status||500).end();
+
+        if (error.response) {
+            console.warn('Handled backend error for fetching favourites');
+            return res.status(error.response.status||500).end();
+        }
+
+        console.error('-------------------Unexpected error fetching favourites-------------------\n', error);
+        return res.status(500).end();
     }
 })
 
@@ -54,8 +60,14 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
 
 
     } catch (error) {
-        console.error('Error adding product to favourites: ', error);
-        return res.status(error.response.status||500).json(error.response.data);
+
+        if (error.response) {
+            console.warn('Handled backend error for adding product to favourites');
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Unexpected error adding product to favourites-------------------\n', error);
+        return res.status(500).json(error.response.data);
     }
 });
 
@@ -84,8 +96,14 @@ router.post(`/removeFav/single`, async (req, res) => {
         return res.status(response.status).json(responseData);
 
     } catch (error) {
-        console.error('Error removing product through the favourites page: ', error);
-        return res.status(error.response.status||500).end();
+
+        if (error.response) {
+            console.warn('Handled backend error for removing product through the favourites page');
+            return res.status(error.response.status||500).end();
+        }
+
+        console.error('-------------------Unexpected error removing product through the favourites page-------------------\n', error);
+        return res.status(500).end();
     }
 })
 
@@ -108,14 +126,19 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
         return res.status(response.status).end();
 
     } catch (error) {
-        console.error('Error removing product from favourites through the product page: ', error);
-        return res.status(error.response.status||500).end();
+
+        if (error.response) {
+            console.warn('Handled backend error for removing product from favourites through the product page');
+            return res.status(error.response.status||500).end();
+        }
+
+        console.error('-------------------Unexpected error removing product from favourites through the product page-------------------\n', error);
+        return res.status(500).end();
     }
 })
 
 router.post(`/removeFav/batch`, async (req, res) => {
     try {
-        const accessToken = req.cookies['access_token'];
         const sessionId = req.cookies.session_id;
         const {currentPage, productCodes} = req.body;
 
@@ -134,36 +157,61 @@ router.post(`/removeFav/batch`, async (req, res) => {
         return res.status(response.status).json(responseData);
 
     } catch (error) {
-        console.error('Error batch deleting products from favourites: ', error);
-        return res.status(error.response.status||500).end();
+
+        if (error.response) {
+            console.warn('Handled backend error for batch deleting products from favourites');
+            return res.status(error.response.status||500).end();
+        }
+        console.error('-------------------Unexpected error batch deleting products from favourites-------------------\n', error);
+        return res.status(500).end();
     }
 })
 
 router.post('/addToCart', async (req, res) => {
     try {
-
         const {productCode, doIncrement} = req.body;
-        const accessToken = req.cookies['access_token'];
+        const sessionId = req.cookies.session_id;
+        // const accessToken = req.cookies['access_token'];
 
-        const response = await fetch(`${Backend_Url}/customer/cart/manageQuant`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            },
-            body: JSON.stringify({product_code: productCode, do_increment: doIncrement})
-        });
 
-        if (response.ok) {
-            return res.status(response.status).json({message: await response.text()});
-        } else {
-            const responseData = await safeJson(response);
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.post(`${Backend_Url}/customer/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                }
+            });
+        })
 
-            return res.status(response.status).json(responseData);
-        }
+        const responseData = await response.data;
+
+        return res.status(response.status).json({message: responseData});
+
+        // const response = await fetch(`${Backend_Url}/customer/cart/manageQuant`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'Authorization': 'Bearer ' + accessToken
+        //     },
+        //     body: JSON.stringify({product_code: productCode, do_increment: doIncrement})
+        // });
+        //
+        // if (response.ok) {
+        //     return res.status(response.status).json({message: await response.text()});
+        // } else {
+        //     const responseData = await safeJson(response);
+        //
+        //     return res.status(response.status).json(responseData);
+        // }
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({error: error.message});
+
+        if (error.response) {
+            console.warn('Handled backend error for adding product to cart');
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Unexpected error adding product to cart-------------------\n', error);
+        return res.status(500).end();
     }
 });
 
