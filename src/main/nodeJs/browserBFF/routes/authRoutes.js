@@ -3,6 +3,8 @@ const router = express.Router();
 const {Backend_Url} = require('./config.js');
 const AuthURL = `${Backend_Url}/auth`;
 const sessionCache = require('../services/sessionCache.js');
+const {fetchWithSessionTokens} = require("../services/requestTokenManager.js");
+const axios = require("axios");
 
 router.post(`/register`, async (req, res) => {
 
@@ -45,7 +47,7 @@ router.post(`/login`, async (req, res) => {
 
     // console.log("Node login: " + email + " " + password)
 
-    const response = await fetch(`${AuthURL}/login`, {
+    const response = await fetch(`${AuthURL}/login`, {//todo napravi tuk da se polzva axios kogato priklu4i6 sys sesiite
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -58,7 +60,7 @@ router.post(`/login`, async (req, res) => {
         })
     })
 
-    console.log("Node response: " + response.status)
+    // console.log("Node response: " + response.status)
 
     if (!response.ok) {
         return res.status(response.status).end();
@@ -73,7 +75,7 @@ router.post(`/login`, async (req, res) => {
     // console.log("accessToken TTL from backend: " + expires_in + "\naccess token TTL for the frontend: " + expires_in * 1000);
 
 
-    res.cookie('access_token', access_token,
+    res.cookie('access_token', access_token,//todo mahni tokenite kato priklu4i6 sys sesiite
         {
             maxAge: expires_in * 1000,
             secure: false,
@@ -91,31 +93,6 @@ router.post(`/login`, async (req, res) => {
             httpOnly: true
         });
 
-
-    const userDataResponse = await fetch(`${Backend_Url}/customer/me`,
-        {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${access_token}`
-            }
-        });
-
-    if (!userDataResponse.ok) {
-        // console.log("Error fetching user data: " + userDataResponse.status);
-
-        return res.status(userDataResponse.status).end();
-    }
-//todo tova e za kogato vsi4ko sys sesiite e setupnato
-
-    res.cookie('session_id', session_id,
-        {
-            maxAge: session_expires_in * 1000,
-            secure: false,
-            path: '/',
-            sameSite: 'lax',
-            httpOnly: true
-        });
-
     sessionCache.set(session_id, {
         access_token,
         expires_in,
@@ -124,14 +101,52 @@ router.post(`/login`, async (req, res) => {
         remember_me: rememberMe
     }, session_expires_in * 1000);
 
-    const userData = await userDataResponse.json();
 
-    sessionCache.print();
 
-    // console.log("userData: " + JSON.stringify(userData));
+    // const userDataResponse = await fetch(`${Backend_Url}/customer/me`,
+    //     {
+    //         method: 'GET',
+    //         headers: {
+    //             Authorization: `Bearer ${access_token}`
+    //         }
+    //     });
 
-    return res.status(userDataResponse.status).json(userData);
+    if (!session_id) {
+        return res.status(400).end();
+    }
+    sessionCache.safeDelete(session_id);
+    let userDataStatus=500;
 
+    try
+    {
+        const userDataResponse = await fetchWithSessionTokens(session_id, async (tokens) => {
+            return await axios.get(`${Backend_Url}/customer/me`, {
+                headers: {
+                    Authorization: `Bearer ${tokens.access_token}`
+                }
+            })
+        });
+
+        res.cookie('session_id', session_id,
+            {
+                maxAge: session_expires_in * 1000,
+                secure: false,
+                path: '/',
+                sameSite: 'lax',
+                httpOnly: true
+            });
+
+
+        const userData = await userDataResponse.data;
+        userDataStatus = userDataResponse.status;
+        // sessionCache.print();
+
+        return res.status(userDataResponse.status).json(userData);
+    }
+    catch (error) {
+        console.error('Error fetching user data: ', error);
+        return res.status(userDataStatus).end();
+    }
 });
 
 
@@ -145,12 +160,12 @@ router.post('/logout', async (req, res) => {
     //     if (!response.ok) console.log("Error invalidating token: " + response.statusText);
     // }
 
-    if (sessionId) {
+    if (sessionId) {//todo napravi tuk da se polzva axios kogato priklu4i6 sys sesiite
         const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}/${encodeURIComponent(sessionId)}`
         )
         if (!response.ok) console.log("Error invalidating token and session: " + response.statusText);
 
-        res.cookie('access_token', '', {//TODO tuk zameni refresh_token/access_token sys session_id
+        res.cookie('access_token', '', {//TODO tuk mahni tokenite kato priklu4i6 sys sesiite
             httpOnly: true,
             secure: false,
             path: '/',
@@ -166,8 +181,6 @@ router.post('/logout', async (req, res) => {
             maxAge: 0
         });
 
-        //todo tova e za kogato vsi4ko sys sesiite e setupnato
-
         res.cookie('session_id', '',
             {
                 maxAge: 0,
@@ -178,12 +191,10 @@ router.post('/logout', async (req, res) => {
             });
 
         sessionCache.safeDelete(sessionId);
-        sessionCache.print();
+        // sessionCache.print();
 
         return res.status(200).end();
     }
-
-
 });
 
 router.post('/refresh', async (req, res) => {

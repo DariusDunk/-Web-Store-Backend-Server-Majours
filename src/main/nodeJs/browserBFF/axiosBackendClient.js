@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { Backend_Url } = require('../browserBFF/routes/config.js');
+const { Backend_Url } = require('./routes/config.js');
 
 const axiosBackendClient = axios.create({ baseURL: Backend_Url , withCredentials: true});
 

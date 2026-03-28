@@ -1,15 +1,15 @@
-import sessionCache from "./sessionCache";
+import sessionCache from "./sessionCache.js";
 
-const {backendClient} = require('../axiosBackendClient');
+import backendClient from '../axiosBackendClient.js';
 
-export async function fetchTokensOfSession(sessionID) {
+ async function fetchTokensOfSession(sessionID) {
     if (!sessionID) return null;
 
     const { data } = await backendClient.get(`/auth/tokens/${sessionID}`);
     return data;
 }
 
-export async function withSessionTokens(sessionId, requestFn) {
+export async function fetchWithSessionTokens(sessionId, requestFn) {
     let tokens = sessionCache.get(sessionId);
 
     if (!tokens) {
