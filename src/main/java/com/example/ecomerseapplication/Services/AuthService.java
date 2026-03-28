@@ -65,10 +65,6 @@ public class AuthService {
     @Transactional
     public void logout(String refreshToken, String sessionId) {
 
-//        System.out.println("logout refresh token: "+refreshToken);
-//
-//        System.out.println("logout session id: "+sessionId);
-
         Session session = sessionService.getById(sessionId);
 
         sessionService.revokeSession(session);
@@ -77,8 +73,7 @@ public class AuthService {
     }
 
     @Transactional
-    public TokenRefreshResponse refresh(String refreshToken, Session session) {//todo tuk da se vry6ta DTO Response sys tokenite i sesiqta
-//todo tova sled kato vsi4ko sys sesiite e setupnato
+    public TokenRefreshResponse refresh(String refreshToken, Session session) {
         if (session.getIsRevoked()|| session.isExpired())
             throw new InvalidSessionException("Session is revoked or expired");
 
@@ -96,16 +91,5 @@ public class AuthService {
             throw new InvalidSessionException("Session/token refresh failed: "+ e.getMessage());
         }
     }
-
-//    @Transactional
-//    public TokenRefreshResponse tokensOfSession(String sessionId) {
-//
-//        Session session = sessionService.getById(sessionId);
-//
-//        if (session.getIsRevoked()|| session.isExpired())
-//            throw new InvalidSessionException("Session is revoked or expired");
-//
-//        return refresh(session.getRefreshToken(), session);
-//    }
 
 }

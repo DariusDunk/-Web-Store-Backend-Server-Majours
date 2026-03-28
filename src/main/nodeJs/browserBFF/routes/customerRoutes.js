@@ -55,34 +55,37 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
 
     } catch (error) {
         console.error('Error:', error);
-        return res.status(error.response.status||500).end();
+        return res.status(error.response.status||500).json(error.response.data);
     }
 });
 
 router.post(`/removeFav/single`, async (req, res) => {
 
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
 
     const {productCode, currentPage} = req.body;
 
     const requestBody = {product_code: productCode, current_page: currentPage};
 
     try {
-        const response = await fetch(`${Backend_Url}/customer/favorite/remove/single`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            },
-            body: JSON.stringify(requestBody)
-        });
 
-        const responseData = await response.json();
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) =>{
+            return await axios.delete(`${Backend_Url}/customer/favorite/remove/single`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                data: JSON.stringify(requestBody)
+            });
+        })
+
+        const responseData = await response.data;
 
         return res.status(response.status).json(responseData);
+
     } catch (error) {
         console.error('Error:', error);
-        return res.status(500).json({error: error.message});
+        return res.status(error.response.status||500).end();
     }
 })
 

@@ -114,7 +114,6 @@ router.post(`/login`, async (req, res) => {
     if (!session_id) {
         return res.status(400).end();
     }
-    sessionCache.safeDelete(session_id);
 
     try
     {
@@ -279,7 +278,10 @@ router.post('/refresh', async (req, res) => {
 
     if (sessionId) {
 
-        const refreshToken2 = sessionCache.get(sessionId).refresh_token
+        const sessionEntry = sessionCache.get(sessionId)
+        const refreshToken2 = sessionEntry.refresh_token
+
+        console.log("sessionEntry: " + JSON.stringify(sessionEntry));
 
         console.log("refreshToken2: " + refreshToken2);
 
