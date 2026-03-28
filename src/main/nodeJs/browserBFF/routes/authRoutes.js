@@ -99,8 +99,7 @@ router.post(`/login`, async (req, res) => {
         refresh_token,
         refresh_expires_in,
         remember_me: rememberMe
-    }, session_expires_in * 1000);
-
+    }, session_expires_in);
 
 
     // const userDataResponse = await fetch(`${Backend_Url}/customer/me`,
@@ -115,8 +114,7 @@ router.post(`/login`, async (req, res) => {
         return res.status(400).end();
     }
 
-    try
-    {
+    try {
         const userDataResponse = await fetchWithSessionTokens(session_id, async (tokens) => {
             return await axios.get(`${Backend_Url}/customer/me`, {
                 headers: {
@@ -134,13 +132,14 @@ router.post(`/login`, async (req, res) => {
                 httpOnly: true
             });
 
+        sessionCache.print();
+
         const userData = await userDataResponse.data;
 
         return res.status(userDataResponse.status).json(userData);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching user data: ', error);
-        return res.status(error.response.status||500).end();
+        return res.status(error.response.status || 500).end();
     }
 });
 
@@ -159,8 +158,7 @@ router.post('/logout', async (req, res) => {
         // const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}/${encodeURIComponent(sessionId)}`
         // )
 
-        try
-        {
+        try {
             await fetchWithSessionTokens(sessionId, async (tokens) => await axios.get(
                 `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}`
             ));
@@ -193,8 +191,7 @@ router.post('/logout', async (req, res) => {
             // // sessionCache.print();
             //
 
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Error invalidating token and session, cookies and sessionCache will still be erased: ", error);
         }
 
@@ -277,24 +274,32 @@ router.post('/refresh', async (req, res) => {
     //todo tova e za kogato vsi4ko sys sesiite e setupnato
 
     if (sessionId) {
+        //
+        // console.log("sessionId for refresh: " + sessionId);
+        //
+        // sessionCache.print();
+        //
+        // const sessionEntry = sessionCache.get(sessionId);
+        //
+        // console.log("sessionEntry for refresh: " + JSON.stringify(sessionEntry));
+        //
+        // const refreshToken2 = sessionEntry.refresh_token;
+        //
+        // console.log("refreshToken2: " + refreshToken2);
 
-        console.log("sessionId for refresh: " + sessionId);
+        // const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken2)}/${encodeURIComponent(sessionId)}`);
 
-        sessionCache.print();
+        try {
+            const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+                return await axios.get(`${AuthURL}/refresh/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+            })
 
-        const sessionEntry = sessionCache.get(sessionId);
+            // console.log("response status: " + response.status)
 
-        console.log("sessionEntry for refresh: " + JSON.stringify(sessionEntry));
-
-        const refreshToken2 = sessionEntry.refresh_token;
-
-        console.log("refreshToken2: " + refreshToken2);
-
-        const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken2)}/${encodeURIComponent(sessionId)}`);
-
-        // console.log("response status: " + response.status)
-
-        if (response.ok) {
             const responseData = await response.json();
             const {
                 access_token,
@@ -333,9 +338,11 @@ router.post('/refresh', async (req, res) => {
 
             sessionCache.ttl(sessionId, newTTL);
             return res.status(200).end();
-        } else
-            return res.status(response.status).end();
 
+        } catch (error) {
+            console.error('Error refreshing token: ', error);
+            return res.status(error.response.status || 500).end();
+        }
     }
 
     return res.status(401).end();

@@ -294,28 +294,30 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
 })
 
 router.get('/getCart', async (req, res) => {
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
 
     try {
-        const response = await fetch(`${Backend_Url}/customer/cart`,
-            {
-                method: 'GET',
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.get(`${Backend_Url}/customer/cart`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken
+                    'Authorization': 'Bearer ' + tokens.access_token,
                 }
             });
+        })
 
-        if (!response.ok) {
-            return res.status(response.status).end();
+        const responseData = await response.data;
+        return res.status(response.status).json(responseData);
+
+    } catch (error) {
+
+        if (error.response) {
+            console.warn('Handled backend error for fetching the cart');
+            return res.status(error.response.status||500).end();
         }
 
-        const responseData = await response.json();
-        const status = response.status;
-        return res.status(status).json(responseData);
-    } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({error: error.message});
+        console.error('-------------------Unexpected error for fetching the cart-------------------\n', error);
+        return res.status(500).end();
     }
 });
 
