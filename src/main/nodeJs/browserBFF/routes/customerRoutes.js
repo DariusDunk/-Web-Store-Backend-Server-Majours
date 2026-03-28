@@ -2,30 +2,30 @@ const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
 const {safeJson} = require('../services/safeJsonFunc.js');
+const sessionCache = require('../services/sessionCache.js');
+const {fetchWithSessionTokens} = require("../services/requestTokenManager.js");
+const axios = require("axios");
 
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
 
     try {
-        const response = await fetch(`${Backend_Url}/customer/favourites/p/${page}`,
-            {
-                method: 'GET',
+
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.get(`${Backend_Url}/customer/favourites/p/${page}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken,
+                    'Authorization': 'Bearer ' + tokens.access_token,
                 }
             });
+        })
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-
-        const responseData = await response.json();
+        const responseData = await response.data;
         return res.status(response.status).json(responseData);
     } catch (error) {
         console.error('Error fetching favourites: ', error);
-        return res.status(500).json({error: error.message});
+        return res.status(error.response.status||500).end();
     }
 })
 

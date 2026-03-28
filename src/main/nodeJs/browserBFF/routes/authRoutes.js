@@ -115,7 +115,6 @@ router.post(`/login`, async (req, res) => {
         return res.status(400).end();
     }
     sessionCache.safeDelete(session_id);
-    let userDataStatus=500;
 
     try
     {
@@ -136,16 +135,13 @@ router.post(`/login`, async (req, res) => {
                 httpOnly: true
             });
 
-
         const userData = await userDataResponse.data;
-        userDataStatus = userDataResponse.status;
-        // sessionCache.print();
 
         return res.status(userDataResponse.status).json(userData);
     }
     catch (error) {
         console.error('Error fetching user data: ', error);
-        return res.status(userDataStatus).end();
+        return res.status(error.response.status||500).end();
     }
 });
 
