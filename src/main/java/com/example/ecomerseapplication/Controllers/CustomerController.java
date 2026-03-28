@@ -62,7 +62,6 @@ public class CustomerController {
     public ResponseEntity<?> addProductToFavourites(@PathVariable @NotBlank String productCode) {
 
         String userId = userIdExtractor.getUserId();
-
         Product product = productService.findByPCode(productCode);
         Customer customer = customerService.getById(userId);
 
@@ -76,9 +75,7 @@ public class CustomerController {
     public ResponseEntity<?> getFavourites(@PathVariable int page) {
 
         String userId = userIdExtractor.getUserId();
-
         Customer customer = customerService.getById(userId);
-
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromCustomerPaged(customer, pageRequest);
@@ -92,7 +89,6 @@ public class CustomerController {
     public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
 
         String userId = userIdExtractor.getUserId();
-
         Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(productCode);
 
@@ -107,7 +103,6 @@ public class CustomerController {
     public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveOneFavRequest request) {
 
         String userId = userIdExtractor.getUserId();
-
         Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(request.productCode());
 
@@ -121,8 +116,6 @@ public class CustomerController {
     @DeleteMapping("favorite/remove/batch")
     @Transactional
     public ResponseEntity<?> removeFromFavouritesBatch(@RequestBody @Valid RemoveFavBatchRequest request) {
-
-//        System.out.println("Batch delete request: "+request);
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);

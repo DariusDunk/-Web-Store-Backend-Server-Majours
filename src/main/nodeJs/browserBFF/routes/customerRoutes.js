@@ -116,22 +116,26 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
 router.post(`/removeFav/batch`, async (req, res) => {
     try {
         const accessToken = req.cookies['access_token'];
+        const sessionId = req.cookies.session_id;
         const {currentPage, productCodes} = req.body;
 
-        const response = await fetch(`${Backend_Url}/customer/favorite/remove/batch`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            },
-            body: JSON.stringify({current_page: currentPage, product_codes: productCodes})
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.delete(`${Backend_Url}/customer/favorite/remove/batch`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                data: JSON.stringify({current_page: currentPage, product_codes: productCodes})
+            });
+        })
 
-        const responseData = await response.json();
+        const responseData = await response.data;
+
         return res.status(response.status).json(responseData);
+
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({error: error.message});
+        console.error('Error batch deleting products from favourites: ', error);
+        return res.status(error.response.status||500).end();
     }
 })
 
