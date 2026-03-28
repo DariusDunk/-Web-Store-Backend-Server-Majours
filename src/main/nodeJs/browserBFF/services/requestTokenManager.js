@@ -1,19 +1,12 @@
 import sessionCache from "./sessionCache";
 
-const express =require( 'express');
-const { Backend_Url } = require('../routes/config.js');
+const {backendClient} = require('../axiosBackendClient');
 
 export async function fetchTokensOfSession(sessionID) {
-    if (sessionID == null) {
-        return null;
-    }
+    if (!sessionID) return null;
 
-    const response = await fetch(`${Backend_Url}/auth/tokens/${sessionID}`);
-    if (!response.ok) {
-        return response.status;
-    }
-
-    return await response.json();
+    const { data } = await backendClient.get(`/auth/tokens/${sessionID}`);
+    return data;
 }
 
 export async function withSessionTokens(sessionId, requestFn) {
@@ -22,6 +15,7 @@ export async function withSessionTokens(sessionId, requestFn) {
     if (!tokens) {
         tokens = await fetchTokensOfSession(sessionId);
         if (!tokens) throw new Error("Session expired or missing");
+
         sessionCache.set(sessionId, tokens, tokens.ttl);
     }
 

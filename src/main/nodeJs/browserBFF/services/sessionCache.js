@@ -14,12 +14,17 @@ module.exports = {
         cache.set(sessionId, value, ttl);
     },
 
-    delete(sessionId) {
+    safeDelete(sessionId) {
+        if (!cache.has(sessionId)) return;
         cache.del(sessionId);
     },
 
     ttl(sessionId, newTTL) {
         cache.ttl(sessionId, newTTL);
+    },
+
+    print() {
+        console.log("cache data: \n" + JSON.stringify(cache.data));
     },
 
     has(sessionId) {

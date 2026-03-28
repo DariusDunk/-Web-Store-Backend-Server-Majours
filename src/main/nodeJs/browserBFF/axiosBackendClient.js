@@ -1,9 +1,9 @@
 const axios = require('axios');
 const { Backend_Url } = require('../browserBFF/routes/config.js');
 
-const backendClient = axios.create({ baseURL: Backend_Url });
+const axiosBackendClient = axios.create({ baseURL: Backend_Url , withCredentials: true});
 
-backendClient.interceptors.response.use(//TODO kogato stigne6 do tuk, vij interceptora ot frontenda, tyi kato tozi tam e po-nova versiq
+axiosBackendClient.interceptors.response.use(//TODO kogato stigne6 do tuk, vij interceptora ot frontenda, tyi kato tozi tam e po-nova versiq
     response => response,
     async error => {
         const originalRequest = error.config;
@@ -18,8 +18,8 @@ backendClient.interceptors.response.use(//TODO kogato stigne6 do tuk, vij interc
             headers: { cookie: originalRequest.headers.cookie }
         });
 
-        return backendClient(originalRequest); // retry automatically
+        return axiosBackendClient(originalRequest); // retry automatically
     }
 );
 
-module.exports = backendClient;
+module.exports = axiosBackendClient;

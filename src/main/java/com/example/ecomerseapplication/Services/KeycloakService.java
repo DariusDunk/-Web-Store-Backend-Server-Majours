@@ -339,7 +339,7 @@ public class KeycloakService {
 
     }
 
-    public Integer invalidateRefreshToken(String refreshToken) {
+    public void invalidateRefreshToken(String refreshToken) {
 
         String logoutUrl = "/realms/" + realmName + "/protocol/openid-connect/logout";
 
@@ -358,7 +358,7 @@ public class KeycloakService {
                     .block();
 
             assert response != null;
-            return response.getStatusCode().value();
+//            return response.getStatusCode().value();
 
         } catch (WebClientResponseException e) {
 

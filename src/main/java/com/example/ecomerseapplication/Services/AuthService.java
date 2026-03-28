@@ -8,6 +8,7 @@ import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidSessionException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
 import com.example.ecomerseapplication.Mappers.LoginResponseMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.nimbusds.jwt.JWTParser;
@@ -41,18 +42,31 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(UserLoginRequest request) throws ParseException {
+        KeycloakTokenResponse tokenResponse = null;
+        try {
+            tokenResponse = keycloakService.loginUser(request);
+            String userId = extractIdFromToken(tokenResponse.accessToken());
+            Customer customer = customerService.getById(userId);
+            ClientType clientType = clientTypeService.getByTypeName(request.clientType());
 
-        KeycloakTokenResponse tokenResponse = keycloakService.loginUser(request); //todo tova sled kato vsi4ko sys sesiite e setupnato
-        String userId = extractIdFromToken(tokenResponse.accessToken());
-        Customer customer = customerService.getById(userId);
-        ClientType clientType = clientTypeService.getByTypeName("web");//todo smeni ot zaqvkata
-        Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType, false);// todo remember me go vzemi ot zaqvkata
+            Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe());
 
-        return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
+            return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
+        } catch (Exception e) {
+            if (tokenResponse != null) {
+                System.out.println();
+                keycloakService.invalidateRefreshToken(tokenResponse.refreshToken());
+                throw new LoginFailedException("Login failed, rolling back session creation: "+ e.getMessage());
+            }
+            throw new LoginFailedException("Login failed: "+ e.getMessage());
+        }
     }
 
     @Transactional
-    public void logout(String refreshToken, Session session) {
+    public void logout(String refreshToken, String sessionId) {
+
+        Session session = sessionService.getById(sessionId);
+
         sessionService.revokeSession(session);
 
         keycloakService.invalidateRefreshToken(refreshToken);

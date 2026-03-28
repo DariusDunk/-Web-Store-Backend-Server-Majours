@@ -31,16 +31,15 @@ public class SessionService {
 
         session.setSessionId(generateSessionId());
 
-        System.out.println("session id: " + session.getSessionId() );
+//        System.out.println("session id: " + session.getSessionId() );
 
         session.setCustomer(customer);
         session.setExpiresAt(Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS));
         session.setRefreshToken(refreshToken);
         session.setIsGuest(false);// TODO tova 6te se promeni v byde6te
         session.setIsRevoked(false);
-//        session.setClientType(clientType); TODO tova trqbva da go napravi6 sled kato nastroi6 BFF-a
+        session.setClientType(clientType);
         session.setRememberMeSession(rememberMe);
-
 
        return sessionRepository.save(session); //todo tova sled kato vi4ko e setupnato
 
@@ -53,9 +52,9 @@ public class SessionService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     }
 
-//    @Transactional
     public void revokeSession(Session session) {
         session.setIsRevoked(true);
+        session.setRevokedAt(Instant.now());
         sessionRepository.save(session);
     }
 

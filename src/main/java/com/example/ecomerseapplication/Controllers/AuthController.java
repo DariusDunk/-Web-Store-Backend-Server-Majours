@@ -75,42 +75,37 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
 
     }
-
-    private String extractIdFromToken(String token) throws ParseException {
-        SignedJWT signedJWT = (SignedJWT) JWTParser.parse(token);
-        return signedJWT.getJWTClaimsSet().getSubject();
-    }
+//
+//    private String extractIdFromToken(String token) throws ParseException {
+//        SignedJWT signedJWT = (SignedJWT) JWTParser.parse(token);
+//        return signedJWT.getJWTClaimsSet().getSubject();
+//    }
 
     @PostMapping("login")//TODO dobavi kym requesta i tipa na ustroistvoto, toi 6te se zadava ot syotvetniq BFF
     public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) throws ParseException {//todo wrapper dto za session-a ili po-dobre napravi nov response, koito da ima samo vajnite ne6ta ot keycloak response-a, zaedno sys sesiqta
-//        KeycloakTokenResponse tokenResponse = keycloakService.loginUser(request); //todo tova sled kato vsi4ko sys sesiite e setupnato
-//        String userId = extractIdFromToken(tokenResponse.accessToken());
-//        Customer customer = customerService.getById(userId);
-//
-//       Session session = sessionService.createSession(tokenResponse.refreshToken(), customer);
 
-//        System.out.println("userId : " + userId + "customer name: " + customer.getFirstName() + "");
+        return ResponseEntity.ok(authService.login(request));
 
-//        return ResponseEntity.ok(LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session));
-
-        return ResponseEntity.ok(keycloakService.loginUser(request));
+//        return ResponseEntity.ok(keycloakService.loginUser(request));
     }
 
     @GetMapping("invalidate/{token}"
-//            +"/{sessionId}"
+            +"/{sessionId}"
     )
     public ResponseEntity<?> invalidateToken(@PathVariable("token") String refreshToken
-//    , @PathVariable("sessionId") String sessionId
+    , @PathVariable String sessionId
     ) {//TODO tuyk da se invalidira i sesiqta
         try {
 
 //            Session session = sessionService.getById(sessionId); //todo tova sled kato vsi4ko sys sesiite e setupnato
 //
 //            sessionService.logout(session, refreshToken);
-//
-//            return ResponseEntity.noContent().build();
 
-            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshToken))).build();
+            authService.logout(refreshToken, sessionId);
+
+            return ResponseEntity.noContent().build();
+
+//            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshToken))).build();
         } catch (Exception e) {
             System.out.println("Error invalidating token or session: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

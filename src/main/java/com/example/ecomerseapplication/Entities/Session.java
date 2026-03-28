@@ -38,25 +38,30 @@ public class Session {
     private Instant createdAt;
 
     @CreationTimestamp
-    @Column(name = "last_activity_at ")
+    @Column(name = "last_activity_at")
     private Instant lastActivityAt;
 
-    @Column(name = "ip_address ")
+    @Column(name = "ip_address")
     private String ipAddress;
 
-    @Column(name = "device_name ")
+    @Column(name = "device_name")
     private String deviceName;
 
-    @Column(name = "user_agent ")
+    @Column(name = "user_agent")
     private String userAgent;
 
     @Column(name = "is_revoked")
     private Boolean isRevoked;
 
-    private boolean isExpired = Instant.now().isAfter(expiresAt);
+    public boolean isExpired() {
+        return expiresAt != null && Instant.now().isAfter(expiresAt);
+    }
 
     @Column(name = "is_remember_me_session")
     private boolean isRememberMeSession;
+
+    @Column(name = "revoked_at")
+    private Instant revokedAt;
 
     //todo v byde6te i za location 6te ima ne6to
 }

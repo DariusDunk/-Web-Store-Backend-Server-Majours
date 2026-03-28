@@ -50,10 +50,15 @@ router.post(`/login`, async (req, res) => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({identifier: email, password: password})//todo tobavi rememberMe vv tqloto
+        body: JSON.stringify({
+            identifier: email,
+            password: password,
+            remember_me: rememberMe,
+            client_type: "Web"
+        })
     })
 
-    // console.log("Node response: " + response.status)
+    console.log("Node response: " + response.status)
 
     if (!response.ok) {
         return res.status(response.status).end();
@@ -63,7 +68,7 @@ router.post(`/login`, async (req, res) => {
     const {
         access_token, refresh_token, expires_in, refresh_expires_in
         , session_id, session_expires_in
-    } = responseData;//TODO tuk zameni refresh_token sys session_id
+    } = responseData;
 
     // console.log("accessToken TTL from backend: " + expires_in + "\naccess token TTL for the frontend: " + expires_in * 1000);
 
@@ -102,24 +107,26 @@ router.post(`/login`, async (req, res) => {
     }
 //todo tova e za kogato vsi4ko sys sesiite e setupnato
 
-//     res.cookie('session_id', session_id,
-//         {
-//             maxAge: session_expires_in * 1000,
-//             secure: false,
-//             path: '/',
-//             sameSite: 'lax',
-//             httpOnly: true
-//         });
-//
-//     sessionCache.set(session_id, {
-//         access_token,
-//         expires_in,
-//         refresh_token,
-//         refresh_expires_in,
-//         remember_me:rememberMe
-//     }, session_expires_in * 1000);
+    res.cookie('session_id', session_id,
+        {
+            maxAge: session_expires_in * 1000,
+            secure: false,
+            path: '/',
+            sameSite: 'lax',
+            httpOnly: true
+        });
+
+    sessionCache.set(session_id, {
+        access_token,
+        expires_in,
+        refresh_token,
+        refresh_expires_in,
+        remember_me: rememberMe
+    }, session_expires_in * 1000);
 
     const userData = await userDataResponse.json();
+
+    sessionCache.print();
 
     // console.log("userData: " + JSON.stringify(userData));
 
@@ -132,48 +139,51 @@ router.post('/logout', async (req, res) => {
     const refreshToken = req.cookies.refresh_token;
     const sessionId = req.cookies.session_id;
 
-    if (refreshToken) {
-        const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}`
-        )
-        if (!response.ok) console.log("Error invalidating token: " + response.statusText);
-    }
+    // if (refreshToken) {
+    //     const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}`
+    //     )
+    //     if (!response.ok) console.log("Error invalidating token: " + response.statusText);
+    // }
 
     if (sessionId) {
-        const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken) / encodeURIComponent(sessionId)}`
+        const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}/${encodeURIComponent(sessionId)}`
         )
         if (!response.ok) console.log("Error invalidating token and session: " + response.statusText);
+
+        res.cookie('access_token', '', {//TODO tuk zameni refresh_token/access_token sys session_id
+            httpOnly: true,
+            secure: false,
+            path: '/',
+            sameSite: 'lax',
+            maxAge: 0
+        });
+
+        res.cookie('refresh_token', '', {
+            httpOnly: true,
+            secure: false,
+            path: '/auth',
+            sameSite: 'lax',
+            maxAge: 0
+        });
+
+        //todo tova e za kogato vsi4ko sys sesiite e setupnato
+
+        res.cookie('session_id', '',
+            {
+                maxAge: 0,
+                secure: false,
+                path: '/',
+                sameSite: 'lax',
+                httpOnly: true
+            });
+
+        sessionCache.safeDelete(sessionId);
+        sessionCache.print();
+
+        return res.status(200).end();
     }
 
-    res.cookie('access_token', '', {//TODO tuk zameni refresh_token/access_token sys session_id
-        httpOnly: true,
-        secure: false,
-        path: '/',
-        sameSite: 'lax',
-        maxAge: 0
-    });
 
-    res.cookie('refresh_token', '', {
-        httpOnly: true,
-        secure: false,
-        path: '/auth',
-        sameSite: 'lax',
-        maxAge: 0
-    });
-
-    //todo tova e za kogato vsi4ko sys sesiite e setupnato
-
-    // res.cookie('session_id', sessionId,
-    //     {
-    //         maxAge: 0,
-    //         secure: false,
-    //         path: '/',
-    //         sameSite: 'lax',
-    //         httpOnly: true
-    //     });
-    //
-    // sessionCache.delete(sessionId);
-
-    return res.status(200).end();
 });
 
 router.post('/refresh', async (req, res) => {
@@ -182,8 +192,48 @@ router.post('/refresh', async (req, res) => {
 
     // console.log("token: " + refreshToken);
 
-    if (refreshToken) {
-        const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken)}`);
+    // if (refreshToken) {
+    //     const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken)}`);
+    //
+    //     // console.log("response status: " + response.status)
+    //
+    //     if (response.ok) {
+    //         const responseData = await response.json();
+    //         const {
+    //             access_token,
+    //             refresh_token,
+    //             expires_in: access_token_lifetime,
+    //             refresh_expires_in: refresh_token_lifeTime
+    //         } = responseData;
+    //
+    //         res.cookie('access_token', access_token, {
+    //             httpOnly: true,
+    //             secure: false,
+    //             path: '/',
+    //             sameSite: 'lax',
+    //             maxAge: access_token_lifetime * 1000
+    //         });
+    //
+    //         res.cookie('refresh_token', refresh_token, {
+    //             httpOnly: true,
+    //             secure: false,
+    //             path: '/auth',
+    //             sameSite: `lax`,
+    //             maxAge: refresh_token_lifeTime * 1000
+    //         })
+    //         return res.status(200).end();
+    //     } else
+    //         return res.status(response.status).end();
+    //
+    // }
+
+    //todo tova e za kogato vsi4ko sys sesiite e setupnato
+
+    if (sessionId) {
+
+        const refreshToken2 = sessionCache.get(sessionId).refresh_token
+
+        const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken2)}/ ${encodeURIComponent(sessionId)}`);
 
         // console.log("response status: " + response.status)
 
@@ -193,8 +243,18 @@ router.post('/refresh', async (req, res) => {
                 access_token,
                 refresh_token,
                 expires_in: access_token_lifetime,
-                refresh_expires_in: refresh_token_lifeTime
+                refresh_expires_in: refresh_token_lifeTime,
+                session_expires_in
             } = responseData;
+
+            res.cookie('session_id', sessionId,
+                {
+                    maxAge: session_expires_in * 1000,
+                    secure: false,
+                    path: '/',
+                    sameSite: 'lax',
+                    httpOnly: true
+                });
 
             res.cookie('access_token', access_token, {
                 httpOnly: true,
@@ -211,49 +271,15 @@ router.post('/refresh', async (req, res) => {
                 sameSite: `lax`,
                 maxAge: refresh_token_lifeTime * 1000
             })
+
+            const newTTL = session_expires_in * 1000;
+
+            sessionCache.ttl(sessionId, newTTL);
             return res.status(200).end();
         } else
             return res.status(response.status).end();
 
     }
-
-    //todo tova e za kogato vsi4ko sys sesiite e setupnato
-
-    // if (sessionId) {
-    //
-    //     const refreshToken2 = sessionCache.get(sessionId).refresh_token
-    //
-    //     const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken2)}/ ${encodeURIComponent(sessionId)}`);
-    //
-    //     // console.log("response status: " + response.status)
-    //
-    //     if (response.ok) {
-    //         const responseData = await response.json();
-    //         const {
-    //             access_token,
-    //             refresh_token,
-    //             expires_in: access_token_lifetime,
-    //             refresh_expires_in: refresh_token_lifeTime,
-    //             session_expires_in
-    //         } = responseData;
-    //
-    //         res.cookie('session_id', sessionId,
-    //             {
-    //                 maxAge: session_expires_in * 1000,
-    //                 secure: false,
-    //                 path: '/',
-    //                 sameSite: 'lax',
-    //                 httpOnly: true
-    //             });
-    //
-    //         const newTTL = session_expires_in * 1000;
-    //
-    //        sessionCache.ttl(sessionId, newTTL);
-    //         return res.status(200).end();
-    //     } else
-    //         return res.status(response.status).end();
-    //
-    // }
 
     return res.status(401).end();
 })
