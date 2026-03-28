@@ -161,41 +161,82 @@ router.post('/logout', async (req, res) => {
     // }
 
     if (sessionId) {//todo napravi tuk da se polzva axios kogato priklu4i6 sys sesiite
-        const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}/${encodeURIComponent(sessionId)}`
-        )
-        if (!response.ok) console.log("Error invalidating token and session: " + response.statusText);
+        // const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}/${encodeURIComponent(sessionId)}`
+        // )
 
-        res.cookie('access_token', '', {//TODO tuk mahni tokenite kato priklu4i6 sys sesiite
-            httpOnly: true,
-            secure: false,
-            path: '/',
-            sameSite: 'lax',
-            maxAge: 0
-        });
+        try
+        {
+            await fetchWithSessionTokens(sessionId, async (tokens) => await axios.get(
+                `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}`
+            ));
+// res.cookie('access_token', '', {//TODO tuk mahni tokenite kato priklu4i6 sys sesiite
+            //     httpOnly: true,
+            //     secure: false,
+            //     path: '/',
+            //     sameSite: 'lax',
+            //     maxAge: 0
+            // });
+            //
+            // res.cookie('refresh_token', '', {
+            //     httpOnly: true,
+            //     secure: false,
+            //     path: '/auth',
+            //     sameSite: 'lax',
+            //     maxAge: 0
+            // });
+            //
+            // res.cookie('session_id', '',
+            //     {
+            //         maxAge: 0,
+            //         secure: false,
+            //         path: '/',
+            //         sameSite: 'lax',
+            //         httpOnly: true
+            //     });
+            //
+            // sessionCache.safeDelete(sessionId);
+            // // sessionCache.print();
+            //
 
-        res.cookie('refresh_token', '', {
-            httpOnly: true,
-            secure: false,
-            path: '/auth',
-            sameSite: 'lax',
-            maxAge: 0
-        });
+        }
+        catch (error) {
+            console.error("Error invalidating token and session, cookies and sessionCache will still be erased: ", error);
+        }
 
-        res.cookie('session_id', '',
-            {
-                maxAge: 0,
-                secure: false,
-                path: '/',
-                sameSite: 'lax',
-                httpOnly: true
-            });
-
-        sessionCache.safeDelete(sessionId);
-        // sessionCache.print();
+        clearSessionCookies(res, sessionId);
 
         return res.status(200).end();
     }
 });
+
+function clearSessionCookies(res, sessionId = null) {
+
+    sessionCache.safeDelete(sessionId);
+    res.cookie('access_token', '', {//TODO tuk mahni tokenite kato priklu4i6 sys sesiite
+        httpOnly: true,
+        secure: false,
+        path: '/',
+        sameSite: 'lax',
+        maxAge: 0
+    });
+
+    res.cookie('refresh_token', '', {
+        httpOnly: true,
+        secure: false,
+        path: '/auth',
+        sameSite: 'lax',
+        maxAge: 0
+    });
+
+    res.cookie('session_id', '',
+        {
+            maxAge: 0,
+            secure: false,
+            path: '/',
+            sameSite: 'lax',
+            httpOnly: true
+        });
+}
 
 router.post('/refresh', async (req, res) => {
     const refreshToken = req.cookies.refresh_token;

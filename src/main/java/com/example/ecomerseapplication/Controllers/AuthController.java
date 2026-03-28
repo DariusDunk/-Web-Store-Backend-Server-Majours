@@ -38,22 +38,21 @@ public class AuthController {
     }
 
     @GetMapping("refresh/{token}"
-//                        +"/{sessionId}"
+                        +"/{sessionId}"
     )
     public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
-//                                               , @PathVariable("sessionId") String sessionId,
-//                                           @RequestParam("rememberMe") boolean rememberMe
+                                               , @PathVariable String sessionId
     ) {
 
         try {
 
-            return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshToken));
+//            return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshToken));
 
             //todo tova sled kato vsi4ko sys sesiite e setupnato
 
-//            Session session = sessionService.getById(sessionId);
-//
-//            return ResponseEntity.ok(authService.refresh(refreshToken,session,rememberMe));
+            Session session = sessionService.getById(sessionId);
+
+            return ResponseEntity.ok(authService.refresh(refreshToken,session));
         } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -75,14 +74,9 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
 
     }
-//
-//    private String extractIdFromToken(String token) throws ParseException {
-//        SignedJWT signedJWT = (SignedJWT) JWTParser.parse(token);
-//        return signedJWT.getJWTClaimsSet().getSubject();
-//    }
 
-    @PostMapping("login")//TODO dobavi kym requesta i tipa na ustroistvoto, toi 6te se zadava ot syotvetniq BFF
-    public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) throws ParseException {//todo wrapper dto za session-a ili po-dobre napravi nov response, koito da ima samo vajnite ne6ta ot keycloak response-a, zaedno sys sesiqta
+    @PostMapping("login")
+    public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) throws ParseException {//todo moje bi login dannite i sesiqta v bazata trqbva da se kriptirat
 
         return ResponseEntity.ok(authService.login(request));
 
@@ -94,12 +88,8 @@ public class AuthController {
     )
     public ResponseEntity<?> invalidateToken(@PathVariable("token") String refreshToken
     , @PathVariable String sessionId
-    ) {//TODO tuyk da se invalidira i sesiqta
+    ) {
         try {
-
-//            Session session = sessionService.getById(sessionId); //todo tova sled kato vsi4ko sys sesiite e setupnato
-//
-//            sessionService.logout(session, refreshToken);
 
             authService.logout(refreshToken, sessionId);
 
