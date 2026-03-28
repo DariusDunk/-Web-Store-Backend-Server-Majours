@@ -32,7 +32,7 @@ public class CategoryController {
         this.manufacturerService = manufacturerService;
         this.productService = productService;
     }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+
     @GetMapping("names")
     public ResponseEntity<List<String>> getAllNames() {
 
@@ -41,7 +41,6 @@ public class CategoryController {
         return ResponseEntity.ok(names);
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("filters")
     public ResponseEntity<?> getAttributes(@RequestParam @NotBlank String categoryName) {
 

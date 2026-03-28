@@ -281,7 +281,9 @@ router.post('/refresh', async (req, res) => {
 
         const refreshToken2 = sessionCache.get(sessionId).refresh_token
 
-        const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken2)}/ ${encodeURIComponent(sessionId)}`);
+        console.log("refreshToken2: " + refreshToken2);
+
+        const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken2)}/${encodeURIComponent(sessionId)}`);
 
         // console.log("response status: " + response.status)
 

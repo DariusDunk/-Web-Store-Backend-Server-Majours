@@ -37,13 +37,9 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("refresh/{token}"
-                        +"/{sessionId}"
-    )
+    @GetMapping("refresh/{token}/{sessionId}")
     public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
-                                               , @PathVariable String sessionId
-    ) {
-
+            , @PathVariable String sessionId) {
         try {
 
 //            return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshToken));
@@ -51,7 +47,7 @@ public class AuthController {
             //todo tova sled kato vsi4ko sys sesiite e setupnato
 
             Session session = sessionService.getById(sessionId);
-
+            System.out.println("Token for refresh: " + refreshToken);
             return ResponseEntity.ok(authService.refresh(refreshToken,session));
         } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());

@@ -31,33 +31,31 @@ router.get('/getFavourites/:page', async (req, res) => {
 
 router.post(`/addFavourite/:productCode`, async (req, res) => {
 
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
     const productCode = req.params.productCode;
 
     try {
-        const response = await fetch(`${Backend_Url}/customer/favorite/add?productCode=${productCode}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken,
-            },
-            body: JSON.stringify(req.body)
+
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.post(`${Backend_Url}/customer/favorite/add/${productCode}`, {}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                }
+            });
         });
 
-        if (!response.ok) {
-            const responseData = await safeJson(response);
+        const responseData = await response.data;
 
-            if (responseData) {
-                return res.status(response.status).json(responseData);
-            }
-
+        if (responseData)
+            return res.status(response.status).json(responseData);
+        else
             return res.status(response.status).end();
-        }
 
-        return res.status(response.status).end();
+
     } catch (error) {
         console.error('Error:', error);
-        return res.status(500).json({error: error.message});
+        return res.status(error.response.status||500).end();
     }
 });
 

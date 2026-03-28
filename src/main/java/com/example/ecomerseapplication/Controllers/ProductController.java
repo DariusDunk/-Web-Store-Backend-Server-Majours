@@ -102,7 +102,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.getNameSuggestions(name));
     }
 
-    //    @ResponseStatus(HttpStatus.NOT_FOUND)
+
     @GetMapping("{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {

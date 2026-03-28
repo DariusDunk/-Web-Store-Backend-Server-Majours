@@ -40,7 +40,6 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
         this.userIdExtractor = userIdExtractor;
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @PostMapping("savedetails")
     @Transactional
     public ResponseEntity<String> savePurchaseInformation(@RequestBody @Valid SavedRecipientDetailsRequest savedPurchaseDetailsResponse) {
@@ -54,7 +53,6 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
         return purchaseDetailsService.saveDetails(purchaseDetails);
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("recipientTemplates/get")
     public ResponseEntity<?> getPurchaseInformation() {
 

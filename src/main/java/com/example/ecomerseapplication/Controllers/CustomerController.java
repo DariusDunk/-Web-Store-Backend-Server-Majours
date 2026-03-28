@@ -56,10 +56,10 @@ public class CustomerController {
         this.favoriteOfCustomerService = favoriteOfCustomerService;
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @PostMapping("favorite/add")
+ 
+    @PostMapping("favorite/add/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addProductToFavourites(@RequestParam @NotBlank String productCode) {
+    public ResponseEntity<?> addProductToFavourites(@PathVariable @NotBlank String productCode) {
 
         String userId = userIdExtractor.getUserId();
 
@@ -71,7 +71,6 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @GetMapping("favourites/p/{page}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> getFavourites(@PathVariable int page) {
@@ -87,7 +86,7 @@ public class CustomerController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @DeleteMapping("favourites/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
@@ -102,7 +101,7 @@ public class CustomerController {
         return ResponseEntity.noContent().build();
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @DeleteMapping("favorite/remove/single")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveOneFavRequest request) {
@@ -118,7 +117,7 @@ public class CustomerController {
                 request.currentPage()));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @DeleteMapping("favorite/remove/batch")
     @Transactional
     public ResponseEntity<?> removeFromFavouritesBatch(@RequestBody @Valid RemoveFavBatchRequest request) {
@@ -134,7 +133,7 @@ public class CustomerController {
                 request.currentPage()));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @PostMapping("cart/manageQuant")
     @Transactional
     @PreAuthorize("hasRole(@roles.customer())")
@@ -157,7 +156,7 @@ public class CustomerController {
         return ResponseEntity.ok(customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
@@ -172,7 +171,7 @@ public class CustomerController {
 
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @DeleteMapping("cart/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
@@ -188,7 +187,7 @@ public class CustomerController {
         }
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @DeleteMapping("cart/remove/batch")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
@@ -204,7 +203,7 @@ public class CustomerController {
         }
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @GetMapping("cart")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> showCart() {
@@ -219,7 +218,7 @@ public class CustomerController {
                 .body(customerCarts);
     }
 
-//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    
 //    @GetMapping("purchase_history")//TODO kato go napravi6 trqbva da ima validacii na vhodnite danni i fetch-natite entitiy-ta
 //    public ResponseEntity<List<CompactPurchaseResponse>> showPurchases(@RequestParam long id) {
 //
@@ -269,7 +268,7 @@ public class CustomerController {
 //
 //        return customerService.passwordUpdate(customer, request.password);
 //    }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    
     @GetMapping("me")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
 
