@@ -263,32 +263,33 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
 
 router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
     try {
-        // throw new Error("THIS SHOULD CRASH EVERYTHING");
-        const accessToken = req.cookies['access_token'];
 
+        const sessionId = req.cookies.session_id;
         const productCodes = req.body;
 
-        const response = await fetch(`${Backend_Url}/customer/cart/remove/batch`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            },
-            body: JSON.stringify(productCodes)
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.delete(`${Backend_Url}/customer/cart/remove/batch`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                data: JSON.stringify(productCodes)
+            });
+        })
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-
-        const responseData = await response.json();
-
+        const responseData = await response.data;
 
         return res.status(response.status).json(responseData);
-        // return res.status(409).end();
+
     } catch (error) {
-        console.error('Error removing product from cart:', error);
-        return res.status(500).json({error: error.message});
+
+        if (error.response) {
+            console.warn('Handled backend error for batch removing product from cart');
+            return res.status(error.response.status||500).end();
+        }
+
+        console.error('-------------------Error batch removing product from cart-------------------\n', error);
+        return res.status(500).end();
     }
 })
 
