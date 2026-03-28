@@ -278,10 +278,11 @@ router.post('/refresh', async (req, res) => {
 
     if (sessionId) {
 
-        const sessionEntry = sessionCache.get(sessionId)
-        const refreshToken2 = sessionEntry.refresh_token
+        const sessionEntry = sessionCache.get(sessionId);
 
-        console.log("sessionEntry: " + JSON.stringify(sessionEntry));
+        console.log("sessionEntry for refresh: " + JSON.stringify(sessionEntry));
+
+        const refreshToken2 = sessionEntry.refresh_token;
 
         console.log("refreshToken2: " + refreshToken2);
 

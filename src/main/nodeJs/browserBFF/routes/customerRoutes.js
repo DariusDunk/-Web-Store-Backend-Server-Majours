@@ -171,8 +171,6 @@ router.post('/addToCart', async (req, res) => {
     try {
         const {productCode, doIncrement} = req.body;
         const sessionId = req.cookies.session_id;
-        // const accessToken = req.cookies['access_token'];
-
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
             return await axios.post(`${Backend_Url}/customer/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
@@ -187,22 +185,6 @@ router.post('/addToCart', async (req, res) => {
 
         return res.status(response.status).json({message: responseData});
 
-        // const response = await fetch(`${Backend_Url}/customer/cart/manageQuant`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': 'Bearer ' + accessToken
-        //     },
-        //     body: JSON.stringify({product_code: productCode, do_increment: doIncrement})
-        // });
-        //
-        // if (response.ok) {
-        //     return res.status(response.status).json({message: await response.text()});
-        // } else {
-        //     const responseData = await safeJson(response);
-        //
-        //     return res.status(response.status).json(responseData);
-        // }
     } catch (error) {
 
         if (error.response) {
@@ -218,17 +200,18 @@ router.post('/addToCart', async (req, res) => {
 router.post('/addToCart/batch', async (req, res) => {
     try {
         const productCodes = req.body;
-        const accessToken = req.cookies['access_token'];
-        const response = await fetch(`${Backend_Url}/customer/cart/add/batch`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            },
-            body: JSON.stringify(productCodes)
-        });
+        const sessionId = req.cookies.session_id;
 
-        const responseData = await safeJson(response);
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.post(`${Backend_Url}/customer/cart/add/batch`, productCodes, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                }
+            });
+        })
+
+        const responseData = await response.data;
 
         if (responseData)
             return res.status(response.status).json(responseData);
@@ -236,8 +219,14 @@ router.post('/addToCart/batch', async (req, res) => {
             return res.status(response.status).end();
 
     } catch (error) {
-        console.error('Error batch adding products to cart: ', error);
-        return res.status(500).json({error: error.message});
+
+        if (error.response) {
+            console.warn('Handled backend error for batch adding products to cart');
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Error batch adding products to cart-------------------\n', error);
+        return res.status(500).end();
     }
 })
 
