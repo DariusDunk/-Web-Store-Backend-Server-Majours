@@ -232,28 +232,32 @@ router.post('/addToCart/batch', async (req, res) => {
 
 router.post('/removeFromCart/:productCode', async (req, res) => {
     try {
-        // const {customerId, productCode} = req.body;
 
         const productCode = req.params.productCode;
-        const accessToken = req.cookies['access_token'];
-        const response = await fetch(`${Backend_Url}/customer/cart/remove/${productCode}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            }
-        });
+        const sessionId = req.cookies.session_id;
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.delete(`${Backend_Url}/customer/cart/remove/${productCode}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                }
+            });
+        })
 
-        const responseData = await response.json();
+        const responseData = await response.data;
 
         return res.status(response.status).json(responseData);
+
     } catch (error) {
-        console.error('Error removing product from cart:', error);
-        return res.status(500).json({error: error.message});
+
+        if (error.response) {
+            console.warn('Handled backend error for removing product from cart');
+            return res.status(error.response.status||500).end();
+        }
+
+        console.error('-------------------Error removing product from cart-------------------\n', error);
+        return res.status(500).end();
     }
 })
 
