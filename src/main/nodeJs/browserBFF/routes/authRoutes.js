@@ -132,7 +132,7 @@ router.post(`/login`, async (req, res) => {
                 httpOnly: true
             });
 
-        sessionCache.print();
+        // sessionCache.print();
 
         const userData = await userDataResponse.data;
 
@@ -275,7 +275,7 @@ router.post('/refresh', async (req, res) => {
 
     if (sessionId) {
         //
-        // console.log("sessionId for refresh: " + sessionId);
+        console.log("Refreshing tokens...");
         //
         // sessionCache.print();
         //
@@ -334,9 +334,21 @@ router.post('/refresh', async (req, res) => {
                 maxAge: refresh_token_lifeTime * 1000
             })
 
-            const newTTL = session_expires_in * 1000;
+            // const newTTL = session_expires_in ;
 
-            sessionCache.ttl(sessionId, newTTL);
+            sessionCache.safeDelete(sessionId);
+
+            sessionCache.set(sessionId, {
+                access_token,
+                access_token_lifetime,
+                refresh_token,
+                refresh_token_lifeTime,
+                remember_me: false
+            }, session_expires_in);
+
+
+
+            // sessionCache.ttl(sessionId, newTTL);
             return res.status(200).end();
 
         } catch (error) {

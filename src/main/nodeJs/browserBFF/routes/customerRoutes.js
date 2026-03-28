@@ -322,29 +322,26 @@ router.get('/getCart', async (req, res) => {
 });
 
 router.get('/me', async (req, res) => {
-    const accessToken = req.cookies['access_token'];
+
+    const sessionId = req.cookies.session_id;
+
     try {
-        const response = await fetch(`${Backend_Url}/customer/me`,
-            {
-                method: 'GET',
+
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.get(`${Backend_Url}/customer/me`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken,
+                    'Authorization': 'Bearer ' + tokens.access_token,
                 }
-            }
-        )
+            });
+        })
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-
-        const responseData = await response.json();
-        // console.log("/Me refetch response: " + JSON.stringify(responseData));
+        const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
     } catch (error) {
         console.error('Error:', error);
-        return res.status(500).json({error: error.message});
+        return res.status(500).end();
     }
 })
 
