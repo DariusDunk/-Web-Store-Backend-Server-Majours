@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
 const {safeJson} = require('../services/safeJsonFunc.js');
-const sessionCache = require('../services/sessionCache.js');
+// const sessionCache = require('../services/sessionCache.js');
 const {fetchWithSessionTokens} = require("../services/requestTokenManager.js");
 const axios = require("axios");
 
@@ -54,7 +54,7 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
 
 
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error adding product to favourites: ', error);
         return res.status(error.response.status||500).json(error.response.data);
     }
 });
@@ -84,31 +84,32 @@ router.post(`/removeFav/single`, async (req, res) => {
         return res.status(response.status).json(responseData);
 
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error removing product through the favourites page: ', error);
         return res.status(error.response.status||500).end();
     }
 })
 
 router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
 
-    // console.log("In fav removal");
-
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
     const productCode = req.params.productCode;
 
     try {
-        const response = await fetch(`${Backend_Url}/customer/favourites/remove/${productCode}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            }
+
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.delete(`${Backend_Url}/customer/favourites/remove/${productCode}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                }
+            });
         });
 
         return res.status(response.status).end();
+
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({error: error.message});
+        console.error('Error removing product from favourites through the product page: ', error);
+        return res.status(error.response.status||500).end();
     }
 })
 
