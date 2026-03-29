@@ -216,48 +216,34 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 });
 
 router.post('/getPagedReviews', async (req, res) => {
-    // const page = parseInt(req.params.page, 10);
+
     const productCode = req.body.productCode;
-    // const userId = req.body.userId;
     const page = req.body.page;
     const sort = req.body.sortOrder;
     const verifiedOnly = req.body.verifiedOnly;
     const ratingValue = req.body.ratingValue
-    const accessToken = req.cookies['access_token'];
-    // console.log("Token: " + accessToken);
-
-    // console.log("Code: " + productCode + " User: " + userId);
-
-    // console.log(JSON.stringify(req.body))
+    const sessionId = req.cookies.session_id;
 
     try {
-        const response = await fetch(`${Backend_Url}/product/reviews/paged`,
-            {
-                method: 'POST',
-                body: JSON.stringify({
-                    product_code: productCode,
-                    page,
-                    sort_order: sort,
-                    verified_only: verifiedOnly,
-                    rating_value: ratingValue
-                }),
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.post(`${Backend_Url}/product/reviews/paged`, {
+                product_code: productCode,
+                page,
+                sort_order: sort,
+                verified_only: verifiedOnly,
+                rating_value: ratingValue
+            }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken
+                    'Authorization': 'Bearer ' + tokens.access_token
                 }
-            });
+            })
+        })
 
-        if (!response.ok) {
-            const text = response.text();
-            console.error(`Review fetch error: ${response.status} - ${text}`);
-            return res.status(response.status).json({error: 'Error from backend'});
-        }
-
-        const responseData = await response.json();
-
-        // console.log(responseData);
+        const responseData = await response.data;
 
         return res.status(response.status).json(responseData);
+
     } catch (error) {
         console.error('Reviews: Error fetching data: ', error);
         return res.status(500).json({error: 'Internal server error'});
