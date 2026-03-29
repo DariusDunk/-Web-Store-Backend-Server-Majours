@@ -2,6 +2,8 @@ const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
 
+//todo kato stigne6 do tuk 6te ima da menq6 vis4ki zaqvki v endpointovete spored novata logika
+
 router.post('/complete', async (req, res)=>{
   try{
 

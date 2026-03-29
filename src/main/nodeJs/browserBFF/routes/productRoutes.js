@@ -2,27 +2,22 @@ const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
 const {safeJson} = require("../services/safeJsonFunc.js");
+const {fetchWithSessionTokens} = require("../services/requestTokenManager");
+const axios = require('axios');
 
 
-router.get('/featured/:page', async (req, res) => {
-    const queryParts = req.url.split("/");
-    const page = queryParts[2];
-    // console.log("inside featured");
+router.get('/featured/:page', async (req, res) => {//todo prodylju sys sesiite ot tuk
+
+    const page = req.params.page;
+
     try {
-        const response = await fetch(`${Backend_Url}/product/findall?page=${page}`);
-        if (response.status === 404) {
-            return res.redirect('/404.html');
-        }
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
+        const response = await axios.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {});
+        const data = await response.data;
+        return res.status(response.status).json(data);
 
-        const data = await response.json();
-        return res.json(data);
-        // }
     } catch (error) {
         console.error('Search: Error fetching data:', error);
-        return res.status(error.status).json({error: error.message});
+        return res.status(error.status).end();
     }
 });
 

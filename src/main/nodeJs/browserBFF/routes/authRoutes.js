@@ -230,7 +230,7 @@ function clearSessionCookies(res, sessionId = null) {
         });
 }
 
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', async (req, res) => {//todo tozi endpoint da se mahne kato priklu4i6 sys sesiite
     const refreshToken = req.cookies.refresh_token;
     const sessionId = req.cookies.session_id;
 
@@ -271,7 +271,7 @@ router.post('/refresh', async (req, res) => {
     //
     // }
 
-    //todo tova e za kogato vsi4ko sys sesiite e setupnato
+
 
     if (sessionId) {
         //
