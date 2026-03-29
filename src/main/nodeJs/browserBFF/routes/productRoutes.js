@@ -66,15 +66,6 @@ router.get(`/review/overview/:productCode`, async (req, res) => {
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
-        // const response = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
-        //
-        // if (!response.ok) {
-        //     return res.status(response.status).end();
-        // }
-        //
-        // const responseData = await response.json();
-        //
-        // return res.status(response.status).json(responseData);
     } catch (error) {
         console.error('Error fetching product review overview from backend:', error);
         return res.status(error.status).end();
@@ -84,37 +75,35 @@ router.get(`/review/overview/:productCode`, async (req, res) => {
 router.get('/detail/:productCode', async (req, res) => {
     const {productCode} = req.params;
 
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
 
-    if (!productCode) {
+    if (!productCode || !sessionId) {
         return res.status(400).json({error: 'Missing required parameters'});
     }
     try {
-        const productDetailsResponse = await fetch(`${Backend_Url}/product/${productCode}`,
-            {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken,
-                }
-            });
 
-        const ratingOverviewResponse = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
+        const [productDetailResponse, ratingOverviewResponse] =
+            await fetchWithSessionTokens(sessionId, async (tokens) =>
+                Promise.all([
+                    axios.get(`${Backend_Url}/product/${productCode}`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + tokens.access_token
+                        }
+                    }),
+                    axios.get(`${Backend_Url}/product/${productCode}/review/overview`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + tokens.access_token
+                        }
+                    })
+                ])
+            );
 
-        if (!ratingOverviewResponse.ok) {
-            return res.status(ratingOverviewResponse.status).end();
-        }
+        const productDetails = productDetailResponse.data;
+        const ratingOverview = ratingOverviewResponse.data;
 
-        if (!productDetailsResponse.ok) {
-            return res.status(productDetailsResponse.status).end();
-        }
-
-        const productDetails = await productDetailsResponse.json();
-        const ratingOverview = await ratingOverviewResponse.json();
-
-        // console.log(JSON.stringify(ratingOverview));
-
-        return res.json({productDetails, ratingOverview});
+        return res.status(200).json({productDetails, ratingOverview});
 
     } catch (error) {
         console.error('Error fetching data from backend:', error);
