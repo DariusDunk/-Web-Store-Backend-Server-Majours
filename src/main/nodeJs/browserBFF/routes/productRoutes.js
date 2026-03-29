@@ -32,7 +32,7 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
 
     } catch (error) {
         console.error('Manufacturer: Error fetching data:', error);
-        return res.status(error.status).json({error: error.message});
+        return res.status(error.status).end();
     }
 });
 
@@ -49,7 +49,7 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
 
     } catch (error) {
         console.error('Category: Error fetching data:', error);
-        return res.status(error.status).json({error: error.message});
+        return res.status(error.status).end();
     }
 });
 
@@ -61,18 +61,23 @@ router.get(`/review/overview/:productCode`, async (req, res) => {
     }
 
     try {
-        const response = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-
-        const responseData = await response.json();
-
+        const response = await axios.get(`${Backend_Url}/product/${productCode}/review/overview`, {});
+        const responseData = await response.data;
         return res.status(response.status).json(responseData);
+
+        // const response = await fetch(`${Backend_Url}/product/${productCode}/review/overview`);
+        //
+        // if (!response.ok) {
+        //     return res.status(response.status).end();
+        // }
+        //
+        // const responseData = await response.json();
+        //
+        // return res.status(response.status).json(responseData);
     } catch (error) {
         console.error('Error fetching product review overview from backend:', error);
-        return res.status(error.status).json({error: error.message});
+        return res.status(error.status).end();
     }
 })
 
