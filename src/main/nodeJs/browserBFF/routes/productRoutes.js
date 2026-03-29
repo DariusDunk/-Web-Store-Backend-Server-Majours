@@ -275,7 +275,7 @@ router.get(`/getReview/:productCode`, async (req, res) => {
             return res.status(error.response.status||500).json(error.response.data);
         }
 
-        console.error('-------------------Error fetching specific review data-------------------\n', error);
+        console.error('-------------------Unexpected error fetching specific review data-------------------\n', error);
         return res.status(500).json({error: 'Internal server error'});
     }
 })
@@ -284,41 +284,32 @@ router.post(`/addReview`, async (req, res) => {
     const productCode = req.body.productCode;
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
 
-    // console.log( "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
-
-    // console.log(JSON.stringify(req.body))
     try {
-        const response = await fetch(`${Backend_Url}/product/review/add`,
-            {
-                method: 'POST',
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.post(`${Backend_Url}/product/review/add`, {
+                product_code: productCode,
+                rating: rating,
+                review_text: reviewText
+            }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken
-                },
-                body: JSON.stringify({
-                    product_code: productCode,
-                    rating: rating,
-                    review_text: reviewText
-                }),
-            }
-        )
+                    'Authorization': 'Bearer ' + tokens.access_token
+                }
+            })
+        })
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-
-        if (response.status === 207) {
-            const responseData = await response.json();
-            // console.log(responseData);
-            return res.status(response.status).json(responseData);
-        }
-
-
-        return res.status(response.status).json(response.statusText);
+        const responseData = await response.data;
+        return res.status(response.status).json(responseData);
     } catch (error) {
-        console.error('Error creating/updating the review ', error);
+
+        if (error.response) {
+            console.warn('Handled backend error for creating review');
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Unexpected error creating review-------------------\n', error);
         return res.status(500).json({error: 'Internal server error'});
     }
 })
