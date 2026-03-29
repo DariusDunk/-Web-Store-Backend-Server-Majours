@@ -129,13 +129,7 @@ router.get(`/search`, async (req, res) => {
 
     const {searchText, page, sort} = req.query;
 
-    // console.log("search");
     try {
-        const params = new URLSearchParams({
-            name: searchText,
-            page: page.toString(),
-            sort: sort || ''
-        });
 
         const url = new URL('/product/search', Backend_Url);
 
@@ -143,18 +137,14 @@ router.get(`/search`, async (req, res) => {
         url.searchParams.set('page', page);
         url.searchParams.set('sort', sort || '');
 
-        const response = await fetch(url.toString());
+        const response = await axios.get(url.toString());
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-
-        const data = await response.json();
-        return res.json(data);
+        const data = await response.data;
+        return res.status(response.status).json(data);
 
     } catch (error) {
         console.error('Search: Error fetching data:', error);
-        return res.status(500).json({error: 'Failed to fetch data from the real server'});
+        return res.status(500).end();
     }
 });
 
