@@ -315,36 +315,39 @@ router.post(`/addReview`, async (req, res) => {
 })
 
 router.post(`/updateReview`, async (req, res) => {
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
     const productCode = req.body.productCode;
     const rating = req.body.rating;
     const reviewText = req.body.reviewText;
 
-    // console.log( "INSIDE UPDATE REVIEW: " + "User: " + userId + " Product: " + productCode + " Rating: " + rating + " Review: " + reviewText)
-
     try {
-        const response = await fetch(Backend_Url + "/product/review/update",
-            {
-                method: 'PATCH',
+
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.patch(`${Backend_Url}/product/review/update`, {
+                product_code: productCode,
+                rating: rating,
+                review_text: reviewText
+            }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken
-                },
-                body: JSON.stringify({
-                    product_code: productCode,
-                    rating: rating,
-                    review_text: reviewText
-                }),
+                    'Authorization': 'Bearer ' + tokens.access_token
+                }
             })
+        })
 
-        const responseData = await safeJson(response);
-
+        const responseData = await response.data;
         return res.status(response.status).json(responseData);
-    } catch (error) {
-        console.error('Error updating the review ', error);
-        return res.status(500).json({error: 'Internal server error'});
-    }
 
+    } catch (error) {
+
+        if (error.response) {
+            console.warn('Handled backend error for updating the review');
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Error updating the review-------------------\n', error);
+        return res.status(500).end();
+    }
 })
 
 router.post(`/deleteReview`, async (req, res) => {

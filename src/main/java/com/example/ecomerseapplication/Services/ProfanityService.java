@@ -70,8 +70,7 @@ public class ProfanityService {
 
             if (swearSet.contains(normalized)) {
                 if (coreWord.length() > 1) {
-                    censoredText.append(coreWord.charAt(0))
-                            .append("*".repeat(coreWord.length() - 1));
+                    censoredText.append(coreWord.charAt(0)).repeat("*", coreWord.length() - 1);
                 } else {
                     censoredText.append("*");
                 }
