@@ -352,29 +352,26 @@ router.post(`/updateReview`, async (req, res) => {
 
 router.post(`/deleteReview`, async (req, res) => {
     const {productCode} = req.body;
-    const accessToken = req.cookies['access_token'];
-
-    // console.log( "INSIDE DELETE REVIEW: " + "Product: " + productCode + " Customer: " + customerId)
-
+    const sessionId = req.cookies.session_id;
 
     try {
-        const response = await fetch(`${Backend_Url}/product/review/delete?product_code=${productCode}`,
-            {
-                method: 'DELETE',
+
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.delete(`${Backend_Url}/product/review/delete?${new URLSearchParams({product_code: productCode || ''})}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken
+                    'Authorization': 'Bearer ' + tokens.access_token
                 }
             })
+        })
 
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
+        const responseData = await response.data;
+        return res.status(response.status).json(responseData);
 
-        return res.status(response.status).json(response.statusText);
     } catch (error) {
+
         console.error('Error deleting the review ', error);
-        return res.status(500).json({error: 'Internal server error'});
+        return res.status(500).end();
     }
 })
 
