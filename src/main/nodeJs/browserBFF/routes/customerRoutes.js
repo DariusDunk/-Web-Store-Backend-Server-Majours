@@ -325,6 +325,10 @@ router.get('/me', async (req, res) => {
 
     const sessionId = req.cookies.session_id;
 
+
+    if (!sessionId)
+        return res.status(400).end();//todo moje bi trqbva dase smeni v byde6te
+
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {

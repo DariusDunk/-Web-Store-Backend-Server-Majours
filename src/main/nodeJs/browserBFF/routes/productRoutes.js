@@ -39,19 +39,13 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
 router.get('/category/:categoryName/p:page', async (req, res) => {
     const {categoryName, page} = req.params;
     const sort = req.query.sort;
-    // console.log("sort: " + sort);
+
     try {
-        const response = await fetch(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
 
-        if (response.status === 404) {
-            return res.redirect('/404.html');
-        }
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
+        const response = await axios.get(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
 
-        const data = await response.json();
-        return res.json(data);
+        const responseData = await response.data;
+        return res.status(response.status).json(responseData);
 
     } catch (error) {
         console.error('Category: Error fetching data:', error);
