@@ -252,27 +252,30 @@ router.post('/getPagedReviews', async (req, res) => {
 
 router.get(`/getReview/:productCode`, async (req, res) => {
     const {productCode} = req.params;
-    // const accessToken = req.cookies['access_token'];
-    // console.log("Token: " + accessToken);
-    const accessToken = req.cookies['access_token'];
+    const sessionId = req.cookies.session_id;
 
     try {
-        const response = await fetch(`${Backend_Url}/product/review/specific?productCode=${productCode}`,
-            {
-                method: 'GET',
+
+        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+            return await axios.get(`${Backend_Url}/product/review/specific?${new URLSearchParams({productCode: productCode || ''})}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken
+                    'Authorization': 'Bearer ' + tokens.access_token
                 }
-            });
+            })
+        })
 
-        // console.log("STATUS: " + response.status);
-
-        const responseData = await safeJson(response);
-        // console.log("STATUS: " + response.status + " DATA: " + JSON.stringify(responseData));
+        const responseData = await response.data;
         return res.status(response.status).json(responseData);
+
     } catch (error) {
-        console.error('Reviews: Error fetching specific review data: ', error);
+
+        if (error.response) {
+            console.warn('Handled backend error for fetching specific review data');
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Error fetching specific review data-------------------\n', error);
         return res.status(500).json({error: 'Internal server error'});
     }
 })
