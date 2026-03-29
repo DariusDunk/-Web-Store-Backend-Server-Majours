@@ -24,17 +24,11 @@ router.get('/featured/:page', async (req, res) => {//todo prodylju sys sesiite o
 router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
     const {manufacturerName, page} = req.params;
     const sort = req.query.sort;
-    // console.log("Manufacturer sort: " + sort);
+
     try {
-        const response = await fetch(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`);
-        if (response.status === 404) {
-            return res.redirect('/404.html');
-        }
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-        const data = await response.json();
-        return res.json(data);
+        const response = await axios.get(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
+        const responseData = await response.data;
+        return res.status(response.status).json(responseData);
 
     } catch (error) {
         console.error('Manufacturer: Error fetching data:', error);
