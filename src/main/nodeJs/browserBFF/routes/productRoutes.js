@@ -158,32 +158,17 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         return res.status(400).json({error: 'Invalid page parameter'});
     }
 
-    // Parse category
     const category = decodeURIComponent(req.params.category);
-
-    // console.log('category', category);
-
     const {filters = {}, sort} = req.query;
-
-    // console.log("sort for filters: " + sort);
-
-    // console.log("filters: "+JSON.stringify(filters));
-
     let minPrice = 0;
     let maxPrice = Infinity;  // Or some default max
 
-
     if (filters.pr) {
-
-        // console.log(filters.pr);
 
         const priceRange = filters.pr.split('-');
         minPrice = parseInt(priceRange[0], 10) || 0;
         maxPrice = parseInt(priceRange[1], 10) || Infinity;
-        // console.log( "PR: " + priceRange );
     }
-
-    // console.log("price range:" + minPrice +" - "+ maxPrice);
 
     let manufacturers = [];
 
@@ -197,11 +182,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         }
     }
 
-    // console.log(manufacturers);
-
     const rating = filters.r ? filters.r : null;  // Assuming ratings are numbers
-
-    // console.log("ratings: "+ ratings);
 
     const attributes = {};
     Object.keys(filters).forEach(key => {
@@ -211,9 +192,6 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         }
     });
 
-    // console.log("attributes: " + JSON.stringify(attributes));
-
-    // Construct request body for backend (adjust keys as needed for your backend API)
     const requestBody = {
         filter_attributes: attributes,
         product_category: category,
@@ -224,26 +202,16 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         sort: sort
     };
 
-    // console.log("request body: " + JSON.stringify(requestBody));
-
     try {
-        const response = await fetch(`${Backend_Url}/product/filter/${page}`, {
-            method: 'POST',
-            body: JSON.stringify(requestBody),
-            headers: {'Content-Type': 'application/json'}
-        });
 
-        if (!response.ok) {
-            const text = await response.text();
-            console.error(`Product filter error: ${response.status} - ${text}`);
-            return res.status(response.status).json({error: 'Error from backend'});
-        }
+        const response = await axios.post(`${Backend_Url}/product/filter/${page}`, requestBody, {});
 
-        const responseData = await response.json();
-        return res.status(200).json(responseData);
+        const responseData = await response.data;
+        return res.status(response.status).json(responseData);
+
     } catch (error) {
-        console.error('Proxy error:', error);
-        return res.status(502).json({error: 'Invalid response from backend'});
+        console.error('Error fetching products with filters:', error);
+        return res.status(500).end();
     }
 });
 

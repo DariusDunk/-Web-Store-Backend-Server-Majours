@@ -31,12 +31,8 @@ public class CategoryAttributeService {
 
     public Set<CategoryAttribute> getByNamesAndOptions(Map<String, List<String>> stringMap) {
 
-
         Specification<CategoryAttribute> specification = AttributeSpecifications.filterByAttributes(stringMap);
 
-//        System.out.println("QUERY: " + specification.toString());
-
         return new HashSet<>(categoryAttributeRepository.findAll(specification));
-
     }
 }
