@@ -1,26 +1,19 @@
 const express =require( 'express');
 const router = express.Router();
 const { Backend_Url } = require('./config.js');
+const {get} = require("axios");
 
 router.get('/names', async (req, res)=> {
-  // console.log("category names");
   try {
-    const response = await fetch(`${Backend_Url}/category/names`);
-    if (response.status === 404) {
-      return res.redirect('/404.html');
-    }
-     if (!response.ok) {
-       return res.status(response.status).end();
-     }
+      const response = await get(`${Backend_Url}/category/names`);
+      const responseData = response.data;
 
-      const data = await response.json();
-      return res.json(data);
+      return res.status(response.status).json(responseData || {})
 
   } catch (error) {
-    console.error('Names: Error fetching data:', error);
-    return res.status(500).json({error: 'Failed to fetch data from the real server'});
+    console.error('-------------------Error fetching category names data-------------------\n', error);
+    return res.status(500).end();
   }
-
 });
 
 module.exports = router

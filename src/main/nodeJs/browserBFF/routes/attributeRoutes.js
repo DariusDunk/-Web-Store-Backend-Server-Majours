@@ -14,7 +14,7 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
 
     return res.status(response.status).json(responseData || {})
   }catch (error) {
-    console.error('-------------------Error getting category filters\n', error);
+    console.error('-------------------Error getting category filters-------------------\n', error);
     return res.status(500).end();
   }
 })
