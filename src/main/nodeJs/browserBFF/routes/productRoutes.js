@@ -74,7 +74,6 @@ router.get(`/review/overview/:productCode`, async (req, res) => {
 
 router.get('/detail/:productCode', async (req, res) => {
     const {productCode} = req.params;
-
     const sessionId = req.cookies.session_id;
 
     if (!productCode || !sessionId) {
@@ -107,27 +106,22 @@ router.get('/detail/:productCode', async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching data from backend:', error);
-        return res.status(error.status).json({error: error.message});
+        return res.status(error.status).end();
     }
 });
 
 router.get('/suggest/:name', async (req, res) => {
     try {
-        // console.log("suggest");
-        const queryParts = req.url.split("/");
-        const text = queryParts[2];
 
-        const response = await fetch(`${Backend_Url}/product/suggest?name=${text}`);
-
-        if (!response.ok) {
-            return res.status(response.status).end();
-        }
-        const data = await response.json();
+        const name = req.params.name;
+        const response = await axios.get(`${Backend_Url}/product/suggest?${new URLSearchParams({name: name || ''})}`);
+        const data = await response.data;
 
         return res.status(response.status).json(data);
+
     } catch (error) {
         console.error('Suggest: Error fetching suggestions from backend:', error);
-        return res.status(500).json({error: 'Internal Server Error'});
+        return res.status(500).end();
     }
 });
 
