@@ -1,11 +1,11 @@
-const NodeCache = require("node-cache");
+import NodeCache from "node-cache";
 
 const cache = new NodeCache({
     stdTTL: 8 * 60 * 60,
     checkperiod: 60
 });
 
-module.exports = {
+export default {
     get(sessionId) {
         return cache.get(sessionId);
     },

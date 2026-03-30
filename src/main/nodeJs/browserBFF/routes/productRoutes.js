@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {Backend_Url} = require('./config.js');
-const {fetchWithSessionTokens} = require("../services/requestTokenManager");
-const axios = require('axios');
+import {Backend_Url} from './config.js';
+import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
+import axiosBackendClient from '../axiosBackendClient.js';
 
 
 router.get('/featured/:page', async (req, res) => {//todo prodylju sys sesiite ot tuk
@@ -10,7 +10,7 @@ router.get('/featured/:page', async (req, res) => {//todo prodylju sys sesiite o
     const page = req.params.page;
 
     try {
-        const response = await axios.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {});
         const data = await response.data;
         return res.status(response.status).json(data);
 
@@ -25,7 +25,7 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
     const sort = req.query.sort;
 
     try {
-        const response = await axios.get(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
@@ -41,7 +41,7 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
 
     try {
 
-        const response = await axios.get(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -61,7 +61,7 @@ router.get(`/review/overview/:productCode`, async (req, res) => {
 
     try {
 
-        const response = await axios.get(`${Backend_Url}/product/${productCode}/review/overview`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {});
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
@@ -83,16 +83,22 @@ router.get('/detail/:productCode', async (req, res) => {
         const [productDetailResponse, ratingOverviewResponse] =
             await fetchWithSessionTokens(sessionId, async (tokens) =>
                 Promise.all([
-                    axios.get(`${Backend_Url}/product/${productCode}`, {
+                    axiosBackendClient.get(`${Backend_Url}/product/${productCode}`, {
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + tokens.access_token
+                        },
+                        bffContext: {
+                            req, res
                         }
                     }),
-                    axios.get(`${Backend_Url}/product/${productCode}/review/overview`, {
+                    axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + tokens.access_token
+                        },
+                        bffContext: {
+                            req, res
                         }
                     })
                 ])
@@ -113,7 +119,7 @@ router.get('/suggest/:name', async (req, res) => {
     try {
 
         const name = req.params.name;
-        const response = await axios.get(`${Backend_Url}/product/suggest?${new URLSearchParams({name: name || ''})}`);
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/suggest?${new URLSearchParams({name: name || ''})}`);
         const data = await response.data;
 
         return res.status(response.status).json(data);
@@ -136,7 +142,7 @@ router.get(`/search`, async (req, res) => {
         url.searchParams.set('page', page);
         url.searchParams.set('sort', sort || '');
 
-        const response = await axios.get(url.toString());
+        const response = await axiosBackendClient.get(url.toString());
 
         const data = await response.data;
         return res.status(response.status).json(data);
@@ -203,7 +209,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
     try {
 
-        const response = await axios.post(`${Backend_Url}/product/filter/${page}`, requestBody, {});
+        const response = await axiosBackendClient.post(`${Backend_Url}/product/filter/${page}`, requestBody, {});
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -225,7 +231,7 @@ router.post('/getPagedReviews', async (req, res) => {
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.post(`${Backend_Url}/product/reviews/paged`, {
+            return await axiosBackendClient.post(`${Backend_Url}/product/reviews/paged`, {
                 product_code: productCode,
                 page,
                 sort_order: sort,
@@ -235,6 +241,9 @@ router.post('/getPagedReviews', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token
+                },
+                bffContext: {
+                    req, res
                 }
             })
         })
@@ -256,10 +265,13 @@ router.get(`/getReview/:productCode`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.get(`${Backend_Url}/product/review/specific?${new URLSearchParams({productCode: productCode || ''})}`, {
+            return await axiosBackendClient.get(`${Backend_Url}/product/review/specific?${new URLSearchParams({productCode: productCode || ''})}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token
+                },
+                bffContext: {
+                    req, res
                 }
             })
         })
@@ -287,7 +299,7 @@ router.post(`/addReview`, async (req, res) => {
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.post(`${Backend_Url}/product/review/add`, {
+            return await axiosBackendClient.post(`${Backend_Url}/product/review/add`, {
                 product_code: productCode,
                 rating: rating,
                 review_text: reviewText
@@ -295,6 +307,9 @@ router.post(`/addReview`, async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token
+                },
+                bffContext: {
+                    req, res
                 }
             })
         })
@@ -322,7 +337,7 @@ router.post(`/updateReview`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.patch(`${Backend_Url}/product/review/update`, {
+            return await axiosBackendClient.patch(`${Backend_Url}/product/review/update`, {
                 product_code: productCode,
                 rating: rating,
                 review_text: reviewText
@@ -330,6 +345,9 @@ router.post(`/updateReview`, async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token
+                },
+                bffContext: {
+                    req, res
                 }
             })
         })
@@ -356,10 +374,13 @@ router.post(`/deleteReview`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.delete(`${Backend_Url}/product/review/delete?${new URLSearchParams({product_code: productCode || ''})}`, {
+            return await axiosBackendClient.delete(`${Backend_Url}/product/review/delete?${new URLSearchParams({product_code: productCode || ''})}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token
+                },
+                bffContext: {
+                    req, res
                 }
             })
         })
@@ -374,5 +395,4 @@ router.post(`/deleteReview`, async (req, res) => {
     }
 })
 
-
-module.exports = router
+export default router;

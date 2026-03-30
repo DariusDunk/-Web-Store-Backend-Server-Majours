@@ -1,11 +1,11 @@
-const express =require( 'express');
+import express from  'express';
 const router = express.Router();
-const { Backend_Url } = require('./config.js');
-const {get} = require("axios");
+import { Backend_Url } from './config.js';
+import axiosBackendClient from '../axiosBackendClient.js';
 
 router.get('/names', async (req, res)=> {
   try {
-      const response = await get(`${Backend_Url}/category/names`);
+      const response = await axiosBackendClient.get(`${Backend_Url}/category/names`);
       const responseData = response.data;
 
       return res.status(response.status).json(responseData || {})
@@ -16,4 +16,4 @@ router.get('/names', async (req, res)=> {
   }
 });
 
-module.exports = router
+export default router;

@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
+import com.example.ecomerseapplication.DTOs.responses.RefreshResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
 import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
@@ -10,6 +11,7 @@ import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidSessionException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
 import com.example.ecomerseapplication.Mappers.LoginResponseMapper;
+import com.example.ecomerseapplication.Mappers.RefreshResponseMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
@@ -41,7 +43,7 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse login(UserLoginRequest request) throws ParseException {
+    public LoginResponse login(UserLoginRequest request) {
         KeycloakTokenResponse tokenResponse = null;
         try {
             tokenResponse = keycloakService.loginUser(request);
@@ -73,18 +75,25 @@ public class AuthService {
     }
 
     @Transactional
-    public TokenRefreshResponse refresh(String refreshToken, Session session) {
+    public RefreshResponse refresh(String refreshToken, Session session) {
         if (session.getIsRevoked()|| session.isExpired())
             throw new InvalidSessionException("Session is revoked or expired");
 
         try {
+
+            System.out.println("refreshing token for session: " + session.getSessionId());
+            System.out.println("refresh token : " + refreshToken);
+
             TokenRefreshResponse tokenRefreshResponse = keycloakService.refreshBothTokens(refreshToken);
             Instant newTTL = session.isRememberMeSession()
                     ?Instant.now().plus(tokenRefreshResponse.expiresIn(), ChronoUnit.SECONDS)
                     :Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS);
             session.setExpiresAt(newTTL);
+            session.setRefreshToken(tokenRefreshResponse.refreshToken());
 
-            return tokenRefreshResponse;
+            sessionService.save(session);
+
+            return RefreshResponseMapper.tokenRefreshToRefreshResponse(tokenRefreshResponse, newTTL);
         }
         catch (Exception e)
         {

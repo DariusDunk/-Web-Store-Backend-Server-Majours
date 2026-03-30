@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {Backend_Url} = require('./config.js');
+import {Backend_Url} from'./config.js';
 // const sessionCache = require('../services/sessionCache.js');
-const {fetchWithSessionTokens} = require("../services/requestTokenManager.js");
-const axios = require("axios");
+import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
+import axiosBackendClient from '../axiosBackendClient.js';
 
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page
@@ -12,10 +12,13 @@ router.get('/getFavourites/:page', async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.get(`${Backend_Url}/customer/favourites/p/${page}`, {
+            return await axiosBackendClient.get(`${Backend_Url}/customer/favourites/p/${page}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req,res
                 }
             });
         })
@@ -42,10 +45,13 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.post(`${Backend_Url}/customer/favorite/add/${productCode}`, {}, {
+            return await axiosBackendClient.post(`${Backend_Url}/customer/favorite/add/${productCode}`, {}, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req, res
                 }
             });
         });
@@ -81,12 +87,15 @@ router.post(`/removeFav/single`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) =>{
-            return await axios.delete(`${Backend_Url}/customer/favorite/remove/single`, {
+            return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/single`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
                 },
-                data: JSON.stringify(requestBody)
+                data: JSON.stringify(requestBody),
+                bffContext: {
+                    req, res
+                }
             });
         })
 
@@ -114,10 +123,13 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.delete(`${Backend_Url}/customer/favourites/remove/${productCode}`, {
+            return await axiosBackendClient.delete(`${Backend_Url}/customer/favourites/remove/${productCode}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req, res
                 }
             });
         });
@@ -142,12 +154,15 @@ router.post(`/removeFav/batch`, async (req, res) => {
         const {currentPage, productCodes} = req.body;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.delete(`${Backend_Url}/customer/favorite/remove/batch`, {
+            return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/batch`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
                 },
-                data: JSON.stringify({current_page: currentPage, product_codes: productCodes})
+                data: JSON.stringify({current_page: currentPage, product_codes: productCodes}),
+                bffContext: {
+                    req, res
+                }
             });
         })
 
@@ -172,10 +187,13 @@ router.post('/addToCart', async (req, res) => {
         const sessionId = req.cookies.session_id;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.post(`${Backend_Url}/customer/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
+            return await axiosBackendClient.post(`${Backend_Url}/customer/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req, res
                 }
             });
         })
@@ -202,10 +220,13 @@ router.post('/addToCart/batch', async (req, res) => {
         const sessionId = req.cookies.session_id;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.post(`${Backend_Url}/customer/cart/add/batch`, productCodes, {
+            return await axiosBackendClient.post(`${Backend_Url}/customer/cart/add/batch`, productCodes, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req, res
                 }
             });
         })
@@ -236,10 +257,13 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
         const sessionId = req.cookies.session_id;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.delete(`${Backend_Url}/customer/cart/remove/${productCode}`, {
+            return await axiosBackendClient.delete(`${Backend_Url}/customer/cart/remove/${productCode}`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req, res
                 }
             });
         })
@@ -267,12 +291,15 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
         const productCodes = req.body;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.delete(`${Backend_Url}/customer/cart/remove/batch`, {
+            return await axiosBackendClient.delete(`${Backend_Url}/customer/cart/remove/batch`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
                 },
-                data: JSON.stringify(productCodes)
+                data: JSON.stringify(productCodes),
+                bffContext: {
+                    req, res
+                }
             });
         })
 
@@ -297,10 +324,13 @@ router.get('/getCart', async (req, res) => {
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.get(`${Backend_Url}/customer/cart`, {
+            return await axiosBackendClient.get(`${Backend_Url}/customer/cart`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req, res
                 }
             });
         })
@@ -331,10 +361,13 @@ router.get('/me', async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axios.get(`${Backend_Url}/customer/me`, {
+            return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                },
+                bffContext: {
+                    req, res
                 }
             });
         })
@@ -348,4 +381,4 @@ router.get('/me', async (req, res) => {
     }
 })
 
-module.exports = router
+export default router;

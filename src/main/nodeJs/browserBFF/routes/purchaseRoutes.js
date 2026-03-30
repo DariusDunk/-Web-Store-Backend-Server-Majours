@@ -1,6 +1,6 @@
-const express =require( 'express');
+import express from 'express';
 const router = express.Router();
-const { Backend_Url } = require('./config.js');
+import { Backend_Url } from './config.js';
 
 //todo kato stigne6 do tuk 6te ima da menq6 vis4ki zaqvki v endpointovete spored novata logika
 
@@ -43,4 +43,4 @@ router.post('/complete', async (req, res)=>{
   }
 })
 
-module.exports = router
+export default router

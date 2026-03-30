@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {Backend_Url} = require('./config.js');
+import {Backend_Url} from './config.js';
 const AuthURL = `${Backend_Url}/auth`;
-const sessionCache = require('../services/sessionCache.js');
-const {fetchWithSessionTokens} = require("../services/requestTokenManager.js");
-const axios = require("axios");
+import sessionCache from '../services/sessionCache.js';
+import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
+import axiosBackendClient from '../axiosBackendClient.js';
+import axios from 'axios';
 
 router.post(`/register`, async (req, res) => {
 
@@ -86,9 +87,12 @@ router.post(`/login`, async (req, res) => {
 
     try {
         const userDataResponse = await fetchWithSessionTokens(authResponse.session_id, async (tokens) => {
-            return await axios.get(`${Backend_Url}/customer/me`, {
+            return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
                 headers: {
                     Authorization: `Bearer ${tokens.access_token}`
+                },
+                bffContext: {
+                    req, res
                 }
             })
         });
@@ -120,7 +124,7 @@ router.post('/logout', async (req, res) => {
     if (sessionId) {
 
         try {
-            await fetchWithSessionTokens(sessionId, async (tokens) => await axios.get(
+            await fetchWithSessionTokens(sessionId, async (tokens) => await axiosBackendClient.get(
                 `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}`
             ));
 
@@ -148,132 +152,4 @@ function clearSessionCookies(res, sessionId = null) {
         });
 }
 
-router.post('/refresh', async (req, res) => {//todo tozi endpoint da se mahne kato priklu4i6 sys sesiite
-    // const refreshToken = req.cookies.refresh_token;
-    const sessionId = req.cookies.session_id;
-
-    // console.log("token: " + refreshToken);
-
-    // if (refreshToken) {
-    //     const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken)}`);
-    //
-    //     // console.log("response status: " + response.status)
-    //
-    //     if (response.ok) {
-    //         const responseData = await response.json();
-    //         const {
-    //             access_token,
-    //             refresh_token,
-    //             expires_in: access_token_lifetime,
-    //             refresh_expires_in: refresh_token_lifeTime
-    //         } = responseData;
-    //
-    //         res.cookie('access_token', access_token, {
-    //             httpOnly: true,
-    //             secure: false,
-    //             path: '/',
-    //             sameSite: 'lax',
-    //             maxAge: access_token_lifetime * 1000
-    //         });
-    //
-    //         res.cookie('refresh_token', refresh_token, {
-    //             httpOnly: true,
-    //             secure: false,
-    //             path: '/auth',
-    //             sameSite: `lax`,
-    //             maxAge: refresh_token_lifeTime * 1000
-    //         })
-    //         return res.status(200).end();
-    //     } else
-    //         return res.status(response.status).end();
-    //
-    // }
-
-
-    if (sessionId) {
-        //
-        console.log("Refreshing tokens...");
-        //
-        // sessionCache.print();
-        //
-        // const sessionEntry = sessionCache.get(sessionId);
-        //
-        // console.log("sessionEntry for refresh: " + JSON.stringify(sessionEntry));
-        //
-        // const refreshToken2 = sessionEntry.refresh_token;
-        //
-        // console.log("refreshToken2: " + refreshToken2);
-
-        // const response = await fetch(`${AuthURL}/refresh/${encodeURIComponent(refreshToken2)}/${encodeURIComponent(sessionId)}`);
-
-        try {
-            const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-                return await axios.get(`${AuthURL}/refresh/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-            })
-
-            // console.log("response status: " + response.status)
-
-            const responseData = await response.json();
-            const {
-                access_token,
-                refresh_token,
-                expires_in: access_token_lifetime,
-                refresh_expires_in: refresh_token_lifeTime,
-                session_expires_in
-            } = responseData;
-
-            res.cookie('session_id', sessionId,
-                {
-                    maxAge: session_expires_in * 1000,
-                    secure: false,
-                    path: '/',
-                    sameSite: 'lax',
-                    httpOnly: true
-                });
-
-            res.cookie('access_token', access_token, {
-                httpOnly: true,
-                secure: false,
-                path: '/',
-                sameSite: 'lax',
-                maxAge: access_token_lifetime * 1000
-            });
-
-            res.cookie('refresh_token', refresh_token, {
-                httpOnly: true,
-                secure: false,
-                path: '/auth',
-                sameSite: `lax`,
-                maxAge: refresh_token_lifeTime * 1000
-            })
-
-            // const newTTL = session_expires_in ;
-
-            sessionCache.safeDelete(sessionId);
-
-            sessionCache.set(sessionId, {
-                access_token,
-                access_token_lifetime,
-                refresh_token,
-                refresh_token_lifeTime,
-                remember_me: false
-            }, session_expires_in);
-
-
-            // sessionCache.ttl(sessionId, newTTL);
-            return res.status(200).end();
-
-        } catch (error) {
-            console.error('Error refreshing token: ', error);
-            return res.status(error.response.status || 500).end();
-        }
-    }
-
-    return res.status(401).end();
-})
-
-module.exports = router;
+export default router;

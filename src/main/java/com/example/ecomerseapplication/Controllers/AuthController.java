@@ -8,8 +8,6 @@ import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.Services.SessionService;
 import com.example.ecomerseapplication.enums.UserRole;
-import com.nimbusds.jwt.JWTParser;
-import com.nimbusds.jwt.SignedJWT;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,13 +39,8 @@ public class AuthController {
     public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
             , @PathVariable String sessionId) {
         try {
-
-//            return ResponseEntity.ok(keycloakService.refreshBothTokens(refreshToken));
-
-            //todo tova sled kato vsi4ko sys sesiite e setupnato
-
             Session session = sessionService.getById(sessionId);
-            System.out.println("Token for refresh: " + refreshToken);
+
             return ResponseEntity.ok(authService.refresh(refreshToken,session));
         } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());
@@ -76,22 +69,16 @@ public class AuthController {
 
         return ResponseEntity.ok(authService.login(request));
 
-//        return ResponseEntity.ok(keycloakService.loginUser(request));
     }
 
-    @GetMapping("invalidate/{token}"
-            +"/{sessionId}"
-    )
-    public ResponseEntity<?> invalidateToken(@PathVariable("token") String refreshToken
-    , @PathVariable String sessionId
+    @GetMapping("invalidate/{token}/{sessionId}")
+    public ResponseEntity<?> invalidateToken(@PathVariable("token") String refreshToken, @PathVariable String sessionId
     ) {
         try {
 
             authService.logout(refreshToken, sessionId);
 
             return ResponseEntity.noContent().build();
-
-//            return ResponseEntity.status(HttpStatus.valueOf(keycloakService.invalidateRefreshToken(refreshToken))).build();
         } catch (Exception e) {
             System.out.println("Error invalidating token or session: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

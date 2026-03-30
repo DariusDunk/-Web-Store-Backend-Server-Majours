@@ -61,4 +61,8 @@ public class SessionService {
     public Session getById(String sessionId) {
         return sessionRepository.findById(sessionId).orElseThrow(() -> new ResourceNotFoundException("Session not found"));
     }
+
+    public void save(Session session) {
+        sessionRepository.save(session);
+    }
 }

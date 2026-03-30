@@ -1,25 +1,83 @@
-const axios = require('axios');
-const { Backend_Url } = require('./routes/config.js');
-
+import axios from 'axios';
+import { Backend_Url } from './routes/config.js';
 const axiosBackendClient = axios.create({ baseURL: Backend_Url , withCredentials: true});
+import {refreshToken} from './services/axiosInterceptor.js';
+import sessionCache from "./services/sessionCache.js";
 
-// axiosBackendClient.interceptors.response.use(//TODO kogato stigne6 do tuk, vij interceptora ot frontenda, tyi kato tozi tam e po-nova versiq
-//     response => response,
-//     async error => {
-//         const originalRequest = error.config;
-//         if (error.response?.status !== 401 || originalRequest._retry) {
-//             return Promise.reject(error);
-//         }
-//
-//         originalRequest._retry = true;
-//
-//         // Call refresh endpoint
-//         await axios.post(`${Backend_Url}/refresh/update`, null, {
-//             headers: { cookie: originalRequest.headers.cookie }
-//         });
-//
-//         return axiosBackendClient(originalRequest); // retry automatically
-//     }
-// );
+const refreshPromises = new Map();
 
-module.exports = axiosBackendClient;
+axiosBackendClient.interceptors.response.use(
+    response => response,
+    async error => {
+        const originalRequest = error.config;
+        if (error.response?.status !== 401) {
+            console.error(error);
+            return Promise.reject(error);
+        }
+
+        console.log("Request failed due to unauthorized access.");
+
+        // if (originalRequest.url.includes("/refresh")
+        //     || originalRequest.url.includes("/login")
+        //     || originalRequest.url.includes("/register")) {
+        //     return Promise.reject(error);
+        // }
+
+        if (!originalRequest?.bffContext) {
+            return Promise.reject(error);
+        }
+
+        const req = originalRequest?.bffContext?.req;
+        const res = originalRequest?.bffContext?.res;
+        const sessionId = req?.cookies?.session_id;
+
+        // console.log('BFF context req:', req);
+        // console.log('BFF context res:', res);
+        // console.log('Session ID from cookie:', sessionId);
+
+        if (!sessionId) {
+            return Promise.reject(error);
+        }
+
+        if (originalRequest._retry) {
+            return Promise.reject(error);
+        }
+
+        originalRequest._retry = true;
+
+        if (!refreshPromises.has(sessionId)) {
+            console.log("Attempting to refresh token...");
+
+            const refreshPromise = refreshToken(sessionId, res)
+                .catch(err => {
+                    console.error("Refresh token failed: " + err);
+                    throw err;
+                })
+                .finally(() => {
+                    refreshPromises.delete(sessionId);
+                });
+
+            refreshPromises.set(sessionId, refreshPromise);
+
+        } else {
+            console.log("Token refresh already in progress, request paused...");
+        }
+
+        return refreshPromises
+            .get(sessionId)
+            .then(() => {
+
+                const updatedTokens = sessionCache.get(sessionId);
+
+                if (updatedTokens && updatedTokens.access_token) {
+                    originalRequest.headers['Authorization'] = 'Bearer ' + updatedTokens.access_token;
+                }
+              return axiosBackendClient(originalRequest)
+            })
+            .catch(err => Promise.reject(err));
+    }
+);
+
+export default axiosBackendClient;
+
+
