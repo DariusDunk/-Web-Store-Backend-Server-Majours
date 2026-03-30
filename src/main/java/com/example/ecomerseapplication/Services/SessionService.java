@@ -41,7 +41,7 @@ public class SessionService {
         session.setClientType(clientType);
         session.setRememberMeSession(rememberMe);
 
-       return sessionRepository.save(session); //todo tova sled kato vi4ko e setupnato
+       return sessionRepository.save(session);
 
     }
 

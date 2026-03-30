@@ -18,7 +18,7 @@ router.post(`/register`, async (req, res) => {
 
 
     try {
-        const response = await fetch(`${AuthURL}/register`, {
+        const response = await fetch(`${AuthURL}/register`, {//todo smeni tova sys axios
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -46,76 +46,46 @@ router.post(`/login`, async (req, res) => {
     const {email, password, rememberMe = false} = req.body;
 
     // console.log("Node login: " + email + " " + password)
+    let authResponse = null;
 
-    const response = await fetch(`${AuthURL}/login`, {//todo napravi tuk da se polzva axios kogato priklu4i6 sys sesiite
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+    try
+    {
+
+        const response = await axios.post(`${AuthURL}/login`, {
             identifier: email,
             password: password,
             remember_me: rememberMe,
             client_type: "Web"
         })
-    })
 
-    // console.log("Node response: " + response.status)
+        const responseData = await response.data;
 
-    if (!response.ok) {
-        return res.status(response.status).end();
+        const {
+            access_token, refresh_token, expires_in, refresh_expires_in
+            , session_id, session_expires_in
+        } = responseData;
+
+        authResponse = responseData;
+
+        sessionCache.set(session_id, {
+            access_token,
+            expires_in,
+            refresh_token,
+            refresh_expires_in,
+            remember_me: rememberMe
+        }, session_expires_in);
+    }
+    catch (error) {
+        console.error('-------------Error with login-------------\n', error);
+        return res.status(500).end();
     }
 
-    const responseData = await response.json();
-    const {
-        access_token, refresh_token, expires_in, refresh_expires_in
-        , session_id, session_expires_in
-    } = responseData;
-
-    // console.log("accessToken TTL from backend: " + expires_in + "\naccess token TTL for the frontend: " + expires_in * 1000);
-
-
-    res.cookie('access_token', access_token,//todo mahni tokenite kato priklu4i6 sys sesiite
-        {
-            maxAge: expires_in * 1000,
-            secure: false,
-            path: '/',
-            sameSite: 'lax',
-            httpOnly: true
-        })
-
-    res.cookie('refresh_token', refresh_token,
-        {
-            maxAge: refresh_expires_in * 1000,
-            secure: false,
-            path: '/auth',
-            sameSite: 'lax',
-            httpOnly: true
-        });
-
-    sessionCache.set(session_id, {
-        access_token,
-        expires_in,
-        refresh_token,
-        refresh_expires_in,
-        remember_me: rememberMe
-    }, session_expires_in);
-
-
-    // const userDataResponse = await fetch(`${Backend_Url}/customer/me`,
-    //     {
-    //         method: 'GET',
-    //         headers: {
-    //             Authorization: `Bearer ${access_token}`
-    //         }
-    //     });
-
-    if (!session_id) {
+    if (!authResponse.session_id) {
         return res.status(400).end();
     }
 
     try {
-        const userDataResponse = await fetchWithSessionTokens(session_id, async (tokens) => {
+        const userDataResponse = await fetchWithSessionTokens(authResponse.session_id, async (tokens) => {
             return await axios.get(`${Backend_Url}/customer/me`, {
                 headers: {
                     Authorization: `Bearer ${tokens.access_token}`
@@ -123,9 +93,9 @@ router.post(`/login`, async (req, res) => {
             })
         });
 
-        res.cookie('session_id', session_id,
+        res.cookie('session_id', authResponse.session_id,
             {
-                maxAge: session_expires_in * 1000,
+                maxAge: authResponse.session_expires_in * 1000,
                 secure: false,
                 path: '/',
                 sameSite: 'lax',
@@ -145,51 +115,14 @@ router.post(`/login`, async (req, res) => {
 
 
 router.post('/logout', async (req, res) => {
-    const refreshToken = req.cookies.refresh_token;
     const sessionId = req.cookies.session_id;
 
-    // if (refreshToken) {
-    //     const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}`
-    //     )
-    //     if (!response.ok) console.log("Error invalidating token: " + response.statusText);
-    // }
-
-    if (sessionId) {//todo napravi tuk da se polzva axios kogato priklu4i6 sys sesiite
-        // const response = await fetch(`${AuthURL}/invalidate/${encodeURIComponent(refreshToken)}/${encodeURIComponent(sessionId)}`
-        // )
+    if (sessionId) {
 
         try {
             await fetchWithSessionTokens(sessionId, async (tokens) => await axios.get(
                 `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}`
             ));
-// res.cookie('access_token', '', {//TODO tuk mahni tokenite kato priklu4i6 sys sesiite
-            //     httpOnly: true,
-            //     secure: false,
-            //     path: '/',
-            //     sameSite: 'lax',
-            //     maxAge: 0
-            // });
-            //
-            // res.cookie('refresh_token', '', {
-            //     httpOnly: true,
-            //     secure: false,
-            //     path: '/auth',
-            //     sameSite: 'lax',
-            //     maxAge: 0
-            // });
-            //
-            // res.cookie('session_id', '',
-            //     {
-            //         maxAge: 0,
-            //         secure: false,
-            //         path: '/',
-            //         sameSite: 'lax',
-            //         httpOnly: true
-            //     });
-            //
-            // sessionCache.safeDelete(sessionId);
-            // // sessionCache.print();
-            //
 
         } catch (error) {
             console.error("Error invalidating token and session, cookies and sessionCache will still be erased: ", error);
@@ -204,21 +137,6 @@ router.post('/logout', async (req, res) => {
 function clearSessionCookies(res, sessionId = null) {
 
     sessionCache.safeDelete(sessionId);
-    res.cookie('access_token', '', {//TODO tuk mahni tokenite kato priklu4i6 sys sesiite
-        httpOnly: true,
-        secure: false,
-        path: '/',
-        sameSite: 'lax',
-        maxAge: 0
-    });
-
-    res.cookie('refresh_token', '', {
-        httpOnly: true,
-        secure: false,
-        path: '/auth',
-        sameSite: 'lax',
-        maxAge: 0
-    });
 
     res.cookie('session_id', '',
         {
@@ -231,7 +149,7 @@ function clearSessionCookies(res, sessionId = null) {
 }
 
 router.post('/refresh', async (req, res) => {//todo tozi endpoint da se mahne kato priklu4i6 sys sesiite
-    const refreshToken = req.cookies.refresh_token;
+    // const refreshToken = req.cookies.refresh_token;
     const sessionId = req.cookies.session_id;
 
     // console.log("token: " + refreshToken);
@@ -270,7 +188,6 @@ router.post('/refresh', async (req, res) => {//todo tozi endpoint da se mahne ka
     //         return res.status(response.status).end();
     //
     // }
-
 
 
     if (sessionId) {
@@ -345,7 +262,6 @@ router.post('/refresh', async (req, res) => {//todo tozi endpoint da se mahne ka
                 refresh_token_lifeTime,
                 remember_me: false
             }, session_expires_in);
-
 
 
             // sessionCache.ttl(sessionId, newTTL);

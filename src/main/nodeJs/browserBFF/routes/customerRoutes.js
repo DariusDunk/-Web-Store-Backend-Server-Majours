@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const {Backend_Url} = require('./config.js');
-const {safeJson} = require('../services/safeJsonFunc.js');
 // const sessionCache = require('../services/sessionCache.js');
 const {fetchWithSessionTokens} = require("../services/requestTokenManager.js");
 const axios = require("axios");
