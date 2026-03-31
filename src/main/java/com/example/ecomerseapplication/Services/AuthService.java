@@ -48,7 +48,7 @@ public class AuthService {
         try {
             tokenResponse = keycloakService.loginUser(request);
             String userId = extractIdFromToken(tokenResponse.accessToken());
-            Customer customer = customerService.getById(userId);
+            Customer customer = customerService.getByIdWithActivityRefresh(userId);
             ClientType clientType = clientTypeService.getByTypeName(request.clientType());
 
             Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());
@@ -67,7 +67,7 @@ public class AuthService {
     @Transactional
     public void logout(String refreshToken, String sessionId) {
 
-        Session session = sessionService.getAndUpdate(sessionId);
+        Session session = sessionService.getById(sessionId);
 
         sessionService.revokeSession(session);
 
@@ -81,17 +81,16 @@ public class AuthService {
 
         try {
 
-            System.out.println("refreshing token for session: " + session.getSessionId());
-            System.out.println("refresh token : " + refreshToken);
-
             TokenRefreshResponse tokenRefreshResponse = keycloakService.refreshBothTokens(refreshToken);
             Instant newTTL = session.isRememberMeSession()
-                    ?Instant.now().plus(tokenRefreshResponse.expiresIn(), ChronoUnit.SECONDS)
+                    ?Instant.now().plus(tokenRefreshResponse.refreshExpiresIn(), ChronoUnit.SECONDS)
                     :Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS);
             session.setExpiresAt(newTTL);
             session.setRefreshToken(tokenRefreshResponse.refreshToken());
 
             sessionService.save(session);
+
+//            System.out.println("New session TTL: " + newTTL);
 
             return RefreshResponseMapper.tokenRefreshToRefreshResponse(tokenRefreshResponse, newTTL);
         }

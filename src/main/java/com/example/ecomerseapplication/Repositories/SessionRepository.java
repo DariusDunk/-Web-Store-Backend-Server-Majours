@@ -12,12 +12,12 @@ import java.util.Optional;
 @Repository
 public interface SessionRepository extends JpaRepository<Session,String> {
 
-    @Query(value = """
-select count (s)
-from Session s
-where s.lastActivityAt<:fiveMinsAgo
-""")
-    int getActiveSessionCount(@Param("fiveMinsAgo") String timeThreshold);//Todo test/optimize
+//    @Query(value = """
+//select count (s)
+//from Session s
+//where s.lastActivityAt<:fiveMinsAgo
+//""")
+//    int getActiveSessionCount(@Param("fiveMinsAgo") String timeThreshold);//Todo test/optimize
 
 
     @Query(value =
@@ -36,7 +36,7 @@ and s.sessionId = :session_id
 update Session set
 isRevoked = true,
 revokedAt = current_timestamp
-where expiresAt < CURRENT TIMESTAMP
+where expiresAt < CURRENT_TIMESTAMP
 and isRevoked = false
 """)
     int revokeExpired();

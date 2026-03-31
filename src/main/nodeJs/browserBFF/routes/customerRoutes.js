@@ -16,6 +16,7 @@ router.get('/getFavourites/:page', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req,res
@@ -49,6 +50,7 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -91,6 +93,7 @@ router.post(`/removeFav/single`, async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 data: JSON.stringify(requestBody),
                 bffContext: {
@@ -127,6 +130,7 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -158,6 +162,7 @@ router.post(`/removeFav/batch`, async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 data: JSON.stringify({current_page: currentPage, product_codes: productCodes}),
                 bffContext: {
@@ -191,6 +196,7 @@ router.post('/addToCart', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -224,6 +230,7 @@ router.post('/addToCart/batch', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -261,6 +268,7 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -295,6 +303,7 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 data: JSON.stringify(productCodes),
                 bffContext: {
@@ -328,6 +337,7 @@ router.get('/getCart', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -365,6 +375,7 @@ router.get('/me', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res

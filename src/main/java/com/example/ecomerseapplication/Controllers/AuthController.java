@@ -4,7 +4,6 @@ import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Services.AuthService;
-import com.example.ecomerseapplication.Services.CustomerService;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.Services.SessionService;
 import com.example.ecomerseapplication.enums.UserRole;
@@ -22,14 +21,12 @@ public class AuthController {
 
     private final KeycloakService keycloakService;
     private final SessionService sessionService;
-    private final CustomerService customerService;
     private final AuthService authService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService, SessionService sessionService, CustomerService customerService, AuthService authService) {
+    public AuthController(KeycloakService keycloakService, SessionService sessionService, AuthService authService) {
         this.keycloakService = keycloakService;
         this.sessionService = sessionService;
-        this.customerService = customerService;
         this.authService = authService;
     }
 
@@ -37,7 +34,7 @@ public class AuthController {
     public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
             , @PathVariable String sessionId) {
         try {
-            Session session = sessionService.getAndUpdate(sessionId);
+            Session session = sessionService.getById(sessionId);
 
             return ResponseEntity.ok(authService.refresh(refreshToken,session));
         } catch (Exception e) {
@@ -86,7 +83,7 @@ public class AuthController {
     @GetMapping("tokens/{sessionId}")
     public ResponseEntity<?> getTokensOfSession(@PathVariable String sessionId) {
 
-        Session session = sessionService.getAndUpdate(sessionId);
+        Session session = sessionService.getById(sessionId);
 
         return ResponseEntity.ok(authService.refresh(session.getRefreshToken(), session));
     }

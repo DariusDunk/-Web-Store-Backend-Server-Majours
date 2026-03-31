@@ -12,6 +12,8 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -25,12 +27,10 @@ import java.util.Base64;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
-    private final KeycloakService keycloakService;
 
     @Autowired
-    public SessionService(SessionRepository sessionRepository, KeycloakService keycloakService) {
+    public SessionService(SessionRepository sessionRepository) {
         this.sessionRepository = sessionRepository;
-        this.keycloakService = keycloakService;
     }
 
     public Session createSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe, int refreshTokenExpirySeconds) {
@@ -68,16 +68,23 @@ public class SessionService {
         sessionRepository.save(session);
     }
 
-    public Session getAndUpdate(String sessionId) {
-        Session session = getById(sessionId);
+    public void updateActivity() {
 
+        String sessionId = (String) ((ServletRequestAttributes) RequestContextHolder
+                .currentRequestAttributes())
+                .getRequest().getAttribute("sessionId");
+
+        Session session = getById(sessionId);
         Instant now = Instant.now();
 
-        if (session.getLastActivityAt().isBefore(now.minus(5,ChronoUnit.MINUTES))) {
+        if (now.isAfter(session.getLastActivityAt().plus(5, ChronoUnit.MINUTES))) {
+
+            System.out.println("Updating session activity timestamp");
+
             session.setLastActivityAt(now);
-            return sessionRepository.save(session);
+            sessionRepository.save(session);
         }
-        return session;
+
     }
 
     public Session getById(String sessionId) {
@@ -91,7 +98,7 @@ public class SessionService {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void revokeExpiredOnStartup() {
-        System.out.println("-------------------------Revoking expired sessions on startup-------------------------");
+//        System.out.println("-------------------------Revoking expired sessions on startup-------------------------");
         revokeExpiredSessions();
     }
     @Transactional

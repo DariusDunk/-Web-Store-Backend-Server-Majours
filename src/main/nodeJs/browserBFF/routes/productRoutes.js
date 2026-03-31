@@ -86,7 +86,8 @@ router.get('/detail/:productCode', async (req, res) => {
                     axiosBackendClient.get(`${Backend_Url}/product/${productCode}`, {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + tokens.access_token
+                            'Authorization': 'Bearer ' + tokens.access_token,
+                            ...(sessionId && { 'X-Session-Id': sessionId }),
                         },
                         bffContext: {
                             req, res
@@ -95,7 +96,8 @@ router.get('/detail/:productCode', async (req, res) => {
                     axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + tokens.access_token
+                            'Authorization': 'Bearer ' + tokens.access_token,
+                            ...(sessionId && { 'X-Session-Id': sessionId }),
                         },
                         bffContext: {
                             req, res
@@ -240,7 +242,8 @@ router.post('/getPagedReviews', async (req, res) => {
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + tokens.access_token
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -268,7 +271,8 @@ router.get(`/getReview/:productCode`, async (req, res) => {
             return await axiosBackendClient.get(`${Backend_Url}/product/review/specific?${new URLSearchParams({productCode: productCode || ''})}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + tokens.access_token
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -306,7 +310,8 @@ router.post(`/addReview`, async (req, res) => {
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + tokens.access_token
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -344,7 +349,8 @@ router.post(`/updateReview`, async (req, res) => {
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + tokens.access_token
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res
@@ -377,7 +383,8 @@ router.post(`/deleteReview`, async (req, res) => {
             return await axiosBackendClient.delete(`${Backend_Url}/product/review/delete?${new URLSearchParams({product_code: productCode || ''})}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + tokens.access_token
+                    'Authorization': 'Bearer ' + tokens.access_token,
+                    ...(sessionId && { 'X-Session-Id': sessionId }),
                 },
                 bffContext: {
                     req, res

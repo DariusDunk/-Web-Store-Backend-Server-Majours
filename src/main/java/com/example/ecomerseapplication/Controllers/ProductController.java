@@ -109,7 +109,7 @@ public class ProductController {
 
         String id = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getById(id);
+        Customer customer = customerService.getByIdWithActivityRefresh(id);
 
         return ResponseEntity.ok(productService.getByNameAndCode(productCode, customer));
     }
@@ -251,7 +251,7 @@ public class ProductController {
         reviewService.requestValidation(request.rating(), request.reviewText());
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
         Product product = productService.findByPCode(request.productCode());
 
         if (reviewService.exists(product, customer)) {
@@ -278,7 +278,7 @@ public class ProductController {
         reviewService.requestValidation(request.rating, request.reviewText);
 
         String customerId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(customerId);
+        Customer customer = customerService.getByIdWithActivityRefresh(customerId);
         Product product = productService.findByPCode(request.productCode);
         Review review = reviewService.getByProdAndCust(product, customer);
 
@@ -323,7 +323,7 @@ public class ProductController {
     public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
 
         String customerId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(customerId);
+        Customer customer = customerService.getByIdWithActivityRefresh(customerId);
         Product product = productService.findByPCode(productCode);
         Review review = reviewService.getByProdAndCust(product, customer);
 

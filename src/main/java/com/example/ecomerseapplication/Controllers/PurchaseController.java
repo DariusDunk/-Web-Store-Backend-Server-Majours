@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -46,7 +45,7 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsResponse, customer);
 
@@ -57,7 +56,7 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
     public ResponseEntity<?> getPurchaseInformation() {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         return purchaseDetailsService.getByCustomer(customer);
     }

@@ -63,7 +63,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
         Product product = productService.findByPCode(productCode);
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         favoriteOfCustomerService.addToFavorite(customer, product);
 
@@ -75,7 +75,7 @@ public class CustomerController {
     public ResponseEntity<?> getFavourites(@PathVariable int page) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromCustomerPaged(customer, pageRequest);
@@ -89,7 +89,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
         Product product = productService.findByPCode(productCode);
 
         favoriteOfCustomerService.removeFromFavorites(customer, product);
@@ -103,7 +103,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveOneFavRequest request) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
         Product product = productService.findByPCode(request.productCode());
 
         return ResponseEntity.ok(favoriteOfCustomerService.removeFromFavoritesWRefetch(
@@ -118,7 +118,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFromFavouritesBatch(@RequestBody @Valid RemoveFavBatchRequest request) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         return ResponseEntity.ok(favoriteOfCustomerService.removeFavoritesBatch(
                 customer,
@@ -144,7 +144,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         return ResponseEntity.ok(customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement));
     }
@@ -155,7 +155,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         List<Product> requestProducts = productService.getByCodes(productCodes);
 
@@ -168,7 +168,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         try {
             return ResponseEntity.ok(customerCartService.removeFromCartWFetch(customer, productCode));
@@ -183,7 +183,7 @@ public class CustomerController {
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         try {
             return ResponseEntity.ok(customerCartService.removeBatchFromCartWFetch(customer, productCodes));
@@ -199,7 +199,7 @@ public class CustomerController {
     public ResponseEntity<?> showCart() {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
         List<CartItemResponse> customerCarts = customerCartService.getCartDtoByCustomer(customer);
 
         return ResponseEntity
@@ -263,7 +263,7 @@ public class CustomerController {
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getById(userId);
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
         String userRole = keycloakService.getRoleByUserId(userId);
 
         return ResponseEntity.ok(new CustomerResponse(

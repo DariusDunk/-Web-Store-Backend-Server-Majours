@@ -15,13 +15,7 @@ axiosBackendClient.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        console.log("Request failed due to unauthorized access.");
-
-        // if (originalRequest.url.includes("/refresh")
-        //     || originalRequest.url.includes("/login")
-        //     || originalRequest.url.includes("/register")) {
-        //     return Promise.reject(error);
-        // }
+        // console.log("Request failed due to unauthorized access.");
 
         if (!originalRequest?.bffContext) {
             return Promise.reject(error);
@@ -30,10 +24,6 @@ axiosBackendClient.interceptors.response.use(
         const req = originalRequest?.bffContext?.req;
         const res = originalRequest?.bffContext?.res;
         const sessionId = req?.cookies?.session_id;
-
-        // console.log('BFF context req:', req);
-        // console.log('BFF context res:', res);
-        // console.log('Session ID from cookie:', sessionId);
 
         if (!sessionId) {
             return Promise.reject(error);
@@ -46,7 +36,7 @@ axiosBackendClient.interceptors.response.use(
         originalRequest._retry = true;
 
         if (!refreshPromises.has(sessionId)) {
-            console.log("Attempting to refresh token...");
+            // console.log("Attempting to refresh token...");
 
             const refreshPromise = refreshToken(sessionId, res)
                 .catch(err => {
@@ -60,7 +50,7 @@ axiosBackendClient.interceptors.response.use(
             refreshPromises.set(sessionId, refreshPromise);
 
         } else {
-            console.log("Token refresh already in progress, request paused...");
+            // console.log("Token refresh already in progress, request paused...");
         }
 
         return refreshPromises
