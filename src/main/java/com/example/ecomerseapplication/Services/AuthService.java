@@ -67,7 +67,7 @@ public class AuthService {
     @Transactional
     public void logout(String refreshToken, String sessionId) {
 
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getAndUpdate(sessionId);
 
         sessionService.revokeSession(session);
 

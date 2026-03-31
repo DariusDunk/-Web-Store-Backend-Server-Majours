@@ -6,11 +6,18 @@ import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
@@ -61,11 +68,49 @@ public class SessionService {
         sessionRepository.save(session);
     }
 
+    public Session getAndUpdate(String sessionId) {
+        Session session = getById(sessionId);
+
+        Instant now = Instant.now();
+
+        if (session.getLastActivityAt().isBefore(now.minus(5,ChronoUnit.MINUTES))) {
+            session.setLastActivityAt(now);
+            return sessionRepository.save(session);
+        }
+        return session;
+    }
+
     public Session getById(String sessionId) {
         return sessionRepository.findById(sessionId).orElseThrow(() -> new ResourceNotFoundException("Session not found"));
     }
 
     public void save(Session session) {
         sessionRepository.save(session);
+    }
+
+    @Transactional
+    @EventListener(ApplicationReadyEvent.class)
+    public void revokeExpiredOnStartup() {
+        System.out.println("-------------------------Revoking expired sessions on startup-------------------------");
+        revokeExpiredSessions();
+    }
+    @Transactional
+    @Scheduled(fixedDelay = 300000)
+    public void revokeExpiredPeriodically() {
+        revokeExpiredSessions();
+    }
+
+    public void revokeExpiredSessions() {
+
+        int revokedSessions = sessionRepository.revokeExpired();
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        if (revokedSessions > 0) {
+            System.out.println("-------------------------["+now.format(formatter)+"]"+" Revoking expired sessions-------------------------");
+            System.out.println("-------------------------Revoked " + revokedSessions + " expired sessions-------------------------");
+        }
+
     }
 }

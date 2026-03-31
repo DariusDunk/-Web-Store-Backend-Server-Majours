@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-
 @RestController
 @Validated
 @RequestMapping("auth/")
@@ -39,7 +37,7 @@ public class AuthController {
     public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
             , @PathVariable String sessionId) {
         try {
-            Session session = sessionService.getById(sessionId);
+            Session session = sessionService.getAndUpdate(sessionId);
 
             return ResponseEntity.ok(authService.refresh(refreshToken,session));
         } catch (Exception e) {
@@ -88,7 +86,7 @@ public class AuthController {
     @GetMapping("tokens/{sessionId}")
     public ResponseEntity<?> getTokensOfSession(@PathVariable String sessionId) {
 
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getAndUpdate(sessionId);
 
         return ResponseEntity.ok(authService.refresh(session.getRefreshToken(), session));
     }

@@ -37,6 +37,8 @@ class EComerseApplicationTests {
     private ProductService productService;
     @Autowired
     private FavoriteOfCustomerService favoriteOfCustomerService;
+    @Autowired
+    private SessionService sessionService;
 
     @Test
     void contextLoads() {
@@ -206,4 +208,14 @@ class EComerseApplicationTests {
 //        System.out.println("Fetch after batch delete: " +fetchResponse3.content());
 //
 //    }
+
+    @Test
+    void testActiveSessionFetch() {
+        Session session = sessionService.getAndUpdate("L7kDsKjS7jf6k9PBBTnt3vnCx7paPW21p53kL-axDoY");
+
+        if (session != null) {
+            System.out.println("Session is active");
+        }
+    }
+
 }
