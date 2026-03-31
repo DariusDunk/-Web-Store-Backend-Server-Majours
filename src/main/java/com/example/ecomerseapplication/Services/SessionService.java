@@ -26,17 +26,20 @@ public class SessionService {
         this.keycloakService = keycloakService;
     }
 
-    public Session createSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe) {
+    public Session createSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe, int refreshTokenExpirySeconds) {
         Session session = new Session();
 
         session.setSessionId(generateSessionId());
 
-//        System.out.println("session id: " + session.getSessionId() );
-
         session.setCustomer(customer);
-        session.setExpiresAt(Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS));
+        if (rememberMe) {
+            session.setExpiresAt(Instant.now().plus(refreshTokenExpirySeconds, ChronoUnit.SECONDS));
+        } else {
+            session.setExpiresAt(Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS));
+        }
+
         session.setRefreshToken(refreshToken);
-        session.setIsGuest(false);// TODO tova 6te se promeni v byde6te
+        session.setIsGuest(false);// TODO tova 6te se promeni v byde6te no ne tuk lol
         session.setIsRevoked(false);
         session.setClientType(clientType);
         session.setRememberMeSession(rememberMe);

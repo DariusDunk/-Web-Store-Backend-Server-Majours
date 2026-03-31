@@ -51,7 +51,7 @@ public class AuthService {
             Customer customer = customerService.getById(userId);
             ClientType clientType = clientTypeService.getByTypeName(request.clientType());
 
-            Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe());
+            Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());
 
             return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
         } catch (Exception e) {
