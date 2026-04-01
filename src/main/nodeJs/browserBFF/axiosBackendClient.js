@@ -11,7 +11,7 @@ axiosBackendClient.interceptors.response.use(
     async error => {
         const originalRequest = error.config;
         if (error.response?.status !== 401) {
-            console.error(error);
+            // console.error(error);
             return Promise.reject(error);
         }
 

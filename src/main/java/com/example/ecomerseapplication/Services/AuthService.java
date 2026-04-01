@@ -48,15 +48,13 @@ public class AuthService {
         try {
             tokenResponse = keycloakService.loginUser(request);
             String userId = extractIdFromToken(tokenResponse.accessToken());
-            Customer customer = customerService.getByIdWithActivityRefresh(userId);
+            Customer customer = customerService.getById(userId);
             ClientType clientType = clientTypeService.getByTypeName(request.clientType());
-
             Session session = sessionService.createSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());
-
+            
             return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
         } catch (Exception e) {
             if (tokenResponse != null) {
-                System.out.println();
                 keycloakService.invalidateRefreshToken(tokenResponse.refreshToken());
                 throw new LoginFailedException("Login failed, rolling back session creation: "+ e.getMessage());
             }

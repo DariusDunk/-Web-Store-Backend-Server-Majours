@@ -12,6 +12,7 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockE
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import com.example.ecomerseapplication.enums.ResultTypes;
+import jakarta.validation.constraints.Positive;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -205,5 +206,41 @@ public class CustomerCartService {
         }
 
       return customerCartRepository.findDtoByCustomer(customer.getKeycloakId());
+    }
+
+    public String addQuantityToCartUser(Product product, short quantity, Customer customer) {
+
+        try
+        {
+            CustomerCartId cartId = new CustomerCartId(product, customer);
+            CustomerCart customerCart = customerCartRepository.findById(cartId).orElse(null);
+            int quantityInStock = product.getQuantityInStock();
+
+            if (customerCart != null) {
+                short currentCartQuantity = customerCart.getQuantity();
+                if (quantityInStock >= currentCartQuantity + quantity) {
+                    customerCart.setQuantity((short) (currentCartQuantity + quantity));
+                    customerCartRepository.save(customerCart);
+                    return "Успешно увеличен в количката!";
+                }
+                else
+                    throw new StockExceededException("Stock exceeded for product " + product.getProductName() + "!");
+            } else {
+                if (quantityInStock < quantity)
+                    throw new StockExceededException("Stock exceeded for product " + product.getProductName() + "!");
+                customerCart = new CustomerCart(cartId, quantity);
+                customerCartRepository.save(customerCart);
+                return "Успешно добавен в количката!";
+
+            }
+        }
+        catch (Exception e)
+        {
+            if (e instanceof StockExceededException)
+                throw e;
+            else
+                throw new RuntimeException("-----------------Quantity cart addition for auth user failed-----------------\n " + e.getMessage());
+
+        }
     }
 }

@@ -148,7 +148,18 @@ public class CustomerController {
 
         return ResponseEntity.ok(customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement));
     }
-    
+
+    @PostMapping("cart/add/quantity")
+    public ResponseEntity<?> addQuantityToCart(@RequestBody @Valid ProductQuantityForCartRequest request) {
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Product product = productService.findByPCode(request.productCode());
+
+        return ResponseEntity.ok(customerCartService.addQuantityToCartUser(product, request.quantity(), customer));
+    }
+
+
     @PostMapping("cart/add/batch")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {

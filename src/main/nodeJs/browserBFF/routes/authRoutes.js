@@ -89,7 +89,9 @@ router.post(`/login`, async (req, res) => {
         const userDataResponse = await fetchWithSessionTokens(authResponse.session_id, async (tokens) => {
             return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
                 headers: {
-                    Authorization: `Bearer ${tokens.access_token}`
+                    'Content-Type': 'application/json',
+                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
+                    ...(authResponse.session_id && { 'X-Session-Id': authResponse.session_id })
                 },
                 bffContext: {
                     req, res

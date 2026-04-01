@@ -1,8 +1,10 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.Entities.Customer;
+import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
+import jakarta.validation.constraints.Positive;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -54,4 +56,5 @@ public class CustomerService {
             throw e;
         }
     }
+
 }

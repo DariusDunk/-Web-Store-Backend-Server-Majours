@@ -60,8 +60,7 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) {//todo moje bi login dannite i sesiqta v bazata trqbva da se kriptirat
-
+    public ResponseEntity<?> loginUserKeycloak(@RequestBody @Valid UserLoginRequest request) {//todo trqbva refresh tokena v tablicata na sesiqta da se kriptira
         return ResponseEntity.ok(authService.login(request));
 
     }
