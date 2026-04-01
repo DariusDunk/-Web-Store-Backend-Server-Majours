@@ -31,8 +31,8 @@ public class CustomerController {
     private final CustomerService customerService;
     private final ProductService productService;
     private final CustomerCartService customerCartService;
-    private final PurchaseService purchaseService;
-    private final PurchaseCartService purchaseCartService;
+//    private final PurchaseService purchaseService;
+//    private final PurchaseCartService purchaseCartService;
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
@@ -41,16 +41,16 @@ public class CustomerController {
     public CustomerController(CustomerService customerService,
                               ProductService productService,
                               CustomerCartService customerCartService,
-                              PurchaseService purchaseService,
-                              PurchaseCartService purchaseCartService,
+//                              PurchaseService purchaseService,
+//                              PurchaseCartService purchaseCartService,
                               KeycloakService keycloakService,
                               UserIdExtractor userIdExtractor, FavoriteOfCustomerService favoriteOfCustomerService) {
 
         this.customerService = customerService;
         this.productService = productService;
         this.customerCartService = customerCartService;
-        this.purchaseService = purchaseService;
-        this.purchaseCartService = purchaseCartService;
+//        this.purchaseService = purchaseService;
+//        this.purchaseCartService = purchaseCartService;
         this.keycloakService = keycloakService;
         this.userIdExtractor = userIdExtractor;
         this.favoriteOfCustomerService = favoriteOfCustomerService;

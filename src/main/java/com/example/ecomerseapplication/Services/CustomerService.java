@@ -1,28 +1,25 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.Entities.Customer;
-import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
-import jakarta.validation.constraints.Positive;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 
 @Service
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final PurchaseRepository purchaseRepository;
+//    private final PurchaseRepository purchaseRepository;
     private final SessionService sessionService;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository, PurchaseRepository purchaseRepository, SessionService sessionService) {
+    public CustomerService(CustomerRepository customerRepository,
+//                           PurchaseRepository purchaseRepository,
+                           SessionService sessionService) {
         this.customerRepository = customerRepository;
-        this.purchaseRepository = purchaseRepository;
+//        this.purchaseRepository = purchaseRepository;
         this.sessionService = sessionService;
     }
 

@@ -12,7 +12,6 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockE
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
 import com.example.ecomerseapplication.enums.ResultTypes;
-import jakarta.validation.constraints.Positive;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -127,21 +126,19 @@ public class CustomerCartService {
 
         int newProductsCount = 0;
         List<String> outOfStockProducts = new ArrayList<>();
-        for (int i =0; i < products.size(); i++) {
-            CustomerCartId newCartId = new CustomerCartId(products.get(i), customer);
-            CustomerCart cartItem = cartMap.getOrDefault(newCartId, new CustomerCart(newCartId, (short)0));
+        for (Product product : products) {
+            CustomerCartId newCartId = new CustomerCartId(product, customer);
+            CustomerCart cartItem = cartMap.getOrDefault(newCartId, new CustomerCart(newCartId, (short) 0));
 
             if (cartItem.getQuantity() == 0) {
                 newProductsCount++;
             }
 
-            if (cartItem.getCustomerCartId().getProduct().getQuantityInStock() < cartItem.getQuantity() + 1)
-            {
+            if (cartItem.getCustomerCartId().getProduct().getQuantityInStock() < cartItem.getQuantity() + 1) {
                 if (!stockExceeded) stockExceeded = true;
 
-                outOfStockProducts.add(products.get(i).getProductName());
-            }
-            else {
+                outOfStockProducts.add(product.getProductName());
+            } else {
                 cartItem.setQuantity((short) (cartItem.getQuantity() + 1));
                 cart.add(cartItem);
             }
