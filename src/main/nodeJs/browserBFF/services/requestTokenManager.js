@@ -25,6 +25,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn) {
         tokens = await fetchTokensOfSession(sessionId);
         if (!tokens) throw new Error("Session expired or missing");
 
+        tokens.is_guest = false;
         sessionCache.set(sessionId, tokens, tokens.ttl);
     }
 

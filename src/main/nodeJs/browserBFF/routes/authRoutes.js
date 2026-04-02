@@ -43,18 +43,25 @@ router.post(`/register`, async (req, res) => {
 router.post(`/login`, async (req, res) => {
     const {email, password, rememberMe = false} = req.body;
 
+    const guestSessionId = req.cookies('session_id');
+
     // console.log("Node login: " + email + " " + password)
     let authResponse = null;
 
-    try
-    {
+    try {
 
         const response = await axios.post(`${AuthURL}/login`, {
             identifier: email,
             password: password,
             remember_me: rememberMe,
             client_type: "Web"
-        })
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            ...(guestSessionId && {'X-Session-Id': guestSessionId})
+        }
+    })
+
 
         const responseData = await response.data;
 
@@ -70,6 +77,7 @@ router.post(`/login`, async (req, res) => {
             expires_in,
             refresh_token,
             refresh_expires_in,
+            is_guest: false,
             remember_me: rememberMe
         }, session_expires_in);
     }

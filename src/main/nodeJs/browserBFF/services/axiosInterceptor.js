@@ -34,13 +34,14 @@ export async function refreshToken(sessionId, res) {
                     httpOnly: true
                 });
 
-            sessionCache.safeDelete(sessionId);
+            // sessionCache.safeDelete(sessionId);
 
             sessionCache.set(sessionId, {
                 access_token,
                 access_token_lifetime,
                 refresh_token,
                 refresh_token_lifeTime,
+                is_guest: false,
                 remember_me: false
             }, session_expires_in);
 

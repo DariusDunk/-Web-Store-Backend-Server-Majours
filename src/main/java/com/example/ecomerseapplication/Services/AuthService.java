@@ -1,10 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
-import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
-import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
-import com.example.ecomerseapplication.DTOs.responses.RefreshResponse;
-import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
@@ -23,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -136,4 +134,13 @@ public class AuthService {
         }
     }
 
+    public GuestSessionResponse createGuest(String clientTypeName) {
+
+        ClientType clientType = clientTypeService.getByTypeName(clientTypeName);
+
+        Session session = sessionService.createGuestSession(clientType);
+
+        return new GuestSessionResponse(session.getSessionId(),
+                Duration.between(Instant.now(), session.getExpiresAt()).getSeconds());
+    }
 }

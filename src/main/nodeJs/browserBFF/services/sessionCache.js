@@ -23,11 +23,11 @@ export default {
         cache.ttl(sessionId, newTTL);
     },
 
-    print() {
-        console.log("cache data: \n" + JSON.stringify(cache.data));
-    },
-
-    has(sessionId) {
-        return cache.has(sessionId);
-    }
+    // print() {
+    //     console.log("cache data: \n" + JSON.stringify(cache.data));
+    // },
+    //
+    // has(sessionId) {
+    //     return cache.has(sessionId);
+    // }
 };

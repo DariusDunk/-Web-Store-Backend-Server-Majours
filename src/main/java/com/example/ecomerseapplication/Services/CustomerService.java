@@ -23,16 +23,6 @@ public class CustomerService {
         this.sessionService = sessionService;
     }
 
-//    public void createByRepresentation(UserRepresentation user, String userId) {
-//        Customer customer = new Customer();
-//        customer.setEmail(user.getEmail());
-//        customer.setFirstName(user.getFirstName());
-//        customer.setLastName(user.getLastName());
-//        customer.setRegistrationDate(LocalDate.now());
-//        customer.setKeycloakId(userId);
-//        customerRepository.save(customer);
-//    }
-
     public Customer getById(String userId) {
         return customerRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No user found with ID "+ userId));
     }
@@ -40,7 +30,7 @@ public class CustomerService {
     public Customer getByIdWithActivityRefresh(String userId) {
 
         Customer customer = getById(userId);
-        sessionService.updateActivity();
+//        sessionService.updateActivity();
         return customer;
 
     }

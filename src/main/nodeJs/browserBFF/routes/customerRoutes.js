@@ -4,6 +4,8 @@ import {Backend_Url} from'./config.js';
 // const sessionCache = require('../services/sessionCache.js');
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
+import axios from "axios";
+import sessionCache from "../services/sessionCache.js";
 
 const timestamp = () => {
     const now = new Date();
@@ -407,30 +409,73 @@ router.get('/me', async (req, res) => {
 
 
     if (!sessionId)
-        return res.status(400).end();//todo moje bi trqbva dase smeni v byde6te
+    {
+        try
+        {
+            const guestResponse = await axios.get(`${Backend_Url}/auth/session/guest/create/Web`);
+            const guestData = await guestResponse.data;
+            const {session_id, session_ttl} = guestData;
 
-    try {
+            console.log("Response from guest session creation: ", JSON.stringify(guestData));
 
-        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                   ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
-                    ...(sessionId && { 'X-Session-Id': sessionId })
-                },
-                bffContext: {
-                    req, res
-                }
-            });
-        })
+            if (session_id && session_ttl)
+            {
+                sessionCache.set(session_id, {
+                        is_guest: true,
+                        remember_me: false
+                    },
+                    session_ttl);
 
-        const responseData = await response.data;
-        return res.status(response.status).json(responseData);
+                res.cookie('session_id', session_id,
+                    {
+                        maxAge: session_ttl * 1000,
+                        secure: false,
+                        path: '/',
+                        sameSite: 'lax',
+                        httpOnly: true
+                    });
 
-    } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).end();
+                return res.status(200).json({authenticated: false});
+            }
+        }
+        catch (error)
+        {
+            console.error('Error creating guest session:', error);
+            return res.status(500).end();
+        }
     }
+
+    const isGuest = sessionCache.get(sessionId)?.is_guest;
+
+    if (isGuest)
+    {
+        try {
+
+            const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+                return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
+                        ...(sessionId && {'X-Session-Id': sessionId})
+                    },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            })
+
+            const responseData = await response.data;
+            responseData.authenticated = true;
+
+            return res.status(response.status).json(responseData);
+
+        } catch (error) {
+            console.error('------------------------Error fetching user info------------------------\n', error);
+            return res.status(500).end();
+        }
+    }
+    else
+        return res.status(401).end();
 })
 
 export default router;

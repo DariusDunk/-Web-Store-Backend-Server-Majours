@@ -2,8 +2,10 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
+import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Services.AuthService;
+import com.example.ecomerseapplication.Services.ClientTypeService;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.Services.SessionService;
 import com.example.ecomerseapplication.enums.UserRole;
@@ -22,12 +24,14 @@ public class AuthController {
     private final KeycloakService keycloakService;
     private final SessionService sessionService;
     private final AuthService authService;
+    private final ClientTypeService clientTypeService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService, SessionService sessionService, AuthService authService) {
+    public AuthController(KeycloakService keycloakService, SessionService sessionService, AuthService authService, ClientTypeService clientTypeService) {
         this.keycloakService = keycloakService;
         this.sessionService = sessionService;
         this.authService = authService;
+        this.clientTypeService = clientTypeService;
     }
 
     @GetMapping("refresh/{token}/{sessionId}")
@@ -36,7 +40,7 @@ public class AuthController {
         try {
             Session session = sessionService.getById(sessionId);
 
-            return ResponseEntity.ok(authService.refresh(refreshToken,session));
+            return ResponseEntity.ok(authService.refresh(refreshToken, session));
         } catch (Exception e) {
             System.out.println("Error refreshing tokens: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -47,9 +51,7 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {//TODO ZAPISVANETO V BAZATA TRQBVA DA SE KRIPTIRA!!!
 
-//        System.out.println("Register request: "+customerAccountRequest);
-
-        authService.register(customerAccountRequest.firstName,// todo sloji tova vyv auth servica
+        authService.register(customerAccountRequest.firstName,
                 customerAccountRequest.familyName,
                 customerAccountRequest.password,
                 customerAccountRequest.email,
@@ -85,5 +87,11 @@ public class AuthController {
         Session session = sessionService.getById(sessionId);
 
         return ResponseEntity.ok(authService.refresh(session.getRefreshToken(), session));
+    }
+
+    @GetMapping("session/guest/create/{clientType}")
+    public ResponseEntity<?> createGuestSession(@PathVariable("clientType") String clientTypeName) {
+
+      return ResponseEntity.status(HttpStatus.CREATED).body(authService.createGuest(clientTypeName));
     }
 }

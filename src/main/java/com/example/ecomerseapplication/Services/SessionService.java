@@ -27,6 +27,7 @@ import java.util.Base64;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
+    private final int GUEST_SESSION_TTL_DAYS = 8;
 
     @Autowired
     public SessionService(SessionRepository sessionRepository) {
@@ -68,11 +69,11 @@ public class SessionService {
         sessionRepository.save(session);
     }
 
-    public void updateActivity() {
+    public void updateActivity(String sessionId) {
 
-        String sessionId = (String) ((ServletRequestAttributes) RequestContextHolder
-                .currentRequestAttributes())
-                .getRequest().getAttribute("sessionId");
+//        String sessionId = (String) ((ServletRequestAttributes) RequestContextHolder
+//                .currentRequestAttributes())
+//                .getRequest().getAttribute("sessionId");
 
         Session session = getById(sessionId);
         Instant now = Instant.now();
@@ -119,5 +120,18 @@ public class SessionService {
             System.out.println("-------------------------Revoked " + revokedSessions + " expired sessions-------------------------");
         }
 
+    }
+
+    public Session createGuestSession(ClientType clientType) {
+
+        Session session = new Session();
+        session.setSessionId(generateSessionId());
+        session.setIsGuest(true);
+        session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
+        session.setRememberMeSession(false);
+        session.setClientType(clientType);
+        session.setIsRevoked(false);
+
+        return sessionRepository.save(session);
     }
 }
