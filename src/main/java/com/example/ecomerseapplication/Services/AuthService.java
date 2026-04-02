@@ -10,11 +10,15 @@ import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidSessionException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
 import com.example.ecomerseapplication.Mappers.LoginResponseMapper;
 import com.example.ecomerseapplication.Mappers.RefreshResponseMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
+import com.example.ecomerseapplication.enums.UserRole;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.validation.ValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,40 @@ public class AuthService {
         this.customerService = customerService;
         this.sessionService = sessionService;
         this.clientTypeService = clientTypeService;
+    }
+
+    public void register(String firstname, String lastName, String password, String email, UserRole userRole) {
+        String userId = null;
+        try {
+            userId = keycloakService.registerUser(firstname, lastName, password, email, userRole);
+
+            if (userId != null)
+            {
+                Customer customer = new Customer(userId, firstname, lastName, email);
+
+                customerService.save(customer);
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("Error registering user: " + e.getMessage());
+            if (userId != null) {
+                try {
+                    System.out.println("Rolling back user creation");
+                    keycloakService.deleteUser(userId);
+                } catch (Exception ex) {
+                    System.out.println("Error rollback deleting user: " + ex.getMessage());
+                }
+            }
+
+            if (e instanceof ValidationException
+                    || e instanceof UserAlreadyExistsException
+                    || e instanceof RegistrationFailedException) {
+                throw e;
+
+            }
+            throw new RegistrationFailedException("Registration failed");
+        }
     }
 
     private String extractIdFromToken(String token) throws ParseException {

@@ -5,6 +5,11 @@ import {Backend_Url} from'./config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 
+const timestamp = () => {
+    const now = new Date();
+    return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
+};
+
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page
     const sessionId = req.cookies.session_id;
@@ -29,7 +34,7 @@ router.get('/getFavourites/:page', async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for fetching favourites');
+            console.warn(`${timestamp()} Handled backend error for fetching favourites`);
             return res.status(error.response.status||500).end();
         }
 
@@ -69,7 +74,7 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for adding product to favourites');
+            console.warn(`${timestamp()} Handled backend error for adding product to favourites`);
             return res.status(error.response.status||500).json(error.response.data);
         }
 
@@ -109,7 +114,7 @@ router.post(`/removeFav/single`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for removing product through the favourites page');
+            console.warn(`${timestamp()} Handled backend error for removing product through the favourites page`);
             return res.status(error.response.status||500).end();
         }
 
@@ -143,7 +148,7 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for removing product from favourites through the product page');
+            console.warn(`${timestamp()} Handled backend error for removing product from favourites through the product page`);
             return res.status(error.response.status||500).end();
         }
 
@@ -178,7 +183,7 @@ router.post(`/removeFav/batch`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for batch deleting products from favourites');
+            console.warn(`${timestamp()} Handled backend error for batch deleting products from favourites`);
             return res.status(error.response.status||500).end();
         }
         console.error('-------------------Unexpected error batch deleting products from favourites-------------------\n', error);
@@ -211,7 +216,7 @@ router.post('/addToCart', async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for adding product to cart');
+            console.warn(`${timestamp()} Handled backend error for adding product to cart`);
             return res.status(error.response.status||500).json(error.response.data);
         }
 
@@ -247,7 +252,7 @@ router.post('/cart/add/quantity', async (req, res) => {
     }
     catch(error){
         if (error.response) {
-            console.warn('Handled backend error for adding product quantity to cart');
+            console.warn(`${timestamp()} Handled backend error for adding product quantity to cart`);
             return res.status(error.response.status||500).json(error.response.data);
         }
 
@@ -284,7 +289,7 @@ router.post('/addToCart/batch', async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for batch adding products to cart');
+            console.warn(`${timestamp()} Handled backend error for batch adding products to cart`);
             return res.status(error.response.status||500).json(error.response.data);
         }
 
@@ -319,7 +324,7 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for removing product from cart');
+            console.warn(`${timestamp()} Handled backend error for removing product from cart`);
             return res.status(error.response.status||500).end();
         }
 
@@ -355,7 +360,7 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for batch removing product from cart');
+            console.warn(`${timestamp()} Handled backend error for batch removing product from cart`);
             return res.status(error.response.status||500).end();
         }
 
@@ -387,7 +392,7 @@ router.get('/getCart', async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for fetching the cart');
+            console.warn(`${timestamp()} Handled backend error for fetching the cart`);
             return res.status(error.response.status||500).end();
         }
 

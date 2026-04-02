@@ -10,33 +10,30 @@ import axios from 'axios';
 router.post(`/register`, async (req, res) => {
 
     const {name, familyName, email, password} = req.body;
-
-    // console.log("Node register" +
-    //   "\nName: " + name +
-    //   "\nFamily name: " + familyName +
-    //   "\nEmail: " + email +
-    //   "\nPassword: " + password)
-
-
+    
     try {
-        const response = await fetch(`${AuthURL}/register`, {//todo smeni tova sys axios
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({first_name: name, last_name: familyName, email: email, password: password})
+        const response = await axios.post(`${AuthURL}/register`, {
+            first_name: name,
+            last_name: familyName,
+            email: email,
+            password: password
         });
 
-        if (response.status !== 201) {
-            const responseData = await response.json();
+        const responseData = response.data;
 
-            if (responseData != null) {
-                return res.status(response.status).json(responseData);
-            }
+        if (responseData != null) {
+            return res.status(response.status).json(responseData);
         }
 
         return res.status(response.status).end();
     } catch (error) {
+        if (error.response) {
+            const responseData = error.response.data;
+            if (responseData != null) {
+                return res.status(error.response.status).json(responseData);
+            }
+            return res.status(error.response.status).end();
+        }
         console.error('Error with registration: ', error);
         return res.status(500).json({error: 'Internal server error'});
     }

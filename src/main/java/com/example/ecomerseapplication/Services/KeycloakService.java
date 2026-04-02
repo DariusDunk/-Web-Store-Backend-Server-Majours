@@ -69,40 +69,40 @@ public class KeycloakService {
         this.customerService = customerService;
     }
 
-    public void registerFlow(String firstname, String lastName, String password, String email, UserRole userRole) throws ValidationException {
-        String userId = null;
-        try {
-             userId = registerUser(firstname, lastName, password, email, userRole);
-
-            if (userId != null)
-            {
-                Customer customer = new Customer(userId, firstname, lastName, email);
-
-                customerService.save(customer);
-            }
-
-        } catch (Exception e) {
-
-            System.out.println("Error registering user: " + e.getMessage());
-            if (userId != null) {
-                try {
-                    System.out.println("Rolling back user creation");
-                    deleteUser(userId);
-                } catch (Exception ex) {
-                    System.out.println("Error rollback deleting user: " + ex.getMessage());
-                }
-            }
-
-            if (e instanceof ValidationException
-            || e instanceof UserAlreadyExistsException
-            || e instanceof RegistrationFailedException) {
-                throw e;
-
-            }
-            throw new RegistrationFailedException("Registration failed");
-
-        }
-    }
+//    public void registerFlow(String firstname, String lastName, String password, String email, UserRole userRole) throws ValidationException {
+//        String userId = null;
+//        try {
+//             userId = registerUser(firstname, lastName, password, email, userRole);
+//
+//            if (userId != null)
+//            {
+//                Customer customer = new Customer(userId, firstname, lastName, email);
+//
+//                customerService.save(customer);
+//            }
+//
+//        } catch (Exception e) {
+//
+//            System.out.println("Error registering user: " + e.getMessage());
+//            if (userId != null) {
+//                try {
+//                    System.out.println("Rolling back user creation");
+//                    deleteUser(userId);
+//                } catch (Exception ex) {
+//                    System.out.println("Error rollback deleting user: " + ex.getMessage());
+//                }
+//            }
+//
+//            if (e instanceof ValidationException
+//            || e instanceof UserAlreadyExistsException
+//            || e instanceof RegistrationFailedException) {
+//                throw e;
+//
+//            }
+//            throw new RegistrationFailedException("Registration failed");
+//
+//        }
+//    }
 
     private String getAdminAccessToken() {
 //        System.out.println("Getting Admin Access Token");
@@ -202,7 +202,7 @@ public class KeycloakService {
 
     }
 
-    private void deleteUser(String userId) {
+    public void deleteUser(String userId) {
 //        System.out.println("Deleting user");
 
         String adminToken = getAdminAccessToken();

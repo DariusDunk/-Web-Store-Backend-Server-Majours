@@ -49,7 +49,7 @@ public class AuthController {
 
 //        System.out.println("Register request: "+customerAccountRequest);
 
-        keycloakService.registerFlow(customerAccountRequest.firstName,// todo sloji tova vyv auth servica
+        authService.register(customerAccountRequest.firstName,// todo sloji tova vyv auth servica
                 customerAccountRequest.familyName,
                 customerAccountRequest.password,
                 customerAccountRequest.email,

@@ -4,6 +4,10 @@ import {Backend_Url} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 
+const timestamp = () => {
+    const now = new Date();
+    return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
+};
 
 router.get('/featured/:page', async (req, res) => {//todo prodylju sys sesiite ot tuk
 
@@ -286,7 +290,7 @@ router.get(`/getReview/:productCode`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for fetching specific review data');
+            console.warn(`${timestamp()} Handled backend error for fetching specific review data`);
             return res.status(error.response.status||500).json(error.response.data);
         }
 
@@ -324,7 +328,7 @@ router.post(`/addReview`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for creating review');
+            console.warn(`${timestamp()} Handled backend error for creating review`);
             return res.status(error.response.status||500).json(error.response.data);
         }
 
@@ -364,7 +368,7 @@ router.post(`/updateReview`, async (req, res) => {
     } catch (error) {
 
         if (error.response) {
-            console.warn('Handled backend error for updating the review');
+            console.warn(`${timestamp()} Handled backend error for updating the review`);
             return res.status(error.response.status||500).json(error.response.data);
         }
 
