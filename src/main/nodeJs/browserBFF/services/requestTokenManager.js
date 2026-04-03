@@ -2,7 +2,7 @@ import sessionCache from "./sessionCache.js";
 
 import { Backend_Url } from '../routes/config.js';
 import axios from 'axios';
-
+const refreshInProgress = {};
 export async function fetchTokensOfSession(sessionID) {
     if (!sessionID) return null;
 
@@ -19,16 +19,33 @@ export async function fetchTokensOfSession(sessionID) {
 }
 
 export async function fetchWithSessionTokens(sessionId, requestFn) {
-    let tokens = sessionCache.get(sessionId);
 
-    if (!tokens) {
-        tokens = await fetchTokensOfSession(sessionId);
-        if (!tokens) throw new Error("Session expired or missing");
+    if (refreshInProgress[sessionId]) {
 
-        tokens.is_guest = false;
-        sessionCache.set(sessionId, tokens, tokens.ttl);
+        // console.log("Refresh call prevented, already in progress for session: " + sessionId + "");
+
+        return refreshInProgress[sessionId];
     }
 
-    // Now tokens exist, call the request function
-    return await requestFn(tokens);
+    refreshInProgress[sessionId] = (async () => {
+        // console.log("fetchWithSessionTokens called");
+        let tokens = sessionCache.get(sessionId);
+
+        if (!tokens) {
+            tokens = await fetchTokensOfSession(sessionId);
+
+            if (!tokens) throw new Error("Session expired or missing");
+
+            sessionCache.set(sessionId, tokens, tokens.ttl);
+        }
+
+        return await requestFn(tokens);
+
+    })();
+
+    try {
+        return await refreshInProgress[sessionId];
+    } finally {
+        delete refreshInProgress[sessionId];
+    }
 }

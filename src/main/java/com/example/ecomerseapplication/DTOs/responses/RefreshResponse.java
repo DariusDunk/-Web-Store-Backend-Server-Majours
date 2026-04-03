@@ -11,6 +11,6 @@ public record RefreshResponse(@JsonProperty("access_token")
                               @JsonProperty("refresh_token")
                               String refreshToken,
                               @JsonProperty("session_expires_in")
-                              long sessionExpiresIn) {
-
-}
+                              long sessionExpiresIn,
+                              @JsonProperty("is_guest")
+                              boolean isGuest){ }

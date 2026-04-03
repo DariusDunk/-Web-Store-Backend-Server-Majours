@@ -34,19 +34,19 @@ public class AuthController {
         this.clientTypeService = clientTypeService;
     }
 
-    @GetMapping("refresh/{token}/{sessionId}")
-    public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
-            , @PathVariable String sessionId) {
-        try {
-            Session session = sessionService.getById(sessionId);
-
-            return ResponseEntity.ok(authService.refresh(refreshToken, session));
-        } catch (Exception e) {
-            System.out.println("Error refreshing tokens: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-    }
+//    @GetMapping("refresh/{token}/{sessionId}")
+//    public ResponseEntity<?> refreshTokens(@PathVariable("token") String refreshToken
+//            , @PathVariable String sessionId) {
+//        try {
+//            Session session = sessionService.getById(sessionId);
+//
+//            return ResponseEntity.ok(authService.refresh(refreshToken, session));
+//        } catch (Exception e) {
+//            System.out.println("Error refreshing tokens: " + e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//
+//    }
 
     @PostMapping("register")
     public ResponseEntity<?> registerUserKeycloak(@RequestBody @Valid CustomerAccountRequest customerAccountRequest) {//TODO ZAPISVANETO V BAZATA TRQBVA DA SE KRIPTIRA!!!

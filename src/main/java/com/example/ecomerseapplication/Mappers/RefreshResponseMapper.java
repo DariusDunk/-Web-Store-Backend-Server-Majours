@@ -7,12 +7,13 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class RefreshResponseMapper {
-    public static RefreshResponse tokenRefreshToRefreshResponse(TokenRefreshResponse tokenRefreshResponse, Instant sessionExpiry) {
+    public static RefreshResponse tokenRefreshToRefreshResponse(TokenRefreshResponse tokenRefreshResponse, Instant sessionExpiry, boolean isGuest) {
         return new RefreshResponse(tokenRefreshResponse.accessToken(),
                 tokenRefreshResponse.expiresIn(),
                 tokenRefreshResponse.refreshExpiresIn(),
                 tokenRefreshResponse.refreshToken(),
-                Duration.between(Instant.now(), sessionExpiry).getSeconds()
+                Duration.between(Instant.now(), sessionExpiry).getSeconds(),
+                isGuest
                 );
     }
 }

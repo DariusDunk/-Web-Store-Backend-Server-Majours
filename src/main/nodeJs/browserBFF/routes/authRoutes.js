@@ -43,7 +43,7 @@ router.post(`/register`, async (req, res) => {
 router.post(`/login`, async (req, res) => {
     const {email, password, rememberMe = false} = req.body;
 
-    const guestSessionId = req.cookies('session_id');
+    const guestSessionId = req.cookies.session_id;
 
     // console.log("Node login: " + email + " " + password)
     let authResponse = null;

@@ -447,7 +447,7 @@ router.get('/me', async (req, res) => {
 
     const isGuest = sessionCache.get(sessionId)?.is_guest;
 
-    if (isGuest)
+    if (!isGuest)
     {
         try {
 
@@ -463,9 +463,10 @@ router.get('/me', async (req, res) => {
                     }
                 });
             })
-
             const responseData = await response.data;
-            responseData.authenticated = true;
+
+            if (responseData)
+                responseData.authenticated = !responseData.is_guest||false;
 
             return res.status(response.status).json(responseData);
 
@@ -475,7 +476,7 @@ router.get('/me', async (req, res) => {
         }
     }
     else
-        return res.status(401).end();
+        return res.status(200).end();
 })
 
 export default router;
