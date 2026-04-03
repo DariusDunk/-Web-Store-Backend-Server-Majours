@@ -6,11 +6,15 @@ import axiosBackendClient from '../axiosBackendClient.js';
 router.get('/getFilters/:categoryName', async (req, res)=>{
 
   const categoryName = req.params.categoryName
+  const sessionId = req.cookies.session_id;
 
   try
   {
-      const response = await axiosBackendClient.get(`${Backend_Url}/category/filters?categoryName=${categoryName}`, {})
-      const responseData = response.data;
+      const response = await axiosBackendClient.get(`${Backend_Url}/category/filters?categoryName=${categoryName}`, {
+          headers: {
+              ...(sessionId && {'X-Session-Id': sessionId})
+          }
+      })
 
     return res.status(response.status).json(responseData || {})
   }catch (error) {

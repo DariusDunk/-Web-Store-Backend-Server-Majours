@@ -9,12 +9,17 @@ const timestamp = () => {
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
 
-router.get('/featured/:page', async (req, res) => {//todo prodylju sys sesiite ot tuk
+router.get('/featured/:page', async (req, res) => {
 
     const page = req.params.page;
+    const sessionId = req.cookies.session_id;
 
     try {
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {
+            headers: {
+                ...(sessionId && {'X-Session-Id': sessionId})
+            }
+        });
         const data = await response.data;
         return res.status(response.status).json(data);
 
@@ -27,9 +32,14 @@ router.get('/featured/:page', async (req, res) => {//todo prodylju sys sesiite o
 router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
     const {manufacturerName, page} = req.params;
     const sort = req.query.sort;
+    const sessionId = req.cookies.session_id;
 
     try {
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {
+            headers: {
+                ...(sessionId && {'X-Session-Id': sessionId})
+            }
+        });
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
@@ -42,10 +52,15 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
 router.get('/category/:categoryName/p:page', async (req, res) => {
     const {categoryName, page} = req.params;
     const sort = req.query.sort;
+    const sessionId = req.cookies.session_id;
 
     try {
 
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {
+            headers: {
+                ...(sessionId && {'X-Session-Id': sessionId})
+            }
+        });
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -58,14 +73,19 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
 
 router.get(`/review/overview/:productCode`, async (req, res) => {
     const {productCode} = req.params;
+    const sessionId = req.cookies.session_id;
 
     if (!productCode) {
-        return res.status(400).json({error: 'Missing required parameters'});
+        return res.status(400).end();
     }
 
     try {
 
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {});
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
+            headers: {
+                ...(sessionId && {'X-Session-Id': sessionId})
+            }
+        });
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
@@ -80,7 +100,7 @@ router.get('/detail/:productCode', async (req, res) => {
     const sessionId = req.cookies.session_id;
 
     if (!productCode || !sessionId) {
-        return res.status(400).json({error: 'Missing required parameters'});
+        return res.status(400).end();
     }
     try {
 
@@ -125,7 +145,12 @@ router.get('/suggest/:name', async (req, res) => {
     try {
 
         const name = req.params.name;
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/suggest?${new URLSearchParams({name: name || ''})}`);
+        const sessionId = req.cookies.session_id;
+        const response = await axiosBackendClient.get(`${Backend_Url}/product/suggest?${new URLSearchParams({name: name || ''})}`, {
+            headers: {
+                ...(sessionId && {'X-Session-Id': sessionId})
+            }
+        });
         const data = await response.data;
 
         return res.status(response.status).json(data);
@@ -139,6 +164,7 @@ router.get('/suggest/:name', async (req, res) => {
 router.get(`/search`, async (req, res) => {
 
     const {searchText, page, sort} = req.query;
+    const sessionId = req.cookies.session_id;
 
     try {
 
@@ -148,7 +174,11 @@ router.get(`/search`, async (req, res) => {
         url.searchParams.set('page', page);
         url.searchParams.set('sort', sort || '');
 
-        const response = await axiosBackendClient.get(url.toString());
+        const response = await axiosBackendClient.get(url.toString(), {
+            headers: {
+                ...(sessionId && {'X-Session-Id': sessionId})
+            }
+        });
 
         const data = await response.data;
         return res.status(response.status).json(data);
@@ -171,6 +201,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
     const category = decodeURIComponent(req.params.category);
     const {filters = {}, sort} = req.query;
+    const sessionId = req.cookies.session_id;
     let minPrice = 0;
     let maxPrice = Infinity;  // Or some default max
 
@@ -215,7 +246,11 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
     try {
 
-        const response = await axiosBackendClient.post(`${Backend_Url}/product/filter/${page}`, requestBody, {});
+        const response = await axiosBackendClient.post(`${Backend_Url}/product/filter/${page}`, requestBody, {
+            headers: {
+                ...(sessionId && {'X-Session-Id': sessionId})
+            }
+        });
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
