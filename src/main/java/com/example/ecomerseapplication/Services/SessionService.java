@@ -64,8 +64,12 @@ public class SessionService {
     }
 
     public void revokeSession(Session session) {
+
+        Instant now = Instant.now();
         session.setIsRevoked(true);
-        session.setRevokedAt(Instant.now());
+        session.setLastActivityAt(now);
+        session.setRevokedAt(now);
+
         sessionRepository.save(session);
     }
 
