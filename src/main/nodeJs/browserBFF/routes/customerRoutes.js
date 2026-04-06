@@ -19,7 +19,7 @@ router.get('/getFavourites/:page', async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.get(`${Backend_Url}/customer/favourites/p/${page}`, {
+                return await axiosBackendClient.get(`${Backend_Url}/customer/favourites/p/${page}`, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -29,7 +29,7 @@ router.get('/getFavourites/:page', async (req, res) => {
                     req,res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -53,7 +53,7 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.post(`${Backend_Url}/customer/favorite/add/${productCode}`, {}, {
+                return await axiosBackendClient.post(`${Backend_Url}/customer/favorite/add/${productCode}`, {}, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -63,7 +63,7 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
                     req, res
                 }
             });
-        });
+            }, {req, res});
 
         const responseData = await response.data;
 
@@ -96,7 +96,7 @@ router.post(`/removeFav/single`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) =>{
-            return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/single`, {
+                return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/single`, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -107,7 +107,7 @@ router.post(`/removeFav/single`, async (req, res) => {
                     req, res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
 
@@ -133,7 +133,7 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.delete(`${Backend_Url}/customer/favourites/remove/${productCode}`, {
+                return await axiosBackendClient.delete(`${Backend_Url}/customer/favourites/remove/${productCode}`, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -143,7 +143,7 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
                     req, res
                 }
             });
-        });
+            }, {req, res});
 
         return res.status(response.status).end();
 
@@ -165,7 +165,7 @@ router.post(`/removeFav/batch`, async (req, res) => {
         const {currentPage, productCodes} = req.body;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/batch`, {
+                return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/batch`, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -176,7 +176,7 @@ router.post(`/removeFav/batch`, async (req, res) => {
                     req, res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
 
@@ -199,7 +199,7 @@ router.post('/addToCart', async (req, res) => {
         const sessionId = req.cookies.session_id;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.post(`${Backend_Url}/customer/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
+                return await axiosBackendClient.post(`${Backend_Url}/customer/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -209,7 +209,7 @@ router.post('/addToCart', async (req, res) => {
                     req, res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
 
@@ -233,7 +233,7 @@ router.post('/cart/add/quantity', async (req, res) => {
         const sessionId = req.cookies.session_id;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.post(`${Backend_Url}/customer/cart/add/quantity`, {
+                return await axiosBackendClient.post(`${Backend_Url}/customer/cart/add/quantity`, {
                 product_code: productCode,
                 quantity: quantity
             }, {
@@ -246,8 +246,7 @@ router.post('/cart/add/quantity', async (req, res) => {
                     req, res
                 }
             })
-
-        });
+            }, {req, res});
 
         const responseData = await response.data;
         return res.status(response.status).json({message:responseData});
@@ -269,7 +268,7 @@ router.post('/addToCart/batch', async (req, res) => {
         const sessionId = req.cookies.session_id;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.post(`${Backend_Url}/customer/cart/add/batch`, productCodes, {
+                return await axiosBackendClient.post(`${Backend_Url}/customer/cart/add/batch`, productCodes, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -279,7 +278,7 @@ router.post('/addToCart/batch', async (req, res) => {
                     req, res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
 
@@ -307,7 +306,7 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
         const sessionId = req.cookies.session_id;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.delete(`${Backend_Url}/customer/cart/remove/${productCode}`, {
+                return await axiosBackendClient.delete(`${Backend_Url}/customer/cart/remove/${productCode}`, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -317,7 +316,7 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
                     req, res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
 
@@ -342,7 +341,7 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
         const productCodes = req.body;
 
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.delete(`${Backend_Url}/customer/cart/remove/batch`, {
+                return await axiosBackendClient.delete(`${Backend_Url}/customer/cart/remove/batch`, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -353,7 +352,7 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
                     req, res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
 
@@ -376,7 +375,7 @@ router.get('/getCart', async (req, res) => {
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.get(`${Backend_Url}/customer/cart`, {
+                return await axiosBackendClient.get(`${Backend_Url}/customer/cart`, {
                 headers: {
                     'Content-Type': 'application/json',
                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
@@ -386,7 +385,7 @@ router.get('/getCart', async (req, res) => {
                     req, res
                 }
             });
-        })
+            }, {req, res})
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -447,22 +446,25 @@ router.get('/me', async (req, res) => {
 
     const isGuest = sessionCache.get(sessionId)?.is_guest;
 
+    // console.log("isGuest: ", isGuest);
+
     if (!isGuest)
     {
         try {
-
             const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-                return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
-                        ...(sessionId && {'X-Session-Id': sessionId})
-                    },
-                    bffContext: {
-                        req, res
-                    }
-                });
-            })
+                    return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
+                            ...(sessionId && {'X-Session-Id': sessionId})
+                        },
+                        bffContext: {
+                            req, res
+                        }
+                    });
+                },
+                {isMe: true, req, res});
+
             const responseData = await response.data;
 
             if (responseData)
@@ -471,6 +473,19 @@ router.get('/me', async (req, res) => {
             return res.status(response.status).json(responseData);
 
         } catch (error) {
+
+            if (error.response &&error.response.status === 401) {
+
+                const errorResponse = error.response.data;
+
+                if (errorResponse.guestError) {
+
+                    console.log("Guest error detected, creating guest session");
+
+                    return res.status(200).json({authenticated: false});
+                }
+            }
+
             console.error('------------------------Error fetching user info------------------------\n', error);
             return res.status(500).end();
         }

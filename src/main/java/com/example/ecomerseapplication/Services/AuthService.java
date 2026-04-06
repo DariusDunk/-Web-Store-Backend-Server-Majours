@@ -130,7 +130,7 @@ public class AuthService {
         }
         catch (Exception e)
         {
-            System.out.println("Error refreshing token in keycloak, session will be treated as a guest: \n" + e.getMessage());
+            System.out.println("Error refreshing token in keycloak, session will be treated as a guest: \n" + e.getMessage() + "\n -------------------------------------------------------");
 
             session.setIsGuest(true);
             session.setRefreshToken(null);

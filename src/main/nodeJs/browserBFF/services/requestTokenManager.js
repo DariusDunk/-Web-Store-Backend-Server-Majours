@@ -1,7 +1,7 @@
 import sessionCache from "./sessionCache.js";
-
 import { Backend_Url } from '../routes/config.js';
 import axios from 'axios';
+
 const refreshInProgress = {};
 export async function fetchTokensOfSession(sessionID) {
     if (!sessionID) return null;
@@ -18,7 +18,9 @@ export async function fetchTokensOfSession(sessionID) {
         }
 }
 
-export async function fetchWithSessionTokens(sessionId, requestFn) {
+export async function fetchWithSessionTokens(sessionId, requestFn, options) {
+
+    const {isMe = false, res, req} = options;
 
     if (refreshInProgress[sessionId]) {
 
@@ -37,6 +39,19 @@ export async function fetchWithSessionTokens(sessionId, requestFn) {
             if (!tokens) throw new Error("Session expired or missing");
 
             sessionCache.set(sessionId, tokens, tokens.ttl);
+
+            if (tokens.is_guest && isMe) {
+
+                const isMeGuestError = new Error("Guest user cannot access this endpoint");
+
+                isMeGuestError.response = {
+                    status: 401,
+                    data: {
+                        guestError: true
+                    }
+                }
+                throw isMeGuestError;
+            }
         }
 
         return await requestFn(tokens);

@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { Backend_Url } from './routes/config.js';
-const axiosBackendClient = axios.create({ baseURL: Backend_Url , withCredentials: true});
-import {refreshToken} from './services/axiosInterceptor.js';
+import {refreshToken} from './services/interceptorTokenRefresh.js';
 import sessionCache from "./services/sessionCache.js";
+
+const axiosBackendClient = axios.create({ baseURL: Backend_Url , withCredentials: true});
 
 const refreshPromises = new Map();
 

@@ -128,7 +128,7 @@ router.get('/detail/:productCode', async (req, res) => {
                         }
                     })
                 ])
-            );
+            , {req, res});
 
         const productDetails = productDetailResponse.data;
         const ratingOverview = ratingOverviewResponse.data;
@@ -288,7 +288,7 @@ router.post('/getPagedReviews', async (req, res) => {
                     req, res
                 }
             })
-        })
+        }, {req, res})
 
         const responseData = await response.data;
 
@@ -317,7 +317,7 @@ router.get(`/getReview/:productCode`, async (req, res) => {
                     req, res
                 }
             })
-        })
+        }, {req, res})
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -356,7 +356,7 @@ router.post(`/addReview`, async (req, res) => {
                     req, res
                 }
             })
-        })
+        }, {req, res})
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -395,7 +395,7 @@ router.post(`/updateReview`, async (req, res) => {
                     req, res
                 }
             })
-        })
+        }, {req, res})
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
@@ -429,7 +429,7 @@ router.post(`/deleteReview`, async (req, res) => {
                     req, res
                 }
             })
-        })
+        }, {req, res})
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);

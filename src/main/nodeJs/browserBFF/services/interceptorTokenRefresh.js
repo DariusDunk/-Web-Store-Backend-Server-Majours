@@ -4,10 +4,6 @@ import sessionCache from "./sessionCache.js";
 
 export async function refreshToken(sessionId, res) {
 
-    // console.log('BFF context req:', req);
-    // console.log('BFF context res:', res);
-    // console.log('Session ID from cookie:', sessionId);
-
     if (sessionId && res) {
         console.log("Refreshing tokens...");
 
