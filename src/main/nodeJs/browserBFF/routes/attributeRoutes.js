@@ -14,7 +14,9 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
           headers: {
               ...(sessionId && {'X-Session-Id': sessionId})
           }
-      })
+      });
+
+      const responseData = response.data;
 
     return res.status(response.status).json(responseData || {})
   }catch (error) {

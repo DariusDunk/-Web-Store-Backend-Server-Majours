@@ -4,6 +4,7 @@ import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidSessionException;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,7 @@ public class SessionService {
         Session session = getById(sessionId);
         Instant now = Instant.now();
 
-        if (now.isAfter(session.getLastActivityAt().plus(5, ChronoUnit.MINUTES))) {
+        if (now.isAfter(session.getLastActivityAt().plus(5, ChronoUnit.MINUTES)) && session.getIsRevoked() == false) {
 
 //            System.out.println("Updating session activity timestamp");
 
@@ -108,7 +109,7 @@ public class SessionService {
     }
 
     public Session getById(String sessionId) {
-        return sessionRepository.findById(sessionId).orElseThrow(() -> new ResourceNotFoundException("Session not found"));
+        return sessionRepository.getActiveById(sessionId).orElseThrow(() -> new ResourceNotFoundException("Session expired or not found"));
     }
 
     public void save(Session session) {
@@ -150,5 +151,23 @@ public class SessionService {
         session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
 
         return buildSession(session, clientType, false, true);
+    }
+
+    public Session LoginToGuestSession(String sessionId) {
+
+        Session session = getById(sessionId);
+
+        if (session.getIsGuest()) {
+            throw new InvalidSessionException("Session is already a guest session");
+        }
+
+        session.setIsGuest(true);
+        session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
+        session.setRefreshToken(null);
+        session.setCustomer(null);
+        session.setRememberMeSession(false);
+        session.setIsRevoked(false);
+
+        return sessionRepository.save(session);
     }
 }

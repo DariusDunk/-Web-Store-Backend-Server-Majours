@@ -108,13 +108,26 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String refreshToken, String sessionId) {
+    public GuestSessionResponse logout(String refreshToken, String sessionId) {
 
-        Session session = sessionService.getById(sessionId);
+//        Session session = sessionService.getById(sessionId);
 
-        sessionService.revokeSession(session);
+//        sessionService.revokeSession(session);
 
-        keycloakService.invalidateRefreshToken(refreshToken);
+        Session session = sessionService.LoginToGuestSession(sessionId);
+        try
+        {
+            keycloakService.invalidateRefreshToken(refreshToken);
+        }
+        catch (Exception e)
+        {
+            System.out.println("-------------------------------------------------------");
+            System.out.println("Error invalidating refresh token in keycloak: " + e.getMessage());
+            System.out.println("-------------------------------------------------------");
+        }
+
+        return new GuestSessionResponse(session.getSessionId(),
+                Duration.between(Instant.now(), session.getExpiresAt()).getSeconds());
     }
 
     @Transactional

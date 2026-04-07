@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {response} from 'express';
 const router = express.Router();
 import {Backend_Url} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
@@ -103,41 +103,48 @@ router.get('/detail/:productCode', async (req, res) => {
         return res.status(400).end();
     }
     try {
+        const response =
+         await fetchWithSessionTokens(sessionId, async (tokens) => {
+                 const [prodReq, reviewReq] = await Promise.all([
+                     axiosBackendClient.get(`${Backend_Url}/product/${productCode}`, {
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'Authorization': 'Bearer ' + tokens.access_token,
+                             ...(sessionId && {'X-Session-Id': sessionId}),
+                         },
+                         bffContext: {
+                             req, res
+                         }
+                     }),
+                     axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'Authorization': 'Bearer ' + tokens.access_token,
+                             ...(sessionId && {'X-Session-Id': sessionId}),
+                         },
+                         bffContext: {
+                             req, res
+                         }
+                     })
+                 ])
 
-        const [productDetailResponse, ratingOverviewResponse] =
-            await fetchWithSessionTokens(sessionId, async (tokens) =>
-                Promise.all([
-                    axiosBackendClient.get(`${Backend_Url}/product/${productCode}`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + tokens.access_token,
-                            ...(sessionId && { 'X-Session-Id': sessionId }),
-                        },
-                        bffContext: {
-                            req, res
-                        }
-                    }),
-                    axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + tokens.access_token,
-                            ...(sessionId && { 'X-Session-Id': sessionId }),
-                        },
-                        bffContext: {
-                            req, res
-                        }
-                    })
-                ])
+                 return {
+                     data: {
+                         productDetails: prodReq.data,
+                         ratingOverview: reviewReq.data
+                     }
+                 };
+             }
             , {req, res});
 
-        const productDetails = productDetailResponse.data;
-        const ratingOverview = ratingOverviewResponse.data;
+        // const productDetails = productDetailResponse.data;
+        // const ratingOverview = ratingOverviewResponse.data;
 
-        return res.status(200).json({productDetails, ratingOverview});
+        return res.status(200).json(response.data);
 
     } catch (error) {
         console.error('Error fetching data from backend:', error);
-        return res.status(error.status).end();
+        return res.status(error.status||500).end();
     }
 });
 
@@ -272,7 +279,7 @@ router.post('/getPagedReviews', async (req, res) => {
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
-            return await axiosBackendClient.post(`${Backend_Url}/product/reviews/paged`, {
+            const respons = await axiosBackendClient.post(`${Backend_Url}/product/reviews/paged`, {
                 product_code: productCode,
                 page,
                 sort_order: sort,
@@ -288,9 +295,20 @@ router.post('/getPagedReviews', async (req, res) => {
                     req, res
                 }
             })
+
+            // console.log('pagedReview response:', respons);
+
+            return respons;
         }, {req, res})
 
-        const responseData = await response.data;
+        // console.log('After wrapper: response:', response);
+        // console.log('response?.status:', response?.status);
+        // console.log('response?.data:', response?.data);
+
+        const responseData = response?.data;
+
+        // console.log('response status:', response?.status);
+        // console.log('response data:', responseData);
 
         return res.status(response.status).json(responseData);
 

@@ -406,7 +406,6 @@ router.get('/me', async (req, res) => {
 
     const sessionId = req.cookies.session_id;
 
-
     if (!sessionId)
     {
         try
@@ -446,6 +445,8 @@ router.get('/me', async (req, res) => {
 
     const isGuest = sessionCache.get(sessionId)?.is_guest;
 
+    // sessionCache.print();
+
     // console.log("isGuest: ", isGuest);
 
     if (!isGuest)
@@ -480,7 +481,7 @@ router.get('/me', async (req, res) => {
 
                 if (errorResponse.guestError) {
 
-                    console.log("Guest error detected, creating guest session");
+                    console.log("Guest error detected in '/me' request, creating guest session");
 
                     return res.status(200).json({authenticated: false});
                 }

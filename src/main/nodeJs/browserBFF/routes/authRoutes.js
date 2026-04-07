@@ -120,7 +120,7 @@ router.post(`/login`, async (req, res) => {
         return res.status(userDataResponse.status).json(userData);
     } catch (error) {
         console.error('Error fetching user data: ', error);
-        return res.status(error.response.status || 500).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -131,17 +131,43 @@ router.post('/logout', async (req, res) => {
     if (sessionId) {
 
         try {
-            await fetchWithSessionTokens(sessionId, async (tokens) => await axiosBackendClient.get(
-                `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}`
+          const response =  await fetchWithSessionTokens(sessionId, async (tokens) => await axiosBackendClient.get(
+                `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}?${new URLSearchParams({clientType: "Web"})}`
             ));
+
+          const responseData = await response.data;
+
+            if (responseData) {
+                const {session_id, session_ttl} = responseData;
+
+                if (session_id && session_ttl)
+                {
+                    sessionCache.set(session_id, {
+                            is_guest: true,
+                            remember_me: false
+                        },
+                        session_ttl);
+
+                    res.cookie('session_id', session_id,
+                        {
+                            maxAge: session_ttl * 1000,
+                            secure: false,
+                            path: '/',
+                            sameSite: 'lax',
+                            httpOnly: true
+                        });
+
+                    return res.status(200).json({authenticated: false});
+                }
+            }
 
         } catch (error) {
             console.error("Error invalidating token and session, cookies and sessionCache will still be erased: ", error);
+            clearSessionCookies(res, sessionId);
+
+            return res.status(200).end();
         }
-
-        clearSessionCookies(res, sessionId);
-
-        return res.status(200).end();
+        
     }
 });
 

@@ -107,6 +107,8 @@ public class ProductController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {
 
+        System.out.println("In detailed product endpoint: " + productCode + " ");
+
         String id = userIdExtractor.getUserId();
 
         Customer customer = customerService.getByIdWithActivityRefresh(id);

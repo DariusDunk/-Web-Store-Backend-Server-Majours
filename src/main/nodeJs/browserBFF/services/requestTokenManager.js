@@ -1,8 +1,8 @@
 import sessionCache from "./sessionCache.js";
-import { Backend_Url } from '../routes/config.js';
+import {Backend_Url} from '../routes/config.js';
 import axios from 'axios';
 
-const refreshInProgress = {};
+const refreshInProgress = new Map();
 export async function fetchTokensOfSession(sessionID) {
     if (!sessionID) return null;
 
@@ -18,49 +18,145 @@ export async function fetchTokensOfSession(sessionID) {
         }
 }
 
-export async function fetchWithSessionTokens(sessionId, requestFn, options) {
+async function createGuestSession() {
+    try {
+        const {data} = await axios.get(`${Backend_Url}/auth/session/guest/create/Web`);
+        return data;
+    } catch (error) {
+        console.error("Error creating guest session: ", error);
+    }
+}
 
-    const {isMe = false, res, req} = options;
-
-    if (refreshInProgress[sessionId]) {
-
-        // console.log("Refresh call prevented, already in progress for session: " + sessionId + "");
-
-        return refreshInProgress[sessionId];
+async function getSessionData(sessionId) {
+    // 1. Check Cache
+    const cachedData = sessionCache.get(sessionId);
+    if (cachedData) {
+        // console.log("✅ Cache Hit:", sessionId);
+        return cachedData;
     }
 
-    refreshInProgress[sessionId] = (async () => {
-        // console.log("fetchWithSessionTokens called");
-        let tokens = sessionCache.get(sessionId);
+    // 2. Check Lock
+    if (refreshInProgress.has(sessionId)) {
+        console.log("⏳ Waiting for existing refresh:", sessionId);
+        await refreshInProgress.get(sessionId);
+        return sessionCache.get(sessionId);
+    }
 
-        if (!tokens) {
-            tokens = await fetchTokensOfSession(sessionId);
+    console.log("🚀 Starting new fetch for:", sessionId);
 
-            if (!tokens) throw new Error("Session expired or missing");
+    // 3. Create the actual work promise
+    const fetchWork = async () => {
+        try {
+            const newSessionData = await fetchTokensOfSession(sessionId);
 
-            sessionCache.set(sessionId, tokens, tokens.ttl);
-
-            if (tokens.is_guest && isMe) {
-
-                const isMeGuestError = new Error("Guest user cannot access this endpoint");
-
-                isMeGuestError.response = {
-                    status: 401,
-                    data: {
-                        guestError: true
-                    }
-                }
-                throw isMeGuestError;
+            if (!newSessionData) {
+                throw new Error('Backend returned empty session data');
             }
+
+            const ttl = newSessionData.session_expires_in || 3600;
+            sessionCache.set(sessionId, newSessionData, ttl);
+            console.log("💾 Cache Updated for:", sessionId);
+
+            return newSessionData;
+        } catch (error) {
+            console.error("❌ Fetch internal error:", error.message);
+            throw error; // Re-throw so the lock-waiters and caller know it failed
+        } finally {
+            refreshInProgress.delete(sessionId);
+            console.log("🔓 Lock released for:", sessionId);
         }
+    };
 
-        return await requestFn(tokens);
+    // 4. Store the promise and execute
+    const p = fetchWork();
+    refreshInProgress.set(sessionId, p);
 
-    })();
+    return await p;
+}
+
+export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
+    const {isMe= false, req, res } = options;
+
+    // Helper to safely format responses
+    const makeResponse = (axiosResponse) => ({
+        status: axiosResponse?.status || 200,
+        data: axiosResponse?.data ?? {},
+        headers: axiosResponse?.headers ?? {}
+    });
 
     try {
-        return await refreshInProgress[sessionId];
-    } finally {
-        delete refreshInProgress[sessionId];
+        // --- 1. Session Setup ---
+        if (!sessionId) {
+            const guest = await createGuestSession();
+            const { session_id, session_ttl } = guest.data;
+
+            sessionCache.set(session_id, { is_guest: true, remember_me: false }, session_ttl);
+            sessionId = session_id;
+
+            res.cookie('session_id', session_id, {
+                maxAge: session_ttl * 1000,
+                secure: false,
+                path: '/',
+                sameSite: 'lax',
+                httpOnly: true
+            });
+        }
+
+        // --- 2. Safe Token Retrieval ---
+        let sessionData;
+        try {
+            // This safely handles the cache, concurrent requests, and Keycloak fetches
+            sessionData = await getSessionData(sessionId);
+        } catch (err) {
+
+            // console.error("Error fetching session data:", err);
+
+            return { status: 401, data: { error: 'Session expired or unable to fetch tokens' }, headers: {} };
+        }
+
+        if (sessionData.is_guest && isMe) {
+            throw new Error("isMe guest error");
+
+        }
+
+        // --- 3. Execute Original Request ---
+        const axiosResponse = await requestFn(sessionData);
+        return makeResponse(axiosResponse);
+
+    } catch (err) {
+
+        // console.error("Error in fetchWithSessionTokens:", err);
+        const normalizedError = new Error(err.message);
+
+        if (err.isAxiosError && err.response) {
+            normalizedError.response = {
+                status: err.response.status,
+                data: err.response.data
+            };
+        } else {
+            // Handle network timeouts/internal BFF crashes
+            normalizedError.response = {
+                status: err.status || 500,
+                data: { error: err.message || 'Internal BFF Error' }
+            };
+        }
+
+        // 2. THROW it. Do not return it.
+        throw normalizedError;
+
+
+        // if (err.message === "isMe guest error") {
+        //     return { status: 401, data: { guestError: true }, headers: {} };
+        // }
+        // // --- 4. Global Error Normalization ---
+        // if (err.isAxiosError) {
+        //     // Fallback to 502 if err.response is undefined (e.g., Network Timeout / ECONNREFUSED)
+        //     const status = err.response?.status || 502;
+        //     const data = err.response?.data ?? { error: err.message || 'Downstream request failed' };
+        //     return { status, data, headers: err.response?.headers ?? {} };
+        // }
+        //
+        // // Catch-all for code errors
+        // return { status: 500, data: { error: err.message || 'Internal BFF Error' }, headers: {} };
     }
 }
