@@ -414,7 +414,7 @@ router.get('/me', async (req, res) => {
             const guestData = await guestResponse.data;
             const {session_id, session_ttl} = guestData;
 
-            console.log("Response from guest session creation: ", JSON.stringify(guestData));
+            // console.log("Response from guest session creation: ", JSON.stringify(guestData));
 
             if (session_id && session_ttl)
             {
@@ -444,9 +444,9 @@ router.get('/me', async (req, res) => {
     }
 
     const isGuest = sessionCache.get(sessionId)?.is_guest;
-
+    //
     // sessionCache.print();
-
+    //
     // console.log("isGuest: ", isGuest);
 
     if (!isGuest)

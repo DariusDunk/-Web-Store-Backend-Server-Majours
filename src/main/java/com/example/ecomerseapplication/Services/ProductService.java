@@ -281,7 +281,7 @@ public class ProductService {
         return productRepository.getNameSuggestions(name);
     }
 
-    public DetailedProductResponse getByNameAndCode(String productCode, Customer customer) {
+    public DetailedProductResponse getByCodeForAuth(String productCode, Customer customer) {
         Product product = findByPCode(productCode);
 
         List<AttributeName> attributeNames = new ArrayList<>();
@@ -305,6 +305,51 @@ public class ProductService {
 
         return detailedProductResponse;
     }
+
+
+    public DetailedProductResponse getByCodeAndWithSession(String productCode, Session session) {
+        try
+        {
+            if (session.getIsGuest()) {
+
+                return getByCodeForGuest(productCode);
+            } else {
+                Customer customer = session.getCustomer();
+                return getByCodeForAuth(productCode, customer);
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println("-------------------------Exception in product detail endpoint-------------------------\n" + e.getMessage());
+            throw e;
+        }
+    }
+
+
+    public DetailedProductResponse getByCodeForGuest(String productCode) {
+        Product product = findByPCode(productCode);
+
+        List<AttributeName> attributeNames = new ArrayList<>();
+
+        for (CategoryAttribute categoryAttribute : product.getCategoryAttributeSet()) {
+            attributeNames.add(categoryAttribute.getAttributeName());
+        }
+
+        List<String[]> attributeNameMUnitPairs = productCategoryService
+                .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
+
+        //        if (customerCartService.cartExists(customer, product)) todo tuk trqbva da se pravi proverkata no sys sesiqta kogato koli4kata moje da se pritejava i ot sesiq
+//            detailedProductResponse.inCart = true;
+
+
+//        detailedProductResponse.inFavourites = false;
+//
+//        if (reviewService.exists(product, customer))
+//            detailedProductResponse.reviewed = true;
+
+        return ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
+    }
+
 
     public Page<CompactProductResponse> getByManufacturer(Manufacturer manufacturer, Pageable pageable) {
 

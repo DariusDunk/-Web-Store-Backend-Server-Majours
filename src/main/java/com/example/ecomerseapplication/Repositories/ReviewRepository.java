@@ -28,7 +28,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "where id = :id")
     void updateReview(@Param("id") long id, @Param("rating") short rating, @Param("text") String text);
 
-    @Query(value = "select new com.example.ecomerseapplication.DTOs.responses.ReviewResponse(" +
+    String ReviewResponsePath = "com.example.ecomerseapplication.DTOs.responses.ReviewResponse";
+    String CustomerDetailsForReviewPath = "com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview";
+
+    @Query(value = "select new " + ReviewResponsePath + "(" +
             "r.id," +
             "r.reviewText, " +
             "r.rating, " +
@@ -67,7 +70,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "and  r.isDeleted=false " +
             "and r.verifiedCustomer=true "
     )
-    Page<ReviewResponse> getByProductCodeVerifiedOnly(
+    Page<ReviewResponse> getByProductCodeVerifiedOnlyForAuth(
             @Param("productCode")
             String productCode,
             @Param("ratingValue")
@@ -78,14 +81,53 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             @Param("aDayEarlier")
             Instant dayEarlier);
 
-    @Query(value = "select new com.example.ecomerseapplication.DTOs.responses.ReviewResponse(" +
+    @Query(value = "select new " + ReviewResponsePath + "(" +
+            "r.id," +
+            "r.reviewText, " +
+            "r.rating, " +
+            "case " +
+                "when r.isDeleted=true then null " +
+                "else r.postTimestamp " +
+            "end, " +
+            "new "+CustomerDetailsForReviewPath+"(" +
+            "case " +
+                "when r.isDeleted=true then 'Ревюто е изтрито' " +
+                "else r.customer.firstName||' '||r.customer.lastName " +
+            "end, " +
+            "case " +
+                "when r.isDeleted=true then null else " +
+                "r.customer.customerPfp " +
+            "end," +
+            "false, " +
+            "case " +
+                "when r.isDeleted=true " +
+                "then false " +
+                "else r.verifiedCustomer " +
+            "end, " +
+            "true)," +
+            "r.isDeleted)" +
+            "from Review r " +
+            "where r.product.productCode = :productCode " +
+            "and (:ratingValue IS NULL OR r.rating=:ratingValue) " +
+            "and  r.isDeleted=false " +
+            "and r.verifiedCustomer=true "
+    )
+    Page<ReviewResponse> getByProductCodeVerifiedOnlyForGuest(
+            @Param("productCode")
+            String productCode,
+            @Param("ratingValue")
+            Short ratingValue,
+            Pageable pageable);
+
+
+    @Query(value = "select new " + ReviewResponsePath + "(" +
             "r.id," +
             "r.reviewText, " +
             "r.rating, " +
             "case when r.isDeleted=true then null " +
             "else r.postTimestamp " +
             "end, " +
-            "new com.example.ecomerseapplication.DTOs.responses.CustomerDetailsForReview(" +
+            "new "+CustomerDetailsForReviewPath+"(" +
             "case when " +
             "r.isDeleted=true then 'Ревюто е изтрито' " +
             "else r.customer.firstName||' '||r.customer.lastName " +
@@ -111,7 +153,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "where r.product.productCode = :productCode " +
             "and (:ratingValue IS NULL OR r.rating=:ratingValue) "
     )
-    Page<ReviewResponse> getByProductCodeAll(
+    Page<ReviewResponse> getByProductCodeAllForAuth(
             @Param("productCode")
             String productCode,
             @Param("ratingValue")
@@ -121,6 +163,44 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             Pageable pageable,
             @Param("aDayEarlier")
             Instant dayEarlier);
+
+
+    @Query(value = "select new " + ReviewResponsePath + "(" +
+            "r.id," +
+            "r.reviewText, " +
+            "r.rating, " +
+            "case when r.isDeleted=true " +
+                "then null " +
+                "else r.postTimestamp " +
+            "end, " +
+            "new "+CustomerDetailsForReviewPath+"(" +
+            "case when " +
+                "r.isDeleted=true then 'Ревюто е изтрито' " +
+                "else r.customer.firstName||' '||r.customer.lastName " +
+            "end, " +
+            "case when " +
+                "r.isDeleted=true then null else " +
+                "r.customer.customerPfp " +
+            "end," +
+            "false, " +
+            "case when r.isDeleted=true " +
+                "then false " +
+                "else r.verifiedCustomer " +
+            "end, " +
+            "false)," +
+            "r.isDeleted)" +
+            "from Review r " +
+            "where r.product.productCode = :productCode " +
+            "and (:ratingValue IS NULL OR r.rating=:ratingValue) "
+    )
+    Page<ReviewResponse> getByProductCodeAllForGuest(
+            @Param("productCode")
+            String productCode,
+            @Param("ratingValue")
+            Short ratingValue,
+            Pageable pageable);
+
+
 
     @Query("""
             select distinct new com.example.ecomerseapplication.DTOs.responses.RatingOverviewResponse(r.rating, count(r))

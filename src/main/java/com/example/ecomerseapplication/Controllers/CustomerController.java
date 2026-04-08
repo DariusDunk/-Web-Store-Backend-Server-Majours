@@ -271,6 +271,7 @@ public class CustomerController {
 //    }
     
     @GetMapping("me")
+    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
 
         String userId = userIdExtractor.getUserId();

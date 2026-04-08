@@ -8,12 +8,15 @@ import com.example.ecomerseapplication.DTOs.responses.ReviewResponse;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Review;
+import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.IncorrectRatingException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.ReviewTextLimitReachedException;
 import com.example.ecomerseapplication.Repositories.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,13 +137,13 @@ public class ReviewService {
 //        reviewRepository.delete(review);//TODO tova trqbva da e dostypno samo za admina i trqbva da ima logika za update na reitinga
 //    }
 
-    public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, Pageable pageable, String customerId) {
+    public Page<ReviewResponse> getProductReviewsForAuth(ReviewSortRequest request, Pageable pageable, String customerId) {
 
         Instant now = Instant.now();
         Instant twentyFourHoursAgo = now.minus(24, ChronoUnit.HOURS);
 
         if (request.verifiedOnly() == true) {
-            return reviewRepository.getByProductCodeVerifiedOnly(
+            return reviewRepository.getByProductCodeVerifiedOnlyForAuth(
                     request.productCode(),
                     request.ratingValue(),
                     customerId,
@@ -148,7 +151,7 @@ public class ReviewService {
                     twentyFourHoursAgo
             );
         } else
-            return reviewRepository.getByProductCodeAll(
+            return reviewRepository.getByProductCodeAllForAuth(
                     request.productCode(),
                     request.ratingValue(),
                     customerId,
@@ -165,6 +168,39 @@ public class ReviewService {
         review.setReviewText("");
         review.setIsDeleted(true);
         save(review);
+    }
+
+    public Page<ReviewResponse> getProductReviews(ReviewSortRequest request, PageRequest pageable, Session session)
+    {
+        try
+        {
+            if (!session.getIsGuest()) {
+                String customerId = session.getCustomer().getKeycloakId();
+                return getProductReviewsForAuth(request, pageable, customerId);
+            } else {
+                return getProductReviewsForGuest(request, pageable);
+            }
+        }
+        catch (Exception e)
+            {
+            System.out.println("-------------------------Exception in product reviews endpoint-------------------------\n" + e.getMessage());
+            throw e;
+            }
+    }
+
+
+    public Page<ReviewResponse> getProductReviewsForGuest(@Valid ReviewSortRequest request, PageRequest pageable) {
+
+        if (request.verifiedOnly() == true) {
+            return reviewRepository.getByProductCodeVerifiedOnlyForGuest(
+                    request.productCode(),
+                    request.ratingValue(),
+                    pageable);
+        } else
+            return reviewRepository.getByProductCodeAllForGuest(
+                    request.productCode(),
+                    request.ratingValue(),
+                    pageable);
     }
 }
 

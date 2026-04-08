@@ -37,12 +37,12 @@ async function getSessionData(sessionId) {
 
     // 2. Check Lock
     if (refreshInProgress.has(sessionId)) {
-        console.log("⏳ Waiting for existing refresh:", sessionId);
+        // console.log("⏳ Waiting for existing refresh:", sessionId);
         await refreshInProgress.get(sessionId);
         return sessionCache.get(sessionId);
     }
 
-    console.log("🚀 Starting new fetch for:", sessionId);
+    // console.log("🚀 Starting new fetch for:", sessionId);
 
     // 3. Create the actual work promise
     const fetchWork = async () => {
@@ -63,7 +63,7 @@ async function getSessionData(sessionId) {
             throw error; // Re-throw so the lock-waiters and caller know it failed
         } finally {
             refreshInProgress.delete(sessionId);
-            console.log("🔓 Lock released for:", sessionId);
+            // console.log("🔓 Lock released for:", sessionId);
         }
     };
 
@@ -107,6 +107,9 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
         try {
             // This safely handles the cache, concurrent requests, and Keycloak fetches
             sessionData = await getSessionData(sessionId);
+
+            // console.log("SessionData = ", JSON.stringify(sessionData));
+
         } catch (err) {
 
             // console.error("Error fetching session data:", err);
@@ -118,7 +121,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
         if (sessionData.is_guest && isMe) {
 
-            // console.log("Throwing isMe guest error");
+            console.log("Throwing isMe guest error");
 
             const guestErr = new Error("isMe guest error");
             guestErr.response = {

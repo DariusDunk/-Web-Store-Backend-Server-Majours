@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
@@ -46,9 +47,10 @@ public class ProductController {
     private final ManufacturerService manufacturerService;
     private final PurchaseCartService purchaseCartService;
     private final UserIdExtractor userIdExtractor;
+    private final SessionService sessionService;
 
     @Autowired
-    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, UserIdExtractor userIdExtractor) {
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, UserIdExtractor userIdExtractor, SessionService sessionService) {
         this.productService = productService;
         this.categoryAttributeService = categoryAttributeService;
         this.customerService = customerService;
@@ -57,6 +59,7 @@ public class ProductController {
         this.manufacturerService = manufacturerService;
         this.purchaseCartService = purchaseCartService;
         this.userIdExtractor = userIdExtractor;
+        this.sessionService = sessionService;
     }
 
     @GetMapping("findall")
@@ -104,16 +107,23 @@ public class ProductController {
 
 
     @GetMapping("{productCode}")
-    @PreAuthorize("hasRole(@roles.customer())")
+//    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {
 
-        System.out.println("In detailed product endpoint: " + productCode + " ");
+//        System.out.println("In detailed product endpoint: " + productCode + " ");
 
-        String id = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByIdWithActivityRefresh(id);
+        String sessionId = SessionExtractor.getRequestSessionId();
 
-        return ResponseEntity.ok(productService.getByNameAndCode(productCode, customer));
+        Session session = sessionService.getById(sessionId);
+
+        return ResponseEntity.ok(productService.getByCodeAndWithSession(productCode, session));
+
+//        String id = userIdExtractor.getUserId();
+//
+//        Customer customer = customerService.getByIdWithActivityRefresh(id);
+//
+//        return ResponseEntity.ok(productService.getByCodeForAuth(productCode, customer));
     }
 
     @GetMapping("{productCode}/review/overview")
@@ -200,22 +210,29 @@ public class ProductController {
     }
 
     @PostMapping("reviews/paged")
-    @PreAuthorize("hasRole(@roles.customer())")//todo tuk trqbva tokena da e optional i da ne se polzva PreAuthorize
+//    @PreAuthorize("hasRole(@roles.customer())")//todo tuk trqbva tokena da e optional i da ne se polzva PreAuthorize
     public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody @Valid ReviewSortRequest request) {
 
-        String customerId = userIdExtractor.getUserId();
+        String sessionId = SessionExtractor.getRequestSessionId();
+
+        Session session = sessionService.getById(sessionId);
 
         Sort sort = request.sortOrder().getValue().equalsIgnoreCase(ReviewSortType.NEWEST.getValue())
                 ? Sort.by("postTimestamp").descending()
                 : Sort.by("postTimestamp").ascending();
-
         PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit, sort);
 
-//        System.out.println(request);
+        Page<ReviewResponse> reviewPage = null;
 
-        Page<ReviewResponse> reviewPage = reviewService.getProductReviews(request, pageRequest, customerId);
+        reviewPage = reviewService.getProductReviews(request, pageRequest, session);
 
-//        System.out.println(reviewPage.getContent());
+//        if (session.getIsGuest()) {
+//            reviewPage = reviewService.getProductReviewsForGuest(request, pageRequest);
+//        }
+//        else {
+//            String customerId = userIdExtractor.getUserId();
+//            reviewPage = reviewService.getProductReviewsForAuth(request, pageRequest, customerId);
+//        }
 
         return ResponseEntity.ok(PageResponse.from(reviewPage));
     }

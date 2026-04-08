@@ -58,7 +58,7 @@ public class Session {
     }
 
     @Column(name = "is_remember_me_session")
-    private boolean isRememberMeSession;
+    private Boolean isRememberMeSession;
 
     @Column(name = "revoked_at")
     private Instant revokedAt;

@@ -14,7 +14,6 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -40,7 +39,7 @@ public class SessionService {
         session.setIsGuest(isGuest);
         session.setIsRevoked(false);
         session.setClientType(clientType);
-        session.setRememberMeSession(rememberMe);
+        session.setIsRememberMeSession(rememberMe);
 
         return sessionRepository.save(session);
     }
@@ -103,9 +102,11 @@ public class SessionService {
 //            System.out.println("Updating session activity timestamp");
 
             session.setLastActivityAt(now);
+            if (session.getIsGuest()) {
+               session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
+            }
             sessionRepository.save(session);
         }
-
     }
 
     public Session getById(String sessionId) {
@@ -165,7 +166,7 @@ public class SessionService {
         session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
         session.setRefreshToken(null);
         session.setCustomer(null);
-        session.setRememberMeSession(false);
+        session.setIsRememberMeSession(false);
         session.setIsRevoked(false);
 
         return sessionRepository.save(session);

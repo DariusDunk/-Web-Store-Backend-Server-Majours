@@ -150,7 +150,7 @@ public class AuthService {
             session.setExpiresAt(Instant.now().plus(GlobalConstants.GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
             session.setLastActivityAt(Instant.now());
             session.setCustomer(null);
-            session.setRememberMeSession(false);
+            session.setIsRememberMeSession(false);
             session.setIsRevoked(false);
 
             sessionService.save(session);
@@ -166,7 +166,7 @@ public class AuthService {
 
         try {
 
-            Instant newTTL = session.isRememberMeSession()
+            Instant newTTL = session.getIsRememberMeSession()
                     ?Instant.now().plus(tokenRefreshResponse.refreshExpiresIn(), ChronoUnit.SECONDS)
                     :Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS);
             session.setExpiresAt(newTTL);
@@ -177,7 +177,7 @@ public class AuthService {
             return RefreshResponseMapper.tokenRefreshToRefreshResponse(tokenRefreshResponse,
                     newTTL,
                     false,
-                    session.isRememberMeSession());
+                    session.getIsRememberMeSession());
         }
         catch (Exception e)
         {

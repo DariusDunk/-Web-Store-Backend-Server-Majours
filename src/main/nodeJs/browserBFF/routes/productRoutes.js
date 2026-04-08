@@ -104,12 +104,12 @@ router.get('/detail/:productCode', async (req, res) => {
     }
     try {
         const response =
-         await fetchWithSessionTokens(sessionId, async (tokens) => {
+         await fetchWithSessionTokens(sessionId, async (sessionData) => {
                  const [prodReq, reviewReq] = await Promise.all([
                      axiosBackendClient.get(`${Backend_Url}/product/${productCode}`, {
                          headers: {
                              'Content-Type': 'application/json',
-                             'Authorization': 'Bearer ' + tokens.access_token,
+                             ...(!sessionData.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
                              ...(sessionId && {'X-Session-Id': sessionId}),
                          },
                          bffContext: {
@@ -119,7 +119,7 @@ router.get('/detail/:productCode', async (req, res) => {
                      axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
                          headers: {
                              'Content-Type': 'application/json',
-                             'Authorization': 'Bearer ' + tokens.access_token,
+                             // 'Authorization': 'Bearer ' + sessionData.access_token,
                              ...(sessionId && {'X-Session-Id': sessionId}),
                          },
                          bffContext: {
@@ -143,7 +143,7 @@ router.get('/detail/:productCode', async (req, res) => {
         return res.status(200).json(response.data);
 
     } catch (error) {
-        console.error('Error fetching data from backend:', error);
+        console.error('Error fetching detailed product data from backend:', error);
         return res.status(error.status||500).end();
     }
 });
@@ -278,7 +278,7 @@ router.post('/getPagedReviews', async (req, res) => {
     const sessionId = req.cookies.session_id;
 
     try {
-        const response = await fetchWithSessionTokens(sessionId, async (tokens) => {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
             const respons = await axiosBackendClient.post(`${Backend_Url}/product/reviews/paged`, {
                 product_code: productCode,
                 page,
@@ -288,7 +288,7 @@ router.post('/getPagedReviews', async (req, res) => {
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                   ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
+                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
                     ...(sessionId && { 'X-Session-Id': sessionId })
                 },
                 bffContext: {
@@ -313,7 +313,7 @@ router.post('/getPagedReviews', async (req, res) => {
         return res.status(response.status).json(responseData);
 
     } catch (error) {
-        console.error('Reviews: Error fetching data: ', error);
+        console.error('Reviews: Error fetching paged reviews data: ', error);
         return res.status(500).json({error: 'Internal server error'});
     }
 })
