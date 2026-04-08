@@ -35,6 +35,7 @@ export async function refreshToken(sessionId, res) {
             // sessionCache.safeDelete(sessionId);
 
             sessionCache.set(sessionId, {
+                session_id:sessionId,
                 access_token,
                 access_token_lifetime,
                 refresh_token,

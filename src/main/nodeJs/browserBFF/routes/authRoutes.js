@@ -73,6 +73,7 @@ router.post(`/login`, async (req, res) => {
         authResponse = responseData;
 
         sessionCache.set(session_id, {
+            session_id,
             access_token,
             expires_in,
             refresh_token,
@@ -91,12 +92,12 @@ router.post(`/login`, async (req, res) => {
     }
 
     try {
-        const userDataResponse = await fetchWithSessionTokens(authResponse.session_id, async (tokens) => {
+        const userDataResponse = await fetchWithSessionTokens(authResponse.session_id, async (sessionData) => {
             return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(tokens?.access_token && {'Authorization': 'Bearer ' + tokens.access_token}),
-                    ...(authResponse.session_id && { 'X-Session-Id': authResponse.session_id })
+                    ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && { 'X-Session-Id': sessionData.session_id })
                 },
                 bffContext: {
                     req, res
@@ -131,7 +132,7 @@ router.post('/logout', async (req, res) => {
     if (sessionId) {
 
         try {
-          const response =  await fetchWithSessionTokens(sessionId, async (tokens) => await axiosBackendClient.get(
+          const response =  await fetchWithSessionTokens(sessionId, async (sessionData) => await axiosBackendClient.get(
                 `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}?${new URLSearchParams({clientType: "Web"})}`
             ));
 
@@ -143,6 +144,7 @@ router.post('/logout', async (req, res) => {
                 if (session_id && session_ttl)
                 {
                     sessionCache.set(session_id, {
+                            session_id,
                             is_guest: true,
                             remember_me: false
                         },

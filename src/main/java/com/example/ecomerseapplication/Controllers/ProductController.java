@@ -210,7 +210,6 @@ public class ProductController {
     }
 
     @PostMapping("reviews/paged")
-//    @PreAuthorize("hasRole(@roles.customer())")//todo tuk trqbva tokena da e optional i da ne se polzva PreAuthorize
     public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody @Valid ReviewSortRequest request) {
 
         String sessionId = SessionExtractor.getRequestSessionId();

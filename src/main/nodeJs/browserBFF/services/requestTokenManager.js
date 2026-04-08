@@ -21,6 +21,9 @@ export async function fetchTokensOfSession(sessionID) {
 async function createGuestSession() {
     try {
         const {data} = await axios.get(`${Backend_Url}/auth/session/guest/create/Web`);
+
+        // console.log("Guest session data: ", data);
+
         return data;
     } catch (error) {
         console.error("Error creating guest session: ", error);
@@ -54,6 +57,9 @@ async function getSessionData(sessionId) {
             }
 
             const ttl = newSessionData.session_expires_in || 3600;
+
+            newSessionData.session_id = sessionId;
+
             sessionCache.set(sessionId, newSessionData, ttl);
             console.log("💾 Cache Updated for:", sessionId);
 
@@ -87,10 +93,10 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
     try {
         // --- 1. Session Setup ---
         if (!sessionId) {
-            const guest = await createGuestSession();
-            const { session_id, session_ttl } = guest.data;
+            const guestData = await createGuestSession();
+            const { session_id, session_ttl } = guestData;
 
-            sessionCache.set(session_id, { is_guest: true, remember_me: false }, session_ttl);
+            sessionCache.set(session_id, { session_id, is_guest: true, remember_me: false }, session_ttl);
             sessionId = session_id;
 
             res.cookie('session_id', session_id, {
