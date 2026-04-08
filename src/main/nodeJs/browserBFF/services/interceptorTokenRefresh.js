@@ -18,7 +18,9 @@ export async function refreshToken(sessionId, res) {
                 refresh_token,
                 expires_in: access_token_lifetime,
                 refresh_expires_in: refresh_token_lifeTime,
-                session_expires_in
+                session_expires_in,
+                is_guest,
+                is_remember_me
             } = responseData;
 
             res.cookie('session_id', sessionId,
@@ -37,8 +39,8 @@ export async function refreshToken(sessionId, res) {
                 access_token_lifetime,
                 refresh_token,
                 refresh_token_lifeTime,
-                is_guest: false,
-                remember_me: false
+                is_guest: is_guest,
+                remember_me: is_remember_me
             }, session_expires_in);
 
             return;

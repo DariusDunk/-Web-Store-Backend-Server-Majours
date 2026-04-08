@@ -160,7 +160,8 @@ public class AuthService {
                     0,
                     null,
                     Duration.between(Instant.now(), session.getExpiresAt()).getSeconds(),
-                    true);
+                    true,
+                    false);
         }
 
         try {
@@ -173,7 +174,10 @@ public class AuthService {
 
             sessionService.save(session);
 
-            return RefreshResponseMapper.tokenRefreshToRefreshResponse(tokenRefreshResponse, newTTL, false);
+            return RefreshResponseMapper.tokenRefreshToRefreshResponse(tokenRefreshResponse,
+                    newTTL,
+                    false,
+                    session.isRememberMeSession());
         }
         catch (Exception e)
         {

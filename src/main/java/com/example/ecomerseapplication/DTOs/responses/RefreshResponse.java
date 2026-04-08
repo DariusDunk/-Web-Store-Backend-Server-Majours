@@ -13,4 +13,6 @@ public record RefreshResponse(@JsonProperty("access_token")
                               @JsonProperty("session_expires_in")
                               long sessionExpiresIn,
                               @JsonProperty("is_guest")
-                              boolean isGuest){ }
+                              boolean isGuest,
+                              @JsonProperty("is_remember_me")
+                              boolean isRememberMe){ }
