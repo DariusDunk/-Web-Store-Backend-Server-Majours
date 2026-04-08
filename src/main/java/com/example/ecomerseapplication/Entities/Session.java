@@ -63,5 +63,20 @@ public class Session {
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
+    @Override
+    public String toString() {
+        return "Session{" +
+                "refreshToken='" + refreshToken + '\'' +
+                ", sessionId='" + sessionId + '\'' +
+                ", customer=" + ((customer!=null)? customer.getFirstName() + " " + customer.getLastName():" " )+
+                ", clientType=" + (clientType!=null? clientType :" ") +
+                ", isGuest=" + isGuest +
+                ", expiresAt=" + expiresAt +
+                ", createdAt=" + createdAt +
+                ", isRevoked=" + isRevoked +
+                ", isRememberMeSession=" + isRememberMeSession +
+                '}';
+    }
+
     //todo v byde6te i za location 6te ima ne6to
 }

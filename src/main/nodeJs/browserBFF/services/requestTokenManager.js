@@ -114,9 +114,21 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             return { status: 401, data: { error: 'Session expired or unable to fetch tokens' }, headers: {} };
         }
 
-        if (sessionData.is_guest && isMe) {
-            throw new Error("isMe guest error");
+        // console.log("SessionData.is_guest = "+ sessionData.is_guest + " isMe = " + isMe)
 
+        if (sessionData.is_guest && isMe) {
+
+            // console.log("Throwing isMe guest error");
+
+            const guestErr = new Error("isMe guest error");
+            guestErr.response = {
+            data:{
+                guestError: true
+            },
+                status: 401}
+            guestErr.isAxiosError = true;
+
+            throw guestErr;
         }
 
         // --- 3. Execute Original Request ---
@@ -125,7 +137,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
     } catch (err) {
 
-        // console.error("Error in fetchWithSessionTokens:", err);
         const normalizedError = new Error(err.message);
 
         if (err.isAxiosError && err.response) {

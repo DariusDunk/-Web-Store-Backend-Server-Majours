@@ -479,9 +479,9 @@ router.get('/me', async (req, res) => {
 
                 const errorResponse = error.response.data;
 
-                if (errorResponse.guestError) {
+                if (errorResponse?.guestError) {
 
-                    console.log("Guest error detected in '/me' request, creating guest session");
+                    // console.log("Guest error detected in '/me' request, creating guest session");
 
                     return res.status(200).json({authenticated: false});
                 }
