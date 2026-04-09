@@ -133,7 +133,7 @@ router.post('/logout', async (req, res) => {
 
         try {
           const response =  await fetchWithSessionTokens(sessionId, async (sessionData) => await axiosBackendClient.get(
-                `${AuthURL}/invalidate/${encodeURIComponent(tokens.refresh_token)}/${encodeURIComponent(sessionId)}?${new URLSearchParams({clientType: "Web"})}`
+                `${AuthURL}/invalidate/${encodeURIComponent(sessionData.refresh_token)}/${encodeURIComponent(sessionId)}?${new URLSearchParams({clientType: "Web"})}`
             ));
 
           const responseData = await response.data;

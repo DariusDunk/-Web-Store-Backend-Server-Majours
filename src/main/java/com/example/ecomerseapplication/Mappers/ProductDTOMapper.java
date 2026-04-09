@@ -50,11 +50,18 @@ public class ProductDTOMapper {
         detailedProductResponse.productDescription = product.getProductDescription();
         detailedProductResponse.deliveryCost = product.getDeliveryCost();
         detailedProductResponse.model = product.getModel();
-        detailedProductResponse.productImageURLs = product
-                .getProductImages()
-                .stream()
-                .map((ProductImage::getImageFileName))
-                .toList();
+        if ( product.getProductImages() != null && !product.getProductImages().isEmpty())
+        {
+            detailedProductResponse.productImageURLs = product
+                    .getProductImages()
+                    .stream()
+                    .map((ProductImage::getImageFileName))
+                    .toList();
+        }
+        else
+        {
+            detailedProductResponse.productImageURLs = List.of();
+        }
 
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
