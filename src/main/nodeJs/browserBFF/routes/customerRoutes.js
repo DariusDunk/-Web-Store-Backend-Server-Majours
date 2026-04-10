@@ -37,7 +37,12 @@ router.get('/getFavourites/:page', async (req, res) => {
 
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for fetching favourites`);
-            return res.status(error.response.status||500).end();
+
+            const status = error.response.status;
+
+            // console.log("error statis: ", status );
+
+            return res.status(status||500).end();
         }
 
         console.error('-------------------Unexpected error fetching favourites-------------------\n', error);

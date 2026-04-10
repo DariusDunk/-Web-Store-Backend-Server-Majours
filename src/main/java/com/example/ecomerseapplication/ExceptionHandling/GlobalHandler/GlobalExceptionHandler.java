@@ -174,4 +174,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleInvalidSessionExceptions() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    @ExceptionHandler(UserIdExtractException.class)
+    public ResponseEntity<?> handleUserIdExtractExceptions() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 }

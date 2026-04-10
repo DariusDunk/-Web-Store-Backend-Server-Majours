@@ -106,6 +106,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                 sameSite: 'lax',
                 httpOnly: true
             });
+
         }
 
         // --- 2. Safe Token Retrieval ---
@@ -125,9 +126,16 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
         // console.log("SessionData.is_guest = "+ sessionData.is_guest + " isMe = " + isMe)
 
+        if (res) {
+            res.setHeader('x-session-user', sessionData.is_guest ? 'guest' : 'authenticated');
+
+            // console.log("Setting x-session-user header to " + (sessionData.is_guest ? 'guest' : 'authenticated'));
+            res.setHeader('Access-Control-Expose-Headers', 'x-session-user');
+        }
+
         if (sessionData.is_guest && isMe) {
 
-            console.log("Throwing isMe guest error");
+            // console.log("Throwing isMe guest error");
 
             const guestErr = new Error("isMe guest error");
             guestErr.response = {
