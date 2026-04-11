@@ -93,34 +93,13 @@ public class ProductService {
 
 
         // Word-level WHERE conditions
-        return executePagedSearchQuery(pageRequest, search, words, query
+        return executePagedSearchQuery(pageRequest, words, query
         );
     }
 
-    private @NonNull Page<CompactProductResponse> executePagedSearchQuery(PageRequest pageRequest, String search, String[] words, Query query
-//                                                                          StringBuilder sql
+    private @NonNull Page<CompactProductResponse> executePagedSearchQuery(PageRequest pageRequest, String[] words, Query query
     ) {
-//        for (int i = 0; i < words.length; i++) {
-//            if (i > 0) sql.append(" OR ");
-//            sql.append("LOWER(p.product_name) LIKE :word")
-//                    .append(i + 1)
-//                    .append(" AND LOWER(m.manufacturer_name) LIKE :word")
-//                    .append(i + 1)
-//                    .append(" AND LOWER(c.category_name) LIKE :word")
-//                    .append(i + 1);
-//        }
 
-//        sql.append(" ORDER BY relevance_score DESC ")
-//        sql.append("LIMIT :limit OFFSET :offset");
-//
-//        Query query = entityManager.createNativeQuery(sql.toString(), Product.class);
-//
-//        for (int i = 0; i < words.length; i++) {
-//            query.setParameter("word" + (i + 1), "%" + words[i].toLowerCase() + "%");
-//        }
-//        query.setParameter("limit", pageRequest.getPageSize());
-//        query.setParameter("offset", pageRequest.getOffset());
-//        query.setParameter("search", "%" + search.toLowerCase() + "%");
 
         @SuppressWarnings("unchecked")
         List<Product> products = query.getResultList();
@@ -273,7 +252,7 @@ public class ProductService {
         query.setParameter("offset", pageRequest.getOffset());
         query.setParameter("search", "%" + search.toLowerCase() + "%");
 
-        return executePagedSearchQuery(pageRequest, search, words, query
+        return executePagedSearchQuery(pageRequest, words, query
         );
     }
 
@@ -295,7 +274,7 @@ public class ProductService {
 
         DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
 
-        if (cartProductService.cartExists(customer, product))
+        if (cartProductService.cartItemExistsByCustomer(customer, product))
             detailedProductResponse.inCart = true;
 
         detailedProductResponse.inFavourites = favoriteOfCustomerService.isInFavorites(customer, product);

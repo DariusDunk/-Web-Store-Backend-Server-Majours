@@ -45,13 +45,13 @@ router.post(`/login`, async (req, res) => {
 
     const guestSessionId = req.cookies.session_id;
 
-    // console.log("Node login: " + email + " " + password)
+    // console.log("Node login:" + email + " " + password)
     let authResponse = null;
-
+    const trimmedEmail = email.trim();
     try {
 
         const response = await axios.post(`${AuthURL}/login`, {
-            identifier: email,
+            identifier: trimmedEmail,
             password: password,
             remember_me: rememberMe,
             client_type: "Web"

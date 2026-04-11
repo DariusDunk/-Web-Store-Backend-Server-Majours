@@ -20,10 +20,7 @@ public class CustomerCartId implements Serializable {
     @ManyToOne
     private Product product;
 
-//    @JoinColumn(name = "customer_id")
-//    @ManyToOne
-//    private Customer customer;
-    @JoinColumn(name = "cart_owner_id")
+    @JoinColumn(name = "cart_id")
     @ManyToOne
     private Cart cart;
 

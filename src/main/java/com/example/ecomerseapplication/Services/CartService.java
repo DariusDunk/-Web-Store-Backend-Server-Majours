@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.Customer;
+import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Repositories.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -22,6 +23,16 @@ public class CartService {
     }
 
     public Cart getOrCreateByCustomer(Customer customer) {
-        return cartRepository.getCartOwnerByCustomer(customer).orElseThrow(()->new ResourceNotFoundException("Cart not found for customer: " + customer.getKeycloakId()));
+        return cartRepository.getCartOwnerByCustomer(customer)
+                .orElseGet(() -> cartRepository.save(new Cart(customer)));
+    }
+
+    public void save(Cart cart) {
+        cartRepository.save(cart);
+    }
+
+    public Cart getOrCreateBySession(Session session) {
+        return cartRepository.getBySession((session))
+                .orElseGet(() -> cartRepository.save(new Cart(session)));
     }
 }

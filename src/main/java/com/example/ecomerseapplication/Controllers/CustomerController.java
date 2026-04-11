@@ -156,7 +156,7 @@ public class CustomerController {
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
         Product product = productService.findByPCode(request.productCode());
 
-        return ResponseEntity.ok(cartProductService.addQuantityToCartUser(product, request.quantity(), customer));
+        return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), customer));
     }
 
 

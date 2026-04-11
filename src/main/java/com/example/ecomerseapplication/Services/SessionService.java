@@ -81,16 +81,16 @@ public class SessionService {
         secureRandom.nextBytes(random);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     }
-
-    public void revokeSession(Session session) {
-
-        Instant now = Instant.now();
-        session.setIsRevoked(true);
-        session.setLastActivityAt(now);
-        session.setRevokedAt(now);
-
-        sessionRepository.save(session);
-    }
+//
+//    public void revokeSession(Session session) {
+//
+//        Instant now = Instant.now();
+//        session.setIsRevoked(true);
+//        session.setLastActivityAt(now);
+//        session.setRevokedAt(now);
+//
+//        sessionRepository.save(session);
+//    }
 
     public void updateActivity(String sessionId) {
 
@@ -130,7 +130,28 @@ public class SessionService {
         revokeExpiredSessions();
     }
 
+    //TODO dobavi logika za iztrivane na koli4ki ot iztekli sesii
     public void revokeExpiredSessions() {
+
+//        @Scheduled(...)
+//        public void cleanupExpiredSessions() {
+//
+//            // 1. Find expired sessions
+//            List<Session> expiredSessions = sessionRepository.findExpired();
+//
+//            for (Session session : expiredSessions) {
+//
+//                // 2. Mark session expired
+//                session.setExpired(true);
+//
+//                // 3. Delete session cart
+//                cartRepository.deleteBySessionId(session.getId());
+//            }
+//
+//            sessionRepository.saveAll(expiredSessions);
+//        }
+
+
 
         int revokedSessions = sessionRepository.revokeExpired();
         ZoneId zoneId = ZoneId.systemDefault();

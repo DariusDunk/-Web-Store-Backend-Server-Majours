@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Cart {
 
-    @Column(name = "owner_id")
+    @Column(name = "cart_id")
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne()
@@ -24,5 +25,8 @@ public class Cart {
 
     public Cart(Customer customer) {
         this.customer = customer;
+    }
+    public Cart(Session session) {
+        this.session = session;
     }
 }

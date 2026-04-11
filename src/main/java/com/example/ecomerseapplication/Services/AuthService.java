@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
+import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
@@ -32,14 +33,17 @@ public class AuthService {
     private final CustomerService customerService;
     private final SessionService sessionService;
     private final ClientTypeService clientTypeService;
+    private final CartService cartService;
 
-    public AuthService(KeycloakService keycloakService, CustomerService customerService, SessionService sessionService, ClientTypeService clientTypeService) {
+    public AuthService(KeycloakService keycloakService, CustomerService customerService, SessionService sessionService, ClientTypeService clientTypeService, CartService cartService) {
         this.keycloakService = keycloakService;
         this.customerService = customerService;
         this.sessionService = sessionService;
         this.clientTypeService = clientTypeService;
+        this.cartService = cartService;
     }
 
+    @Transactional
     public void register(String firstname, String lastName, String password, String email, UserRole userRole) {
         String userId = null;
         try {
@@ -48,8 +52,9 @@ public class AuthService {
             if (userId != null)
             {
                 Customer customer = new Customer(userId, firstname, lastName, email);
+                customer = customerService.save(customer);
 
-                customerService.save(customer);
+                cartService.save(new Cart(customer));
             }
 
         } catch (Exception e) {
