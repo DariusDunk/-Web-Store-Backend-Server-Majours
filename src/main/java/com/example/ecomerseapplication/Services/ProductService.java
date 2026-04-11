@@ -26,7 +26,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    private final CustomerCartService customerCartService;
+    private final CartProductService cartProductService;
 
     private final ReviewService reviewService;
     private final ProductCategoryService productCategoryService;
@@ -35,9 +35,9 @@ public class ProductService {
     private EntityManager entityManager;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CustomerCartService customerCartService, ReviewService reviewService, ProductCategoryService productCategoryService, FavoriteOfCustomerService favoriteOfCustomerService) {
+    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, ProductCategoryService productCategoryService, FavoriteOfCustomerService favoriteOfCustomerService) {
         this.productRepository = productRepository;
-        this.customerCartService = customerCartService;
+        this.cartProductService = cartProductService;
         this.reviewService = reviewService;
         this.productCategoryService = productCategoryService;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
@@ -295,7 +295,7 @@ public class ProductService {
 
         DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
 
-        if (customerCartService.cartExists(customer, product))
+        if (cartProductService.cartExists(customer, product))
             detailedProductResponse.inCart = true;
 
         detailedProductResponse.inFavourites = favoriteOfCustomerService.isInFavorites(customer, product);

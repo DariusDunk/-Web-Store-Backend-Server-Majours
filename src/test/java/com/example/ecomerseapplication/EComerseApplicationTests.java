@@ -28,7 +28,7 @@ class EComerseApplicationTests {
     @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
-    private CustomerCartRepository customerCartRepository;
+    private CartProductRepository cartProductRepository;
     @Autowired
     private PurchaseCartRepository purchaseCartRepository;
     @Autowired
@@ -51,7 +51,7 @@ class EComerseApplicationTests {
     CategoryAttributeService categoryAttributeService;
 
     @Autowired
-    CustomerCartService customerCartService;
+    CartProductService cartProductService;
 
     @Autowired
     CustomerService customerService;

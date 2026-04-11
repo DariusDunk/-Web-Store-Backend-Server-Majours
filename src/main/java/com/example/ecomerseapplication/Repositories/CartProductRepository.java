@@ -3,7 +3,7 @@ package com.example.ecomerseapplication.Repositories;
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.Entities.Customer;
-import com.example.ecomerseapplication.Entities.CustomerCart;
+import com.example.ecomerseapplication.Entities.CartProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CustomerCartRepository extends JpaRepository<CustomerCart, CustomerCartId> {
+public interface CartProductRepository extends JpaRepository<CartProduct, CustomerCartId> {
 
     boolean existsByCustomerCartId(CustomerCartId customerCartId);
 
@@ -23,9 +23,9 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
 //    List<CustomerCart> findByCustomer(Customer customer);
 
     @Query(value = "select cc " +
-            "from CustomerCart cc " +
-            "where cc.customerCartId.customer.keycloakId = ?1")
-    List<CustomerCart> findByCustomer(String customer);
+            "from CartProduct cc " +
+            "where cc.customerCartId.cart.customer.keycloakId = ?1")
+    List<CartProduct> findByCustomer(String customer);
 
     @Query(
             """
@@ -51,9 +51,9 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
                      ),
                     cc.dateAdded,
                     cc.quantity)
-                    from CustomerCart cc
+                    from CartProduct cc
                     join Product p on p = cc.customerCartId.product
-                    where cc.customerCartId.customer.keycloakId =:keycloakId
+                    where cc.customerCartId.cart.customer.keycloakId =:keycloakId
                     order by
                     case
                         when cc.customerCartId.product.quantityInStock>0
@@ -72,15 +72,15 @@ public interface CustomerCartRepository extends JpaRepository<CustomerCart, Cust
 
 
     @Modifying
-    @Query("delete from CustomerCart where customerCartId.customer = ?1 and customerCartId.product.productCode = ?2 ")
+    @Query("delete from CartProduct where customerCartId.cart.customer = ?1 and customerCartId.product.productCode = ?2 ")
     int deleteByCustomerAndProductCode(Customer customer, String productCode);
 
     @Modifying
     @Query("""
             delete
             from
-            CustomerCart cc
-            where cc.customerCartId.customer=:customer
+            CartProduct cc
+            where cc.customerCartId.cart.customer=:customer
             and cc.customerCartId.product.productCode in :productCodes
             """)
     int deleteBatchByCustomerAndPCodes(@Param("customer") Customer customer, @Param("productCodes") List<String> productCodes);

@@ -30,7 +30,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final ProductService productService;
-    private final CustomerCartService customerCartService;
+    private final CartProductService cartProductService;
 //    private final PurchaseService purchaseService;
 //    private final PurchaseCartService purchaseCartService;
     private final KeycloakService keycloakService;
@@ -40,7 +40,7 @@ public class CustomerController {
     @Autowired
     public CustomerController(CustomerService customerService,
                               ProductService productService,
-                              CustomerCartService customerCartService,
+                              CartProductService cartProductService,
 //                              PurchaseService purchaseService,
 //                              PurchaseCartService purchaseCartService,
                               KeycloakService keycloakService,
@@ -48,7 +48,7 @@ public class CustomerController {
 
         this.customerService = customerService;
         this.productService = productService;
-        this.customerCartService = customerCartService;
+        this.cartProductService = cartProductService;
 //        this.purchaseService = purchaseService;
 //        this.purchaseCartService = purchaseCartService;
         this.keycloakService = keycloakService;
@@ -146,7 +146,7 @@ public class CustomerController {
 
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
-        return ResponseEntity.ok(customerCartService.addToOrRemoveFromCart(customer, product, request.doIncrement));
+        return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(customer, product, request.doIncrement));
     }
 
     @PostMapping("cart/add/quantity")
@@ -156,7 +156,7 @@ public class CustomerController {
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
         Product product = productService.findByPCode(request.productCode());
 
-        return ResponseEntity.ok(customerCartService.addQuantityToCartUser(product, request.quantity(), customer));
+        return ResponseEntity.ok(cartProductService.addQuantityToCartUser(product, request.quantity(), customer));
     }
 
 
@@ -170,7 +170,7 @@ public class CustomerController {
 
         List<Product> requestProducts = productService.getByCodes(productCodes);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerCartService.addBatchToCart(customer, requestProducts));
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(customer, requestProducts));
 
     }
 
@@ -182,7 +182,7 @@ public class CustomerController {
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         try {
-            return ResponseEntity.ok(customerCartService.removeFromCartWFetch(customer, productCode));
+            return ResponseEntity.ok(cartProductService.removeFromCartWFetch(customer, productCode));
         } catch (Exception e) {
             System.out.println("Error removing from cart: " + e.getMessage());
             throw e;
@@ -197,7 +197,7 @@ public class CustomerController {
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         try {
-            return ResponseEntity.ok(customerCartService.removeBatchFromCartWFetch(customer, productCodes));
+            return ResponseEntity.ok(cartProductService.removeBatchFromCartWFetch(customer, productCodes));
         } catch (Exception e) {
             System.out.println("Error removing product batch from cart: " + e.getMessage());
             throw e;
@@ -211,7 +211,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
-        List<CartItemResponse> customerCarts = customerCartService.getCartDtoByCustomer(customer);
+        List<CartItemResponse> customerCarts = cartProductService.getCartDtoByCustomer(customer);
 
         return ResponseEntity
                 .ok()

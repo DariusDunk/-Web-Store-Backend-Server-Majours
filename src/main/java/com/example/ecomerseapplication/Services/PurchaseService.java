@@ -12,14 +12,14 @@ public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
     private final CustomerService customerService;
-    private final CustomerCartService customerCartService;
+    private final CartProductService cartProductService;
     private final PurchaseCartService purchaseCartService;
 
     @Autowired
-    public PurchaseService(PurchaseRepository purchaseRepository, CustomerService customerService, CustomerCartService customerCartService, ProductService productService, PurchaseCartService purchaseCartService) {
+    public PurchaseService(PurchaseRepository purchaseRepository, CustomerService customerService, CartProductService cartProductService, ProductService productService, PurchaseCartService purchaseCartService) {
         this.purchaseRepository = purchaseRepository;
         this.customerService = customerService;
-        this.customerCartService = customerCartService;
+        this.cartProductService = cartProductService;
         this.purchaseCartService = purchaseCartService;
     }
 

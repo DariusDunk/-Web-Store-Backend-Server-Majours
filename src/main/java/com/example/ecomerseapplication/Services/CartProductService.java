@@ -3,14 +3,15 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.MessageResponse;
+import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.Customer;
-import com.example.ecomerseapplication.Entities.CustomerCart;
+import com.example.ecomerseapplication.Entities.CartProduct;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.CartLimitReachedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoStockForCartException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockExceededException;
 import com.example.ecomerseapplication.Others.GlobalConstants;
-import com.example.ecomerseapplication.Repositories.CustomerCartRepository;
+import com.example.ecomerseapplication.Repositories.CartProductRepository;
 import com.example.ecomerseapplication.enums.ResultTypes;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,51 +22,55 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CustomerCartService {
+public class CartProductService {
 
 
-    private final CustomerCartRepository customerCartRepository;
+    private final CartProductRepository cartProductRepository;
+    private final CartService cartService;
 
     @Autowired
-    public CustomerCartService(CustomerCartRepository customerCartRepository) {
-        this.customerCartRepository = customerCartRepository;
+    public CartProductService(CartProductRepository cartProductRepository, CartService cartService) {
+        this.cartProductRepository = cartProductRepository;
+        this.cartService = cartService;
     }
 
     @Transactional
     public String  addToOrRemoveFromCart(Customer customer, Product product, Boolean doIncrement) {
 
-        CustomerCartId cartId = new CustomerCartId(product, customer);
+        Cart cart = cartService.getOrCreateByCustomer(customer);
 
-        CustomerCart customerCart = customerCartRepository.findById(cartId).orElse(null);
+        CustomerCartId cartId = new CustomerCartId(product, cart);
+
+        CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
 
         try
         {
-            if (customerCart == null) {
+            if (cartProduct == null) {
 
                 if (cartsByCustomer(customer).size() >= GlobalConstants.CART_SIZE_LIMIT)
                     throw new CartLimitReachedException("Cart limit reached!");
 
-                customerCart = new CustomerCart(cartId, (short) 1);
-                customerCartRepository.save(customerCart);
+                cartProduct = new CartProduct(cartId, (short) 1);
+                cartProductRepository.save(cartProduct);
                 return "Успешно добавен в количката!";
             }
 
             if (doIncrement) {
-                short quantity = customerCart.getQuantity();
+                short quantity = cartProduct.getQuantity();
                 if (product.getQuantityInStock() < quantity + 1)
                     throw new StockExceededException("Stock exceeded for product " + product.getProductName() + "!");
 
-                customerCart.setQuantity(++quantity);
-                customerCartRepository.save(customerCart);
+                cartProduct.setQuantity(++quantity);
+                cartProductRepository.save(cartProduct);
                 return "Успешно увеличeно количество в количката!";
             }
 
-            if (customerCart.getQuantity() == 1) {
-                customerCartRepository.deleteById(cartId);
+            if (cartProduct.getQuantity() == 1) {
+                cartProductRepository.deleteById(cartId);
                 return "Успешно премахнат от количката!";
             } else {
-                short quantity = customerCart.getQuantity();
-                customerCart.setQuantity(--quantity);
+                short quantity = cartProduct.getQuantity();
+                cartProduct.setQuantity(--quantity);
 
                 return "Успешно намалено количество в коликчата!";
             }
@@ -82,20 +87,21 @@ public class CustomerCartService {
     }
 
     public boolean cartExists(Customer customer, Product product) {
-        return customerCartRepository.existsByCustomerCartId(new CustomerCartId(product, customer));
+        Cart cart = cartService.getOrCreateByCustomer(customer);
+        return cartProductRepository.existsByCustomerCartId(new CustomerCartId(product, cart));
     }
 
-    public List<CustomerCart> cartsByCustomer(Customer customer) {
-        return customerCartRepository.findByCustomer(customer.getKeycloakId());
+    public List<CartProduct> cartsByCustomer(Customer customer) {
+        return cartProductRepository.findByCustomer(customer.getKeycloakId());
     }
 
     public List<CartItemResponse> getCartDtoByCustomer(Customer customer) {
-        return customerCartRepository.findDtoByCustomer(customer.getKeycloakId());
+        return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
     }
     @Transactional
     public List<CartItemResponse> removeFromCartWFetch(Customer customer, String productCode) {
 
-        int affectedRows = customerCartRepository.deleteByCustomerAndProductCode(customer, productCode);
+        int affectedRows = cartProductRepository.deleteByCustomerAndProductCode(customer, productCode);
 
         if (affectedRows==0)
             throw new IllegalStateException("No rows deleted");
@@ -110,15 +116,13 @@ public class CustomerCartService {
     public MessageResponse addBatchToCart(Customer customer, List<Product> products) {
 
         boolean stockExceeded = false;
-
-        List<CustomerCart> cart = cartsByCustomer(customer);
-
-        int originalSize = cart.size();
-
-        Map<CustomerCartId, CustomerCart> cartMap = Map.copyOf(cart.stream().collect(HashMap::new,
+        Cart cart = cartService.getOrCreateByCustomer(customer);
+        List<CartProduct> cartProducts = cartsByCustomer(customer);
+        int originalSize = cartProducts.size();
+        Map<CustomerCartId, CartProduct> cartMap = Map.copyOf(cartProducts.stream().collect(HashMap::new,
                 (m, v) -> m.put(v.getCustomerCartId(), v), HashMap::putAll));
 
-        cart = new ArrayList<>();
+        cartProducts = new ArrayList<>();
 
 //        System.out.println("CART MAP size: " + cartMap.size());
 
@@ -127,8 +131,8 @@ public class CustomerCartService {
         int newProductsCount = 0;
         List<String> outOfStockProducts = new ArrayList<>();
         for (Product product : products) {
-            CustomerCartId newCartId = new CustomerCartId(product, customer);
-            CustomerCart cartItem = cartMap.getOrDefault(newCartId, new CustomerCart(newCartId, (short) 0));
+            CustomerCartId newCartId = new CustomerCartId(product, cart);
+            CartProduct cartItem = cartMap.getOrDefault(newCartId, new CartProduct(newCartId, (short) 0));
 
             if (cartItem.getQuantity() == 0) {
                 newProductsCount++;
@@ -140,7 +144,7 @@ public class CustomerCartService {
                 outOfStockProducts.add(product.getProductName());
             } else {
                 cartItem.setQuantity((short) (cartItem.getQuantity() + 1));
-                cart.add(cartItem);
+                cartProducts.add(cartItem);
             }
         }
 
@@ -172,7 +176,7 @@ public class CustomerCartService {
         }
 
         try {
-            int savedSize = customerCartRepository.saveAll(cart).size();
+            int savedSize = cartProductRepository.saveAll(cartProducts).size();
 
             if (stockExceeded) {
                 if (savedSize == 0)
@@ -196,28 +200,29 @@ public class CustomerCartService {
     @Transactional
     public List<CartItemResponse> removeBatchFromCartWFetch(Customer customer, List<String> productCodes) {
 
-        int deletedCount = customerCartRepository.deleteBatchByCustomerAndPCodes(customer, productCodes);
+        int deletedCount = cartProductRepository.deleteBatchByCustomerAndPCodes(customer, productCodes);
 
         if (deletedCount != productCodes.size()|| deletedCount == 0) {
             throw new IllegalArgumentException("Not all products were found in the cart!");
         }
 
-      return customerCartRepository.findDtoByCustomer(customer.getKeycloakId());
+      return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
     }
 
     public String addQuantityToCartUser(Product product, short quantity, Customer customer) {
 
         try
         {
-            CustomerCartId cartId = new CustomerCartId(product, customer);
-            CustomerCart customerCart = customerCartRepository.findById(cartId).orElse(null);
+            Cart cart = cartService.getOrCreateByCustomer(customer);
+            CustomerCartId cartId = new CustomerCartId(product, cart);
+            CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
             int quantityInStock = product.getQuantityInStock();
 
-            if (customerCart != null) {
-                short currentCartQuantity = customerCart.getQuantity();
+            if (cartProduct != null) {
+                short currentCartQuantity = cartProduct.getQuantity();
                 if (quantityInStock >= currentCartQuantity + quantity) {
-                    customerCart.setQuantity((short) (currentCartQuantity + quantity));
-                    customerCartRepository.save(customerCart);
+                    cartProduct.setQuantity((short) (currentCartQuantity + quantity));
+                    cartProductRepository.save(cartProduct);
                     return "Успешно увеличен в количката!";
                 }
                 else
@@ -225,8 +230,8 @@ public class CustomerCartService {
             } else {
                 if (quantityInStock < quantity)
                     throw new StockExceededException("Stock exceeded for product " + product.getProductName() + "!");
-                customerCart = new CustomerCart(cartId, quantity);
-                customerCartRepository.save(customerCart);
+                cartProduct = new CartProduct(cartId, quantity);
+                cartProductRepository.save(cartProduct);
                 return "Успешно добавен в количката!";
 
             }

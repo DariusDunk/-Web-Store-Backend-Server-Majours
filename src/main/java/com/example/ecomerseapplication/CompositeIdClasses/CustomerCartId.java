@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.CompositeIdClasses;
 
-import com.example.ecomerseapplication.Entities.Customer;
+import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.Product;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
@@ -20,12 +20,15 @@ public class CustomerCartId implements Serializable {
     @ManyToOne
     private Product product;
 
-    @JoinColumn(name = "customer_id")
+//    @JoinColumn(name = "customer_id")
+//    @ManyToOne
+//    private Customer customer;
+    @JoinColumn(name = "cart_owner_id")
     @ManyToOne
-    private Customer customer;
+    private Cart cart;
 
-    public CustomerCartId(Product product, Customer customer) {
+    public CustomerCartId(Product product, Cart customer) {
         this.product = product;
-        this.customer = customer;
+        this.cart = customer;
     }
 }

@@ -22,18 +22,18 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
 
     private final CustomerService customerService;
 
-    private final CustomerCartService customerCartService;
+    private final CartProductService cartProductService;
 
     private final PurchaseCartService purchaseCartService;
     private final ProductService productService;
     private final UserIdExtractor userIdExtractor;
 
     @Autowired
-    public PurchaseController(PurchaseService purchaseService, SavedPurchaseDetailsService purchaseDetailsService, CustomerService customerService, CustomerCartService customerCartService, PurchaseCartService purchaseCartService, ProductService productService, UserIdExtractor userIdExtractor) {
+    public PurchaseController(PurchaseService purchaseService, SavedPurchaseDetailsService purchaseDetailsService, CustomerService customerService, CartProductService cartProductService, PurchaseCartService purchaseCartService, ProductService productService, UserIdExtractor userIdExtractor) {
         this.purchaseService = purchaseService;
         this.purchaseDetailsService = purchaseDetailsService;
         this.customerService = customerService;
-        this.customerCartService = customerCartService;
+        this.cartProductService = cartProductService;
         this.purchaseCartService = purchaseCartService;
         this.productService = productService;
         this.userIdExtractor = userIdExtractor;

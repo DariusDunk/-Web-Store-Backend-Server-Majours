@@ -10,11 +10,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "customer_carts",schema = "online_shop")
+@Table(name = "cart_products",schema = "online_shop")
 @Getter
 @Setter
 @NoArgsConstructor
-public class CustomerCart {
+public class CartProduct {
 
     @EmbeddedId
     private CustomerCartId customerCartId;
@@ -25,7 +25,7 @@ public class CustomerCart {
     @CreationTimestamp
     private Instant dateAdded;
 
-    public CustomerCart(CustomerCartId customerCartId, short quantity) {
+    public CartProduct(CustomerCartId customerCartId, short quantity) {
         this.customerCartId = customerCartId;
         this.quantity = quantity;
     }
