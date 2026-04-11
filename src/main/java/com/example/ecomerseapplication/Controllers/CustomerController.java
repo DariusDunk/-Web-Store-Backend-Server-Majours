@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Controllers;
 
+import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
@@ -36,6 +37,7 @@ public class CustomerController {
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
+    private final SessionService sessionService;
 
     @Autowired
     public CustomerController(CustomerService customerService,
@@ -44,7 +46,7 @@ public class CustomerController {
 //                              PurchaseService purchaseService,
 //                              PurchaseCartService purchaseCartService,
                               KeycloakService keycloakService,
-                              UserIdExtractor userIdExtractor, FavoriteOfCustomerService favoriteOfCustomerService) {
+                              UserIdExtractor userIdExtractor, FavoriteOfCustomerService favoriteOfCustomerService, SessionService sessionService) {
 
         this.customerService = customerService;
         this.productService = productService;
@@ -54,6 +56,7 @@ public class CustomerController {
         this.keycloakService = keycloakService;
         this.userIdExtractor = userIdExtractor;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
+        this.sessionService = sessionService;
     }
 
  
@@ -142,19 +145,36 @@ public class CustomerController {
                     "Този продукт е изчерпан и не беше добавен в количката"));
         }
 
-        String userId = userIdExtractor.getUserId();
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
 
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        if (session.getIsGuest()) {
+            return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(session, product, request.doIncrement));
+        }
 
-        return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(customer, product, request.doIncrement));
+        else
+        {
+            String userId = userIdExtractor.getUserId();
+            Customer customer = customerService.getByIdWithActivityRefresh(userId);
+
+            return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(customer, product, request.doIncrement));
+        }
     }
 
     @PostMapping("cart/add/quantity")
     public ResponseEntity<?> addQuantityToCart(@RequestBody @Valid ProductQuantityForCartRequest request) {
 
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+        Product product = productService.findByPCode(request.productCode());
+
+        if (session.getIsGuest()) {
+            return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), session));
+        }
+
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
-        Product product = productService.findByPCode(request.productCode());
 
         return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), customer));
     }
@@ -164,11 +184,17 @@ public class CustomerController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
 
-        String userId = userIdExtractor.getUserId();
-
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
-
         List<Product> requestProducts = productService.getByCodes(productCodes);
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+
+        if (session.getIsGuest()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(session, requestProducts));
+        }
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(customer, requestProducts));
 
@@ -177,6 +203,22 @@ public class CustomerController {
     @DeleteMapping("cart/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
+
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+
+        if (session.getIsGuest()) {
+            try
+            {
+                return ResponseEntity.ok(cartProductService.removeFromCartWFetch(session, productCode));
+            }
+            catch (Exception e)
+                {
+                System.out.println("Error removing from cart: " + e.getMessage());
+                throw e;
+                }
+        }
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
@@ -193,6 +235,22 @@ public class CustomerController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
 
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+
+        if (session.getIsGuest()) {
+            try
+            {
+                return ResponseEntity.ok(cartProductService.removeBatchFromCartWFetch(session, productCodes));
+            }
+            catch (Exception e)
+                {
+                System.out.println("Error removing product batch from cart: " + e.getMessage());
+                throw e;
+                }
+        }
+
+
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
@@ -208,6 +266,13 @@ public class CustomerController {
     @GetMapping("cart")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> showCart() {
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+
+        if (session.getIsGuest()) {
+            return ResponseEntity.ok(cartProductService.getCartDtoBySession(session));
+        }
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByIdWithActivityRefresh(userId);

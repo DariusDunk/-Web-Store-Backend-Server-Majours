@@ -140,7 +140,7 @@ public class AuthService {
         if (session.getIsRevoked()|| session.isExpired())
             throw new InvalidSessionException("Session is revoked or expired");
 
-        TokenRefreshResponse tokenRefreshResponse = null;
+        TokenRefreshResponse tokenRefreshResponse;
 
         try
         {
