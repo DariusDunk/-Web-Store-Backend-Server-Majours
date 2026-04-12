@@ -4,6 +4,7 @@ import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
+import com.example.ecomerseapplication.DTOs.requests.ProductQuantityForCartRequest;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
 import com.example.ecomerseapplication.Entities.Customer;
@@ -14,15 +15,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import java.util.List;
 
 @Controller
@@ -92,6 +90,24 @@ public class CartController {
             return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(customer, product, request.doIncrement));
         }
     }
+
+    @PostMapping("add/quantity")
+    public ResponseEntity<?> addQuantityToCart(@RequestBody @Valid ProductQuantityForCartRequest request) {
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+        Product product = productService.findByPCode(request.productCode());
+
+        if (session.getIsGuest()) {
+            return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), session));
+        }
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+
+        return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), customer));
+    }
+
 
 
     @GetMapping("summary")

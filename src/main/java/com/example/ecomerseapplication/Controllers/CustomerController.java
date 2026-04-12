@@ -5,7 +5,6 @@ import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import jakarta.validation.Valid;
@@ -17,12 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 
@@ -131,25 +126,6 @@ public class CustomerController {
                 request.currentPage()));
     }
 
-    
-
-    @PostMapping("cart/add/quantity")
-    public ResponseEntity<?> addQuantityToCart(@RequestBody @Valid ProductQuantityForCartRequest request) {
-
-
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
-        Product product = productService.findByPCode(request.productCode());
-
-        if (session.getIsGuest()) {
-            return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), session));
-        }
-
-        String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
-
-        return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), customer));
-    }
 
 
     @PostMapping("cart/add/batch")
