@@ -3,8 +3,8 @@ package com.example.ecomerseapplication.enums;
 import lombok.Getter;
 
 public enum UserRole {
-    ADMIN("admin"),
-    CUSTOMER("customer");
+    ADMIN("ADMIN"),
+    CUSTOMER("CUSTOMER");
 
     @Getter
     private final String value;
