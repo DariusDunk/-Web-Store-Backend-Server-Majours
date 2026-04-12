@@ -198,40 +198,6 @@ router.post(`/removeFav/batch`, async (req, res) => {
     }
 })
 
-router.post('/addToCart', async (req, res) => {
-    try {
-        const {productCode, doIncrement} = req.body;
-        const sessionId = req.cookies.session_id;
-
-        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.post(`${Backend_Url}/customer/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
-                headers: {
-                    'Content-Type': 'application/json',
-                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
-                },
-                bffContext: {
-                    req, res
-                }
-            });
-            }, {req, res})
-
-        const responseData = await response.data;
-
-        return res.status(response.status).json({message: responseData});
-
-    } catch (error) {
-
-        if (error.response) {
-            console.warn(`${timestamp()} Handled backend error for adding product to cart`);
-            return res.status(error.response.status||500).json(error.response.data);
-        }
-
-        console.error('-------------------Unexpected error adding product to cart-------------------\n', error);
-        return res.status(500).end();
-    }
-});
-
 router.post('/cart/add/quantity', async (req, res) => {
     try{
         const {productCode, quantity} = req.body;

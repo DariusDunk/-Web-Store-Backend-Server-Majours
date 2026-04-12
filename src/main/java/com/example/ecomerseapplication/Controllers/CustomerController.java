@@ -132,36 +132,6 @@ public class CustomerController {
     }
 
     
-    @PostMapping("cart/manageQuant")
-    @Transactional
-    @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addToCart(@RequestBody @Valid ProductForCartRequest request) {
-
-//        System.out.println("REQUEST: "+request);
-
-        Product product = productService.findByPCode(request.productCode);
-
-        if (!product.isInStock()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ErrorType.OUT_OF_STOCK,
-                    "Продуктът не е наличен", HttpStatus.BAD_REQUEST.value(),
-                    "Този продукт е изчерпан и не беше добавен в количката"));
-        }
-
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
-
-        if (session.getIsGuest()) {
-            return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(session, product, request.doIncrement));
-        }
-
-        else
-        {
-            String userId = userIdExtractor.getUserId();
-            Customer customer = customerService.getByIdWithActivityRefresh(userId);
-
-            return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(customer, product, request.doIncrement));
-        }
-    }
 
     @PostMapping("cart/add/quantity")
     public ResponseEntity<?> addQuantityToCart(@RequestBody @Valid ProductQuantityForCartRequest request) {

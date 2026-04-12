@@ -1,16 +1,30 @@
 import express from 'express';
-const router = express.Router();
 import {Backend_Url} from './config.js';
-const AuthURL = `${Backend_Url}/auth`;
-import sessionCache from '../services/sessionCache.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
-import axios from 'axios';
+
+const router = express.Router();
+const AuthURL = `${Backend_Url}/auth`;
 
 const timestamp = () => {
     const now = new Date();
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
+
+ async function getCartSummary(req, res, sessionId) {
+    return await fetchWithSessionTokens(sessionId, async (sessionData) => {
+        return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
+                },
+                bffContext: {req, res}
+            }
+        );
+    });
+}
 
 router.get('/getCart', async (req, res) => {
     const sessionId = req.cookies.session_id;
@@ -31,19 +45,7 @@ router.get('/getCart', async (req, res) => {
 
         const cartResponseData = await response.data;
 
-
-        const cartSummaryResponse = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                        ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
-                    },
-                    bffContext: {req, res}
-                }
-            );
-        });
+        const cartSummaryResponse = await getCartSummary(req, res, sessionId);
 
         const cartSummaryData = await cartSummaryResponse?.data;
 
@@ -59,6 +61,42 @@ router.get('/getCart', async (req, res) => {
         }
 
         console.error('-------------------Unexpected error for fetching the cart-------------------\n', error);
+        return res.status(500).end();
+    }
+});
+
+router.post('/addToCart', async (req, res) => {
+    try {
+        const {productCode, doIncrement} = req.body;
+        const sessionId = req.cookies.session_id;
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.post(`${Backend_Url}/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
+
+        const responseData = await response.data;
+        const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+        const cartSummaryData = await cartSummaryResponse?.data;
+
+        return res.status(response.status).json({message: responseData, cartSummary: cartSummaryData});
+
+    } catch (error) {
+
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for adding product to cart`);
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Unexpected error adding product to cart-------------------\n', error);
         return res.status(500).end();
     }
 });

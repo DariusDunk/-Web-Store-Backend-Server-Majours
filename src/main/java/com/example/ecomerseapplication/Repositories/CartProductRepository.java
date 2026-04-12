@@ -139,9 +139,4 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
             "where cc.customerCartId.cart = ?1")
     CartSummaryResponse getSummaryByCart(Cart cart);
 
-//    @Query(value = "select new " +
-//            "com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(sum(cc.quantity), sum(cc.customerCartId.product.salePriceStotinki)) " +
-//            "from CartProduct cc " +
-//            "where cc.customerCartId.cart.customer = ?1")
-//    CartSummaryResponse getSummaryByCustomer(Customer customer);
 }

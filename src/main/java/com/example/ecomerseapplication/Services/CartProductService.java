@@ -90,7 +90,6 @@ public class CartProductService {
         }
     }
 
-    //TODO TEST
     @Transactional
     public String  addToOrRemoveFromCart(Session session, Product product, Boolean doIncrement) {
 
