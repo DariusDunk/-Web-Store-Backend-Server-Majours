@@ -19,10 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @Controller
@@ -126,6 +124,35 @@ public class CartController {
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(customer, requestProducts));
+    }
+
+    @DeleteMapping("remove/{productCode}")
+    public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+
+        if (session.getIsGuest()) {
+            try
+            {
+                return ResponseEntity.ok(cartProductService.removeFromCartWFetch(session, productCode));
+            }
+            catch (Exception e)
+            {
+                System.out.println("Error removing from cart: " + e.getMessage());
+                throw e;
+            }
+        }
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+
+        try {
+            return ResponseEntity.ok(cartProductService.removeFromCartWFetch(customer, productCode));
+        } catch (Exception e) {
+            System.out.println("Error removing from cart: " + e.getMessage());
+            throw e;
+        }
     }
 
 

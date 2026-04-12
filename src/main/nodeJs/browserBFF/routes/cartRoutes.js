@@ -175,6 +175,44 @@ router.post('/addToCart/batch', async (req, res) => {
     }
 })
 
+router.post('/removeFromCart/:productCode', async (req, res) => {
+    try {
+
+        const productCode = req.params.productCode;
+        const sessionId = req.cookies.session_id;
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/${productCode}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
+
+        const responseData = await response.data;
+        const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+        const cartSummaryData= await cartSummaryResponse?.data;
+
+        return res.status(response.status).json({products: responseData, cartSummary: cartSummaryData});
+
+    } catch (error) {
+
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for removing product from cart`);
+            return res.status(error.response.status||500).end();
+        }
+
+        console.error('-------------------Error removing product from cart-------------------\n', error);
+        return res.status(500).end();
+    }
+})
+
+
 
 router.get(`/summary`, async (req, res) => {
 

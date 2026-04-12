@@ -126,37 +126,6 @@ public class CustomerController {
                 request.currentPage()));
     }
 
-    @DeleteMapping("cart/remove/{productCode}")
-    @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
-
-
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
-
-        if (session.getIsGuest()) {
-            try
-            {
-                return ResponseEntity.ok(cartProductService.removeFromCartWFetch(session, productCode));
-            }
-            catch (Exception e)
-                {
-                System.out.println("Error removing from cart: " + e.getMessage());
-                throw e;
-                }
-        }
-
-        String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
-
-        try {
-            return ResponseEntity.ok(cartProductService.removeFromCartWFetch(customer, productCode));
-        } catch (Exception e) {
-            System.out.println("Error removing from cart: " + e.getMessage());
-            throw e;
-        }
-    }
-
     @DeleteMapping("cart/remove/batch")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
