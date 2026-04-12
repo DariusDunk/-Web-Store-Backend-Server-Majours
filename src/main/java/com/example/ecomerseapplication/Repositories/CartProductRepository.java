@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
+import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.CartProduct;
 import com.example.ecomerseapplication.Entities.Session;
@@ -129,4 +130,18 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
                     """
     )
     List<CartItemResponse> findDtoBySession(@Param("session")Session session);
+
+
+    //todo tuk kato napravi6 otstupkite smeni izto4nika za cenite
+    @Query(value = "select new " +
+            "com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(sum(cc.customerCartId.product.salePriceStotinki*cc.quantity), sum(cc.quantity)) " +
+            "from CartProduct cc " +
+            "where cc.customerCartId.cart = ?1")
+    CartSummaryResponse getSummaryByCart(Cart cart);
+
+//    @Query(value = "select new " +
+//            "com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(sum(cc.quantity), sum(cc.customerCartId.product.salePriceStotinki)) " +
+//            "from CartProduct cc " +
+//            "where cc.customerCartId.cart.customer = ?1")
+//    CartSummaryResponse getSummaryByCustomer(Customer customer);
 }

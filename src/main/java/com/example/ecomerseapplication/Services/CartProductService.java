@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
+import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.DTOs.responses.MessageResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.CartLimitReachedException;
@@ -368,5 +369,19 @@ public class CartProductService {
             return "Успешно добавен в количката!";
 
         }
+    }
+
+    public CartSummaryResponse getSummary(Session session) {
+
+        Cart cart = cartService.getOrCreateBySession(session);
+
+        return cartProductRepository.getSummaryByCart(cart);
+    }
+
+    public CartSummaryResponse getSummary(Customer customer) {
+
+        Cart cart = cartService.getOrCreateByCustomer(customer);
+
+        return cartProductRepository.getSummaryByCart(cart);
     }
 }

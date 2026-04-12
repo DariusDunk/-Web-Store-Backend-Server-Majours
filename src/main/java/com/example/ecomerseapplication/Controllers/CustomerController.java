@@ -265,27 +265,7 @@ public class CustomerController {
     }
 
     
-    @GetMapping("cart")
-    @PreAuthorize("hasRole(@roles.customer())")
-//    @PreAuthorize("denyAll()")
-    public ResponseEntity<?> showCart() {
 
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
-
-        if (session.getIsGuest()) {
-            return ResponseEntity.ok(cartProductService.getCartDtoBySession(session));
-        }
-
-        String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
-        List<CartItemResponse> customerCarts = cartProductService.getCartDtoByCustomer(customer);
-
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(customerCarts);
-    }
 
 //    
 //    @GetMapping("purchase_history")//TODO kato go napravi6 trqbva da ima validacii na vhodnite danni i fetch-natite entitiy-ta
@@ -341,9 +321,6 @@ public class CustomerController {
     @GetMapping("me")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(auth.getAuthorities());
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByIdWithActivityRefresh(userId);
