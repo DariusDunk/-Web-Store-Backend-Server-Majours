@@ -2,8 +2,6 @@ import express from 'express';
 import {Backend_Url} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
-import axios from "axios";
-import sessionCache from "../services/sessionCache.js";
 
 const router = express.Router();
 const timestamp = () => {

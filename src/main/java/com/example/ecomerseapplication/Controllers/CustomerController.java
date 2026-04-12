@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
@@ -9,7 +8,6 @@ import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -18,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 
 @RestController
