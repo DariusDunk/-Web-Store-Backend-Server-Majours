@@ -136,6 +136,46 @@ router.post('/add/quantity', async (req, res) => {
     }
 })
 
+router.post('/addToCart/batch', async (req, res) => {
+    try {
+        const productCodes = req.body;
+        const sessionId = req.cookies.session_id;
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.post(`${Backend_Url}/cart/add/batch`, productCodes, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
+
+        const responseData = await response.data;
+        const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+        responseData.cartSummary = await cartSummaryResponse?.data;
+
+        if (responseData)
+            return res.status(response.status).json(responseData);
+        else
+            return res.status(response.status).end();
+
+    } catch (error) {
+
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for batch adding products to cart`);
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Error batch adding products to cart-------------------\n', error);
+        return res.status(500).end();
+    }
+})
+
+
 router.get(`/summary`, async (req, res) => {
 
     const sessionId = req.cookies.session_id;

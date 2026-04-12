@@ -12,9 +12,11 @@ import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Services.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -108,6 +110,23 @@ public class CartController {
         return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), customer));
     }
 
+    @PostMapping("add/batch")
+    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
+
+        List<Product> requestProducts = productService.getByCodes(productCodes);
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+
+        if (session.getIsGuest()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(session, requestProducts));
+        }
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(customer, requestProducts));
+    }
 
 
     @GetMapping("summary")

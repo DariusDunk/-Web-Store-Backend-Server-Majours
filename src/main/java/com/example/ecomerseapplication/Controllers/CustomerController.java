@@ -126,28 +126,6 @@ public class CustomerController {
                 request.currentPage()));
     }
 
-
-
-    @PostMapping("cart/add/batch")
-    @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
-
-        List<Product> requestProducts = productService.getByCodes(productCodes);
-
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
-
-        if (session.getIsGuest()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(session, requestProducts));
-        }
-
-        String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(customer, requestProducts));
-
-    }
-
     @DeleteMapping("cart/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
