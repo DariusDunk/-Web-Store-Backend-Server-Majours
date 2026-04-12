@@ -155,6 +155,35 @@ public class CartController {
         }
     }
 
+    @DeleteMapping("remove/batch")
+    public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
+
+        String sessionId = SessionExtractor.getRequestSessionId();
+        Session session = sessionService.getById(sessionId);
+
+        if (session.getIsGuest()) {
+            try
+            {
+                return ResponseEntity.ok(cartProductService.removeBatchFromCartWFetch(session, productCodes));
+            }
+            catch (Exception e)
+            {
+                System.out.println("Error removing product batch from cart: " + e.getMessage());
+                throw e;
+            }
+        }
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+
+        try {
+            return ResponseEntity.ok(cartProductService.removeBatchFromCartWFetch(customer, productCodes));
+        } catch (Exception e) {
+            System.out.println("Error removing product batch from cart: " + e.getMessage());
+            throw e;
+        }
+    }
+
 
     @GetMapping("summary")
     public ResponseEntity<?> getCartSummary() {

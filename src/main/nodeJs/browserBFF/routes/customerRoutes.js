@@ -1,16 +1,32 @@
 import express from 'express';
-const router = express.Router();
-import {Backend_Url} from'./config.js';
+import {Backend_Url} from './config.js';
 // const sessionCache = require('../services/sessionCache.js');
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import axios from "axios";
 import sessionCache from "../services/sessionCache.js";
 
+const router = express.Router();
+
 const timestamp = () => {
     const now = new Date();
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
+
+async function getCartSummary(req, res, sessionId) {
+    return await fetchWithSessionTokens(sessionId, async (sessionData) => {
+        return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
+                },
+                bffContext: {req, res}
+            }
+        );
+    });
+}
 
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page
@@ -198,44 +214,6 @@ router.post(`/removeFav/batch`, async (req, res) => {
     }
 })
 
-router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
-    try {
-
-        const sessionId = req.cookies.session_id;
-        const productCodes = req.body;
-
-        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.delete(`${Backend_Url}/customer/cart/remove/batch`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
-                },
-                data: JSON.stringify(productCodes),
-                bffContext: {
-                    req, res
-                }
-            });
-            }, {req, res})
-
-        const responseData = await response.data;
-
-        return res.status(response.status).json(responseData);
-
-    } catch (error) {
-
-        if (error.response) {
-            console.warn(`${timestamp()} Handled backend error for batch removing product from cart`);
-            return res.status(error.response.status||500).end();
-        }
-
-        console.error('-------------------Error batch removing product from cart-------------------\n', error);
-        return res.status(500).end();
-    }
-})
-
-
-
 router.get('/me', async (req, res) => {
 
     const sessionId = req.cookies.session_id;
@@ -267,6 +245,9 @@ router.get('/me', async (req, res) => {
                         sameSite: 'lax',
                         httpOnly: true
                     });
+
+
+
 
                 return res.status(200).json({authenticated: false});
             }
@@ -305,6 +286,9 @@ router.get('/me', async (req, res) => {
 
             if (responseData)
                 responseData.authenticated = !responseData.is_guest||false;
+
+            const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+            responseData.cartSummary = await cartSummaryResponse?.data;
 
             return res.status(response.status).json(responseData);
 

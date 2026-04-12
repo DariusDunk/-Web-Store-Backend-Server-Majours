@@ -2,6 +2,8 @@ import express from 'express';
 import {Backend_Url} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
+import axios from "axios";
+import sessionCache from "../services/sessionCache.js";
 
 const router = express.Router();
 const timestamp = () => {
@@ -212,37 +214,74 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
     }
 })
 
+router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
+    try {
 
+        const sessionId = req.cookies.session_id;
+        const productCodes = req.body;
 
-router.get(`/summary`, async (req, res) => {
-
-    const sessionId = req.cookies.session_id;
-
-    try{
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                        ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
-                    },
-                    bffContext: {req, res}
+            return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/batch`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                },
+                data: JSON.stringify(productCodes),
+                bffContext: {
+                    req, res
                 }
-            );
-        })
+            });
+        }, {req, res})
 
         const responseData = await response.data;
-        return res.status(response.status).json(responseData);
-    }catch (error) {
+        const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+        const cartSummaryData= await cartSummaryResponse?.data;
+
+        return res.status(response.status).json({products: responseData, cartSummary: cartSummaryData});
+
+    } catch (error) {
 
         if (error.response) {
-            console.warn(`${timestamp()} Handled backend error for fetching the cart summary`);
+            console.warn(`${timestamp()} Handled backend error for batch removing product from cart`);
             return res.status(error.response.status||500).end();
         }
-        console.error('-------------------Unexpected error for fetching the cart summary-------------------\n', error);
+
+        console.error('-------------------Error batch removing product from cart-------------------\n', error);
         return res.status(500).end();
     }
 })
+
+//
+// router.get(`/summary`, async (req, res) => {
+//
+//     const sessionId = req.cookies.session_id;
+//
+//     try{
+//         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+//             return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
+//                 {
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+//                         ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
+//                     },
+//                     bffContext: {req, res}
+//                 }
+//             );
+//         })
+//
+//         const responseData = await response.data;
+//         return res.status(response.status).json(responseData);
+//     }catch (error) {
+//
+//         if (error.response) {
+//             console.warn(`${timestamp()} Handled backend error for fetching the cart summary`);
+//             return res.status(error.response.status||500).end();
+//         }
+//         console.error('-------------------Unexpected error for fetching the cart summary-------------------\n', error);
+//         return res.status(500).end();
+//     }
+// })
 
 export default router;
