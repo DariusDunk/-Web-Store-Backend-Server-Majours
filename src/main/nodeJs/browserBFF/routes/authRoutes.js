@@ -7,6 +7,21 @@ import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import axios from 'axios';
 
+async function getCartSummary(req, res, sessionId) {
+    return await fetchWithSessionTokens(sessionId, async (sessionData) => {
+        return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
+                },
+                bffContext: {req, res}
+            }
+        );
+    });
+}
+
 router.post(`/register`, async (req, res) => {
 
     const {name, familyName, email, password} = req.body;
@@ -93,16 +108,24 @@ router.post(`/login`, async (req, res) => {
 
     try {
         const userDataResponse = await fetchWithSessionTokens(authResponse.session_id, async (sessionData) => {
-            return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && { 'X-Session-Id': sessionData.session_id })
-                },
-                bffContext: {
-                    req, res
-                }
-            })
+            const [userResponse, cartSummary] = await Promise.all([
+                axiosBackendClient.get(`${Backend_Url}/customer/me`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                        ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
+                    },
+                    bffContext: {
+                        req, res
+                    }
+                }),
+                getCartSummary(res, req, authResponse.session_id)
+
+            ]);
+
+            return {
+                data: {user: userResponse?.data, cartSummary: cartSummary?.data}
+            }
         });
 
         res.cookie('session_id', authResponse.session_id,
@@ -116,8 +139,10 @@ router.post(`/login`, async (req, res) => {
 
         // sessionCache.print();
 
-        const userData = await userDataResponse.data;
 
+
+        const userData = await userDataResponse.data;
+        console.log("UserData.data: "+ JSON.stringify(userData))
         return res.status(userDataResponse.status).json(userData);
     } catch (error) {
         console.error('Error fetching user data: ', error);

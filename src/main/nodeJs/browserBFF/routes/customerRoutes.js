@@ -290,6 +290,8 @@ router.get('/me', async (req, res) => {
             const cartSummaryResponse = await getCartSummary(req, res, sessionId);
             responseData.cartSummary = await cartSummaryResponse?.data;
 
+            // console.log("responseData: ", JSON.stringify(responseData));
+
             return res.status(response.status).json(responseData);
 
         } catch (error) {
@@ -300,9 +302,12 @@ router.get('/me', async (req, res) => {
 
                 if (errorResponse?.guestError) {
 
-                    // console.log("Guest error detected in '/me' request, creating guest session");
+                    console.log("Guest error detected in '/me' request, creating guest session");
 
-                    return res.status(200).json({authenticated: false});
+                    const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+                    const summaryData = cartSummaryResponse?.data;
+
+                    return res.status(200).json({authenticated: false, cartSummary: summaryData});
                 }
             }
 
@@ -310,8 +315,11 @@ router.get('/me', async (req, res) => {
             return res.status(500).end();
         }
     }
-    else
-        return res.status(200).end();
+    else {
+        const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+        const summaryData = cartSummaryResponse?.data;
+        return res.status(200).json({authenticated: false, cartSummary: summaryData});
+    }
 })
 
 export default router;
