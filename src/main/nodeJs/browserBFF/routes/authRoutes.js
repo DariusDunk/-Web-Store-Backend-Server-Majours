@@ -142,7 +142,7 @@ router.post(`/login`, async (req, res) => {
 
 
         const userData = await userDataResponse.data;
-        console.log("UserData.data: "+ JSON.stringify(userData))
+        // console.log("UserData.data: "+ JSON.stringify(userData))
         return res.status(userDataResponse.status).json(userData);
     } catch (error) {
         console.error('Error fetching user data: ', error);
@@ -168,6 +168,8 @@ router.post('/logout', async (req, res) => {
 
                 if (session_id && session_ttl)
                 {
+                    const summaryResponse = await getCartSummary(req, res, session_id);
+                    const cartSummary = await summaryResponse?.data;
                     sessionCache.set(session_id, {
                             session_id,
                             is_guest: true,
@@ -184,7 +186,7 @@ router.post('/logout', async (req, res) => {
                             httpOnly: true
                         });
 
-                    return res.status(200).json({authenticated: false});
+                    return res.status(200).json({authenticated: false, cartSummary: cartSummary});
                 }
             }
 
