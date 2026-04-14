@@ -42,7 +42,7 @@ export async function refreshToken(sessionId, res) {
                 refresh_token_lifeTime,
                 is_guest: is_guest,
                 remember_me: is_remember_me
-            }, session_expires_in);
+            });
 
             return;
 

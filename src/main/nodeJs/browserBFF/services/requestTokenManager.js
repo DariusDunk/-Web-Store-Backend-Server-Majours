@@ -56,11 +56,11 @@ async function getSessionData(sessionId) {
                 throw new Error('Backend returned empty session data');
             }
 
-            const ttl = newSessionData.session_expires_in || 3600;
+            // const ttl = newSessionData.session_expires_in || 3600;
 
-            newSessionData.session_id = sessionId;
+            // newSessionData.session_id = sessionId;
 
-            sessionCache.set(sessionId, newSessionData, ttl);
+            sessionCache.set(sessionId, newSessionData);
             console.log("💾 Cache Updated for:", sessionId);
 
             return newSessionData;
@@ -80,6 +80,23 @@ async function getSessionData(sessionId) {
     return await p;
 }
 
+async function setUpGuestSession(res) {
+    const guestData = await createGuestSession();
+    const { session_id, session_ttl } = guestData;
+
+    sessionCache.set(session_id, { session_id, is_guest: true, remember_me: false });
+    // sessionId = session_id;
+
+    res.cookie('session_id', session_id, {
+        maxAge: session_ttl * 1000,
+        secure: false,
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: true
+    });
+    return session_id;
+}
+
 export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
     const {isMe= false, req, res } = options;
 
@@ -93,20 +110,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
     try {
         // --- 1. Session Setup ---
         if (!sessionId) {
-            const guestData = await createGuestSession();
-            const { session_id, session_ttl } = guestData;
-
-            sessionCache.set(session_id, { session_id, is_guest: true, remember_me: false }, session_ttl);
-            sessionId = session_id;
-
-            res.cookie('session_id', session_id, {
-                maxAge: session_ttl * 1000,
-                secure: false,
-                path: '/',
-                sameSite: 'lax',
-                httpOnly: true
-            });
-
+            sessionId = setUpGuestSession(res);
         }
 
         // --- 2. Safe Token Retrieval ---

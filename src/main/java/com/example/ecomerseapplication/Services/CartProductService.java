@@ -383,4 +383,12 @@ public class CartProductService {
 
         return cartProductRepository.getSummaryByCart(cart);
     }
+
+    @Transactional
+    public void deleteItemsBySession(List<Session> sessions) {
+
+        List<String> sessionIds = sessions.stream().map(Session::getSessionId).toList();
+
+        cartProductRepository.deleteCartProductsBySessions(sessionIds);
+    }
 }

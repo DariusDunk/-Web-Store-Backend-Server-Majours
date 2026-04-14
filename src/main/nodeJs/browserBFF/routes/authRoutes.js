@@ -95,7 +95,7 @@ router.post(`/login`, async (req, res) => {
             refresh_expires_in,
             is_guest: false,
             remember_me: rememberMe
-        }, session_expires_in);
+        });
     }
     catch (error) {
         console.error('-------------Error with login-------------\n', error);
@@ -174,8 +174,7 @@ router.post('/logout', async (req, res) => {
                             session_id,
                             is_guest: true,
                             remember_me: false
-                        },
-                        session_ttl);
+                        });
 
                     res.cookie('session_id', session_id,
                         {

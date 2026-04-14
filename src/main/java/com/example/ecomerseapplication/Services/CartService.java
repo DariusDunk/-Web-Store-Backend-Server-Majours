@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CartService {
 
@@ -19,7 +21,7 @@ public class CartService {
     }
 
     public Cart getById(Long id) {
-        return cartRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cart owner not found"));
+        return cartRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
     }
 
     public Cart getOrCreateByCustomer(Customer customer) {
@@ -35,5 +37,17 @@ public class CartService {
         return cartRepository.getBySession((session))
                 .orElseGet(() -> cartRepository.save(new Cart(session)));
     }
+
+//    public void deleteCart(Cart cart) {
+//        cartRepository.delete(cart);
+//    }
+
+    public void deleteCartsBySessions(List<Session> sessions) {
+
+        List<String> sessionIds = sessions.stream().map(Session::getSessionId).toList();
+
+        cartRepository.deleteBySessions(sessionIds);
+    }
+
 
 }

@@ -139,4 +139,16 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
             "where cc.customerCartId.cart = ?1")
     CartSummaryResponse getSummaryByCart(Cart cart);
 
+    @Modifying
+    void deleteCartProductByCustomerCartId_Cart(Cart customerCartIdCart);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            """
+                    delete
+                    from CartProduct cp
+                    where cp.customerCartId.cart.session.sessionId in ?1
+                    """
+    )
+    void deleteCartProductsBySessions(List<String> sessionIds);
 }

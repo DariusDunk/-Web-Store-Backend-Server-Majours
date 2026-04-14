@@ -49,8 +49,7 @@ public class AuthService {
         try {
             userId = keycloakService.registerUser(firstname, lastName, password, email, userRole);
 
-            if (userId != null)
-            {
+            if (userId != null) {
                 Customer customer = new Customer(userId, firstname, lastName, email);
                 customer = customerService.save(customer);
 
@@ -97,18 +96,17 @@ public class AuthService {
 
             if (sessionId != null) {
                 session = sessionService.getById(sessionId);
-                session = sessionService.guestToLoginSession(session,tokenResponse,request.rememberMe(), customer);
-            }
-            else
+                session = sessionService.guestToLoginSession(session, tokenResponse, request.rememberMe(), customer);
+            } else
                 session = sessionService.createAuthenticatedSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());
 
             return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
         } catch (Exception e) {
             if (tokenResponse != null) {
                 keycloakService.invalidateRefreshToken(tokenResponse.refreshToken());
-                throw new LoginFailedException("Login failed, rolling back session creation: "+ e.getMessage());
+                throw new LoginFailedException("Login failed, rolling back session creation: " + e.getMessage());
             }
-            throw new LoginFailedException("Login failed: "+ e.getMessage());
+            throw new LoginFailedException("Login failed: " + e.getMessage());
         }
     }
 
@@ -120,12 +118,9 @@ public class AuthService {
 //        sessionService.revokeSession(session);
 
         Session session = sessionService.LoginToGuestSession(sessionId);
-        try
-        {
+        try {
             keycloakService.invalidateRefreshToken(refreshToken);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("-------------------------------------------------------");
             System.out.println("Error invalidating refresh token in keycloak: " + e.getMessage());
             System.out.println("-------------------------------------------------------");
@@ -137,17 +132,14 @@ public class AuthService {
 
     @Transactional
     public RefreshResponse refresh(String refreshToken, Session session) {
-        if (session.getIsRevoked()|| session.isExpired())
-            throw new InvalidSessionException("Session is revoked or expired");
+        if (session.getIsRevoked() || session.isExpired())
+            session = sessionService.createGuestSession(session.getClientType());
 
         TokenRefreshResponse tokenRefreshResponse;
 
-        try
-        {
+        try {
             tokenRefreshResponse = keycloakService.refreshBothTokens(refreshToken);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Error refreshing token in keycloak, session will be treated as a guest: \n" + e.getMessage() + "\n -------------------------------------------------------");
 
             session.setIsGuest(true);
@@ -166,14 +158,15 @@ public class AuthService {
                     null,
                     Duration.between(Instant.now(), session.getExpiresAt()).getSeconds(),
                     true,
-                    false);
+                    false,
+                    session.getSessionId());
         }
 
         try {
 
             Instant newTTL = session.getIsRememberMeSession()
-                    ?Instant.now().plus(tokenRefreshResponse.refreshExpiresIn(), ChronoUnit.SECONDS)
-                    :Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS);
+                    ? Instant.now().plus(tokenRefreshResponse.refreshExpiresIn(), ChronoUnit.SECONDS)
+                    : Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS);
             session.setExpiresAt(newTTL);
             session.setRefreshToken(tokenRefreshResponse.refreshToken());
 
@@ -182,11 +175,10 @@ public class AuthService {
             return RefreshResponseMapper.tokenRefreshToRefreshResponse(tokenRefreshResponse,
                     newTTL,
                     false,
-                    session.getIsRememberMeSession());
-        }
-        catch (Exception e)
-        {
-            throw new InvalidSessionException("Session persist failed: "+ e.getMessage());
+                    session.getIsRememberMeSession(),
+                    session.getSessionId());
+        } catch (Exception e) {
+            throw new InvalidSessionException("Session persist failed: " + e.getMessage());
         }
     }
 

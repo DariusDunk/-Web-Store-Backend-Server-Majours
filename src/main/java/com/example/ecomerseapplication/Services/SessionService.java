@@ -8,30 +8,28 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.Invali
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
-
+import java.util.List;
 import static com.example.ecomerseapplication.Others.GlobalConstants.GUEST_SESSION_TTL_DAYS;
 
 @Service
 public class SessionService {
 
     private final SessionRepository sessionRepository;
+    private final CartProductService cartProductService;
+    private final CartService cartService;
 
     @Autowired
-    public SessionService(SessionRepository sessionRepository) {
+    public SessionService(SessionRepository sessionRepository, CartProductService cartProductService, CartService cartService) {
         this.sessionRepository = sessionRepository;
+        this.cartProductService = cartProductService;
+        this.cartService = cartService;
     }
 
     public Session buildSession(Session session, ClientType clientType, boolean rememberMe, boolean isGuest) {
@@ -118,51 +116,26 @@ public class SessionService {
     }
 
     @Transactional
-    @EventListener(ApplicationReadyEvent.class)
-    public void revokeExpiredOnStartup() {
-//        System.out.println("-------------------------Revoking expired sessions on startup-------------------------");
-        revokeExpiredSessions();
-    }
+    public void revokeSessions(List<Session> expiredSessions) {
 
-    @Transactional
-    @Scheduled(fixedDelay = 300000)
-    public void revokeExpiredPeriodically() {
-        revokeExpiredSessions();
+        for (Session session : expiredSessions) {
+            session.setIsRevoked(true);
+            session.setRevokedAt(Instant.now());
+            session.setRefreshToken(null);
+        }
+
+        sessionRepository.saveAll(expiredSessions);
+        System.out.println("Revoked " + expiredSessions.size() + " sessions");
+        cartProductService.deleteItemsBySession(expiredSessions);
+        System.out.println("Deleted cart products for revoked sessions");
+        cartService.deleteCartsBySessions(expiredSessions);
+        System.out.println("Deleted carts for revoked sessions");
     }
 
     //TODO dobavi logika za iztrivane na koli4ki ot iztekli sesii
-    public void revokeExpiredSessions() {
 
-//        @Scheduled(...)
-//        public void cleanupExpiredSessions() {
-//
-//            // 1. Find expired sessions
-//            List<Session> expiredSessions = sessionRepository.findExpired();
-//
-//            for (Session session : expiredSessions) {
-//
-//                // 2. Mark session expired
-//                session.setExpired(true);
-//
-//                // 3. Delete session cart
-//                cartRepository.deleteBySessionId(session.getId());
-//            }
-//
-//            sessionRepository.saveAll(expiredSessions);
-//        }
-
-
-
-        int revokedSessions = sessionRepository.revokeExpired();
-        ZoneId zoneId = ZoneId.systemDefault();
-        ZonedDateTime now = ZonedDateTime.now(zoneId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        if (revokedSessions > 0) {
-            System.out.println("-------------------------[" + now.format(formatter) + "]" + " Revoking expired sessions-------------------------");
-            System.out.println("-------------------------Revoked " + revokedSessions + " expired sessions-------------------------");
-        }
-
+    public List<Session> getExpiredSessions() {
+        return sessionRepository.getExpired();
     }
 
     public Session createGuestSession(ClientType clientType) {

@@ -10,14 +10,16 @@ public class RefreshResponseMapper {
     public static RefreshResponse tokenRefreshToRefreshResponse(TokenRefreshResponse tokenRefreshResponse,
                                                                 Instant sessionExpiry,
                                                                 boolean isGuest,
-                                                                boolean isRememberMe) {
+                                                                boolean isRememberMe,
+                                                                String validSessionId) {
         return new RefreshResponse(tokenRefreshResponse.accessToken(),
                 tokenRefreshResponse.expiresIn(),
                 tokenRefreshResponse.refreshExpiresIn(),
                 tokenRefreshResponse.refreshToken(),
                 Duration.between(Instant.now(), sessionExpiry).getSeconds(),
                 isGuest,
-                isRememberMe
+                isRememberMe,
+                validSessionId
                 );
     }
 }

@@ -1,7 +1,9 @@
 import NodeCache from "node-cache";
 
+const ONE_HOUR = 60 * 60;
+
 const cache = new NodeCache({
-    stdTTL: 8 * 60 * 60,
+    stdTTL: ONE_HOUR,
     checkperiod: 60
 });
 

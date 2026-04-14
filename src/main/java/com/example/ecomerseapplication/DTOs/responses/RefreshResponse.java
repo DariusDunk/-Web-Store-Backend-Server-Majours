@@ -15,4 +15,6 @@ public record RefreshResponse(@JsonProperty("access_token")
                               @JsonProperty("is_guest")
                               boolean isGuest,
                               @JsonProperty("is_remember_me")
-                              boolean isRememberMe){ }
+                              boolean isRememberMe,
+                              @JsonProperty("session_id")
+                              String validSessionId){ }

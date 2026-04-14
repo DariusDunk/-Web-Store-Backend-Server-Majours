@@ -234,8 +234,7 @@ router.get('/me', async (req, res) => {
                         session_id,
                         is_guest: true,
                         remember_me: false
-                    },
-                    session_ttl);
+                    });
 
                 res.cookie('session_id', session_id,
                     {

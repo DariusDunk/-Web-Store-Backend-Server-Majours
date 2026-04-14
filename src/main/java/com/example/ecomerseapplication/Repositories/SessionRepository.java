@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -40,5 +41,15 @@ where expiresAt < CURRENT_TIMESTAMP
 and isRevoked = false
 """)
     int revokeExpired();
+
+    @Query(value =
+            """
+            select s
+            from Session s
+            where s.expiresAt <CURRENT_TIMESTAMP
+            and s.isRevoked = false
+            """)
+    List<Session> getExpired();
+
 
 }
