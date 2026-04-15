@@ -4,8 +4,6 @@ import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Services.AuthService;
-import com.example.ecomerseapplication.Services.ClientTypeService;
-import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.Services.SessionService;
 import com.example.ecomerseapplication.enums.UserRole;
 import jakarta.validation.Valid;
@@ -20,17 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("auth/")
 public class AuthController {
 
-    private final KeycloakService keycloakService;
     private final SessionService sessionService;
     private final AuthService authService;
-    private final ClientTypeService clientTypeService;
 
     @Autowired
-    public AuthController(KeycloakService keycloakService, SessionService sessionService, AuthService authService, ClientTypeService clientTypeService) {
-        this.keycloakService = keycloakService;
+    public AuthController(SessionService sessionService, AuthService authService) {
         this.sessionService = sessionService;
         this.authService = authService;
-        this.clientTypeService = clientTypeService;
     }
 
     @PostMapping("register")
@@ -53,7 +47,7 @@ public class AuthController {
     }
 
     @GetMapping("invalidate/{token}/{sessionId}")
-    public ResponseEntity<?> logout(@PathVariable("token") String refreshToken, @PathVariable String sessionId, @RequestParam String clientType) {
+    public ResponseEntity<?> logout(@PathVariable("token") String refreshToken, @PathVariable String sessionId, @RequestParam String clientType) {//todo mahni clientType ot tuk i ot bff request-a
         try {
 
             return ResponseEntity.ok(authService.logout(refreshToken, sessionId));

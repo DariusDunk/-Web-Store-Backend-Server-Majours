@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
+import com.example.ecomerseapplication.CompositeIdClasses.CartProductId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.Entities.Cart;
@@ -15,18 +15,18 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CartProductRepository extends JpaRepository<CartProduct, CustomerCartId> {
+public interface CartProductRepository extends JpaRepository<CartProduct, CartProductId> {
 
-    boolean existsByCustomerCartId(CustomerCartId customerCartId);
+    boolean existsByCartProductId(CartProductId cartProductId);
 
 //    @Query(value = "select cc " +
 //            "from CustomerCart cc " +
-//            "where cc.customerCartId.customer = ?1")
+//            "where cc.cartProductId.customer = ?1")
 //    List<CustomerCart> findByCustomer(Customer customer);
 
     @Query(value = "select cc " +
             "from CartProduct cc " +
-            "where cc.customerCartId.cart.customer.keycloakId = ?1")
+            "where cc.cartProductId.cart.customer.keycloakId = ?1")
     List<CartProduct> findByCustomer(String customer);
 
     @Query(
@@ -54,11 +54,11 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
                     cc.dateAdded,
                     cc.quantity)
                     from CartProduct cc
-                    join Product p on p = cc.customerCartId.product
-                    where cc.customerCartId.cart.customer.keycloakId =:keycloakId
+                    join Product p on p = cc.cartProductId.product
+                    where cc.cartProductId.cart.customer.keycloakId =:keycloakId
                     order by
                     case
-                        when cc.customerCartId.product.quantityInStock>0
+                        when cc.cartProductId.product.quantityInStock>0
                         then 1
                         else 0
                     end desc,
@@ -69,12 +69,12 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
 
 //    @Modifying
 //    @Query("delete from CustomerCart " +
-//            "where customerCartId.customer = ?1")
+//            "where cartProductId.customer = ?1")
 //    void deleteAllByCustomer(Customer customer);
 
 
     @Modifying
-    @Query("delete from CartProduct where customerCartId.cart = ?1 and customerCartId.product.productCode = ?2 ")
+    @Query("delete from CartProduct where cartProductId.cart = ?1 and cartProductId.product.productCode = ?2 ")
     int deleteByCartAndProductCode(Cart cart, String productCode);
 
     @Modifying
@@ -82,14 +82,14 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
             delete
             from
             CartProduct cc
-            where cc.customerCartId.cart=:cart
-            and cc.customerCartId.product.productCode in :productCodes
+            where cc.cartProductId.cart=:cart
+            and cc.cartProductId.product.productCode in :productCodes
             """)
     int deleteBatchByCartAndPCodes(@Param("cart") Cart cart, @Param("productCodes") List<String> productCodes);
 
     @Query(value = "select cc " +
             "from CartProduct cc " +
-            "where cc.customerCartId.cart.session = ?1")
+            "where cc.cartProductId.cart.session = ?1")
     List<CartProduct> getBySession(Session session);
 
 
@@ -118,11 +118,11 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
                     cc.dateAdded,
                     cc.quantity)
                     from CartProduct cc
-                    join Product p on p = cc.customerCartId.product
-                    where cc.customerCartId.cart.session =:session
+                    join Product p on p = cc.cartProductId.product
+                    where cc.cartProductId.cart.session =:session
                     order by
                     case
-                        when cc.customerCartId.product.quantityInStock>0
+                        when cc.cartProductId.product.quantityInStock>0
                         then 1
                         else 0
                     end desc,
@@ -134,9 +134,9 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
 
     //todo tuk kato napravi6 otstupkite smeni izto4nika za cenite
     @Query(value = "select new " +
-            "com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(sum(cc.customerCartId.product.salePriceStotinki*cc.quantity), sum(cc.quantity)) " +
+            "com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(sum(cc.cartProductId.product.salePriceStotinki*cc.quantity), sum(cc.quantity)) " +
             "from CartProduct cc " +
-            "where cc.customerCartId.cart = ?1")
+            "where cc.cartProductId.cart = ?1")
     CartSummaryResponse getSummaryByCart(Cart cart);
 //
 //    @Modifying
@@ -147,11 +147,26 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
             """
                     delete
                     from CartProduct cp
-                    where cp.customerCartId.cart.session.sessionId in ?1
+                    where cp.cartProductId.cart.session.sessionId in ?1
                     """
     )
     void deleteCartProductsBySessions(List<String> sessionIds);
 
-    @Query(value = "select exists (select 1 from CartProduct cc where cc.customerCartId.cart.session = ?1)")
-    boolean exitsBySession(Session session);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from CartProduct where cartProductId.cart.session.sessionId = ?1")
+    void deleteBySessionId(String sessionId);
+
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+update CartProduct cp
+set cp.cartProductId.cart = :customerCart
+where cp.cartProductId.cart = :sessionCart
+and cp.cartProductId.product.id in :productIds
+""")
+    void transferNewGuestItemsToCustomer(
+            @Param("customerCart") Cart customerCart,
+            @Param("sessionCart") Cart sessionCart,
+            @Param("productIds") List<Integer> productIds
+    );
 }

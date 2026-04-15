@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Entities;
 
-import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
+import com.example.ecomerseapplication.CompositeIdClasses.CartProductId;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.time.Instant;
 public class CartProduct {
 
     @EmbeddedId
-    private CustomerCartId customerCartId;
+    private CartProductId cartProductId;
 
     private short quantity;
 
@@ -25,8 +25,8 @@ public class CartProduct {
     @CreationTimestamp
     private Instant dateAdded;
 
-    public CartProduct(CustomerCartId customerCartId, short quantity) {
-        this.customerCartId = customerCartId;
+    public CartProduct(CartProductId cartProductId, short quantity) {
+        this.cartProductId = cartProductId;
         this.quantity = quantity;
     }
 

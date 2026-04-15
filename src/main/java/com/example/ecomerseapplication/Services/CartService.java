@@ -5,9 +5,7 @@ import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Repositories.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -49,16 +47,20 @@ public class CartService {
         cartRepository.deleteBySessions(sessionIds);
     }
 
+//
+//    public void mergeCarts(Session session, Customer customer) {
+//        cartRepository.sessionToUserCart(session, customer);
+//    }
 
-    public void mergeCarts(Session session, Customer customer) {
-        cartRepository.sessionToUserCart(session, customer);
-    }
-
-    public void deleteCartBySession(Session session) {
-        cartRepository.deleteBySession(session);
+    public void deleteCartBySession(String sessionId) {
+        cartRepository.deleteBySession(sessionId);
     }
 
     public void deleteCartByCustomer(Customer customer) {
         cartRepository.deleteByCustomer(customer);
+    }
+
+    public boolean existsBySession(Session session) {
+        return cartRepository.existsBySession(session);
     }
 }

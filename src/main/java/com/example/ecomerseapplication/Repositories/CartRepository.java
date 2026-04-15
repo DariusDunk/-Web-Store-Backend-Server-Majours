@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.Entities.Session;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,20 +35,23 @@ where c.session.sessionId in ?1
 //""")
 //    CartSummaryResponse getSummaryBySession(Session session);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(
-"""
-update Cart
-set customer =:customer,
-session = null
-where session = :session
+//    @Modifying(clearAutomatically = true, flushAutomatically = true)
+//    @Query(
+//"""
+//update Cart
+//set customer =:customer,
+//session = null
+//where session = :session
+//
+//"""
+//    )
+//    void sessionToUserCart(@Param("session") Session session, @Param("customer") Customer customer);
 
-"""
-    )
-    void sessionToUserCart(@Param("session") Session session, @Param("customer") Customer customer);
-
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    void deleteBySession(Session session);
+    @Query("delete from Cart where session.sessionId = ?1")
+    void deleteBySession(String sessionId);
 
     void deleteByCustomer(Customer customer);
+
+    boolean existsBySession(Session session);
 }

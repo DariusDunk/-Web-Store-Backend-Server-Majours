@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.CompositeIdClasses.CustomerCartId;
+import com.example.ecomerseapplication.CompositeIdClasses.CartProductId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.DTOs.responses.MessageResponse;
@@ -11,6 +11,7 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockE
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.CartProductRepository;
 import com.example.ecomerseapplication.enums.ResultTypes;
+import jakarta.persistence.EntityManager;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,14 @@ public class CartProductService {
     private final CartProductRepository cartProductRepository;
     private final CartService cartService;
 
+
+    private final EntityManager entityManager;
+
     @Autowired
-    public CartProductService(CartProductRepository cartProductRepository, CartService cartService) {
+    public CartProductService(CartProductRepository cartProductRepository, CartService cartService, EntityManager entityManager) {
         this.cartProductRepository = cartProductRepository;
         this.cartService = cartService;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -39,7 +44,7 @@ public class CartProductService {
 
         Cart cart = cartService.getOrCreateByCustomer(customer);
 
-        CustomerCartId cartId = new CustomerCartId(product, cart);
+        CartProductId cartId = new CartProductId(product, cart);
 
         CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
 
@@ -69,7 +74,7 @@ public class CartProductService {
     }
 
     @NonNull
-    private String doIncrementMainLogic(Product product, Boolean doIncrement, CustomerCartId cartId, CartProduct cartProduct) {
+    private String doIncrementMainLogic(Product product, Boolean doIncrement, CartProductId cartId, CartProduct cartProduct) {
         if (doIncrement) {
             short quantity = cartProduct.getQuantity();
             if (product.getQuantityInStock() < quantity + 1)
@@ -96,7 +101,7 @@ public class CartProductService {
 
         Cart cart = cartService.getOrCreateBySession(session);
 
-        CustomerCartId cartId = new CustomerCartId(product, cart);
+        CartProductId cartId = new CartProductId(product, cart);
 
         CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
 
@@ -127,12 +132,7 @@ public class CartProductService {
 
     public boolean cartItemExistsByCustomer(Customer customer, Product product) {
         Cart cart = cartService.getOrCreateByCustomer(customer);
-        return cartProductRepository.existsByCustomerCartId(new CustomerCartId(product, cart));
-    }
-    //TODO TEST
-    public boolean cartItemExistsBySession(Session session, Product product) {
-        Cart cart = cartService.getOrCreateBySession(session);
-        return cartProductRepository.existsByCustomerCartId(new CustomerCartId(product, cart));
+        return cartProductRepository.existsByCartProductId(new CartProductId(product, cart));
     }
 
     public List<CartProduct> cartsByCustomer(Customer customer) {
@@ -189,22 +189,11 @@ public class CartProductService {
 
     }
 
-
-//    @Transactional
-//    public MessageResponse addBatchToCart(Session session, List<Product> products) {
-//
-//        boolean stockExceeded = false;
-//        Cart cart = cartService.getOrCreateBySession(session);
-//        List<CartProduct> cartProducts = cartsBySession(session);
-//        return cartBatchAddLogic(products, cartProducts, cart, stockExceeded);
-//
-//    }
-
     @NonNull
     private MessageResponse cartBatchAddLogic(List<Product> products, List<CartProduct> cartProducts, Cart cart, boolean stockExceeded) {
         int originalSize = cartProducts.size();
-        Map<CustomerCartId, CartProduct> cartMap = Map.copyOf(cartProducts.stream().collect(HashMap::new,
-                (m, v) -> m.put(v.getCustomerCartId(), v), HashMap::putAll));
+        Map<CartProductId, CartProduct> cartMap = Map.copyOf(cartProducts.stream().collect(HashMap::new,
+                (m, v) -> m.put(v.getCartProductId(), v), HashMap::putAll));
 
         cartProducts = new ArrayList<>();
 
@@ -215,14 +204,14 @@ public class CartProductService {
         int newProductsCount = 0;
         List<String> outOfStockProducts = new ArrayList<>();
         for (Product product : products) {
-            CustomerCartId newCartId = new CustomerCartId(product, cart);
+            CartProductId newCartId = new CartProductId(product, cart);
             CartProduct cartItem = cartMap.getOrDefault(newCartId, new CartProduct(newCartId, (short) 0));
 
             if (cartItem.getQuantity() == 0) {
                 newProductsCount++;
             }
 
-            if (cartItem.getCustomerCartId().getProduct().getQuantityInStock() < cartItem.getQuantity() + 1) {
+            if (cartItem.getCartProductId().getProduct().getQuantityInStock() < cartItem.getQuantity() + 1) {
                 if (!stockExceeded) stockExceeded = true;
 
                 outOfStockProducts.add(product.getProductName());
@@ -313,7 +302,7 @@ public class CartProductService {
         try
         {
             Cart cart = cartService.getOrCreateByCustomer(customer);
-            CustomerCartId cartId = new CustomerCartId(product, cart);
+            CartProductId cartId = new CartProductId(product, cart);
             CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
             return addQuantityToCartMain(product, quantity, cartId, cartProduct);
         }
@@ -332,7 +321,7 @@ public class CartProductService {
         try
         {
             Cart cart = cartService.getOrCreateBySession(session);
-            CustomerCartId cartId = new CustomerCartId(product, cart);
+            CartProductId cartId = new CartProductId(product, cart);
             CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
             return addQuantityToCartMain(product, quantity, cartId, cartProduct);
         }
@@ -347,7 +336,7 @@ public class CartProductService {
     }
 
     @NonNull
-    private String addQuantityToCartMain(Product product, short quantity, CustomerCartId cartId, CartProduct cartProduct) {
+    private String addQuantityToCartMain(Product product, short quantity, CartProductId cartId, CartProduct cartProduct) {
         int quantityInStock = product.getQuantityInStock();
 
         if (cartProduct != null) {
@@ -391,21 +380,21 @@ public class CartProductService {
         cartProductRepository.deleteCartProductsBySessions(sessionIds);
     }
 
-    public boolean hasCartItemsBySession(Session session) {
-        return cartProductRepository.exitsBySession(session);
-    }
-
     @Transactional
     public void mergeCarts(Session session, Customer customer) {
         List<CartProduct> guestCartProducts = cartProductRepository.getBySession(session);
 
         if (guestCartProducts.isEmpty()) {
+
+            cartService.deleteCartBySession(session.getSessionId());
             return;
         }
 
+        Cart customerCart = cartService.getOrCreateByCustomer(customer);
         List<CartProduct> customerCartProducts = cartProductRepository.findByCustomer(customer.getKeycloakId());
 
         if (customerCartProducts.isEmpty()) {
+
             cartService.deleteCartByCustomer(customer);
 
             Cart sessionCart = cartService.getOrCreateBySession(session);
@@ -416,36 +405,26 @@ public class CartProductService {
             return;
         }
 
-        List<CartProduct> mergedItems = mergeCartsByComparing(guestCartProducts, customerCartProducts);
+        List<CartProduct> copiedItems = mergeCartsByComparing(guestCartProducts, customerCartProducts);
 
-        Cart customerCart = cartService.getOrCreateByCustomer(customer);
-        Long cartId = customerCart.getId();
+        entityManager.flush();
 
-//        List<CartProduct> updatedMergedItems = mergedItems
-//                .stream()
-//                .filter(cp -> !(cp.getCustomerCartId().getCart().getId().equals(cartId)))
-//                .peek(cp -> cp.getCustomerCartId().setCart(customerCart))
-//                .toList();
+        List<Integer> copiedItemIds = copiedItems
+                .stream()
+                .map(cp->cp
+                        .getCartProductId()
+                        .getProduct()
+                        .getId())
+                .toList();
+        Cart sessionCart = cartService.getOrCreateBySession(session);
 
-        List<CartProduct> updatedMergedItems = new ArrayList<>();
-
-        for (CartProduct cp : mergedItems) {
-            if (!cp.getCustomerCartId().getCart().getId().equals(cartId)) {
-                cp.getCustomerCartId().setCart(customerCart);
-                updatedMergedItems.add(cp);
-            }
-        }
-
-        cartProductRepository.saveAll(updatedMergedItems);
-        cartProductRepository.deleteAll(guestCartProducts.stream()
-                .filter(cp -> !updatedMergedItems.contains(cp))
-                .toList());
-        cartService.deleteCartBySession(session);
-
+        cartProductRepository.transferNewGuestItemsToCustomer(customerCart,sessionCart, copiedItemIds);
+        cartProductRepository.deleteBySessionId(session.getSessionId());
+        cartService.deleteCartBySession(session.getSessionId());
     }
 
     private Integer getProductId(CartProduct cartProduct) {
-        return cartProduct.getCustomerCartId()
+        return cartProduct.getCartProductId()
                 .getProduct()
                 .getId();
     }
@@ -453,6 +432,8 @@ public class CartProductService {
     private List<CartProduct> mergeCartsByComparing(
             List<CartProduct> guestSessionCartProducts,
             List<CartProduct> customerCartProducts) {
+
+        List<CartProduct> mergedItems = new ArrayList<>();
 
         Map<Integer, CartProduct> customerProductsMap =
                 customerCartProducts.stream()
@@ -464,7 +445,7 @@ public class CartProductService {
         for (CartProduct guestProduct : guestSessionCartProducts) {
 
             Integer guestProductId =
-                    guestProduct.getCustomerCartId().getProduct().getId();
+                    guestProduct.getCartProductId().getProduct().getId();
 
             CartProduct existingCustomerProduct =
                     customerProductsMap.get(guestProductId);
@@ -478,11 +459,12 @@ public class CartProductService {
             } else {
 
                 customerCartProducts.add(guestProduct);
+                mergedItems.add(guestProduct);
 
                 customerProductsMap.put(guestProductId, guestProduct);
             }
         }
 
-        return customerCartProducts;
+        return mergedItems;
     }
 }

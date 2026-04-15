@@ -99,8 +99,9 @@ public class AuthService {
             if (sessionId != null) {
                 session = sessionService.getById(sessionId);
                 session = sessionService.guestToLoginSession(session, tokenResponse, request.rememberMe(), customer);
-                if (cartProductService.hasCartItemsBySession(session)) {
-                    cartService.mergeCarts(session, customer);
+                if (cartService.existsBySession(session)) {
+//                    cartService.mergeCarts(session, customer);
+                    cartProductService.mergeCarts(session, customer);
                 }
             } else {
                 session = sessionService.createAuthenticatedSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());

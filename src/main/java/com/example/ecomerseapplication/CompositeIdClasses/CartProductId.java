@@ -7,7 +7,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
@@ -16,7 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Data
-public class CustomerCartId implements Serializable {
+public class CartProductId implements Serializable {
 
     @JoinColumn(name = "product_id")
     @ManyToOne
@@ -26,7 +25,7 @@ public class CustomerCartId implements Serializable {
     @ManyToOne
     private Cart cart;
 
-    public CustomerCartId(Product product, Cart customer) {
+    public CartProductId(Product product, Cart customer) {
         this.product = product;
         this.cart = customer;
     }
