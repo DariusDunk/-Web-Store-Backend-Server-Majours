@@ -115,9 +115,9 @@ public class CartController {
         String sessionId = SessionExtractor.getRequestSessionId();
         Session session = sessionService.getById(sessionId);
 
-        if (session.getIsGuest()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(session, requestProducts));
-        }
+//        if (session.getIsGuest()) {
+//            return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(session, requestProducts));
+//        }
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getByIdWithActivityRefresh(userId);

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CartProductService {
@@ -137,7 +138,7 @@ public class CartProductService {
     public List<CartProduct> cartsByCustomer(Customer customer) {
         return cartProductRepository.findByCustomer(customer.getKeycloakId());
     }
-    //TODO TEST
+
     public List<CartProduct> cartsBySession(Session session) {
         return cartProductRepository.getBySession(session);
     }
@@ -145,7 +146,7 @@ public class CartProductService {
     public List<CartItemResponse> getCartDtoByCustomer(Customer customer) {
         return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
     }
-    //TODO TEST
+
     public List<CartItemResponse> getCartDtoBySession(Session session) {
         return cartProductRepository.findDtoBySession(session);
     }
@@ -164,7 +165,6 @@ public class CartProductService {
         return getCartDtoByCustomer(customer);
     }
 
-    //TODO TEST
     @Transactional
     public List<CartItemResponse> removeFromCartWFetch(Session session, String productCode) {
         Cart cart = cartService.getOrCreateBySession(session);
@@ -189,16 +189,16 @@ public class CartProductService {
 
     }
 
-    //TODO TEST
-    @Transactional
-    public MessageResponse addBatchToCart(Session session, List<Product> products) {
 
-        boolean stockExceeded = false;
-        Cart cart = cartService.getOrCreateBySession(session);
-        List<CartProduct> cartProducts = cartsBySession(session);
-        return cartBatchAddLogic(products, cartProducts, cart, stockExceeded);
-
-    }
+//    @Transactional
+//    public MessageResponse addBatchToCart(Session session, List<Product> products) {
+//
+//        boolean stockExceeded = false;
+//        Cart cart = cartService.getOrCreateBySession(session);
+//        List<CartProduct> cartProducts = cartsBySession(session);
+//        return cartBatchAddLogic(products, cartProducts, cart, stockExceeded);
+//
+//    }
 
     @NonNull
     private MessageResponse cartBatchAddLogic(List<Product> products, List<CartProduct> cartProducts, Cart cart, boolean stockExceeded) {
@@ -323,7 +323,6 @@ public class CartProductService {
                 throw e;
             else
                 throw new RuntimeException("-----------------Quantity cart addition for auth user failed-----------------\n " + e.getMessage());
-
         }
     }
 
@@ -390,5 +389,100 @@ public class CartProductService {
         List<String> sessionIds = sessions.stream().map(Session::getSessionId).toList();
 
         cartProductRepository.deleteCartProductsBySessions(sessionIds);
+    }
+
+    public boolean hasCartItemsBySession(Session session) {
+        return cartProductRepository.exitsBySession(session);
+    }
+
+    @Transactional
+    public void mergeCarts(Session session, Customer customer) {
+        List<CartProduct> guestCartProducts = cartProductRepository.getBySession(session);
+
+        if (guestCartProducts.isEmpty()) {
+            return;
+        }
+
+        List<CartProduct> customerCartProducts = cartProductRepository.findByCustomer(customer.getKeycloakId());
+
+        if (customerCartProducts.isEmpty()) {
+            cartService.deleteCartByCustomer(customer);
+
+            Cart sessionCart = cartService.getOrCreateBySession(session);
+            sessionCart.setCustomer(customer);
+            sessionCart.setSession(null);
+
+            cartService.save(sessionCart);
+            return;
+        }
+
+        List<CartProduct> mergedItems = mergeCartsByComparing(guestCartProducts, customerCartProducts);
+
+        Cart customerCart = cartService.getOrCreateByCustomer(customer);
+        Long cartId = customerCart.getId();
+
+//        List<CartProduct> updatedMergedItems = mergedItems
+//                .stream()
+//                .filter(cp -> !(cp.getCustomerCartId().getCart().getId().equals(cartId)))
+//                .peek(cp -> cp.getCustomerCartId().setCart(customerCart))
+//                .toList();
+
+        List<CartProduct> updatedMergedItems = new ArrayList<>();
+
+        for (CartProduct cp : mergedItems) {
+            if (!cp.getCustomerCartId().getCart().getId().equals(cartId)) {
+                cp.getCustomerCartId().setCart(customerCart);
+                updatedMergedItems.add(cp);
+            }
+        }
+
+        cartProductRepository.saveAll(updatedMergedItems);
+        cartProductRepository.deleteAll(guestCartProducts.stream()
+                .filter(cp -> !updatedMergedItems.contains(cp))
+                .toList());
+        cartService.deleteCartBySession(session);
+
+    }
+
+    private Integer getProductId(CartProduct cartProduct) {
+        return cartProduct.getCustomerCartId()
+                .getProduct()
+                .getId();
+    }
+
+    private List<CartProduct> mergeCartsByComparing(
+            List<CartProduct> guestSessionCartProducts,
+            List<CartProduct> customerCartProducts) {
+
+        Map<Integer, CartProduct> customerProductsMap =
+                customerCartProducts.stream()
+                        .collect(Collectors.toMap(
+                                this::getProductId,
+                                cp -> cp
+                        ));
+
+        for (CartProduct guestProduct : guestSessionCartProducts) {
+
+            Integer guestProductId =
+                    guestProduct.getCustomerCartId().getProduct().getId();
+
+            CartProduct existingCustomerProduct =
+                    customerProductsMap.get(guestProductId);
+
+            if (existingCustomerProduct != null) {
+
+                existingCustomerProduct.setQuantity(
+                        (short) (existingCustomerProduct.getQuantity()
+                                + guestProduct.getQuantity()));
+
+            } else {
+
+                customerCartProducts.add(guestProduct);
+
+                customerProductsMap.put(guestProductId, guestProduct);
+            }
+        }
+
+        return customerCartProducts;
     }
 }

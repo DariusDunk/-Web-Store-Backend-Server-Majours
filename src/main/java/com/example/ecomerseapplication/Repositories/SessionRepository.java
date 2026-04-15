@@ -31,16 +31,16 @@ and s.sessionId = :session_id
 """)
     Optional<Session> getActiveById(@Param("session_id") String id);
 
-    @Modifying
-    @Query(value =
-"""
-update Session set
-isRevoked = true,
-revokedAt = current_timestamp
-where expiresAt < CURRENT_TIMESTAMP
-and isRevoked = false
-""")
-    int revokeExpired();
+//    @Modifying
+//    @Query(value =
+//"""
+//update Session set
+//isRevoked = true,
+//revokedAt = current_timestamp
+//where expiresAt < CURRENT_TIMESTAMP
+//and isRevoked = false
+//""")
+//    int revokeExpired();
 
     @Query(value =
             """

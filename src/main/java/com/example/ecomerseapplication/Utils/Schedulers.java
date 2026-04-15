@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Utils;
 
-import com.example.ecomerseapplication.Services.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -22,7 +21,7 @@ public class Schedulers {
         sessionRevoker.revokeExpiredSessions();
     }
 
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedDelay = 300000, initialDelay = 300000)
     public void revokeExpiredPeriodically() {
         sessionRevoker.revokeExpiredSessions();
     }

@@ -138,9 +138,9 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
             "from CartProduct cc " +
             "where cc.customerCartId.cart = ?1")
     CartSummaryResponse getSummaryByCart(Cart cart);
-
-    @Modifying
-    void deleteCartProductByCustomerCartId_Cart(Cart customerCartIdCart);
+//
+//    @Modifying
+//    void deleteCartProductByCustomerCartId_Cart(Cart customerCartIdCart);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(
@@ -151,4 +151,7 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Custom
                     """
     )
     void deleteCartProductsBySessions(List<String> sessionIds);
+
+    @Query(value = "select exists (select 1 from CartProduct cc where cc.customerCartId.cart.session = ?1)")
+    boolean exitsBySession(Session session);
 }

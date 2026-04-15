@@ -20,9 +20,9 @@ public class CartService {
         this.cartRepository = cartRepository;
     }
 
-    public Cart getById(Long id) {
-        return cartRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
-    }
+//    public Cart getById(Long id) {
+//        return cartRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+//    }
 
     public Cart getOrCreateByCustomer(Customer customer) {
         return cartRepository.getCartOwnerByCustomer(customer)
@@ -50,4 +50,15 @@ public class CartService {
     }
 
 
+    public void mergeCarts(Session session, Customer customer) {
+        cartRepository.sessionToUserCart(session, customer);
+    }
+
+    public void deleteCartBySession(Session session) {
+        cartRepository.deleteBySession(session);
+    }
+
+    public void deleteCartByCustomer(Customer customer) {
+        cartRepository.deleteByCustomer(customer);
+    }
 }

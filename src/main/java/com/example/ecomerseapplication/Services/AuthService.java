@@ -34,13 +34,15 @@ public class AuthService {
     private final SessionService sessionService;
     private final ClientTypeService clientTypeService;
     private final CartService cartService;
+    private final CartProductService cartProductService;
 
-    public AuthService(KeycloakService keycloakService, CustomerService customerService, SessionService sessionService, ClientTypeService clientTypeService, CartService cartService) {
+    public AuthService(KeycloakService keycloakService, CustomerService customerService, SessionService sessionService, ClientTypeService clientTypeService, CartService cartService, CartProductService cartProductService) {
         this.keycloakService = keycloakService;
         this.customerService = customerService;
         this.sessionService = sessionService;
         this.clientTypeService = clientTypeService;
         this.cartService = cartService;
+        this.cartProductService = cartProductService;
     }
 
     @Transactional
@@ -97,8 +99,12 @@ public class AuthService {
             if (sessionId != null) {
                 session = sessionService.getById(sessionId);
                 session = sessionService.guestToLoginSession(session, tokenResponse, request.rememberMe(), customer);
-            } else
+                if (cartProductService.hasCartItemsBySession(session)) {
+                    cartService.mergeCarts(session, customer);
+                }
+            } else {
                 session = sessionService.createAuthenticatedSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());
+            }
 
             return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
         } catch (Exception e) {

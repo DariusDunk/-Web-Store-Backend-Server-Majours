@@ -3,7 +3,6 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
-import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.LoginFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RefreshRequestFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
@@ -38,7 +37,6 @@ public class KeycloakService {
 
     //    private final CustomerService customerService;
     private final WebClient keycloakWebClient;
-    private final CustomerService customerService;
 
     //    @Value("${keycloak.server-url}")
 //    private String serverUrl;
@@ -63,10 +61,8 @@ public class KeycloakService {
 
     @Autowired
     public KeycloakService(
-            WebClient keycloakWebClient,
-            CustomerService customerService) {
+            WebClient keycloakWebClient) {
         this.keycloakWebClient = keycloakWebClient;
-        this.customerService = customerService;
     }
 
 //    public void registerFlow(String firstname, String lastName, String password, String email, UserRole userRole) throws ValidationException {
