@@ -221,17 +221,9 @@ public class ProductController {
                 : Sort.by("postTimestamp").ascending();
         PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit, sort);
 
-        Page<ReviewResponse> reviewPage = null;
+        Page<ReviewResponse> reviewPage;
 
         reviewPage = reviewService.getProductReviews(request, pageRequest, session);
-
-//        if (session.getIsGuest()) {
-//            reviewPage = reviewService.getProductReviewsForGuest(request, pageRequest);
-//        }
-//        else {
-//            String customerId = userIdExtractor.getUserId();
-//            reviewPage = reviewService.getProductReviewsForAuth(request, pageRequest, customerId);
-//        }
 
         return ResponseEntity.ok(PageResponse.from(reviewPage));
     }
@@ -269,7 +261,7 @@ public class ProductController {
         reviewService.requestValidation(request.rating(), request.reviewText());
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(request.productCode());
 
         if (reviewService.exists(product, customer)) {
@@ -296,7 +288,7 @@ public class ProductController {
         reviewService.requestValidation(request.rating, request.reviewText);
 
         String customerId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(customerId);
+        Customer customer = customerService.getById(customerId);
         Product product = productService.findByPCode(request.productCode);
         Review review = reviewService.getByProdAndCust(product, customer);
 
@@ -341,7 +333,7 @@ public class ProductController {
     public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
 
         String customerId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(customerId);
+        Customer customer = customerService.getById(customerId);
         Product product = productService.findByPCode(productCode);
         Review review = reviewService.getByProdAndCust(product, customer);
 

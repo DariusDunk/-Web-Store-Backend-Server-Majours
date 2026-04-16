@@ -28,8 +28,6 @@ public class CartProductService {
 
     private final CartProductRepository cartProductRepository;
     private final CartService cartService;
-
-
     private final EntityManager entityManager;
 
     @Autowired

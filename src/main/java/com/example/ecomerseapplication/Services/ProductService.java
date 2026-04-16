@@ -25,9 +25,7 @@ import java.util.Set;
 public class ProductService {
 
     private final ProductRepository productRepository;
-
     private final CartProductService cartProductService;
-
     private final ReviewService reviewService;
     private final ProductCategoryService productCategoryService;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
@@ -316,15 +314,6 @@ public class ProductService {
 
         List<String[]> attributeNameMUnitPairs = productCategoryService
                 .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
-
-        //        if (customerCartService.cartExists(customer, product)) todo tuk trqbva da se pravi proverkata no sys sesiqta kogato koli4kata moje da se pritejava i ot sesiq
-//            detailedProductResponse.inCart = true;
-
-
-//        detailedProductResponse.inFavourites = false;
-//
-//        if (reviewService.exists(product, customer))
-//            detailedProductResponse.reviewed = true;
 
         return ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
     }

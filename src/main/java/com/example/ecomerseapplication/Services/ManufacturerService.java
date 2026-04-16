@@ -24,10 +24,6 @@ public class ManufacturerService {
         return repository.findAll();
     }
 
-//    public Set<Object[]> getByCategory(ProductCategory productCategory) {
-//        return repository.getByCategory(productCategory);
-//    }
-
     public Manufacturer findByName(String manufacturerName) {
         return repository.findByManufacturerName(manufacturerName).orElseThrow(()->new ResourceNotFoundException("Manufacturer not found with name: " + manufacturerName));
     }

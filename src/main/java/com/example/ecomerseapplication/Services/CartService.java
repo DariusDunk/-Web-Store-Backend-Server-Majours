@@ -18,10 +18,6 @@ public class CartService {
         this.cartRepository = cartRepository;
     }
 
-//    public Cart getById(Long id) {
-//        return cartRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
-//    }
-
     public Cart getOrCreateByCustomer(Customer customer) {
         return cartRepository.getCartOwnerByCustomer(customer)
                 .orElseGet(() -> cartRepository.save(new Cart(customer)));
@@ -36,21 +32,12 @@ public class CartService {
                 .orElseGet(() -> cartRepository.save(new Cart(session)));
     }
 
-//    public void deleteCart(Cart cart) {
-//        cartRepository.delete(cart);
-//    }
-
     public void deleteCartsBySessions(List<Session> sessions) {
 
         List<String> sessionIds = sessions.stream().map(Session::getSessionId).toList();
 
         cartRepository.deleteBySessions(sessionIds);
     }
-
-//
-//    public void mergeCarts(Session session, Customer customer) {
-//        cartRepository.sessionToUserCart(session, customer);
-//    }
 
     public void deleteCartBySession(String sessionId) {
         cartRepository.deleteBySession(sessionId);

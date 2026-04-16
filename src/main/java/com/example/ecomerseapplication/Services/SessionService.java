@@ -79,16 +79,6 @@ public class SessionService {
         secureRandom.nextBytes(random);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     }
-//
-//    public void revokeSession(Session session) {
-//
-//        Instant now = Instant.now();
-//        session.setIsRevoked(true);
-//        session.setLastActivityAt(now);
-//        session.setRevokedAt(now);
-//
-//        sessionRepository.save(session);
-//    }
 
     public void updateActivity(String sessionId) {
 

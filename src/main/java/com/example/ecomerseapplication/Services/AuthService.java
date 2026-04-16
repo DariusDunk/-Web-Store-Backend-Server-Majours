@@ -18,6 +18,7 @@ import com.example.ecomerseapplication.enums.UserRole;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.validation.ValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class AuthService {
     private final CartService cartService;
     private final CartProductService cartProductService;
 
+    @Autowired
     public AuthService(KeycloakService keycloakService, CustomerService customerService, SessionService sessionService, ClientTypeService clientTypeService, CartService cartService, CartProductService cartProductService) {
         this.keycloakService = keycloakService;
         this.customerService = customerService;

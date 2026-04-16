@@ -1,9 +1,9 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.Entities.AttributeGroup;
+import com.example.ecomerseapplication.Entities.Sale;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AttributeGroupRepository extends JpaRepository<AttributeGroup, Long>{
+public interface SaleRepository extends JpaRepository<Sale, Long> {
 }

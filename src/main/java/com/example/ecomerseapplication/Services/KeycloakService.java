@@ -65,41 +65,6 @@ public class KeycloakService {
         this.keycloakWebClient = keycloakWebClient;
     }
 
-//    public void registerFlow(String firstname, String lastName, String password, String email, UserRole userRole) throws ValidationException {
-//        String userId = null;
-//        try {
-//             userId = registerUser(firstname, lastName, password, email, userRole);
-//
-//            if (userId != null)
-//            {
-//                Customer customer = new Customer(userId, firstname, lastName, email);
-//
-//                customerService.save(customer);
-//            }
-//
-//        } catch (Exception e) {
-//
-//            System.out.println("Error registering user: " + e.getMessage());
-//            if (userId != null) {
-//                try {
-//                    System.out.println("Rolling back user creation");
-//                    deleteUser(userId);
-//                } catch (Exception ex) {
-//                    System.out.println("Error rollback deleting user: " + ex.getMessage());
-//                }
-//            }
-//
-//            if (e instanceof ValidationException
-//            || e instanceof UserAlreadyExistsException
-//            || e instanceof RegistrationFailedException) {
-//                throw e;
-//
-//            }
-//            throw new RegistrationFailedException("Registration failed");
-//
-//        }
-//    }
-
     private String getAdminAccessToken() {
 //        System.out.println("Getting Admin Access Token");
         return Objects.requireNonNull(keycloakWebClient.post()
@@ -230,20 +195,10 @@ public class KeycloakService {
 //        System.out.println("User information set");
 
         if (password.length() < 12) {
-//            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
-//                    "Кратка парола!",
-//                    HttpStatus.BAD_REQUEST.value(),
-//                    "Паролата не трябва да е по-кратка от 12 символа"));
-
             throw new ValidationException("Паролата не трябва да е по-кратка от 12 символа");
         }
 
         if (Objects.equals(password, email)) {
-//            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
-//                    "Имейлът съвпада с паролата!",
-//                    HttpStatus.BAD_REQUEST.value(),
-//                    "Имейлът и паролата не трябва да съвпадат!"));
-
             throw new ValidationException("Имейлът и паролата не трябва да съвпадат!");
         }
 
@@ -255,15 +210,6 @@ public class KeycloakService {
 //        System.out.println("Password checked");
 
         if (doesUserExist(email, adminToken)) {
-//            System.out.println("User already exists");
-//            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-//                    .body(new ErrorResponse(
-//                            ErrorType.USER_ALREADY_EXISTS,
-//                            "Съществуващ потребител",
-//                            HttpStatus.CONFLICT.value(),
-//                            "Потребител с този имейл адрес вече съществува"
-//                    ));
-
             throw new UserAlreadyExistsException("Потребител с този имейл адрес вече съществува");
         }
 

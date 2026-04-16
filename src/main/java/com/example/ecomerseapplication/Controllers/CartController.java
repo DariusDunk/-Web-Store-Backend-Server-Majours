@@ -54,7 +54,7 @@ public class CartController {
         }
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
         List<CartItemResponse> customerCarts = cartProductService.getCartDtoByCustomer(customer);
 
         return ResponseEntity
@@ -84,7 +84,7 @@ public class CartController {
         else
         {
             String userId = userIdExtractor.getUserId();
-            Customer customer = customerService.getByIdWithActivityRefresh(userId);
+            Customer customer = customerService.getById(userId);
 
             return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(customer, product, request.doIncrement));
         }
@@ -102,7 +102,7 @@ public class CartController {
         }
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         return ResponseEntity.ok(cartProductService.addQuantityToCart(product, request.quantity(), customer));
     }
@@ -120,7 +120,7 @@ public class CartController {
 //        }
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(customer, requestProducts));
     }
@@ -144,7 +144,7 @@ public class CartController {
         }
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         try {
             return ResponseEntity.ok(cartProductService.removeFromCartWFetch(customer, productCode));
@@ -173,7 +173,7 @@ public class CartController {
         }
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         try {
             return ResponseEntity.ok(cartProductService.removeBatchFromCartWFetch(customer, productCodes));
@@ -195,7 +195,7 @@ public class CartController {
         }
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
         return ResponseEntity.ok(cartProductService.getSummary(customer));
 
     }

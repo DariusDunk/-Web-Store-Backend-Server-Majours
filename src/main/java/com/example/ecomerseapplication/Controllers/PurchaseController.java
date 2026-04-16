@@ -45,7 +45,7 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
 
         String userId = userIdExtractor.getUserId();
 
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsResponse, customer);
 
@@ -56,7 +56,7 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
     public ResponseEntity<?> getPurchaseInformation() {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         return purchaseDetailsService.getByCustomer(customer);
     }

@@ -160,7 +160,7 @@ class EComerseApplicationTests {
 
     @Test
     void getFavouritesTest() {
-        Customer customer = customerService.getByIdWithActivityRefresh("a5668417-ddc8-4029-9fcb-4f61512d044f");
+        Customer customer = customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f");
         PageResponse<CompactProductResponse> fetchResponse = favoriteOfCustomerService.getFromCustomerPaged(customer, PageRequest.of(0, PageContentLimit.limit));
 
         System.out.println("Fetch result: " +fetchResponse.content());

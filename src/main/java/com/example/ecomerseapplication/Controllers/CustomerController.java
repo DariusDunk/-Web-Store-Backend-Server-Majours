@@ -31,7 +31,6 @@ public class CustomerController {
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
-    private final SessionService sessionService;
 
     @Autowired
     public CustomerController(CustomerService customerService,
@@ -40,7 +39,7 @@ public class CustomerController {
 //                              PurchaseService purchaseService,
 //                              PurchaseCartService purchaseCartService,
                               KeycloakService keycloakService,
-                              UserIdExtractor userIdExtractor, FavoriteOfCustomerService favoriteOfCustomerService, SessionService sessionService) {
+                              UserIdExtractor userIdExtractor, FavoriteOfCustomerService favoriteOfCustomerService) {
 
         this.customerService = customerService;
         this.productService = productService;
@@ -50,7 +49,6 @@ public class CustomerController {
         this.keycloakService = keycloakService;
         this.userIdExtractor = userIdExtractor;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
-        this.sessionService = sessionService;
     }
 
  
@@ -60,7 +58,7 @@ public class CustomerController {
 
         String userId = userIdExtractor.getUserId();
         Product product = productService.findByPCode(productCode);
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         favoriteOfCustomerService.addToFavorite(customer, product);
 
@@ -72,7 +70,7 @@ public class CustomerController {
     public ResponseEntity<?> getFavourites(@PathVariable int page) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
         PageResponse<CompactProductResponse> response = favoriteOfCustomerService.getFromCustomerPaged(customer, pageRequest);
@@ -86,7 +84,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(productCode);
 
         favoriteOfCustomerService.removeFromFavorites(customer, product);
@@ -100,7 +98,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveOneFavRequest request) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
         Product product = productService.findByPCode(request.productCode());
 
         return ResponseEntity.ok(favoriteOfCustomerService.removeFromFavoritesWRefetch(
@@ -115,7 +113,7 @@ public class CustomerController {
     public ResponseEntity<?> removeFromFavouritesBatch(@RequestBody @Valid RemoveFavBatchRequest request) {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
 
         return ResponseEntity.ok(favoriteOfCustomerService.removeFavoritesBatch(
                 customer,
@@ -180,7 +178,7 @@ public class CustomerController {
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
 
         String userId = userIdExtractor.getUserId();
-        Customer customer = customerService.getByIdWithActivityRefresh(userId);
+        Customer customer = customerService.getById(userId);
         String userRole = keycloakService.getRoleByUserId(userId);
 
         return ResponseEntity.ok(new CustomerResponse(
