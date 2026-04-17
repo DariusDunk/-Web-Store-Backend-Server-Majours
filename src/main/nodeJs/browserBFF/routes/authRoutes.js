@@ -154,12 +154,11 @@ router.post(`/login`, async (req, res) => {
 router.post('/logout', async (req, res) => {
     const sessionId = req.cookies.session_id;
 
-    if (sessionId) {
-
         try {
           const response =  await fetchWithSessionTokens(sessionId, async (sessionData) => await axiosBackendClient.get(
                 `${AuthURL}/invalidate/${encodeURIComponent(sessionData.refresh_token)}/${encodeURIComponent(sessionId)}?${new URLSearchParams({clientType: "Web"})}`
-            ));
+            ),
+              {req, res});
 
           const responseData = await response.data;
 
@@ -191,26 +190,10 @@ router.post('/logout', async (req, res) => {
 
         } catch (error) {
             console.error("Error invalidating token and session, cookies and sessionCache will still be erased: ", error);
-            clearSessionCookies(res, sessionId);
-
+            // clearSessionCookies(res, sessionId);
+            sessionCache.safeDelete(sessionId);
             return res.status(200).end();
         }
-        
-    }
+
 });
-
-function clearSessionCookies(res, sessionId = null) {
-
-    sessionCache.safeDelete(sessionId);
-
-    res.cookie('session_id', '',
-        {
-            maxAge: 0,
-            secure: false,
-            path: '/',
-            sameSite: 'lax',
-            httpOnly: true
-        });
-}
-
 export default router;

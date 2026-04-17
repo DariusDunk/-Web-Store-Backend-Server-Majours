@@ -126,7 +126,7 @@ public class AuthService {
 
 //        sessionService.revokeSession(session);
 
-        Session session = sessionService.LoginToGuestSession(sessionId);
+        Session session = sessionService.AuthToGuestSession(sessionId);
         try {
             keycloakService.invalidateRefreshToken(refreshToken);
         } catch (Exception e) {

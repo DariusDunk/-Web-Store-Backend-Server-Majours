@@ -81,20 +81,44 @@ async function getSessionData(sessionId) {
 }
 
 async function setUpGuestSession(res) {
-    const guestData = await createGuestSession();
-    const { session_id, session_ttl } = guestData;
+    try
+    {
+        const guestData = await createGuestSession();
+        const {session_id, session_ttl} = guestData;
 
-    sessionCache.set(session_id, { session_id, is_guest: true, remember_me: false });
-    // sessionId = session_id;
+        sessionCache.set(session_id, {session_id, is_guest: true, remember_me: false});
+        // sessionId = session_id;
 
-    res.cookie('session_id', session_id, {
-        maxAge: session_ttl * 1000,
-        secure: false,
-        path: '/',
-        sameSite: 'lax',
-        httpOnly: true
-    });
-    return session_id;
+        res.cookie('session_id', session_id, {
+            maxAge: session_ttl * 1000,
+            secure: false,
+            path: '/',
+            sameSite: 'lax',
+            httpOnly: true
+        });
+
+        console.log("Guest session id for return: ", session_id);
+        return session_id;
+    }
+    catch (error)
+    {
+
+        // if (error.response) {
+        //
+        //     const errorResponse = error.response.data;
+        //
+        //     if (errorResponse?.guestError) {
+        //
+        //         console.log("Guest se");
+        //
+        //         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+        //         const summaryData = cartSummaryResponse?.data;
+        //
+        //         return res.status(200).json({authenticated: false, cartSummary: summaryData});
+        //     }
+        // }
+        console.error("Error creating guest session: ", error);
+    }
 }
 
 export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
@@ -110,16 +134,14 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
     try {
         // --- 1. Session Setup ---
         if (!sessionId) {
-            sessionId = setUpGuestSession(res);
+            sessionId = await setUpGuestSession(res);
+
         }
 
         // --- 2. Safe Token Retrieval ---
         let sessionData;
         try {
-            // This safely handles the cache, concurrent requests, and Keycloak fetches
             sessionData = await getSessionData(sessionId);
-
-            // console.log("SessionData = ", JSON.stringify(sessionData));
 
         } catch (err) {
 

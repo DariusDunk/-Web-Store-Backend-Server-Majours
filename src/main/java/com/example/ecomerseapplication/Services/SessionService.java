@@ -138,7 +138,7 @@ public class SessionService {
         return buildSession(session, clientType, false, true);
     }
 
-    public Session LoginToGuestSession(String sessionId) {
+    public Session AuthToGuestSession(String sessionId) {
 
         Session session = getById(sessionId);
 

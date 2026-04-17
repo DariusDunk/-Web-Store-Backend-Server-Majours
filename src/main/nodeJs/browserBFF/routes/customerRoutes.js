@@ -25,7 +25,8 @@ async function getCartSummary(req, res, sessionId) {
                 bffContext: {req, res}
             }
         );
-    });
+    },
+        {req, res});
 }
 
 router.get('/getFavourites/:page', async (req, res) => {
