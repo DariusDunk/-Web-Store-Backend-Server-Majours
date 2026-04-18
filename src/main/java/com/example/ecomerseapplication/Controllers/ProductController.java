@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.DTOs.requests.*;
 import com.example.ecomerseapplication.DTOs.responses.*;
@@ -107,23 +106,14 @@ public class ProductController {
 
 
     @GetMapping("{productCode}")
-//    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {
 
 //        System.out.println("In detailed product endpoint: " + productCode + " ");
 
-
-        String sessionId = SessionExtractor.getRequestSessionId();
-
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();;
 
         return ResponseEntity.ok(productService.getByCodeAndWithSession(productCode, session));
 
-//        String id = userIdExtractor.getUserId();
-//
-//        Customer customer = customerService.getByIdWithActivityRefresh(id);
-//
-//        return ResponseEntity.ok(productService.getByCodeForAuth(productCode, customer));
     }
 
     @GetMapping("{productCode}/review/overview")
@@ -212,9 +202,9 @@ public class ProductController {
     @PostMapping("reviews/paged")
     public ResponseEntity<PageResponse<ReviewResponse>> getPagedReviews(@RequestBody @Valid ReviewSortRequest request) {
 
-        String sessionId = SessionExtractor.getRequestSessionId();
+//        System.out.println("Inside reviews Paged endpoint: " + request.productCode() + "");
 
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
 
         Sort sort = request.sortOrder().getValue().equalsIgnoreCase(ReviewSortType.NEWEST.getValue())
                 ? Sort.by("postTimestamp").descending()
@@ -329,7 +319,7 @@ public class ProductController {
     }
 
     @DeleteMapping("review/delete")
-    @Transactional
+    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<String> deleteReview(@RequestParam("product_code") @NotBlank String productCode) {
 
         String customerId = userIdExtractor.getUserId();

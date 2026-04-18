@@ -3,9 +3,8 @@ package com.example.ecomerseapplication.Mappers;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.LoginResponse;
 import com.example.ecomerseapplication.Entities.Session;
-
-import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class LoginResponseMapper {
     public static LoginResponse fromKeycloakResponseAndSession(KeycloakTokenResponse keycloakTokenResponse, Session session) {
@@ -14,6 +13,6 @@ public class LoginResponseMapper {
                 keycloakTokenResponse.refreshExpiresIn(),
                 keycloakTokenResponse.refreshToken(),
                 session.getSessionId(),
-                Duration.between(Instant.now(), session.getExpiresAt()).getSeconds());
+                ChronoUnit.SECONDS.between(Instant.now(), session.getExpiresAt()));
     }
 }

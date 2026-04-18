@@ -21,7 +21,8 @@ const timestamp = () => {
                 bffContext: {req, res}
             }
         );
-    });
+    },
+        {req, res});
 }
 
 router.get('/getCart', async (req, res) => {
@@ -249,37 +250,5 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
         return res.status(500).end();
     }
 })
-
-//
-// router.get(`/summary`, async (req, res) => {
-//
-//     const sessionId = req.cookies.session_id;
-//
-//     try{
-//         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-//             return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
-//                 {
-//                     headers: {
-//                         'Content-Type': 'application/json',
-//                         ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-//                         ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
-//                     },
-//                     bffContext: {req, res}
-//                 }
-//             );
-//         })
-//
-//         const responseData = await response.data;
-//         return res.status(response.status).json(responseData);
-//     }catch (error) {
-//
-//         if (error.response) {
-//             console.warn(`${timestamp()} Handled backend error for fetching the cart summary`);
-//             return res.status(error.response.status||500).end();
-//         }
-//         console.error('-------------------Unexpected error for fetching the cart summary-------------------\n', error);
-//         return res.status(500).end();
-//     }
-// })
 
 export default router;

@@ -109,7 +109,7 @@ public class CustomerController {
 
     
     @DeleteMapping("favorite/remove/batch")
-//    @Transactional
+    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromFavouritesBatch(@RequestBody @Valid RemoveFavBatchRequest request) {
 
         String userId = userIdExtractor.getUserId();

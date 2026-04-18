@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.Auth.helpers.ClientTypeExtractor;
 import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Repositories.ClientTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,5 +19,9 @@ public class ClientTypeService {
 
     public ClientType getByTypeName(String typeName) {
         return clientTypeRepository.findClientTypeByClientTypeName(typeName).orElseThrow(() -> new ResourceNotFoundException("Client type not found"));
+    }
+
+    public ClientType getFromRequest() {
+        return ClientTypeExtractor.getClientType().orElseThrow(() -> new ResourceNotFoundException("Client type not found"));
     }
 }

@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Auth.config;
 
+import com.example.ecomerseapplication.Auth.helpers.EndpointMatcher;
 import  org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -22,7 +23,7 @@ import java.util.Map;
 @EnableMethodSecurity
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, EndpointMatcher endpointMatcher) throws Exception {
         http
                 // Disable CSRF for simplicity (useful for APIs)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -31,21 +32,7 @@ public class SecurityConfig {
                 // Define access rules
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/customer/login/customer",
-                                "/customer/register/customer",
-                                "/public/**",
-                                "/docs/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/attributes/**",
-                                "**",
-                                "/category/**",
-//                                "/product/**",
-                                "/customer/**",
-                                "/manufacturer/**",
-                                "/purchase/**",
-                                "/session/**",
-                                "/auth/**"
+                                request -> endpointMatcher.isPublicOrSemiProtected(request.getRequestURI())
                         ).permitAll() // public endpoints
                         .anyRequest().authenticated() // everything else needs auth
                 )
@@ -55,7 +42,6 @@ public class SecurityConfig {
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
                 );
-//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
         return http.build();
     }

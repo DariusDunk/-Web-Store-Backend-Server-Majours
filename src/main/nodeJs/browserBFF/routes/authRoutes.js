@@ -19,7 +19,8 @@ async function getCartSummary(req, res, sessionId) {
                 bffContext: {req, res}
             }
         );
-    });
+    },
+        {req, res});
 }
 
 router.post(`/register`, async (req, res) => {
@@ -96,6 +97,15 @@ router.post(`/login`, async (req, res) => {
             is_guest: false,
             remember_me: rememberMe
         });
+
+        res.cookie('session_id', authResponse.session_id,
+            {
+                maxAge: session_expires_in * 1000,
+                secure: false,
+                path: '/',
+                sameSite: 'lax',
+                httpOnly: true
+            });
     }
     catch (error) {
         console.error('-------------Error with login-------------\n', error);
@@ -118,28 +128,16 @@ router.post(`/login`, async (req, res) => {
                     bffContext: {
                         req, res
                     }
-                }),
-                getCartSummary(res, req, authResponse.session_id)
+                },
+                    ),
+                getCartSummary(req, res, authResponse.session_id)
 
             ]);
 
             return {
                 data: {user: userResponse?.data, cartSummary: cartSummary?.data}
             }
-        });
-
-        res.cookie('session_id', authResponse.session_id,
-            {
-                maxAge: authResponse.session_expires_in * 1000,
-                secure: false,
-                path: '/',
-                sameSite: 'lax',
-                httpOnly: true
-            });
-
-        // sessionCache.print();
-
-
+        },{req, res});
 
         const userData = await userDataResponse.data;
         // console.log("UserData.data: "+ JSON.stringify(userData))
@@ -156,7 +154,17 @@ router.post('/logout', async (req, res) => {
 
         try {
           const response =  await fetchWithSessionTokens(sessionId, async (sessionData) => await axiosBackendClient.get(
-                `${AuthURL}/invalidate/${encodeURIComponent(sessionData.refresh_token)}/${encodeURIComponent(sessionId)}?${new URLSearchParams({clientType: "Web"})}`
+                `${AuthURL}/invalidate/${encodeURIComponent(sessionData.refresh_token)}`,
+                  {
+                      headers: {
+                          'Content-Type': 'application/json',
+                          ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                          ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                      },
+                      bffContext: {
+                          req, res
+                      }
+                  }
             ),
               {req, res});
 

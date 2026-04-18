@@ -1,7 +1,6 @@
 package com.example.ecomerseapplication.Auth.helpers;
 
-import com.example.ecomerseapplication.Entities.Session;
-import com.example.ecomerseapplication.Others.GlobalConstants;
+import com.example.ecomerseapplication.Entities.ClientType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -9,14 +8,16 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Optional;
 
 @Component
-public class SessionExtractor {
-    public static Optional<Session> getRequestSession() {
+public class ClientTypeExtractor {
+    public static Optional<ClientType> getClientType()
+    {
         ServletRequestAttributes attributes =
                 (ServletRequestAttributes) RequestContextHolder
                         .currentRequestAttributes();
 
-        return Optional.ofNullable((Session) attributes
+        return Optional.ofNullable((ClientType) attributes
                 .getRequest()
-                .getAttribute(GlobalConstants.SESSION_ATTRIBUTE));
+                .getAttribute("clientType"));
+
     }
 }

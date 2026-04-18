@@ -1,12 +1,8 @@
 package com.example.ecomerseapplication.Mappers;
 
-import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductQuantityPairResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
-import com.example.ecomerseapplication.DTOs.responses.SavedPurchaseDetailsResponse;
-import com.example.ecomerseapplication.DTOs.responses.PurchaseResponse;
 import com.example.ecomerseapplication.Entities.Purchase;
-import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 
 import java.util.List;
 

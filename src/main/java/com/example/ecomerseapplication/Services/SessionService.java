@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
@@ -16,6 +17,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
+
 import static com.example.ecomerseapplication.Others.GlobalConstants.GUEST_SESSION_TTL_DAYS;
 
 @Service
@@ -42,21 +45,21 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-    public Session createAuthenticatedSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe, int refreshTokenExpirySeconds) {
-        Session session = new Session();
-        session.setSessionId(generateSessionId());
-
-        if (rememberMe) {
-            session.setExpiresAt(Instant.now().plus(refreshTokenExpirySeconds, ChronoUnit.SECONDS));
-        } else {
-            session.setExpiresAt(Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS));
-        }
-
-        session.setCustomer(customer);
-        session.setRefreshToken(refreshToken);//todo tuk trqbva da se kriptira refresh tokena
-
-        return buildSession(session, clientType, rememberMe, false);
-    }
+//    public Session createAuthenticatedSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe, int refreshTokenExpirySeconds) {
+//        Session session = new Session();
+//        session.setSessionId(generateSessionId());
+//
+//        if (rememberMe) {
+//            session.setExpiresAt(Instant.now().plus(refreshTokenExpirySeconds, ChronoUnit.SECONDS));
+//        } else {
+//            session.setExpiresAt(Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS));
+//        }
+//
+//        session.setCustomer(customer);
+//        session.setRefreshToken(refreshToken);//todo tuk trqbva da se kriptira refresh tokena
+//
+//        return buildSession(session, clientType, rememberMe, false);
+//    }
 
     public Session guestToLoginSession(Session session, KeycloakTokenResponse tokenResponse, boolean isRememberMe, Customer customer) {
 
@@ -80,9 +83,8 @@ public class SessionService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     }
 
-    public void updateActivity(String sessionId) {
+    public void updateActivity(Session session) {
 
-        Session session = getById(sessionId);
         Instant now = Instant.now();
 
         if (now.isAfter(session.getLastActivityAt().plus(5, ChronoUnit.MINUTES)) && session.getIsRevoked() == false) {
@@ -100,6 +102,20 @@ public class SessionService {
     public Session getById(String sessionId) {
         return sessionRepository.getActiveById(sessionId).orElseThrow(() -> new ResourceNotFoundException("Session expired or not found"));
     }
+
+    public Optional<Session> getActiveByIdOptional(String sessionId) {
+        return sessionRepository.getActiveById(sessionId);
+    }
+
+//    public Session getOrCreateById(String sessionId, ClientType clientType) {
+//        try{
+//            return getById(sessionId);
+//        }
+//        catch (Exception e){
+//            System.out.println("Session not found, creating new one");
+//            return createGuestSession(clientType);
+//        }
+//    }
 
     public void save(Session session) {
         sessionRepository.save(session);
@@ -138,9 +154,7 @@ public class SessionService {
         return buildSession(session, clientType, false, true);
     }
 
-    public Session AuthToGuestSession(String sessionId) {
-
-        Session session = getById(sessionId);
+    public Session AuthToGuestSession(Session session) {
 
         if (session.getIsGuest()) {
             throw new InvalidSessionException("Session is already a guest session");
@@ -154,5 +168,16 @@ public class SessionService {
         session.setIsRevoked(false);
 
         return sessionRepository.save(session);
+    }
+
+    public Session getRequestSession() {
+        return SessionExtractor.getRequestSession()
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "Session not found. SessionFilter should guarantee session presence."));
+    }
+
+    public static long calculateSessionTTLSeconds(Instant expiresAt) {
+    return ChronoUnit.SECONDS.between(Instant.now(), expiresAt);
     }
 }

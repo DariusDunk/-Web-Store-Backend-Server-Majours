@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
-import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Services.AuthService;
 import com.example.ecomerseapplication.Services.SessionService;
 import com.example.ecomerseapplication.enums.UserRole;
@@ -46,11 +45,11 @@ public class AuthController {
 
     }
 
-    @GetMapping("invalidate/{token}/{sessionId}")
-    public ResponseEntity<?> logout(@PathVariable("token") String refreshToken, @PathVariable String sessionId, @RequestParam String clientType) {//todo mahni clientType ot tuk i ot bff request-a
+    @GetMapping("invalidate/{token}")
+    public ResponseEntity<?> logout(@PathVariable("token") String refreshToken) {
         try {
 
-            return ResponseEntity.ok(authService.logout(refreshToken, sessionId));
+            return ResponseEntity.ok(authService.logout(refreshToken));
 
 //            return ResponseEntity.ok(authService.createGuest(clientType));
         } catch (Exception e) {
@@ -59,12 +58,10 @@ public class AuthController {
         }
     }
 
-    @GetMapping("tokens/{sessionId}")
-    public ResponseEntity<?> getTokensOfSession(@PathVariable String sessionId) {
+    @GetMapping("tokens")
+    public ResponseEntity<?> getTokensOfSession() {
 
-        Session session = sessionService.getById(sessionId);
-
-        return ResponseEntity.ok(authService.refresh(session.getRefreshToken(), session));
+        return ResponseEntity.ok(authService.refresh());
     }
 
     @GetMapping("session/guest/create/{clientType}")

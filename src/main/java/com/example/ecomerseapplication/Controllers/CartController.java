@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Controllers;
 
-import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
@@ -16,6 +15,7 @@ import jakarta.validation.constraints.NotEmpty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,8 +46,7 @@ public class CartController {
     @GetMapping("get")
     public ResponseEntity<?> showCart() {
 
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
 
         if (session.getIsGuest()) {
             return ResponseEntity.ok(cartProductService.getCartDtoBySession(session));
@@ -74,8 +73,7 @@ public class CartController {
                     "Този продукт е изчерпан и не беше добавен в количката"));
         }
 
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
 
         if (session.getIsGuest()) {
             return ResponseEntity.ok(cartProductService.addToOrRemoveFromCart(session, product, request.doIncrement));
@@ -93,8 +91,7 @@ public class CartController {
     @PostMapping("add/quantity")
     public ResponseEntity<?> addQuantityToCart(@RequestBody @Valid ProductQuantityForCartRequest request) {
 
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
         Product product = productService.findByPCode(request.productCode());
 
         if (session.getIsGuest()) {
@@ -108,16 +105,10 @@ public class CartController {
     }
 
     @PostMapping("add/batch")
+    @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addBatchToCart(@RequestBody @NotEmpty List<String> productCodes) {
 
         List<Product> requestProducts = productService.getByCodes(productCodes);
-
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
-
-//        if (session.getIsGuest()) {
-//            return ResponseEntity.status(HttpStatus.CREATED).body(cartProductService.addBatchToCart(session, requestProducts));
-//        }
 
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);
@@ -128,8 +119,7 @@ public class CartController {
     @DeleteMapping("remove/{productCode}")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
 
         if (session.getIsGuest()) {
             try
@@ -157,8 +147,7 @@ public class CartController {
     @DeleteMapping("remove/batch")
     public ResponseEntity<?> removeBatchFromCart(@RequestBody @NotEmpty List<String> productCodes) {
 
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
 
         if (session.getIsGuest()) {
             try
@@ -187,8 +176,7 @@ public class CartController {
     @GetMapping("summary")
     public ResponseEntity<?> getCartSummary() {
 
-        String sessionId = SessionExtractor.getRequestSessionId();
-        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
 
         if (session.getIsGuest()) {
             return ResponseEntity.ok(cartProductService.getSummary(session));

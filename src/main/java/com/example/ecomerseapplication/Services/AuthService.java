@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.Cart;
@@ -94,20 +93,19 @@ public class AuthService {
             tokenResponse = keycloakService.loginUser(request);
             String userId = extractIdFromToken(tokenResponse.accessToken());
             Customer customer = customerService.getById(userId);
-            ClientType clientType = clientTypeService.getByTypeName(request.clientType());
-            Session session;
-            String sessionId = SessionExtractor.getRequestSessionId();
+//            ClientType clientType = clientTypeService.getByTypeName(request.clientType());
+            Session session = sessionService.getRequestSession();
+//            String sessionId = SessionExtractor.getRequestSession();
 
-            if (sessionId != null) {
-                session = sessionService.getById(sessionId);
+//            if (sessionId != null) {
+//                session = sessionService.getOrCreateById(sessionId, clientType);
                 session = sessionService.guestToLoginSession(session, tokenResponse, request.rememberMe(), customer);
                 if (cartService.existsBySession(session)) {
-//                    cartService.mergeCarts(session, customer);
                     cartProductService.mergeCarts(session, customer);
                 }
-            } else {
-                session = sessionService.createAuthenticatedSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());
-            }
+//            } else {
+//                session = sessionService.createAuthenticatedSession(tokenResponse.refreshToken(), customer, clientType, request.rememberMe(), tokenResponse.refreshExpiresIn());
+//            }
 
             return LoginResponseMapper.fromKeycloakResponseAndSession(tokenResponse, session);
         } catch (Exception e) {
@@ -120,14 +118,13 @@ public class AuthService {
     }
 
     @Transactional
-    public GuestSessionResponse logout(String refreshToken, String sessionId) {
+    public GuestSessionResponse logout(String refreshToken) {
 
-//        Session session = sessionService.getById(sessionId);
+        Session session = sessionService.getRequestSession();
 
-//        sessionService.revokeSession(session);
-
-        Session session = sessionService.AuthToGuestSession(sessionId);
         try {
+            session = sessionService.AuthToGuestSession(session);
+
             keycloakService.invalidateRefreshToken(refreshToken);
         } catch (Exception e) {
             System.out.println("-------------------------------------------------------");
@@ -140,24 +137,48 @@ public class AuthService {
     }
 
     @Transactional
-    public RefreshResponse refresh(String refreshToken, Session session) {
-        if (session.getIsRevoked() || session.isExpired())
-            session = sessionService.createGuestSession(session.getClientType());
+    public RefreshResponse refresh() {
 
+        String refreshToken;
         TokenRefreshResponse tokenRefreshResponse;
-
+        Session session= null;
         try {
+            session = sessionService.getRequestSession();
+
+            if (session.getIsRevoked() || session.isExpired()) {
+                session = sessionService.createGuestSession(session.getClientType());
+                sessionService.save(session);
+                return new RefreshResponse(null,
+                        0,
+                        0,
+                        null,
+                        Duration.between(Instant.now(), session.getExpiresAt()).getSeconds(),
+                        true,
+                        false,
+                        session.getSessionId());
+            }
+            else
+                refreshToken = session.getRefreshToken();
+
             tokenRefreshResponse = keycloakService.refreshBothTokens(refreshToken);
         } catch (Exception e) {
             System.out.println("Error refreshing token in keycloak, session will be treated as a guest: \n" + e.getMessage() + "\n -------------------------------------------------------");
 
-            session.setIsGuest(true);
-            session.setRefreshToken(null);
-            session.setExpiresAt(Instant.now().plus(GlobalConstants.GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
-            session.setLastActivityAt(Instant.now());
-            session.setCustomer(null);
-            session.setIsRememberMeSession(false);
-            session.setIsRevoked(false);
+            if (session == null) {
+
+                ClientType clientType = clientTypeService.getFromRequest();
+                session = sessionService.createGuestSession(clientType);
+            }
+            else
+            {
+                session.setIsGuest(true);
+                session.setRefreshToken(null);
+                session.setExpiresAt(Instant.now().plus(GlobalConstants.GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
+                session.setLastActivityAt(Instant.now());
+                session.setCustomer(null);
+                session.setIsRememberMeSession(false);
+                session.setIsRevoked(false);
+            }
 
             sessionService.save(session);
 

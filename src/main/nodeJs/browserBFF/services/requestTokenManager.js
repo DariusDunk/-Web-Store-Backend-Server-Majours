@@ -1,5 +1,5 @@
 import sessionCache from "./sessionCache.js";
-import {Backend_Url} from '../routes/config.js';
+import {Backend_Url, WEB_CLIENT_NAME} from '../routes/config.js';
 import axios from 'axios';
 
 const refreshInProgress = new Map();
@@ -8,7 +8,14 @@ export async function fetchTokensOfSession(sessionID) {
 
     try
     {
-        const {data} = await axios.get(`${Backend_Url}/auth/tokens/${sessionID}`);
+        const {data} = await axios.get(`${Backend_Url}/auth/tokens`,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-session-id': sessionID,
+                    // 'x-client_type': WEB_CLIENT_NAME,
+                }
+            });
         return data;
     }
     catch (error)
@@ -45,8 +52,6 @@ async function getSessionData(sessionId) {
         return sessionCache.get(sessionId);
     }
 
-    // console.log("🚀 Starting new fetch for:", sessionId);
-
     // 3. Create the actual work promise
     const fetchWork = async () => {
         try {
@@ -56,11 +61,6 @@ async function getSessionData(sessionId) {
                 throw new Error('Backend returned empty session data');
             }
 
-            // const ttl = newSessionData.session_expires_in || 3600;
-
-            // newSessionData.session_id = sessionId;
-
-            sessionCache.set(sessionId, newSessionData);
             console.log("💾 Cache Updated for:", sessionId);
 
             return newSessionData;
@@ -102,28 +102,13 @@ async function setUpGuestSession(res) {
     }
     catch (error)
     {
-
-        // if (error.response) {
-        //
-        //     const errorResponse = error.response.data;
-        //
-        //     if (errorResponse?.guestError) {
-        //
-        //         console.log("Guest se");
-        //
-        //         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
-        //         const summaryData = cartSummaryResponse?.data;
-        //
-        //         return res.status(200).json({authenticated: false, cartSummary: summaryData});
-        //     }
-        // }
         console.error("Error creating guest session: ", error);
     }
 }
 
 export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
     const {isMe= false, req, res } = options;
-
+    req.headers['x-client_type'] = WEB_CLIENT_NAME;
     // Helper to safely format responses
     const makeResponse = (axiosResponse) => ({
         status: axiosResponse?.status || 200,
@@ -152,65 +137,137 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
         // console.log("SessionData.is_guest = "+ sessionData.is_guest + " isMe = " + isMe)
 
-        if (res) {
-            res.setHeader('x-session-user', sessionData.is_guest ? 'guest' : 'authenticated');
+        // if (res) {
+        //     res.setHeader('x-session-user', sessionData.is_guest ? 'guest' : 'authenticated');
+        //
+        //     // console.log("Setting x-session-user header to " + (sessionData.is_guest ? 'guest' : 'authenticated'));
+        //     res.setHeader('Access-Control-Expose-Headers', 'x-session-user');
+        // }
 
-            // console.log("Setting x-session-user header to " + (sessionData.is_guest ? 'guest' : 'authenticated'));
-            res.setHeader('Access-Control-Expose-Headers', 'x-session-user');
+        processSessionData(sessionData, res, isMe, sessionId);
+
+
+        // --- 3. Execute Original Request ---
+
+        const axiosResponse = await requestFn(sessionData);
+        const responseBody = makeResponse(axiosResponse);
+
+        processResponseHeaders(responseBody.headers ?? {}, res, sessionId);
+
+        return responseBody;
+
+    } catch (err) {
+
+        // console.error("Error in fetchWithSessionTokens:", err);
+
+        const normalizedError = new Error(err?.message);
+
+        if (err.isAxiosError && err.response) {
+
+            // console.log("Axios Error Response:", err.response.data);
+
+            if (err.response.headers) {
+                if (err.response?.headers) {
+                    processResponseHeaders(err.response.headers, res, sessionId);
+                }
+            }
+
+            normalizedError.response = {
+                status: err.response.status,
+                data: err.response.data
+            };
+        } else {
+            // console.log("Non-Axios Error:", err);
+            normalizedError.response = {
+                status: err?.status || 500,
+                data: { error: err?.message || 'Internal BFF Error' }
+            };
         }
 
-        if (sessionData.is_guest && isMe) {
+        // console.error("Normalized Error:", normalizedError);
 
-            // console.log("Throwing isMe guest error");
+        throw normalizedError;
+    }
+
+    function processSessionData(newSessionData, res, isMe = false, oldSessionId = null) {
+
+        const {
+            session_id: newSessionId,
+            session_expires_in,
+            is_guest,
+        } = newSessionData;
+
+        if (newSessionId !== oldSessionId) {
+            sessionCache.safeDelete(oldSessionId);
+            sessionCache.set(newSessionId, newSessionData);
+
+            res.cookie('session_id', sessionId,
+                {
+                    maxAge: session_expires_in * 1000,
+                    secure: false,
+                    path: '/',
+                    sameSite: 'lax',
+                    httpOnly: true
+                });
+        }
+        else {
+            sessionCache.set(oldSessionId, newSessionData);
+            res.cookie('session_id', oldSessionId,
+                {
+                    maxAge: session_expires_in * 1000,
+                    secure: false,
+                    path: '/',
+                    sameSite: 'lax',
+                    httpOnly: true
+                });
+        }
+
+        if (is_guest && isMe) {
 
             const guestErr = new Error("isMe guest error");
             guestErr.response = {
-            data:{
-                guestError: true
-            },
+                data:{
+                    guestError: true
+                },
                 status: 401}
             guestErr.isAxiosError = true;
 
             throw guestErr;
         }
 
-        // --- 3. Execute Original Request ---
-        const axiosResponse = await requestFn(sessionData);
-        return makeResponse(axiosResponse);
+    }
 
-    } catch (err) {
+    function processResponseHeaders(headers, res, oldSessionId) {
 
-        const normalizedError = new Error(err.message);
+        if (headers) {
+            const {'x-session-info': sessionData} = headers;
 
-        if (err.isAxiosError && err.response) {
-            normalizedError.response = {
-                status: err.response.status,
-                data: err.response.data
-            };
-        } else {
-            // Handle network timeouts/internal BFF crashes
-            normalizedError.response = {
-                status: err.status || 500,
-                data: { error: err.message || 'Internal BFF Error' }
-            };
+            if (!sessionData) return;
+
+            const {session_id, session_ttl, is_guest, is_rememberMe, is_replaced} = sessionData;
+
+            if (session_id) {
+                if (is_replaced)
+                {
+                    res.cookie('session_id', session_id,
+                        {
+                            maxAge: (session_ttl ?? 3600) * 1000,
+                            secure: false,
+                            path: '/',
+                            sameSite: 'lax',
+                            httpOnly: true
+                        });
+
+                    sessionCache.safeDelete(oldSessionId);
+                }
+
+                sessionCache.set(session_id, {
+                    session_id,
+                    is_guest: is_guest,
+                    remember_me: is_rememberMe
+                });
+            }
         }
 
-        // 2. THROW it. Do not return it.
-        throw normalizedError;
-
-
-        // if (err.message === "isMe guest error") {
-        //     return { status: 401, data: { guestError: true }, headers: {} };
-        // }
-        // // --- 4. Global Error Normalization ---
-        // if (err.isAxiosError) {
-        //     // Fallback to 502 if err.response is undefined (e.g., Network Timeout / ECONNREFUSED)
-        //     const status = err.response?.status || 502;
-        //     const data = err.response?.data ?? { error: err.message || 'Downstream request failed' };
-        //     return { status, data, headers: err.response?.headers ?? {} };
-        // }
-        //
-        // // Catch-all for code errors
-        // return { status: 500, data: { error: err.message || 'Internal BFF Error' }, headers: {} };
     }
 }

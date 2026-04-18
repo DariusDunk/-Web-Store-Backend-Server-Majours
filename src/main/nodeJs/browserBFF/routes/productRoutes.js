@@ -1,4 +1,4 @@
-import express, {response} from 'express';
+import express from 'express';
 const router = express.Router();
 import {Backend_Url} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
@@ -139,6 +139,8 @@ router.get('/detail/:productCode', async (req, res) => {
 
         // const productDetails = productDetailResponse.data;
         // const ratingOverview = ratingOverviewResponse.data;
+
+        // console.log('productDetails response:', response);
 
         return res.status(200).json(response.data);
 
@@ -301,14 +303,14 @@ router.post('/getPagedReviews', async (req, res) => {
             return respons;
         }, {req, res})
 
-        // console.log('After wrapper: response:', response);
+        // console.log('Paged reviews response body:', response);
         // console.log('response?.status:', response?.status);
         // console.log('response?.data:', response?.data);
 
         const responseData = response?.data;
 
-        // console.log('response status:', response?.status);
-        // console.log('response data:', responseData);
+        // console.log('paged reviews response status:', response?.status);
+        // console.log('paged reviews response data:', responseData);
 
         return res.status(response.status).json(responseData);
 

@@ -163,7 +163,7 @@ public class ReviewService {
     public List<RatingOverviewResponse> getRatingOverview(String productCode) {
         return reviewRepository.getRatingOverviewByProductCode(productCode);
     }
-
+    @Transactional
     public void softDelete(Review review) {
         review.setReviewText("");
         review.setIsDeleted(true);
