@@ -50,4 +50,8 @@ public class CartService {
     public boolean existsBySession(Session session) {
         return cartRepository.existsBySession(session);
     }
+
+    public Cart getBySessionOptional(Session session) {
+        return cartRepository.getBySession(session).orElse(null);
+    }
 }

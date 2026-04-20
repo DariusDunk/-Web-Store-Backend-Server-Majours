@@ -6,6 +6,8 @@ import com.example.ecomerseapplication.Mappers.SessionMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Services.ClientTypeService;
 import com.example.ecomerseapplication.Services.SessionService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +15,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.Collection;
 
 @Component
 public class SessionFilter extends OncePerRequestFilter {
@@ -21,6 +26,7 @@ public class SessionFilter extends OncePerRequestFilter {
     private final SessionService sessionService;
     private final ClientTypeService clientTypeService;
     private final EndpointMatcher endpointMatcher;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public SessionFilter(SessionService sessionService, ClientTypeService clientTypeService, EndpointMatcher endpointMatcher) {
         this.sessionService = sessionService;
@@ -35,65 +41,139 @@ public class SessionFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        boolean isPublic = isPublicEndpoint(request);
+        ContentCachingResponseWrapper wrappedResponse =
+                new ContentCachingResponseWrapper(response);
 
-        if (!isPublic)
-        {
-//            System.out.println("(Semi-)Protected endpoint accessed, checking session...");
-            sessionValidation(request);
+//        boolean isPublic = isPublicEndpoint(request);
+        String requestLabel = "[For request: " + request.getRequestURI() + "]";
+
+        //todo tuk moje da se pravi testvane na skorost na zaqvkata kato se sloji taimer predi tova izvikvane (koeto realno pozvolqva da se izpylni zaqvkata sled filtyra), koioto da svyr6i sled nego
+        if (isPublicEndpoint(request)) {
+
+            /*----------------------PUBLIC ENDPOINT-----------------------------*/
+            filterChain.doFilter(request, wrappedResponse);
+            /*----------------------PUBLIC ENDPOINT-----------------------------*/
+            wrappedResponse.copyBodyToResponse();
+            return;
         }
-//        else
-//            System.out.println("Public endpoint accessed, skipping session check...");
-        //tuk moje da se pravi testvane na skorost na zaqvkata kato se sloji taimer predi tova izvikvane (koeto realno pozvolqva da se izpylni zaqvkata sled filtyra), koioto da svyr6i sled nego
-        filterChain.doFilter(request, response);
 
-        if (!isPublic)
-        {
-            Session session = (Session) request.getAttribute(GlobalConstants.SESSION_ATTRIBUTE);
-            Boolean sessionReplaced = (Boolean) request.getAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE);
+        if (isRefreshEndpoint(request)) {
+            Session session = getRequestSession(request);
+            ClientType clientType = getSessionClientType(request);
+            setUpSessionAndClientRequestHeaders(request, session, clientType);
+            /*----------------------REFRESH ENDPOINT-----------------------------*/
+            filterChain.doFilter(request, wrappedResponse);
+            /*----------------------REFRESH ENDPOINT-----------------------------*/
+            wrappedResponse.copyBodyToResponse();
+            return;
+        }
 
-            if (session != null && sessionReplaced==true) {
-                System.out.println("Session replaced, sending new session info...");
-                response.setHeader("x-session-info", String.valueOf(SessionMapper.entToHeaderResponse(session, sessionReplaced)));
+        Session session = sessionValidation(request);
+        Instant initialSessionExpiry = session.getExpiresAt();
+        boolean isReplaced = Boolean.TRUE.equals(request.getAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE));
+        /*----------------------ENDPOINT-----------------------------*/
+        filterChain.doFilter(request, wrappedResponse);
+        /*----------------------ENDPOINT-----------------------------*/
+        sessionService.updateActivity(session);
+
+        Instant finalSessionExpiry = session.getExpiresAt();
+
+        if (isReplaced || !initialSessionExpiry.equals(finalSessionExpiry)) {
+            try {
+                String json = mapper.writeValueAsString(
+                        SessionMapper.entToHeaderResponse(session, isReplaced)
+                );
+                wrappedResponse.setHeader("x-session-info", json);
+            } catch (JsonProcessingException e) {
+                logger.error("Failed to serialize session header", e);
             }
         }
 
+        Collection<String> headerNames = response.getHeaderNames();
+
+        System.out.println(requestLabel + "------ Response Headers ------");
+
+        for (String headerName : headerNames) {
+            System.out.println(headerName + ": " + response.getHeader(headerName));
+        }
+
+        System.out.println("------------------------------");
+        wrappedResponse.copyBodyToResponse();
     }
 
-    private void sessionValidation(@NonNull HttpServletRequest request) {
-        String sessionId = request.getHeader("X-Session-Id");
+    private Session getRequestSession(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String sessionId = request.getHeader(GlobalConstants.SESSION_ID_HEADER);
 
-        String clientTypeName = request.getHeader("X-Client-Type");
+        System.out.println("\n" +
+                "----------------------------------\n" +
+                "FOR REQUEST ["+path+"]RECEIVED SESSION ID TO FILTER: " + sessionId + "\n" +
+                "----------------------------------\n");
+
+        if (sessionId != null) {
+            return sessionService.getActiveByIdOptional(sessionId).orElse(null);
+        }
+        return null;
+    }
+
+    private ClientType getSessionClientType(HttpServletRequest request) {
+        String clientTypeName = request.getHeader(GlobalConstants.CLIENT_TYPE_HEADER);
+        String path = request.getRequestURI();
+
+        System.out.println("FOR REQUEST ["+path+"]CLIENT TYPE: " + clientTypeName + "\n-----------------------------------------\n");
+
         if (clientTypeName == null)
             clientTypeName = "Web";
 
-        request.setAttribute(GlobalConstants.CLIENT_TYPE_ATTRIBUTE, clientTypeName);
+        return clientTypeService.getByTypeName(clientTypeName);
+    }
 
-        Session session = sessionService.getActiveByIdOptional(sessionId).orElse(null);
-        boolean sessionReplaced = false;
-
-        if (session == null) {
-            sessionReplaced = true;
-            ClientType clientType = clientTypeService.getByTypeName(clientTypeName);
-            session = sessionService.createGuestSession(clientType);
-        }
-
+    private void setUpSessionAndClientRequestHeaders(HttpServletRequest request, Session session, ClientType clientType) {
+        request.setAttribute(GlobalConstants.CLIENT_TYPE_ATTRIBUTE, clientType);
         request.setAttribute(GlobalConstants.SESSION_ATTRIBUTE, session);
-        request.setAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE, sessionReplaced);
+    }
 
-        // Update last activity (throttled inside service)
-        if (session != null) {
-            sessionService.updateActivity(session);
+    private Session sessionValidation(@NonNull HttpServletRequest request) {
+
+        Session session = getRequestSession(request);
+        ClientType clientType = getSessionClientType(request);
+
+        if (session == null || session.getIsRevoked() || session.getExpiresAt().isBefore(Instant.now())) {
+
+            session = sessionService.createGuestSession(clientType);
+            request.setAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE, true);
+
+            System.out.println("\n" +
+                    "----------------------------------\n" +
+                    "SESSION REPLACED WITH NEW SESSION: "+ session.getSessionId() +
+                    "\n----------------------------------\n");
+
+        } else {
+            request.setAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE, false);
         }
+
+        setUpSessionAndClientRequestHeaders(request, session, clientType);
+
+        return session;
     }
 
     private boolean isPublicEndpoint(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return endpointMatcher.isPublic(path);
+
+        System.out.println("\n" +
+                "----------------------------------\nCurrent Request Path: '" + path + "'\n" +
+                "----------------------------------\n");
+
+        boolean isPublic = endpointMatcher.isPublic(path);
+
+        System.out.println("Endpoint " + path + " is " + (isPublic ? "public" : "private") + "\n");
+        return isPublic;
     }
 
-//    private boolean isLoginEndpoint(HttpServletRequest request) {
-//        String path = request.getRequestURI();
-//        return
-//    }
+    private boolean isRefreshEndpoint(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        return endpointMatcher.isRefreshToken(path);
+    }
+
 }

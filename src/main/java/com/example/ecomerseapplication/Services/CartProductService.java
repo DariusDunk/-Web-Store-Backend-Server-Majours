@@ -29,12 +29,14 @@ public class CartProductService {
     private final CartProductRepository cartProductRepository;
     private final CartService cartService;
     private final EntityManager entityManager;
+    private final SessionCartService sessionCartService;
 
     @Autowired
-    public CartProductService(CartProductRepository cartProductRepository, CartService cartService, EntityManager entityManager) {
+    public CartProductService(CartProductRepository cartProductRepository, CartService cartService, EntityManager entityManager, SessionCartService sessionCartService) {
         this.cartProductRepository = cartProductRepository;
         this.cartService = cartService;
         this.entityManager = entityManager;
+        this.sessionCartService = sessionCartService;
     }
 
     @Transactional
@@ -97,7 +99,7 @@ public class CartProductService {
     @Transactional
     public String  addToOrRemoveFromCart(Session session, Product product, Boolean doIncrement) {
 
-        Cart cart = cartService.getOrCreateBySession(session);
+        Cart cart = sessionCartService.getOrCreateSessionCart(session);
 
         CartProductId cartId = new CartProductId(product, cart);
 
@@ -165,7 +167,7 @@ public class CartProductService {
 
     @Transactional
     public List<CartItemResponse> removeFromCartWFetch(Session session, String productCode) {
-        Cart cart = cartService.getOrCreateBySession(session);
+        Cart cart = sessionCartService.getOrCreateSessionCart(session);
         int affectedRows = cartProductRepository.deleteByCartAndProductCode(cart, productCode);
 
         if (affectedRows==0)
@@ -285,7 +287,7 @@ public class CartProductService {
     @Transactional
     public List<CartItemResponse> removeBatchFromCartWFetch(Session session, List<String> productCodes) {
 
-        Cart cart = cartService.getOrCreateBySession(session);
+        Cart cart = sessionCartService.getOrCreateSessionCart(session);
         int deletedCount = cartProductRepository.deleteBatchByCartAndPCodes(cart, productCodes);
 
         if (deletedCount != productCodes.size()|| deletedCount == 0) {
@@ -318,7 +320,7 @@ public class CartProductService {
 
         try
         {
-            Cart cart = cartService.getOrCreateBySession(session);
+            Cart cart = sessionCartService.getOrCreateSessionCart(session);
             CartProductId cartId = new CartProductId(product, cart);
             CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
             return addQuantityToCartMain(product, quantity, cartId, cartProduct);
@@ -358,7 +360,14 @@ public class CartProductService {
 
     public CartSummaryResponse getSummary(Session session) {
 
-        Cart cart = cartService.getOrCreateBySession(session);
+//        Cart cart = sessionCartService.getOrCreateSessionCart(session);
+
+        Cart cart = cartService.getBySessionOptional(session);
+
+        if (cart == null)
+        {
+            return new CartSummaryResponse(0L, 0L);
+        }
 
         return cartProductRepository.getSummaryByCart(cart);
     }
@@ -395,7 +404,7 @@ public class CartProductService {
 
             cartService.deleteCartByCustomer(customer);
 
-            Cart sessionCart = cartService.getOrCreateBySession(session);
+            Cart sessionCart = sessionCartService.getOrCreateSessionCart(session);
             sessionCart.setCustomer(customer);
             sessionCart.setSession(null);
 
@@ -414,7 +423,7 @@ public class CartProductService {
                         .getProduct()
                         .getId())
                 .toList();
-        Cart sessionCart = cartService.getOrCreateBySession(session);
+        Cart sessionCart = sessionCartService.getOrCreateSessionCart(session);
 
         cartProductRepository.transferNewGuestItemsToCustomer(customerCart,sessionCart, copiedItemIds);
         cartProductRepository.deleteBySessionId(session.getSessionId());

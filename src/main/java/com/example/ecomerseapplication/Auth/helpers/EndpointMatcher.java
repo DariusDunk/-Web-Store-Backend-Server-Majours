@@ -30,6 +30,7 @@ public class EndpointMatcher {
             "/attributes/**",
             "/category/**",
             "/manufacturer/**",
+            "/product/*",
             "/product/*/review/overview",
             "/product/manufacturer/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
             "/product/category/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
@@ -40,9 +41,11 @@ public class EndpointMatcher {
             "/auth/**",
             "/cart/*",
             "/cart/add/quantity",
-            "/product/*",
+            "/product/detail/*",
             "/product/reviews/paged"
     );//todo purchase endpoint-ovete predstoqt da se dobavqt
+
+    private final List<String> PRIORITY_SESSION_ENDPOINTS = List.of("/cart/**");
 
     public boolean isPublicOrSemiProtected(String path) {
 
@@ -56,6 +59,10 @@ public class EndpointMatcher {
     public boolean isPublic(String path) {
         return PUBLIC_ENDPOINTS.stream()
                 .anyMatch(pattern -> matcher.match(pattern, path));
+    }
+
+    public boolean isRefreshToken(String path) {
+        return matcher.match("/auth/tokens", path);
     }
 
 }

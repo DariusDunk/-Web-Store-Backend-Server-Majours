@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record LoginResponse(
         @JsonProperty("access_token")
         String accessToken,
-        @JsonProperty("expires_in")
+        @JsonProperty("access_expires_in")
         int expiresIn,
         @JsonProperty("refresh_expires_in")
         int refreshExpiresIn,

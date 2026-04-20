@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.Cart;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 @Service
 public class AuthService {
@@ -143,7 +143,13 @@ public class AuthService {
         TokenRefreshResponse tokenRefreshResponse;
         Session session= null;
         try {
-            session = sessionService.getRequestSession();
+            session = SessionExtractor.getRequestSession().orElse(null);
+
+            System.out.println("\n" +
+                    "----------------------------------\nSession in refresh is: " + session.getSessionId()
+                    + "\nIs expired or revked: "
+                    + (session.isExpired() || session.getIsRevoked()) + "\n" +
+                    "----------------------------------\n");
 
             if (session.getIsRevoked() || session.isExpired()) {
                 session = sessionService.createGuestSession(session.getClientType());
@@ -152,7 +158,7 @@ public class AuthService {
                         0,
                         0,
                         null,
-                        Duration.between(Instant.now(), session.getExpiresAt()).getSeconds(),
+                        SessionService.calculateSessionTTLSeconds(session.getExpiresAt()),
                         true,
                         false,
                         session.getSessionId());
@@ -171,13 +177,7 @@ public class AuthService {
             }
             else
             {
-                session.setIsGuest(true);
-                session.setRefreshToken(null);
-                session.setExpiresAt(Instant.now().plus(GlobalConstants.GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
-                session.setLastActivityAt(Instant.now());
-                session.setCustomer(null);
-                session.setIsRememberMeSession(false);
-                session.setIsRevoked(false);
+                session.markAsGuest(GlobalConstants.LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
             }
 
             sessionService.save(session);
@@ -194,16 +194,16 @@ public class AuthService {
 
         try {
 
-            Instant newTTL = session.getIsRememberMeSession()
-                    ? Instant.now().plus(tokenRefreshResponse.refreshExpiresIn(), ChronoUnit.SECONDS)
-                    : Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS);
-            session.setExpiresAt(newTTL);
-            session.setRefreshToken(tokenRefreshResponse.refreshToken());
+            session.markAsAuthenticated(session.getCustomer(),
+                    refreshToken,
+                    session.getIsRememberMeSession(),
+                    tokenRefreshResponse.refreshExpiresIn(),
+                    GlobalConstants.NORMAL_SESSION_TTL_HOURS);
 
             sessionService.save(session);
 
             return RefreshResponseMapper.tokenRefreshToRefreshResponse(tokenRefreshResponse,
-                    newTTL,
+                    session.getExpiresAt(),
                     false,
                     session.getIsRememberMeSession(),
                     session.getSessionId());

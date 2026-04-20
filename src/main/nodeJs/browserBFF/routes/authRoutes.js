@@ -1,32 +1,19 @@
 import express from 'express';
 const router = express.Router();
-import {Backend_Url} from './config.js';
+import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
 const AuthURL = `${Backend_Url}/auth`;
 import sessionCache from '../services/sessionCache.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import axios from 'axios';
+import {getCartSummary} from "../services/cartSummaryFetcher.js"
 
-async function getCartSummary(req, res, sessionId) {
-    return await fetchWithSessionTokens(sessionId, async (sessionData) => {
-        return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
-                },
-                bffContext: {req, res}
-            }
-        );
-    },
-        {req, res});
-}
+
 
 router.post(`/register`, async (req, res) => {
 
     const {name, familyName, email, password} = req.body;
-    
+
     try {
         const response = await axios.post(`${AuthURL}/register`, {
             first_name: name,
@@ -74,7 +61,8 @@ router.post(`/login`, async (req, res) => {
         }, {
             headers: {
                 'Content-Type': 'application/json',
-            ...(guestSessionId && {'X-Session-Id': guestSessionId})
+                'x-client_type': WEB_CLIENT_NAME,
+            ...(guestSessionId && {'x-session-id': guestSessionId})
         }
     })
 
@@ -82,25 +70,34 @@ router.post(`/login`, async (req, res) => {
         const responseData = await response.data;
 
         const {
-            access_token, refresh_token, expires_in, refresh_expires_in
+            access_token, refresh_token, access_expires_in, refresh_expires_in
             , session_id, session_expires_in
         } = responseData;
 
         authResponse = responseData;
 
-        sessionCache.set(session_id, {
-            session_id,
+        // sessionCache.set(session_id, {
+        //     session_id,
+        //     access_token,
+        //     expires_in,
+        //     refresh_token,
+        //     refresh_expires_in,
+        //     is_guest: false,
+        //     remember_me: rememberMe
+        // });
+
+        sessionCache.setSession(session_id,
             access_token,
-            expires_in,
+            access_expires_in,
             refresh_token,
             refresh_expires_in,
-            is_guest: false,
-            remember_me: rememberMe
-        });
+            false,
+            rememberMe,
+            session_expires_in);
 
         res.cookie('session_id', authResponse.session_id,
             {
-                maxAge: session_expires_in * 1000,
+                maxAge: (session_expires_in ?? 660) * 1000,
                 secure: false,
                 path: '/',
                 sameSite: 'lax',
@@ -122,8 +119,9 @@ router.post(`/login`, async (req, res) => {
                 axiosBackendClient.get(`${Backend_Url}/customer/me`, {
                     headers: {
                         'Content-Type': 'application/json',
+                        'x-client_type': WEB_CLIENT_NAME,
                         ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                        ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
+                        ...(sessionData.session_id && {'x-session-id': sessionData.session_id})
                     },
                     bffContext: {
                         req, res
@@ -135,7 +133,8 @@ router.post(`/login`, async (req, res) => {
             ]);
 
             return {
-                data: {user: userResponse?.data, cartSummary: cartSummary?.data}
+                data: {user: userResponse?.data, cartSummary: cartSummary?.data},
+                headers: cartSummary?.headers
             }
         },{req, res});
 
@@ -158,8 +157,9 @@ router.post('/logout', async (req, res) => {
                   {
                       headers: {
                           'Content-Type': 'application/json',
-                          ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                          ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                          'x-client_type': WEB_CLIENT_NAME,
+                          ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                          ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
                       },
                       bffContext: {
                           req, res
@@ -171,21 +171,25 @@ router.post('/logout', async (req, res) => {
           const responseData = await response.data;
 
             if (responseData) {
-                const {session_id, session_ttl} = responseData;
+                const {session_id, session_expires_in} = responseData;
 
-                if (session_id && session_ttl)
+                if (session_id && session_expires_in)
                 {
                     const summaryResponse = await getCartSummary(req, res, session_id);
                     const cartSummary = await summaryResponse?.data;
-                    sessionCache.set(session_id, {
-                            session_id,
-                            is_guest: true,
-                            remember_me: false
-                        });
+
+                    sessionCache.setSession(session_id,
+                        null,
+                        null,
+                        null,
+                        null,
+                        true,
+                        false,
+                        session_expires_in);
 
                     res.cookie('session_id', session_id,
                         {
-                            maxAge: session_ttl * 1000,
+                            maxAge: (session_expires_in ?? 660) * 1000,
                             secure: false,
                             path: '/',
                             sameSite: 'lax',

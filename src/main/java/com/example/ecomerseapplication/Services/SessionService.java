@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidSessionException;
-import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -19,31 +18,30 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.ecomerseapplication.Others.GlobalConstants.GUEST_SESSION_TTL_DAYS;
+import static com.example.ecomerseapplication.Others.GlobalConstants.*;
 
 @Service
 public class SessionService {
 
     private final SessionRepository sessionRepository;
-    private final CartProductService cartProductService;
     private final CartService cartService;
 
     @Autowired
-    public SessionService(SessionRepository sessionRepository, CartProductService cartProductService, CartService cartService) {
+    public SessionService(SessionRepository sessionRepository, CartService cartService) {
         this.sessionRepository = sessionRepository;
-        this.cartProductService = cartProductService;
         this.cartService = cartService;
     }
+//
+//    public Session buildSession(Session session, ClientType clientType, boolean rememberMe, boolean isGuest) {
+//
+//        session.setIsGuest(isGuest);
+//        session.setIsRevoked(false);
+//        session.setClientType(clientType);
+//        session.setIsRememberMeSession(rememberMe);
+//
+//        return sessionRepository.save(session);
+//    }
 
-    public Session buildSession(Session session, ClientType clientType, boolean rememberMe, boolean isGuest) {
-
-        session.setIsGuest(isGuest);
-        session.setIsRevoked(false);
-        session.setClientType(clientType);
-        session.setIsRememberMeSession(rememberMe);
-
-        return sessionRepository.save(session);
-    }
 
 //    public Session createAuthenticatedSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe, int refreshTokenExpirySeconds) {
 //        Session session = new Session();
@@ -63,16 +61,15 @@ public class SessionService {
 
     public Session guestToLoginSession(Session session, KeycloakTokenResponse tokenResponse, boolean isRememberMe, Customer customer) {
 
-        if (isRememberMe) {
-            session.setExpiresAt(Instant.now().plus(tokenResponse.refreshExpiresIn(), ChronoUnit.SECONDS));
-        } else {
-            session.setExpiresAt(Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS));
-        }
+        session.markAsAuthenticated(customer,
+                tokenResponse.refreshToken(),
+                isRememberMe,
+                tokenResponse.refreshExpiresIn(), //todo tuk trqbva da se kriptira refresh tokena
+                NORMAL_SESSION_TTL_HOURS);
 
-        session.setCustomer(customer);
-        session.setRefreshToken(tokenResponse.refreshToken());//todo tuk trqbva da se kriptira refresh tokena
+        return sessionRepository.save(session);
 
-      return buildSession(session, session.getClientType(), isRememberMe, false);
+//      return buildSession(session, session.getClientType(), isRememberMe, false);
 
     }
 
@@ -85,18 +82,10 @@ public class SessionService {
 
     public void updateActivity(Session session) {
 
-        Instant now = Instant.now();
+        boolean hasCart = cartService.existsBySession(session);
+        session.registerActivity(hasCart, LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, GUEST_SESSION_TTL_DAYS);
 
-        if (now.isAfter(session.getLastActivityAt().plus(5, ChronoUnit.MINUTES)) && session.getIsRevoked() == false) {
-
-//            System.out.println("Updating session activity timestamp");
-
-            session.setLastActivityAt(now);
-            if (session.getIsGuest()) {
-               session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
-            }
-            sessionRepository.save(session);
-        }
+        sessionRepository.save(session);
     }
 
     public Session getById(String sessionId) {
@@ -107,16 +96,6 @@ public class SessionService {
         return sessionRepository.getActiveById(sessionId);
     }
 
-//    public Session getOrCreateById(String sessionId, ClientType clientType) {
-//        try{
-//            return getById(sessionId);
-//        }
-//        catch (Exception e){
-//            System.out.println("Session not found, creating new one");
-//            return createGuestSession(clientType);
-//        }
-//    }
-
     public void save(Session session) {
         sessionRepository.save(session);
     }
@@ -125,20 +104,12 @@ public class SessionService {
     public void revokeSessions(List<Session> expiredSessions) {
 
         for (Session session : expiredSessions) {
-            session.setIsRevoked(true);
-            session.setRevokedAt(Instant.now());
-            session.setRefreshToken(null);
+            session.revoke();
         }
 
         sessionRepository.saveAll(expiredSessions);
-        System.out.println("Revoked " + expiredSessions.size() + " sessions");
-        cartProductService.deleteItemsBySession(expiredSessions);
-        System.out.println("Deleted cart products for revoked sessions");
-        cartService.deleteCartsBySessions(expiredSessions);
-        System.out.println("Deleted carts for revoked sessions");
-    }
 
-    //TODO dobavi logika za iztrivane na koli4ki ot iztekli sesii
+    }
 
     public List<Session> getExpiredSessions() {
         return sessionRepository.getExpired();
@@ -148,10 +119,14 @@ public class SessionService {
 
         Session session = new Session();
         session.setSessionId(generateSessionId());
+        session.setClientType(clientType);
+        session.markAsGuest(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
 
-        session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
+        return sessionRepository.save(session);
 
-        return buildSession(session, clientType, false, true);
+//        session.setExpiresAt(Instant.now().plus(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, ChronoUnit.MINUTES));
+//
+//        return buildSession(session, clientType, false, true);
     }
 
     public Session AuthToGuestSession(Session session) {
@@ -160,12 +135,14 @@ public class SessionService {
             throw new InvalidSessionException("Session is already a guest session");
         }
 
-        session.setIsGuest(true);
-        session.setExpiresAt(Instant.now().plus(GUEST_SESSION_TTL_DAYS, ChronoUnit.DAYS));
-        session.setRefreshToken(null);
-        session.setCustomer(null);
-        session.setIsRememberMeSession(false);
-        session.setIsRevoked(false);
+        session.markAsGuest(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
+
+//        session.setIsGuest(true);
+//        session.setExpiresAt(Instant.now().plus(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, ChronoUnit.MINUTES));
+//        session.setRefreshToken(null);
+//        session.setCustomer(null);
+//        session.setIsRememberMeSession(false);
+//        session.setIsRevoked(false);
 
         return sessionRepository.save(session);
     }
@@ -178,6 +155,6 @@ public class SessionService {
     }
 
     public static long calculateSessionTTLSeconds(Instant expiresAt) {
-    return ChronoUnit.SECONDS.between(Instant.now(), expiresAt);
+        return ChronoUnit.SECONDS.between(Instant.now(), expiresAt);
     }
 }

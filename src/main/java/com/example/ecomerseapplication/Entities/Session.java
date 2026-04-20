@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "sessions", schema = "online_shop")
@@ -62,6 +63,69 @@ public class Session {
 
     @Column(name = "revoked_at")
     private Instant revokedAt;
+
+    // Add these methods inside your Session.java entity class
+
+    public void markAsGuest(int lowPriorityMinutes) {
+        this.isGuest = true;
+        this.customer = null;
+        this.refreshToken = null;
+        this.isRememberMeSession = false;
+        this.isRevoked = false;
+        this.expiresAt = Instant.now().plus(lowPriorityMinutes, ChronoUnit.MINUTES);
+        this.lastActivityAt = Instant.now();
+    }
+
+    public void markAsCartActive(int cartTtlDays) {
+        // We only promote the TTL if it's a guest session.
+        // Authenticated sessions are governed by the token refresh lifecycle.
+        if (Boolean.TRUE.equals(this.isGuest)) {
+            this.expiresAt = Instant.now().plus(cartTtlDays, ChronoUnit.DAYS); // Fixed from HOURS to DAYS
+        }
+    }
+
+    public void markAsAuthenticated(Customer customer, String refreshToken, boolean isRememberMe, long refreshExpiresInSeconds, int normalTtlHours) {
+        this.isGuest = false;
+        this.customer = customer;
+        this.refreshToken = refreshToken;
+        this.isRememberMeSession = isRememberMe;
+        this.isRevoked = false;
+        this.lastActivityAt = Instant.now();
+
+        if (isRememberMe) {
+            this.expiresAt = Instant.now().plus(refreshExpiresInSeconds, ChronoUnit.SECONDS);
+        } else {
+            this.expiresAt = Instant.now().plus(normalTtlHours, ChronoUnit.HOURS);
+        }
+    }
+
+    public void registerActivity(boolean hasCart, int lowPriorityMinutes, int cartTtlDays) {
+        Instant now = Instant.now();
+
+        // Sliding expiration: Only update if 5 minutes have passed and it's not revoked
+        if (this.lastActivityAt != null && now.isAfter(this.lastActivityAt.plus(5, ChronoUnit.MINUTES)) && !Boolean.TRUE.equals(this.isRevoked)) {
+            this.lastActivityAt = now;
+
+            if (Boolean.TRUE.equals(this.isGuest)) {
+                if (hasCart) {
+                    this.expiresAt = Instant.now().plus(cartTtlDays, ChronoUnit.DAYS);
+                } else {
+                    this.expiresAt = Instant.now().plus(lowPriorityMinutes, ChronoUnit.MINUTES);
+                }
+            }
+//            return true;
+        }
+//        return false;
+    }
+
+    public void revoke() {
+        this.isRevoked = true;
+        this.revokedAt = Instant.now();
+        this.refreshToken = null;
+    }
+
+
+
 
     @Override
     public String toString() {

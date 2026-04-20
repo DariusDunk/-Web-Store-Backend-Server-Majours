@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Auth.helpers;
 
 import com.example.ecomerseapplication.Entities.ClientType;
+import com.example.ecomerseapplication.Others.GlobalConstants;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -17,7 +18,7 @@ public class ClientTypeExtractor {
 
         return Optional.ofNullable((ClientType) attributes
                 .getRequest()
-                .getAttribute("clientType"));
+                .getAttribute(GlobalConstants.CLIENT_TYPE_ATTRIBUTE));
 
     }
 }

@@ -1,10 +1,13 @@
 package com.example.ecomerseapplication.Utils;
 
 import com.example.ecomerseapplication.Entities.Session;
+import com.example.ecomerseapplication.Services.CartProductService;
+import com.example.ecomerseapplication.Services.CartService;
 import com.example.ecomerseapplication.Services.KeycloakService;
 import com.example.ecomerseapplication.Services.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -16,31 +19,38 @@ public class SessionRevoker {
 
     private final SessionService sessionService;
     private final KeycloakService keycloakService;
+    private final CartProductService cartProductService;
+    private final CartService cartService;
 
     @Autowired
-    public SessionRevoker(SessionService sessionService, KeycloakService keycloakService) {
+    public SessionRevoker(SessionService sessionService, KeycloakService keycloakService, CartProductService cartProductService, CartService cartService) {
         this.sessionService = sessionService;
         this.keycloakService = keycloakService;
+        this.cartProductService = cartProductService;
+        this.cartService = cartService;
     }
 
+    @Transactional
     public void revokeExpiredSessions() {
 
         List<Session> expiredSessions = sessionService.getExpiredSessions();
         if (!expiredSessions.isEmpty()) {
-        sessionService.revokeSessions(expiredSessions);
+            sessionService.revokeSessions(expiredSessions);
+            cartProductService.deleteItemsBySession(expiredSessions);
+            cartService.deleteCartsBySessions(expiredSessions);
 
-        for (Session session : expiredSessions) {
+            for (Session session : expiredSessions) {
 
-            if (session.getRefreshToken()!=null
-                    && session.getRefreshToken().isBlank()
-                    &&!session.getIsGuest())
-                keycloakService.invalidateRefreshToken(session.getRefreshToken());
-        }
-        System.out.println("Revoked refresh tokens for expired sessions.");
+                if (session.getRefreshToken() != null
+                        && session.getRefreshToken().isBlank()
+                        && !session.getIsGuest())
+                    keycloakService.invalidateRefreshToken(session.getRefreshToken());
+            }
+            System.out.println("Revoked refresh tokens for expired sessions.");
 
-        ZoneId zoneId = ZoneId.systemDefault();
-        ZonedDateTime now = ZonedDateTime.now(zoneId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            ZoneId zoneId = ZoneId.systemDefault();
+            ZonedDateTime now = ZonedDateTime.now(zoneId);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
             System.out.println("-------------------------[" + now.format(formatter) + "]" + " Revoking expired sessions-------------------------");

@@ -8,7 +8,7 @@ router.get('/names', async (req, res)=> {
       const sessionId = req.cookies.session_id;
       const response = await axiosBackendClient.get(`${Backend_Url}/category/names`, {
           headers: {
-              ...(sessionId && {'X-Session-Id': sessionId})
+              ...(sessionId && {'x-session-id': sessionId})
           }
       });
       const responseData = response.data;

@@ -104,15 +104,22 @@ public class ProductController {
         return ResponseEntity.ok(productService.getNameSuggestions(name));
     }
 
-
-    @GetMapping("{productCode}")
+    @GetMapping("detail/{productCode}")
     public ResponseEntity<DetailedProductResponse> detailedProductInfo(@PathVariable String productCode) {
 
-//        System.out.println("In detailed product endpoint: " + productCode + " ");
+        System.out.println("In detailed product endpoint: " + productCode + " ");
 
-        Session session = sessionService.getRequestSession();;
+        Session session = sessionService.getRequestSession();
 
-        return ResponseEntity.ok(productService.getByCodeAndWithSession(productCode, session));
+        DetailedProductResponse response = productService.getByCodeAndWithSession(productCode, session);
+
+        System.out.println("\n" +
+                "----------------------------------\n" +
+                "Detailed product response: "+ response+
+                " \n----------------------------------\n");
+
+//        return ResponseEntity.ok(productService.getByCodeAndWithSession(productCode, session));
+        return ResponseEntity.ok(response);
 
     }
 
@@ -215,7 +222,15 @@ public class ProductController {
 
         reviewPage = reviewService.getProductReviews(request, pageRequest, session);
 
-        return ResponseEntity.ok(PageResponse.from(reviewPage));
+        var response = PageResponse.from(reviewPage);
+
+        System.out.println(" \n" +
+                "----------------------------------\n" +
+                "Paged Reviews response: " + response + "  \n" +
+                "----------------------------------\n");
+
+//        return ResponseEntity.ok(PageResponse.from(reviewPage));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("review/specific")

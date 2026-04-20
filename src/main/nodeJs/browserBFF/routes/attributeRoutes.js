@@ -12,7 +12,7 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
   {
       const response = await axiosBackendClient.get(`${Backend_Url}/category/filters?categoryName=${categoryName}`, {
           headers: {
-              ...(sessionId && {'X-Session-Id': sessionId})
+              ...(sessionId && {'x-session-id': sessionId})
           }
       });
 

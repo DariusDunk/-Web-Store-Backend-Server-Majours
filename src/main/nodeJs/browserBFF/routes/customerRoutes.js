@@ -1,33 +1,15 @@
 import express from 'express';
-import {Backend_Url} from './config.js';
-// const sessionCache = require('../services/sessionCache.js');
+import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
-import axios from "axios";
 import sessionCache from "../services/sessionCache.js";
-
 const router = express.Router();
+import {getCartSummary} from "../services/cartSummaryFetcher.js"
 
 const timestamp = () => {
     const now = new Date();
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
-
-async function getCartSummary(req, res, sessionId) {
-    return await fetchWithSessionTokens(sessionId, async (sessionData) => {
-        return await axiosBackendClient.get(`${Backend_Url}/cart/summary`,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id})
-                },
-                bffContext: {req, res}
-            }
-        );
-    },
-        {req, res});
-}
 
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page
@@ -39,8 +21,9 @@ router.get('/getFavourites/:page', async (req, res) => {
                 return await axiosBackendClient.get(`${Backend_Url}/customer/favourites/p/${page}`, {
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
                    ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && { 'X-Session-Id': sessionData.session_id })
+                    ...(sessionData.session_id && { 'x-session-id': sessionData.session_id })
                 },
                 bffContext: {
                     req,res
@@ -78,8 +61,9 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
                 return await axiosBackendClient.post(`${Backend_Url}/customer/favorite/add/${productCode}`, {}, {
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
                    ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && { 'X-Session-Id': sessionId })
+                    ...(sessionData.session_id && { 'x-session-id': sessionId })
                 },
                 bffContext: {
                     req, res
@@ -121,8 +105,9 @@ router.post(`/removeFav/single`, async (req, res) => {
                 return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/single`, {
                 headers: {
                     'Content-Type': 'application/json',
-                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                    'x-client_type': WEB_CLIENT_NAME,
+                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
                 },
                 data: JSON.stringify(requestBody),
                 bffContext: {
@@ -158,8 +143,9 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
                 return await axiosBackendClient.delete(`${Backend_Url}/customer/favourites/remove/${productCode}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                    'x-client_type': WEB_CLIENT_NAME,
+                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -190,8 +176,9 @@ router.post(`/removeFav/batch`, async (req, res) => {
                 return await axiosBackendClient.delete(`${Backend_Url}/customer/favorite/remove/batch`, {
                 headers: {
                     'Content-Type': 'application/json',
-                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                    ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                    'x-client_type': WEB_CLIENT_NAME,
+                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
                 },
                 data: JSON.stringify({current_page: currentPage, product_codes: productCodes}),
                 bffContext: {
@@ -217,47 +204,44 @@ router.post(`/removeFav/batch`, async (req, res) => {
 
 router.get('/me', async (req, res) => {
 
-    const sessionId = req.cookies.session_id;
+    let sessionId = req.cookies.session_id;
 
-    if (!sessionId)
-    {
-        try
-        {
-            const guestResponse = await axios.get(`${Backend_Url}/auth/session/guest/create/Web`);
-            const guestData = await guestResponse.data;
-            const {session_id, session_ttl} = guestData;
-
-            // console.log("Response from guest session creation: ", JSON.stringify(guestData));
-
-            if (session_id && session_ttl)
-            {
-                sessionCache.set(session_id, {
-                        session_id,
-                        is_guest: true,
-                        remember_me: false
-                    });
-
-                res.cookie('session_id', session_id,
-                    {
-                        maxAge: session_ttl * 1000,
-                        secure: false,
-                        path: '/',
-                        sameSite: 'lax',
-                        httpOnly: true
-                    });
-
-
-
-
-                return res.status(200).json({authenticated: false});
-            }
-        }
-        catch (error)
-        {
-            console.error('Error creating guest session:', error);
-            return res.status(500).end();
-        }
-    }
+    // if (!sessionId)
+    // {
+    //     try
+    //     {
+    //         const guestResponse = await axios.get(`${Backend_Url}/auth/session/guest/create/Web`);
+    //         const guestData = await guestResponse.data;
+    //         const {session_id, session_ttl} = guestData;
+    //
+    //         // console.log("Response from guest session creation: ", JSON.stringify(guestData));
+    //
+    //         if (session_id && session_ttl)
+    //         {
+    //             sessionCache.set(session_id, {
+    //                     session_id,
+    //                     is_guest: true,
+    //                     remember_me: false
+    //                 });
+    //
+    //             res.cookie('session_id', session_id,
+    //                 {
+    //                     maxAge: (session_ttl ?? 660) * 1000,
+    //                     secure: false,
+    //                     path: '/',
+    //                     sameSite: 'lax',
+    //                     httpOnly: true
+    //                 });
+    //
+    //             return res.status(200).json({authenticated: false});
+    //         }
+    //     }
+    //     catch (error)
+    //     {
+    //         console.error('Error creating guest session:', error);
+    //         return res.status(500).end();
+    //     }
+    // }
 
     const isGuest = sessionCache.get(sessionId)?.is_guest;
     //
@@ -269,16 +253,20 @@ router.get('/me', async (req, res) => {
     {
         try {
             const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                    return await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
+                    const meResponse = await axiosBackendClient.get(`${Backend_Url}/customer/me`, {
                         headers: {
                             'Content-Type': 'application/json',
-                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                            ...(sessionData.session_id && {'X-Session-Id': sessionData.session_id}),
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
                         },
                         bffContext: {
                             req, res
                         }
                     });
+
+                    meResponse.data.session_id = sessionData.session_id;
+                    return meResponse;
                 },
                 {isMe: true, req, res});
 
@@ -286,6 +274,13 @@ router.get('/me', async (req, res) => {
 
             if (responseData)
                 responseData.authenticated = !responseData.is_guest||false;
+
+            if (responseData.session_id)
+            {
+                console.log("Replacing session_id in responseData: ", sessionId, " with ", responseData.session_id, " from '/me' request'")
+
+                sessionId = responseData.session_id;
+            }
 
             const cartSummaryResponse = await getCartSummary(req, res, sessionId);
             responseData.cartSummary = await cartSummaryResponse?.data;
