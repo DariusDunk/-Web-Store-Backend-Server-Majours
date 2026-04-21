@@ -26,8 +26,11 @@ export default {
                refresh_expires_in,
                is_guest,
                is_remember_me,
-               sessionExpiresIn,
-               explicitEntryTTL){
+               sessionExpiresIn){
+
+        const entryTTL = Math.min((sessionExpiresIn ?? 660), ONE_HOUR) ;
+
+        console.log("Added new session to the cache: ", sessionId, "with ttl: ", entryTTL/60, " minutes.");
 
        cache.set(sessionId, {
             session_id:sessionId,
@@ -38,7 +41,7 @@ export default {
             is_guest: is_guest,
             is_remember_me: is_remember_me,
             session_expires_in: sessionExpiresIn
-        }, explicitEntryTTL);
+        },entryTTL);
 
     },
 

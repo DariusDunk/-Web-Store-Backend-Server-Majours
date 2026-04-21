@@ -8,29 +8,42 @@ const router = express.Router();
 
 const timestamp = () => {
     const now = new Date();
-    return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
+    return `[${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}]`;
 };
 
+router.get('/getCart', async (req, res) => {
+    let sessionId = req.cookies.session_id;
 
-    router.get('/getCart', async (req, res) => {
-        const sessionId = req.cookies.session_id;
+    try {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+           return  await axiosBackendClient.get(`${Backend_Url}/cart/get`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
 
-        try {
-            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.get(`${Backend_Url}/cart/get`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
-                    },
-                    bffContext: {
-                        req, res
-                    }
-                });
-            }, {req, res})
+        const {data: cartResponseData, newSessionId} =  response;
 
-        const cartResponseData = await response.data;
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "Response for addToCart: \n" + JSON.stringify(response) +
+        //     " \n" +
+        //     "----------------------------------\n")
+
+        sessionId = newSessionId||sessionId;
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "New session id after get cart response: \n" + sessionId +
+            " \n" +
+            "----------------------------------\n")
 
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
 
@@ -44,7 +57,7 @@ const timestamp = () => {
 
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for fetching the cart`);
-            return res.status(error.response.status||500).end();
+            return res.status(error.response.status || 500).end();
         }
 
         console.error('-------------------Unexpected error for fetching the cart-------------------\n', error);
@@ -55,23 +68,43 @@ const timestamp = () => {
 router.post('/addToCart', async (req, res) => {
     try {
         const {productCode, doIncrement} = req.body;
-        const sessionId = req.cookies.session_id;
+        let sessionId = req.cookies.session_id;
 
-            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.post(`${Backend_Url}/cart/manageQuant`, {product_code: productCode, do_increment: doIncrement}, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
-                    },
-                    bffContext: {
-                        req, res
-                    }
-                });
-            }, {req, res})
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+           return await axiosBackendClient.post(`${Backend_Url}/cart/manageQuant`, {
+                product_code: productCode,
+                do_increment: doIncrement
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
 
-        const responseData = await response.data;
+        const {data: responseData, newSessionId} =  response;
+
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "Response for addToCart: \n" + JSON.stringify(response) +
+        " \n" +
+            "----------------------------------\n")
+
+        sessionId = newSessionId||sessionId;
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "New session id after response: \n" + sessionId +
+            " \n" +
+            "----------------------------------\n")
+
+
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
         const cartSummaryData = await cartSummaryResponse?.data;
 
@@ -81,7 +114,7 @@ router.post('/addToCart', async (req, res) => {
 
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for adding product to cart`);
-            return res.status(error.response.status||500).json(error.response.data);
+            return res.status(error.response.status || 500).json(error.response.data);
         }
 
         console.error('-------------------Unexpected error adding product to cart-------------------\n', error);
@@ -90,36 +123,51 @@ router.post('/addToCart', async (req, res) => {
 });
 
 router.post('/add/quantity', async (req, res) => {
-    try{
+    try {
         const {productCode, quantity} = req.body;
-        const sessionId = req.cookies.session_id;
+        let sessionId = req.cookies.session_id;
 
-            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.post(`${Backend_Url}/cart/add/quantity`, {
-                    product_code: productCode,
-                    quantity: quantity
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
-                    },
-                    bffContext: {
-                        req, res
-                    }
-                })
-            }, {req, res});
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+           return await axiosBackendClient.post(`${Backend_Url}/cart/add/quantity`, {
+                product_code: productCode,
+                quantity: quantity
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
 
-        const responseData = await response.data;
+        const {data: responseData, newSessionId} =  response;
+
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "Response for addQuantity: \n" + JSON.stringify(response) +
+            " \n" +
+            "----------------------------------\n")
+
+        sessionId = newSessionId||sessionId;
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "New session id after addQuantity response: \n" + sessionId +
+            " \n" +
+            "----------------------------------\n")
+
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
         const cartSummaryData = await cartSummaryResponse?.data;
-        return res.status(response.status).json({message:responseData, cartSummary: cartSummaryData});
-    }
-    catch(error){
+        return res.status(response.status).json({message: responseData, cartSummary: cartSummaryData});
+    } catch (error) {
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for adding product quantity to cart`);
-            return res.status(error.response.status||500).json(error.response.data);
+            return res.status(error.response.status || 500).json(error.response.data);
         }
 
         console.error('-------------------Unexpected error adding product quantity to cart-------------------\n', error);
@@ -130,23 +178,39 @@ router.post('/add/quantity', async (req, res) => {
 router.post('/addToCart/batch', async (req, res) => {
     try {
         const productCodes = req.body;
-        const sessionId = req.cookies.session_id;
+        let sessionId = req.cookies.session_id;
 
-            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.post(`${Backend_Url}/cart/add/batch`, productCodes, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
-                    },
-                    bffContext: {
-                        req, res
-                    }
-                });
-            }, {req, res})
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+           return await axiosBackendClient.post(`${Backend_Url}/cart/add/batch`, productCodes, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
 
-        const responseData = await response.data;
+        const {data: responseData, newSessionId} =  response;
+
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "Response for /addToCart/batch: \n" + JSON.stringify(response) +
+            " \n" +
+            "----------------------------------\n")
+
+        sessionId = newSessionId||sessionId;
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "New session id after /addToCart/batch response: \n" + sessionId +
+            " \n" +
+            "----------------------------------\n")
+
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
         responseData.cartSummary = await cartSummaryResponse?.data;
 
@@ -159,7 +223,7 @@ router.post('/addToCart/batch', async (req, res) => {
 
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for batch adding products to cart`);
-            return res.status(error.response.status||500).json(error.response.data);
+            return res.status(error.response.status || 500).json(error.response.data);
         }
 
         console.error('-------------------Error batch adding products to cart-------------------\n', error);
@@ -171,25 +235,41 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
     try {
 
         const productCode = req.params.productCode;
-        const sessionId = req.cookies.session_id;
+        let sessionId = req.cookies.session_id;
 
-            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/${productCode}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
-                    },
-                    bffContext: {
-                        req, res
-                    }
-                });
-            }, {req, res})
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+           return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/${productCode}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
 
-        const responseData = await response.data;
+        const {data: responseData, newSessionId} =  response;
+
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "Response for removeFromCart: \n" + JSON.stringify(response) +
+            " \n" +
+            "----------------------------------\n")
+
+        sessionId = newSessionId||sessionId;
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "New session id after removeFromCart response: \n" + sessionId +
+            " \n" +
+            "----------------------------------\n")
+
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
-        const cartSummaryData= await cartSummaryResponse?.data;
+        const cartSummaryData = await cartSummaryResponse?.data;
 
         return res.status(response.status).json({products: responseData, cartSummary: cartSummaryData});
 
@@ -197,7 +277,7 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
 
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for removing product from cart`);
-            return res.status(error.response.status||500).end();
+            return res.status(error.response.status || 500).end();
         }
 
         console.error('-------------------Error removing product from cart-------------------\n', error);
@@ -208,27 +288,42 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
 router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
     try {
 
-        const sessionId = req.cookies.session_id;
+        let sessionId = req.cookies.session_id;
         const productCodes = req.body;
 
-            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/batch`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
-                    },
-                    data: JSON.stringify(productCodes),
-                    bffContext: {
-                        req, res
-                    }
-                });
-            }, {req, res})
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+           return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/batch`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                data: JSON.stringify(productCodes),
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res})
 
-        const responseData = await response.data;
+        const {data: responseData, newSessionId} =  response;
+
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "Response for /removeFromCart/batch/turbo: \n" + JSON.stringify(response) +
+            " \n" +
+            "----------------------------------\n")
+
+        sessionId = newSessionId||sessionId;
+
+        console.log(" \n" +
+            "----------------------------------\n" +
+            "New session id after /removeFromCart/batch/turbo response: \n" + sessionId +
+            " \n" +
+            "----------------------------------\n")
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
-        const cartSummaryData= await cartSummaryResponse?.data;
+        const cartSummaryData = await cartSummaryResponse?.data;
 
         return res.status(response.status).json({products: responseData, cartSummary: cartSummaryData});
 
@@ -236,7 +331,7 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
 
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for batch removing product from cart`);
-            return res.status(error.response.status||500).end();
+            return res.status(error.response.status || 500).end();
         }
 
         console.error('-------------------Error batch removing product from cart-------------------\n', error);

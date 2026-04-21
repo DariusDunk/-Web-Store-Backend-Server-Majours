@@ -175,8 +175,8 @@ router.post('/logout', async (req, res) => {
 
                 if (session_id && session_expires_in)
                 {
-                    const summaryResponse = await getCartSummary(req, res, session_id);
-                    const cartSummary = await summaryResponse?.data;
+                    // const summaryResponse = await getCartSummary(req, res, session_id);
+                    // const cartSummary = await summaryResponse?.data;
 
                     sessionCache.setSession(session_id,
                         null,
@@ -196,7 +196,8 @@ router.post('/logout', async (req, res) => {
                             httpOnly: true
                         });
 
-                    return res.status(200).json({authenticated: false, cartSummary: cartSummary});
+                    // return res.status(200).json({authenticated: false, cartSummary: cartSummary});
+                    return res.status(200).end();
                 }
             }
 

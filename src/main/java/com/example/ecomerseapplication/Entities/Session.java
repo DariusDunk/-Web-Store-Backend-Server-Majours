@@ -77,10 +77,9 @@ public class Session {
     }
 
     public void markAsCartActive(int cartTtlDays) {
-        // We only promote the TTL if it's a guest session.
-        // Authenticated sessions are governed by the token refresh lifecycle.
+
         if (Boolean.TRUE.equals(this.isGuest)) {
-            this.expiresAt = Instant.now().plus(cartTtlDays, ChronoUnit.DAYS); // Fixed from HOURS to DAYS
+            this.expiresAt = Instant.now().plus(cartTtlDays, ChronoUnit.DAYS);
         }
     }
 
@@ -99,11 +98,13 @@ public class Session {
         }
     }
 
-    public void registerActivity(boolean hasCart, int lowPriorityMinutes, int cartTtlDays) {
+    public boolean registerActivity(boolean hasCart, int lowPriorityMinutes, int cartTtlDays) {
         Instant now = Instant.now();
 
-        // Sliding expiration: Only update if 5 minutes have passed and it's not revoked
-        if (this.lastActivityAt != null && now.isAfter(this.lastActivityAt.plus(5, ChronoUnit.MINUTES)) && !Boolean.TRUE.equals(this.isRevoked)) {
+        if (this.lastActivityAt != null
+                && now.isAfter(this.lastActivityAt.plus(5, ChronoUnit.MINUTES))
+                && !Boolean.TRUE.equals(this.isRevoked)
+        ) {
             this.lastActivityAt = now;
 
             if (Boolean.TRUE.equals(this.isGuest)) {
@@ -113,9 +114,9 @@ public class Session {
                     this.expiresAt = Instant.now().plus(lowPriorityMinutes, ChronoUnit.MINUTES);
                 }
             }
-//            return true;
+            return true;
         }
-//        return false;
+        return false;
     }
 
     public void revoke() {

@@ -142,7 +142,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
         const responseBody = makeResponse(axiosResponse);
         console.log("----------------------------------\nResponse Body for header processing: ", responseBody, "\n----------------------------------\n");
-        processResponseHeaders(responseBody.headers ?? {}, res, sessionId, sessionData);
+        processResponseHeaders(responseBody, res, sessionId);
 
         return responseBody;
 
@@ -271,7 +271,9 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
     }
 
-    function processResponseHeaders(headers, res, oldSessionId, refreshSessionData = null) {
+    function processResponseHeaders(responseObject, res, oldSessionId) {
+
+        const{headers} = responseObject;
 
         console.log("----------------------------------\nResponse Headers: ", headers,"\n----------------------------------\n");
 
@@ -295,12 +297,12 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             console.log("----------------------------------\nIs_replaced from headers: ", is_replaced);
 
             if (session_id) {
+                responseObject.newSessionId = session_id;
+
                 if (is_replaced)
                 {
                     console.log("----------------------------------\nReplacing session cookie and cache from headers with new session:  \n" + session_id +
                         "----------------------------------\n ");
-                    if (refreshSessionData)
-                        refreshSessionData.session_id = session_id;
                     sessionCache.safeDelete(oldSessionId);
                 }
 

@@ -40,12 +40,11 @@ public class EndpointMatcher {
     private final List<String> SEMI_PROTECTED_ENDPOINTS = List.of(
             "/auth/**",
             "/cart/*",
+            "/cart/remove/*",
             "/cart/add/quantity",
             "/product/detail/*",
             "/product/reviews/paged"
     );//todo purchase endpoint-ovete predstoqt da se dobavqt
-
-    private final List<String> PRIORITY_SESSION_ENDPOINTS = List.of("/cart/**");
 
     public boolean isPublicOrSemiProtected(String path) {
 

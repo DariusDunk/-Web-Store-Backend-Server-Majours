@@ -18,10 +18,16 @@ public class SessionCartService {
 
     public Cart getOrCreateSessionCart(Session session) {
 
-        session.markAsCartActive(GlobalConstants.GUEST_SESSION_TTL_DAYS);
-        sessionService.save(session);
+        Cart cart = cartService.getBySession(session).orElse(null);
 
-        return cartService.getOrCreateBySession(session);
+        if (cart == null) {
+            cart = new Cart(session);
+            session.markAsCartActive(GlobalConstants.GUEST_SESSION_TTL_DAYS);
+            sessionService.save(session);
+        }
+
+        return cart;
+
     }
 
 }

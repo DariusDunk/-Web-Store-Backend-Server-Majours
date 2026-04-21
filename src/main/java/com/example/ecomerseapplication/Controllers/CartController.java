@@ -119,7 +119,10 @@ public class CartController {
     @DeleteMapping("remove/{productCode}")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
+        System.out.println("Inside remove from cart endpoint: " + productCode);
+
         Session session = sessionService.getRequestSession();
+
 
         if (session.getIsGuest()) {
             try

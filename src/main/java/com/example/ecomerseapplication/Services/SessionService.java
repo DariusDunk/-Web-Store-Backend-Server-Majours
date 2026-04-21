@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -31,33 +32,6 @@ public class SessionService {
         this.sessionRepository = sessionRepository;
         this.cartService = cartService;
     }
-//
-//    public Session buildSession(Session session, ClientType clientType, boolean rememberMe, boolean isGuest) {
-//
-//        session.setIsGuest(isGuest);
-//        session.setIsRevoked(false);
-//        session.setClientType(clientType);
-//        session.setIsRememberMeSession(rememberMe);
-//
-//        return sessionRepository.save(session);
-//    }
-
-
-//    public Session createAuthenticatedSession(String refreshToken, Customer customer, ClientType clientType, boolean rememberMe, int refreshTokenExpirySeconds) {
-//        Session session = new Session();
-//        session.setSessionId(generateSessionId());
-//
-//        if (rememberMe) {
-//            session.setExpiresAt(Instant.now().plus(refreshTokenExpirySeconds, ChronoUnit.SECONDS));
-//        } else {
-//            session.setExpiresAt(Instant.now().plus(GlobalConstants.NORMAL_SESSION_TTL_HOURS, ChronoUnit.HOURS));
-//        }
-//
-//        session.setCustomer(customer);
-//        session.setRefreshToken(refreshToken);//todo tuk trqbva da se kriptira refresh tokena
-//
-//        return buildSession(session, clientType, rememberMe, false);
-//    }
 
     public Session guestToLoginSession(Session session, KeycloakTokenResponse tokenResponse, boolean isRememberMe, Customer customer) {
 
@@ -68,8 +42,6 @@ public class SessionService {
                 NORMAL_SESSION_TTL_HOURS);
 
         return sessionRepository.save(session);
-
-//      return buildSession(session, session.getClientType(), isRememberMe, false);
 
     }
 
@@ -83,9 +55,9 @@ public class SessionService {
     public void updateActivity(Session session) {
 
         boolean hasCart = cartService.existsBySession(session);
-        session.registerActivity(hasCart, LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, GUEST_SESSION_TTL_DAYS);
 
-        sessionRepository.save(session);
+        if (session.registerActivity(hasCart, LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, GUEST_SESSION_TTL_DAYS))
+            sessionRepository.save(session);
     }
 
     public Session getById(String sessionId) {
@@ -124,9 +96,6 @@ public class SessionService {
 
         return sessionRepository.save(session);
 
-//        session.setExpiresAt(Instant.now().plus(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, ChronoUnit.MINUTES));
-//
-//        return buildSession(session, clientType, false, true);
     }
 
     public Session AuthToGuestSession(Session session) {
@@ -136,13 +105,6 @@ public class SessionService {
         }
 
         session.markAsGuest(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
-
-//        session.setIsGuest(true);
-//        session.setExpiresAt(Instant.now().plus(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, ChronoUnit.MINUTES));
-//        session.setRefreshToken(null);
-//        session.setCustomer(null);
-//        session.setIsRememberMeSession(false);
-//        session.setIsRevoked(false);
 
         return sessionRepository.save(session);
     }

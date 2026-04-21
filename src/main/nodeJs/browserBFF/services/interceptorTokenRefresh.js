@@ -9,7 +9,7 @@ export async function refreshToken(sessionId, res) {
 
         try {
             const responseData = await fetchTokensOfSession(sessionId);
-            // console.log('Fetched tokens:', responseData);
+            console.log('Fetched tokens:', responseData);
             if (!responseData) {
                 return Promise.reject("No token response data received from backend.");
             }
@@ -32,18 +32,6 @@ export async function refreshToken(sessionId, res) {
                     sameSite: 'lax',
                     httpOnly: true
                 });
-
-            // sessionCache.safeDelete(sessionId);
-
-            // sessionCache.set(sessionId, {
-            //     session_id:sessionId,
-            //     access_token,
-            //     access_token_lifetime,
-            //     refresh_token,
-            //     refresh_token_lifeTime,
-            //     is_guest: is_guest,
-            //     remember_me: is_remember_me
-            // });
 
             sessionCache.setSession(
                 session_id,

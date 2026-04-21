@@ -206,48 +206,7 @@ router.get('/me', async (req, res) => {
 
     let sessionId = req.cookies.session_id;
 
-    // if (!sessionId)
-    // {
-    //     try
-    //     {
-    //         const guestResponse = await axios.get(`${Backend_Url}/auth/session/guest/create/Web`);
-    //         const guestData = await guestResponse.data;
-    //         const {session_id, session_ttl} = guestData;
-    //
-    //         // console.log("Response from guest session creation: ", JSON.stringify(guestData));
-    //
-    //         if (session_id && session_ttl)
-    //         {
-    //             sessionCache.set(session_id, {
-    //                     session_id,
-    //                     is_guest: true,
-    //                     remember_me: false
-    //                 });
-    //
-    //             res.cookie('session_id', session_id,
-    //                 {
-    //                     maxAge: (session_ttl ?? 660) * 1000,
-    //                     secure: false,
-    //                     path: '/',
-    //                     sameSite: 'lax',
-    //                     httpOnly: true
-    //                 });
-    //
-    //             return res.status(200).json({authenticated: false});
-    //         }
-    //     }
-    //     catch (error)
-    //     {
-    //         console.error('Error creating guest session:', error);
-    //         return res.status(500).end();
-    //     }
-    // }
-
     const isGuest = sessionCache.get(sessionId)?.is_guest;
-    //
-    // sessionCache.print();
-    //
-    // console.log("isGuest: ", isGuest);
 
     if (!isGuest)
     {
@@ -275,7 +234,7 @@ router.get('/me', async (req, res) => {
             if (responseData)
                 responseData.authenticated = !responseData.is_guest||false;
 
-            if (responseData.session_id)
+            if (responseData?.session_id)
             {
                 console.log("Replacing session_id in responseData: ", sessionId, " with ", responseData.session_id, " from '/me' request'")
 
@@ -299,10 +258,29 @@ router.get('/me', async (req, res) => {
 
                     console.log("Guest error detected in '/me' request, creating guest session");
 
-                    const cartSummaryResponse = await getCartSummary(req, res, sessionId);
-                    const summaryData = cartSummaryResponse?.data;
+                    const {headers} = error.response;
 
-                    return res.status(200).json({authenticated: false, cartSummary: summaryData});
+                    // let newSessionId = null
+
+                    if (headers) {
+                        let {'x-session-info': sessionData} = headers;
+
+                        if (sessionData) {
+                            sessionData = JSON.parse(sessionData);
+
+                            const {session_id} = sessionData;
+                            console.log("Replacing session_id in responseData: ", sessionId, " with ", session_id, " from '/me' request's error handling")
+                            sessionId = session_id;
+                        }
+                    }
+                    let summaryData = {};
+                    if (sessionId)
+                    {
+                        const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+                        summaryData= cartSummaryResponse?.data;
+                    }
+
+                    return res.status(200).json({authenticated: false, cartSummary: summaryData||{}});
                 }
             }
 

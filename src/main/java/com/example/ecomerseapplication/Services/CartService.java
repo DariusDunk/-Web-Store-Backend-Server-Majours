@@ -7,6 +7,7 @@ import com.example.ecomerseapplication.Repositories.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartService {
@@ -30,6 +31,10 @@ public class CartService {
     public Cart getOrCreateBySession(Session session) {
         return cartRepository.getBySession((session))
                 .orElseGet(() -> cartRepository.save(new Cart(session)));
+    }
+
+    public Optional<Cart> getBySession(Session session) {
+        return cartRepository.getBySession(session);
     }
 
     public void deleteCartsBySessions(List<Session> sessions) {

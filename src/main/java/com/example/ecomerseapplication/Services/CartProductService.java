@@ -282,8 +282,7 @@ public class CartProductService {
 
       return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
     }
-
-    //TODO TEST
+    
     @Transactional
     public List<CartItemResponse> removeBatchFromCartWFetch(Session session, List<String> productCodes) {
 
@@ -315,7 +314,6 @@ public class CartProductService {
         }
     }
 
-    //TODO TEST
     public String addQuantityToCart(Product product, short quantity, Session session) {
 
         try

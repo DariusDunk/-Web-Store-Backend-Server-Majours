@@ -79,6 +79,12 @@ public class SessionFilter extends OncePerRequestFilter {
         Instant finalSessionExpiry = session.getExpiresAt();
 
         if (isReplaced || !initialSessionExpiry.equals(finalSessionExpiry)) {
+
+            System.out.println(" \n" +
+                    "----------------------------------\nThe session has been replaced or the expiry time has changed.\n" +
+                    "Old expiry: "+ initialSessionExpiry + " new expiri: "+ finalSessionExpiry + " \n" +
+                    "----------------------------------\n");
+
             try {
                 String json = mapper.writeValueAsString(
                         SessionMapper.entToHeaderResponse(session, isReplaced)
@@ -88,8 +94,8 @@ public class SessionFilter extends OncePerRequestFilter {
                 logger.error("Failed to serialize session header", e);
             }
         }
-
-        Collection<String> headerNames = response.getHeaderNames();
+        wrappedResponse.copyBodyToResponse();
+        Collection<String> headerNames = wrappedResponse.getHeaderNames();
 
         System.out.println(requestLabel + "------ Response Headers ------");
 
@@ -98,7 +104,7 @@ public class SessionFilter extends OncePerRequestFilter {
         }
 
         System.out.println("------------------------------");
-        wrappedResponse.copyBodyToResponse();
+
     }
 
     private Session getRequestSession(HttpServletRequest request) {
