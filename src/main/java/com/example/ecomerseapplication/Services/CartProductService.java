@@ -100,21 +100,26 @@ public class CartProductService {
     public String  addToOrRemoveFromCart(Session session, Product product, Boolean doIncrement) {
 
         Cart cart = sessionCartService.getOrCreateSessionCart(session);
-
         CartProductId cartId = new CartProductId(product, cart);
-
         CartProduct cartProduct = cartProductRepository.findById(cartId).orElse(null);
 
         try
         {
             if (cartProduct == null) {
 
-                if (cartsBySession(session).size() >= GlobalConstants.CART_SIZE_LIMIT)
-                    throw new CartLimitReachedException("Cart limit reached!");
+                if (doIncrement)
+                {
+                    if (cartsBySession(session).size() >= GlobalConstants.CART_SIZE_LIMIT)
+                        throw new CartLimitReachedException("Cart limit reached!");
 
-                cartProduct = new CartProduct(cartId, (short) 1);
-                cartProductRepository.save(cartProduct);
-                return "Успешно добавен в количката!";
+                    cartProduct = new CartProduct(cartId, (short) 1);
+                    cartProductRepository.save(cartProduct);
+                    return "Успешно добавен в количката!";
+                }
+                else
+                {
+                    return "Успешно премахнат от количката! ";
+                }
             }
 
             return doIncrementMainLogic(product, doIncrement, cartId, cartProduct);
@@ -154,13 +159,7 @@ public class CartProductService {
     @Transactional
     public List<CartItemResponse> removeFromCartWFetch(Customer customer, String productCode) {
         Cart cart = cartService.getOrCreateByCustomer(customer);
-        int affectedRows = cartProductRepository.deleteByCartAndProductCode(cart, productCode);
-
-        if (affectedRows==0)
-            throw new IllegalStateException("No rows deleted");
-
-        if (affectedRows > 1)
-            throw new IllegalStateException("Multiple rows deleted unexpectedly");
+        cartProductRepository.deleteByCartAndProductCode(cart, productCode);
 
         return getCartDtoByCustomer(customer);
     }
@@ -168,13 +167,7 @@ public class CartProductService {
     @Transactional
     public List<CartItemResponse> removeFromCartWFetch(Session session, String productCode) {
         Cart cart = sessionCartService.getOrCreateSessionCart(session);
-        int affectedRows = cartProductRepository.deleteByCartAndProductCode(cart, productCode);
-
-        if (affectedRows==0)
-            throw new IllegalStateException("No rows deleted");
-
-        if (affectedRows > 1)
-            throw new IllegalStateException("Multiple rows deleted unexpectedly");
+        cartProductRepository.deleteByCartAndProductCode(cart, productCode);
 
         return getCartDtoBySession(session);
     }
@@ -274,24 +267,16 @@ public class CartProductService {
     public List<CartItemResponse> removeBatchFromCartWFetch(Customer customer, List<String> productCodes) {
 
         Cart cart = cartService.getOrCreateByCustomer(customer);
-        int deletedCount = cartProductRepository.deleteBatchByCartAndPCodes(cart, productCodes);
+        cartProductRepository.deleteBatchByCartAndPCodes(cart, productCodes);
 
-        if (deletedCount != productCodes.size()|| deletedCount == 0) {
-            throw new IllegalArgumentException("Not all products were found in the cart!");
-        }
-
-      return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
+        return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
     }
     
     @Transactional
     public List<CartItemResponse> removeBatchFromCartWFetch(Session session, List<String> productCodes) {
 
         Cart cart = sessionCartService.getOrCreateSessionCart(session);
-        int deletedCount = cartProductRepository.deleteBatchByCartAndPCodes(cart, productCodes);
-
-        if (deletedCount != productCodes.size()|| deletedCount == 0) {
-            throw new IllegalArgumentException("Not all products were found in the cart!");
-        }
+        cartProductRepository.deleteBatchByCartAndPCodes(cart, productCodes);
 
         return cartProductRepository.findDtoBySession(session);
     }

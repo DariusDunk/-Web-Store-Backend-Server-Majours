@@ -26,7 +26,7 @@ public class SessionCartService {
             sessionService.save(session);
         }
 
-        return cart;
+        return cartService.save(cart);
 
     }
 

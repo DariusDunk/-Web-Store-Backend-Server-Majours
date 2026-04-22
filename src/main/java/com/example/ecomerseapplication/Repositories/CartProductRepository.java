@@ -75,7 +75,7 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
 
     @Modifying
     @Query("delete from CartProduct where cartProductId.cart = ?1 and cartProductId.product.productCode = ?2 ")
-    int deleteByCartAndProductCode(Cart cart, String productCode);
+    void deleteByCartAndProductCode(Cart cart, String productCode);
 
     @Modifying
     @Query("""
@@ -85,7 +85,7 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
             where cc.cartProductId.cart=:cart
             and cc.cartProductId.product.productCode in :productCodes
             """)
-    int deleteBatchByCartAndPCodes(@Param("cart") Cart cart, @Param("productCodes") List<String> productCodes);
+    void deleteBatchByCartAndPCodes(@Param("cart") Cart cart, @Param("productCodes") List<String> productCodes);
 
     @Query(value = "select cc " +
             "from CartProduct cc " +

@@ -12,6 +12,7 @@ import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Services.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,15 +32,14 @@ public class CartController {
     private final UserIdExtractor userIdExtractor;
     private final CustomerService customerService ;
     private final CartProductService cartProductService;
-    private final CartService cartService;
     private final ProductService productService;
 
-    public CartController(SessionService sessionService, UserIdExtractor userIdExtractor, CustomerService customerService, CartProductService cartProductService, CartService cartService, ProductService productService) {
+    @Autowired
+    public CartController(SessionService sessionService, UserIdExtractor userIdExtractor, CustomerService customerService, CartProductService cartProductService, ProductService productService) {
         this.sessionService = sessionService;
         this.userIdExtractor = userIdExtractor;
         this.customerService = customerService;
         this.cartProductService = cartProductService;
-        this.cartService = cartService;
         this.productService = productService;
     }
 
@@ -119,10 +119,9 @@ public class CartController {
     @DeleteMapping("remove/{productCode}")
     public ResponseEntity<?> removeFromCart(@PathVariable String productCode) {
 
-        System.out.println("Inside remove from cart endpoint: " + productCode);
+//        System.out.println("Inside remove from cart endpoint: " + productCode);
 
         Session session = sessionService.getRequestSession();
-
 
         if (session.getIsGuest()) {
             try

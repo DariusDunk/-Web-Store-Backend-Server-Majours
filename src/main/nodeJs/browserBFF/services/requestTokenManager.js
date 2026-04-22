@@ -3,10 +3,10 @@ import {Backend_Url, WEB_CLIENT_NAME} from '../routes/config.js';
 import axios from 'axios';
 
 const refreshInProgress = new Map();
+
 export async function fetchTokensOfSession(sessionID) {
 
-    try
-    {
+    try {
         const {data} = await axios.get(`${Backend_Url}/auth/tokens`,
             {
                 headers: {
@@ -16,13 +16,12 @@ export async function fetchTokensOfSession(sessionID) {
                 }
             });
         return data;
-    }
-    catch (error)
-        {
+    } catch (error) {
         console.error("Error fetching tokens of session: ", error);
         throw error;
-        }
+    }
 }
+
 //
 // async function createGuestSession() {
 //     try {
@@ -41,13 +40,13 @@ async function getSessionData(sessionId) {
     const cachedData = sessionCache.get(sessionId);
     if (cachedData) {
         console.log("✅ Cache Hit:", sessionId);
-        return { ...cachedData, _isCacheHit: true };
+        return {...cachedData, _isCacheHit: true};
     }
 
     // 2. Check Lock
     if (refreshInProgress.has(sessionId)) {
         // console.log("⏳ Waiting for existing refresh:", sessionId);
-       return await refreshInProgress.get(sessionId);
+        return await refreshInProgress.get(sessionId);
         // return sessionCache.get(sessionId);
     }
 
@@ -61,7 +60,7 @@ async function getSessionData(sessionId) {
             // console.log("💾 Cache Updated for:", sessionId);
 
             const freshData = await fetchTokensOfSession(sessionId);
-            return { ...freshData, _isCacheHit: false };
+            return {...freshData, _isCacheHit: false};
         } catch (error) {
             console.error("❌ Fetch internal error:", error.message);
             throw error; // Re-throw so the lock-waiters and caller know it failed
@@ -77,6 +76,7 @@ async function getSessionData(sessionId) {
 
     return await p;
 }
+
 //
 // async function setUpGuestSession(res) {
 //     try
@@ -105,24 +105,15 @@ async function getSessionData(sessionId) {
 // }
 
 export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
-    const {isMe= false, req, res } = options;
-    // req.headers['x-client_type'] = WEB_CLIENT_NAME;
-    // Helper to safely format responses
+    const {isMe = false, req, res} = options;
+
     const makeResponse = (axiosResponse) => ({
         status: axiosResponse?.status || 200,
         data: axiosResponse?.data ?? {},
         headers: axiosResponse?.headers ?? {}
     });
     let sessionData;
-
     try {
-        // // --- 1. Session Setup ---
-        // if (!sessionId) {
-        //     sessionId = await setUpGuestSession(res);
-        //
-        // }
-
-        // --- 2. Safe Token Retrieval First Line Of Deffense---
 
         try {
             sessionData = await getSessionData(sessionId);
@@ -131,19 +122,19 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
             console.error("Error fetching session data:", err);
 
-            // return { status: 401, data: { error: 'Session expired or unable to fetch tokens' }, headers: {} };
         }
-
-        // --- 3. Execute Original Request Second Line Of Deffense ---
 
         const axiosResponse = await requestFn(sessionData);
 
-        console.log("----------------------------------\nResponse Body for of original request: ", JSON.stringify(axiosResponse.data), "\n----------------------------------\n");
+        // console.log("----------------------------------\nResponse Body for of original request: ", JSON.stringify(axiosResponse.data), "\n----------------------------------\n");
 
         const responseBody = makeResponse(axiosResponse);
-        console.log("----------------------------------\nResponse Body for header processing: ", responseBody, "\n----------------------------------\n");
+        // console.log("----------------------------------\nResponse Body for header processing: ", responseBody, "\n----------------------------------\n");
         processResponseHeaders(responseBody, res, sessionId);
+        handleGuestState(responseBody.headers, sessionData, res);
 
+        // const {headers} = responseBody;
+        // console.log("----------------------------------\nResponse headers: ", headers, "\n----------------------------------\n");
         return responseBody;
 
     } catch (err) {
@@ -159,6 +150,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             if (err.response.headers) {
                 if (err.response?.headers) {
                     processResponseHeaders(err.response.headers, res, sessionId, sessionData);
+                    handleGuestState(err.response.headers, sessionData, res);
                 }
             }
 
@@ -170,13 +162,48 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             // console.log("Non-Axios Error:", err);
             normalizedError.response = {
                 status: err?.status || 500,
-                data: { error: err?.message || 'Internal BFF Error' }
+                data: {error: err?.message || 'Internal BFF Error'}
             };
         }
 
         // console.error("Normalized Error:", normalizedError);
 
         throw normalizedError;
+    }
+
+    function handleGuestState(headers, sessionDataAfterCacheRefresh, res) {
+
+        let {'x-session-info': sessionData} = headers;
+
+        let responseSessionId = null;
+
+        responseSessionId = sessionData?.session_id;
+        const {is_guest, session_id: refreshSessionId} = sessionDataAfterCacheRefresh;
+
+        if (responseSessionId) {
+
+            res.setHeader('Access-Control-Expose-Headers', 'x-guest-state');
+
+            res.setHeader('x-guest-state', is_guest
+                ? "guest"
+                : "authenticated");
+
+        } else {
+            const cacheData = sessionCache.get(refreshSessionId);
+
+            if (cacheData) {
+
+                res.setHeader('Access-Control-Expose-Headers', 'x-guest-state');
+
+                res.setHeader('x-guest-state', cacheData?.is_guest
+                    ? "guest"
+                    : "authenticated");
+
+            }
+        }
+
+        console.log("----------------------------------\nResponse headers: ", res.headers, "\n----------------------------------\n");
+
     }
 
     function processRefreshedOrCachedSessionData(newSessionData, res, isMe = false, oldSessionId = null) {
@@ -230,8 +257,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                     sameSite: 'lax',
                     httpOnly: true
                 });
-        }
-        else if (!_isCacheHit){
+        } else if (!_isCacheHit) {
             // sessionCache.set(oldSessionId, newSessionData);
             delete newSessionData._isCacheHit;
 
@@ -260,10 +286,11 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
             const guestErr = new Error("isMe guest error");
             guestErr.response = {
-                data:{
+                data: {
                     guestError: true
                 },
-                status: 401}
+                status: 401
+            }
             guestErr.isAxiosError = true;
 
             throw guestErr;
@@ -273,9 +300,9 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
     function processResponseHeaders(responseObject, res, oldSessionId) {
 
-        const{headers} = responseObject;
+        const {headers} = responseObject;
 
-        console.log("----------------------------------\nResponse Headers: ", headers,"\n----------------------------------\n");
+        console.log("----------------------------------\nResponse Headers: ", headers, "\n----------------------------------\n");
 
         if (headers) {
             let {'x-session-info': sessionData} = headers;
@@ -299,8 +326,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             if (session_id) {
                 responseObject.newSessionId = session_id;
 
-                if (is_replaced)
-                {
+                if (is_replaced) {
                     console.log("----------------------------------\nReplacing session cookie and cache from headers with new session:  \n" + session_id +
                         "----------------------------------\n ");
                     sessionCache.safeDelete(oldSessionId);

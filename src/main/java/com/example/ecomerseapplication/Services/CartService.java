@@ -24,8 +24,8 @@ public class CartService {
                 .orElseGet(() -> cartRepository.save(new Cart(customer)));
     }
 
-    public void save(Cart cart) {
-        cartRepository.save(cart);
+    public Cart save(Cart cart) {
+       return cartRepository.save(cart);
     }
 
     public Cart getOrCreateBySession(Session session) {
