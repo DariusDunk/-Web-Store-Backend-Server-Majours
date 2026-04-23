@@ -64,9 +64,9 @@ public class SessionService {
         return sessionRepository.getActiveById(sessionId).orElseThrow(() -> new ResourceNotFoundException("Session expired or not found"));
     }
 
-    public Optional<Session> getActiveByIdOptional(String sessionId) {
-        return sessionRepository.getActiveById(sessionId);
-    }
+//    public Optional<Session> getActiveByIdOptional(String sessionId) {
+//        return sessionRepository.getActiveById(sessionId);
+//    }
 
     public void save(Session session) {
         sessionRepository.save(session);

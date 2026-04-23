@@ -135,34 +135,41 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
         responseSessionId = sessionData?.session_id;
         const {is_guest, session_id: refreshSessionId} = sessionDataAfterCacheRefresh;
 
-        if (responseSessionId) {
-
-            res.setHeader('Access-Control-Expose-Headers', 'x-guest-state');
-
-            res.setHeader('x-guest-state', is_guest
-                ? "guest"
-                : "authenticated");
-
-        } else {
-            const cacheData = sessionCache.get(refreshSessionId);
-
-            if (cacheData) {
+        if (res)
+        {
+            if (responseSessionId) {
 
                 res.setHeader('Access-Control-Expose-Headers', 'x-guest-state');
 
-                res.setHeader('x-guest-state', cacheData?.is_guest
+                res.setHeader('x-guest-state', is_guest
                     ? "guest"
                     : "authenticated");
 
-            }
-        }
+            } else {
+                const cacheData = sessionCache.get(refreshSessionId);
 
-        console.log("----------------------------------\nResponse headers: ", res.headers, "\n----------------------------------\n");
+                if (cacheData) {
+
+                    res.setHeader('Access-Control-Expose-Headers', 'x-guest-state');
+
+                    res.setHeader('x-guest-state', cacheData?.is_guest
+                        ? "guest"
+                        : "authenticated");
+
+                }
+            }
+            console.log("----------------------------------\nResponse headers: ", res.headers, "\n----------------------------------\n");
+        }
+        else
+            console.warn(" \n" +
+                "----------------------------------\n" +
+                "⚠️ fetchWithSessionTokens called without res" +
+                " \n" +
+                "----------------------------------\n");
 
     }
 
     function processRefreshedOrCachedSessionData(newSessionData, res, isMe = false, oldSessionId = null) {
-
 
         if (newSessionData == null) {
             return;

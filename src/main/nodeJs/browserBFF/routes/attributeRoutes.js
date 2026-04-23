@@ -23,7 +23,7 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
                       req, res
                   }
               })
-          }
+          }, {req, res}
       );
 
       const responseData = response.data;

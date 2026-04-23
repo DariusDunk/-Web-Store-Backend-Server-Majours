@@ -19,7 +19,7 @@ router.get('/names', async (req, res)=> {
                   req, res
               }
           });
-      })
+      }, {req, res})
       const responseData = response.data;
 
       return res.status(response.status).json(responseData || {})
