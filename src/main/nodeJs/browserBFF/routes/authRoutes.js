@@ -69,8 +69,7 @@ router.post(`/login`, async (req, res) => {
         const responseData = await response.data;
 
         const {
-            access_token, refresh_token, access_expires_in, refresh_expires_in
-            , session_id, session_expires_in
+            access_token, session_id, session_expires_in
         } = responseData;
 
         authResponse = responseData;

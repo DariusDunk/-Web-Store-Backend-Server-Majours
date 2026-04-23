@@ -119,4 +119,8 @@ public class SessionService {
     public static long calculateSessionTTLSeconds(Instant expiresAt) {
         return ChronoUnit.SECONDS.between(Instant.now(), expiresAt);
     }
+
+    public Optional<Session> getByIdOptional(String sessionId) {
+        return sessionRepository.findById(sessionId);
+    }
 }

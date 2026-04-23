@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Auth.helpers;
 
 import com.example.ecomerseapplication.Entities.ClientType;
+import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.Mappers.SessionMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
@@ -49,9 +50,8 @@ public class SessionFilter extends OncePerRequestFilter {
         String accessToken = request.getHeader("Authorization");
         Session session = getRequestSession(request);
 
-        if (accessToken != null && !accessToken.isBlank()
-        && (session == null || session.getIsRevoked())) {
-            wrappedResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired session");
+        if (isInvalidAuthSession(session, accessToken)) {
+            wrappedResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired auth session");
             wrappedResponse.copyBodyToResponse();
             return;
         }
@@ -76,7 +76,7 @@ public class SessionFilter extends OncePerRequestFilter {
             return;
         }
 
-        session = sessionValidation(request);
+        session = replaceIfInvalidSession(session, request);
         Instant initialSessionExpiry = session.getExpiresAt();
         boolean isReplaced = Boolean.TRUE.equals(request.getAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE));
         /*----------------------ENDPOINT-----------------------------*/
@@ -115,6 +115,24 @@ public class SessionFilter extends OncePerRequestFilter {
 
     }
 
+    private boolean isInvalidAuthSession(Session session, String accessToken) {
+
+        if (accessToken != null && !accessToken.isBlank()
+                && (session == null || (session.getIsRevoked() || session.isExpired()))
+        ) {
+            return true;
+        }
+
+        if (session != null) {
+
+            Customer sessionCustomer = session.getCustomer();
+
+            return sessionCustomer != null
+                    && (session.getIsRevoked() || session.isExpired());
+        }
+        return false;
+    }
+
     private Session getRequestSession(HttpServletRequest request) {
         String path = request.getRequestURI();
         String sessionId = request.getHeader(GlobalConstants.SESSION_ID_HEADER);
@@ -125,7 +143,8 @@ public class SessionFilter extends OncePerRequestFilter {
                 "----------------------------------\n");
 
         if (sessionId != null) {
-            return sessionService.getActiveByIdOptional(sessionId).orElse(null);
+//            return sessionService.getActiveByIdOptional(sessionId).orElse(null);
+            return sessionService.getByIdOptional(sessionId).orElse(null);
         }
         return null;
     }
@@ -147,9 +166,9 @@ public class SessionFilter extends OncePerRequestFilter {
         request.setAttribute(GlobalConstants.SESSION_ATTRIBUTE, session);
     }
 
-    private Session sessionValidation(@NonNull HttpServletRequest request) {
+    private Session replaceIfInvalidSession(Session session, @NonNull HttpServletRequest request) {
 
-        Session session = getRequestSession(request);
+//        Session session = getRequestSession(request);
         ClientType clientType = getSessionClientType(request);
 
         if (session == null || session.getIsRevoked() || session.getExpiresAt().isBefore(Instant.now())) {

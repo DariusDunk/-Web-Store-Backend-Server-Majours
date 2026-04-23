@@ -3,7 +3,6 @@ package com.example.ecomerseapplication.Controllers;
 import com.example.ecomerseapplication.DTOs.requests.CustomerAccountRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.Services.AuthService;
-import com.example.ecomerseapplication.Services.SessionService;
 import com.example.ecomerseapplication.enums.UserRole;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +16,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("auth/")
 public class AuthController {
 
-    private final SessionService sessionService;
     private final AuthService authService;
 
     @Autowired
-    public AuthController(SessionService sessionService, AuthService authService) {
-        this.sessionService = sessionService;
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
 

@@ -11,8 +11,17 @@ const timestamp = () => {
     return `[${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}]`;
 };
 
+const authIntentHeader = 'x-auth-intent';
+
 router.get('/getCart', async (req, res) => {
     let sessionId = req.cookies.session_id;
+
+    const authIntent = req.get(authIntentHeader);
+
+    if (authIntent && !sessionId)
+    {
+        return res.status(401).json({message: "Unauthorized cart activity"});
+    }
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -69,6 +78,13 @@ router.post('/addToCart', async (req, res) => {
     try {
         const {productCode, doIncrement} = req.body;
         let sessionId = req.cookies.session_id;
+        
+        const authIntent = req.get(authIntentHeader);
+
+        if (authIntent && !sessionId)
+        {
+            return res.status(401).json({message: "Unauthorized cart activity"});
+        }
 
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
            return await axiosBackendClient.post(`${Backend_Url}/cart/manageQuant`, {
@@ -126,7 +142,14 @@ router.post('/add/quantity', async (req, res) => {
     try {
         const {productCode, quantity} = req.body;
         let sessionId = req.cookies.session_id;
+        
+        const authIntent = req.get(authIntentHeader);
 
+        if (authIntent && !sessionId)
+        {
+            return res.status(401).json({message: "Unauthorized cart activity"});
+        }
+        
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
            return await axiosBackendClient.post(`${Backend_Url}/cart/add/quantity`, {
                 product_code: productCode,
@@ -180,6 +203,13 @@ router.post('/addToCart/batch', async (req, res) => {
         const productCodes = req.body;
         let sessionId = req.cookies.session_id;
 
+        const authIntent = req.get(authIntentHeader);
+
+        if (authIntent && !sessionId)
+        {
+            return res.status(401).json({message: "Unauthorized cart activity"});
+        }
+        
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
            return await axiosBackendClient.post(`${Backend_Url}/cart/add/batch`, productCodes, {
                 headers: {
@@ -236,7 +266,14 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
 
         const productCode = req.params.productCode;
         let sessionId = req.cookies.session_id;
+        
+        const authIntent = req.get(authIntentHeader);
 
+        if (authIntent && !sessionId)
+        {
+            return res.status(401).json({message: "Unauthorized cart activity"});
+        }
+        
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
            return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/${productCode}`, {
                 headers: {
@@ -291,6 +328,13 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
         let sessionId = req.cookies.session_id;
         const productCodes = req.body;
 
+        const authIntent = req.get(authIntentHeader);
+
+        if (authIntent && !sessionId)
+        {
+            return res.status(401).json({message: "Unauthorized cart activity"});
+        }
+        
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
            return await axiosBackendClient.delete(`${Backend_Url}/cart/remove/batch`, {
                 headers: {
