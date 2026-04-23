@@ -21,9 +21,6 @@ export default {
 
     setSession(sessionId,
                access_token,
-               access_expires_in,
-               refresh_token,
-               refresh_expires_in,
                is_guest,
                is_remember_me,
                sessionExpiresIn){
@@ -35,9 +32,6 @@ export default {
        cache.set(sessionId, {
             session_id:sessionId,
             access_token: access_token,
-            access_expires_in: access_expires_in,
-            refresh_token: refresh_token,
-            refresh_expires_in: refresh_expires_in,
             is_guest: is_guest,
             is_remember_me: is_remember_me,
             session_expires_in: sessionExpiresIn

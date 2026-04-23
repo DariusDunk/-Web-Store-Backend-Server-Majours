@@ -1,8 +1,9 @@
 import express from 'express';
-const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
+
+const router = express.Router();
 
 const timestamp = () => {
     const now = new Date();
@@ -16,17 +17,26 @@ router.get('/featured/:page', async (req, res) => {
 
     try {
 
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {
-            headers: {
-                ...(sessionId && {'x-session-id': sessionId})
-            }
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
+
         const data = await response.data;
         return res.status(response.status).json(data);
 
     } catch (error) {
         console.error('Search: Error fetching data:', error);
-        return res.status(error.status).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -36,17 +46,26 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
     const sessionId = req.cookies.session_id;
 
     try {
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {
-            headers: {
-                ...(sessionId && {'x-session-id': sessionId})
-            }
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.get(`${Backend_Url}/product/manufacturer/${manufacturerName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
+
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
     } catch (error) {
         console.error('Manufacturer: Error fetching data:', error);
-        return res.status(error.status).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -57,18 +76,26 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
 
     try {
 
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {
-            headers: {
-                ...(sessionId && {'x-session-id': sessionId})
-            }
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.get(`${Backend_Url}/product/category/${categoryName}/p${page}?${new URLSearchParams({sort: sort || ''})}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
     } catch (error) {
         console.error('Category: Error fetching data:', error);
-        return res.status(error.status).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -82,17 +109,26 @@ router.get(`/review/overview/:productCode`, async (req, res) => {
 
     try {
 
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
-            headers: {
-                ...(sessionId && {'x-session-id': sessionId})
-            }
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.get(`${Backend_Url}/product/${productCode}/review/overview`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
+
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
     } catch (error) {
         console.error('Error fetching product review overview from backend:', error);
-        return res.status(error.status).end();
+        return res.status(error.response?.status || 500).end();
     }
 })
 
@@ -149,7 +185,7 @@ router.get('/detail/:productCode', async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching detailed product data from backend:', error);
-        return res.status(error.status||500).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -158,18 +194,28 @@ router.get('/suggest/:name', async (req, res) => {
 
         const name = req.params.name;
         const sessionId = req.cookies.session_id;
-        const response = await axiosBackendClient.get(`${Backend_Url}/product/suggest?${new URLSearchParams({name: name || ''})}`, {
-            headers: {
-                ...(sessionId && {'x-session-id': sessionId})
-            }
-        });
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.get(`${Backend_Url}/product/suggest?${new URLSearchParams({name: name || ''})}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
+
         const data = await response.data;
 
         return res.status(response.status).json(data);
 
     } catch (error) {
         console.error('Suggest: Error fetching suggestions from backend:', error);
-        return res.status(500).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -186,18 +232,26 @@ router.get(`/search`, async (req, res) => {
         url.searchParams.set('page', page);
         url.searchParams.set('sort', sort || '');
 
-        const response = await axiosBackendClient.get(url.toString(), {
-            headers: {
-                ...(sessionId && {'x-session-id': sessionId})
-            }
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.get(url.toString(), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
 
         const data = await response.data;
         return res.status(response.status).json(data);
 
     } catch (error) {
         console.error('Search: Error fetching data:', error);
-        return res.status(500).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -258,18 +312,26 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
     try {
 
-        const response = await axiosBackendClient.post(`${Backend_Url}/product/filter/${page}`, requestBody, {
-            headers: {
-                ...(sessionId && {'x-session-id': sessionId})
-            }
-        });
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.post(`${Backend_Url}/product/filter/${page}`, requestBody, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-client_type': WEB_CLIENT_NAME,
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                },
+                bffContext: {
+                    req, res
+                }
+            });
+        }, {req, res});
 
         const responseData = await response.data;
         return res.status(response.status).json(responseData);
 
     } catch (error) {
         console.error('Error fetching products with filters:', error);
-        return res.status(500).end();
+        return res.status(error.response?.status || 500).end();
     }
 });
 
@@ -285,9 +347,11 @@ router.post('/getPagedReviews', async (req, res) => {
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
 
-            console.log("Session data for paged review: ", sessionData);
+            // console.log("Session data for paged review: ", sessionData);
 
-            const respons = await axiosBackendClient.post(`${Backend_Url}/product/reviews/paged`, {
+            // console.log('pagedReview response:', respons);
+
+            return await axiosBackendClient.post(`${Backend_Url}/product/reviews/paged`, {
                 product_code: productCode,
                 page,
                 sort_order: sort,
@@ -297,17 +361,13 @@ router.post('/getPagedReviews', async (req, res) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
-                   ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
                     ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
                 },
                 bffContext: {
                     req, res
                 }
-            })
-
-            // console.log('pagedReview response:', respons);
-
-            return respons;
+            });
         }, {req, res})
 
         // console.log('Paged reviews response body:', response);
@@ -323,7 +383,7 @@ router.post('/getPagedReviews', async (req, res) => {
 
     } catch (error) {
         console.error('Reviews: Error fetching paged reviews data: ', error);
-        return res.status(500).json({error: 'Internal server error'});
+        return res.status(error.response?.status || 500).json({error: 'Internal server error'});
     }
 })
 
@@ -358,7 +418,7 @@ router.get(`/getReview/:productCode`, async (req, res) => {
         }
 
         console.error('-------------------Unexpected error fetching specific review data-------------------\n', error);
-        return res.status(500).json({error: 'Internal server error'});
+        return res.status(error.response?.status || 500).json({error: 'Internal server error'});
     }
 })
 
@@ -397,7 +457,7 @@ router.post(`/addReview`, async (req, res) => {
         }
 
         console.error('-------------------Unexpected error creating review-------------------\n', error);
-        return res.status(500).json({error: 'Internal server error'});
+        return res.status(error.response?.status || 500).json({error: 'Internal server error'});
     }
 })
 
@@ -438,7 +498,7 @@ router.post(`/updateReview`, async (req, res) => {
         }
 
         console.error('-------------------Error updating the review-------------------\n', error);
-        return res.status(500).end();
+        return res.status(error.response?.status || 500).end();
     }
 })
 
@@ -468,7 +528,7 @@ router.post(`/deleteReview`, async (req, res) => {
     } catch (error) {
 
         console.error('Error deleting the review ', error);
-        return res.status(500).end();
+        return res.status(error.response?.status || 500).end();
     }
 })
 

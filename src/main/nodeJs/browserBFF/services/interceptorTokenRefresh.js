@@ -16,9 +16,6 @@ export async function refreshToken(sessionId, res) {
             const {
                 session_id,
                 access_token,
-                refresh_token,
-                access_expires_in,
-                refresh_expires_in,
                 session_expires_in,
                 is_guest,
                 is_remember_me
@@ -36,9 +33,6 @@ export async function refreshToken(sessionId, res) {
             sessionCache.setSession(
                 session_id,
                 access_token,
-                access_expires_in,
-                refresh_token,
-                refresh_expires_in,
                 is_guest,
                 is_remember_me,
                 session_expires_in

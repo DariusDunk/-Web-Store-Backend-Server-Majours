@@ -38,7 +38,7 @@ router.post(`/register`, async (req, res) => {
             return res.status(error.response.status).end();
         }
         console.error('Error with registration: ', error);
-        return res.status(500).json({error: 'Internal server error'});
+        return res.status(error.response?.status || 500).json({error: 'Internal server error'});
     }
 })
 
@@ -66,7 +66,6 @@ router.post(`/login`, async (req, res) => {
         }
     })
 
-
         const responseData = await response.data;
 
         const {
@@ -76,21 +75,8 @@ router.post(`/login`, async (req, res) => {
 
         authResponse = responseData;
 
-        // sessionCache.set(session_id, {
-        //     session_id,
-        //     access_token,
-        //     expires_in,
-        //     refresh_token,
-        //     refresh_expires_in,
-        //     is_guest: false,
-        //     remember_me: rememberMe
-        // });
-
         sessionCache.setSession(session_id,
             access_token,
-            access_expires_in,
-            refresh_token,
-            refresh_expires_in,
             false,
             rememberMe,
             session_expires_in);
@@ -106,7 +92,7 @@ router.post(`/login`, async (req, res) => {
     }
     catch (error) {
         console.error('-------------Error with login-------------\n', error);
-        return res.status(500).end();
+        return res.status(error.status || 500).end();
     }
 
     if (!authResponse.session_id) {
@@ -153,7 +139,7 @@ router.post('/logout', async (req, res) => {
 
         try {
           const response =  await fetchWithSessionTokens(sessionId, async (sessionData) => await axiosBackendClient.get(
-                `${AuthURL}/invalidate/${encodeURIComponent(sessionData.refresh_token)}`,
+                `${AuthURL}/logout`,
                   {
                       headers: {
                           'Content-Type': 'application/json',
@@ -179,9 +165,6 @@ router.post('/logout', async (req, res) => {
                     // const cartSummary = await summaryResponse?.data;
 
                     sessionCache.setSession(session_id,
-                        null,
-                        null,
-                        null,
                         null,
                         true,
                         false,

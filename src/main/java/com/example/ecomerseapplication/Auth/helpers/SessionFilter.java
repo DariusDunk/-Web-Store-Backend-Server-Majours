@@ -44,10 +44,18 @@ public class SessionFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper wrappedResponse =
                 new ContentCachingResponseWrapper(response);
 
-//        boolean isPublic = isPublicEndpoint(request);
         String requestLabel = "[For request: " + request.getRequestURI() + "]";
 
-        //todo tuk moje da se pravi testvane na skorost na zaqvkata kato se sloji taimer predi tova izvikvane (koeto realno pozvolqva da se izpylni zaqvkata sled filtyra), koioto da svyr6i sled nego
+        String accessToken = request.getHeader("Authorization");
+        Session session = getRequestSession(request);
+
+        if (accessToken != null && !accessToken.isBlank()
+        && (session == null || session.getIsRevoked())) {
+            wrappedResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired session");
+            wrappedResponse.copyBodyToResponse();
+            return;
+        }
+
         if (isPublicEndpoint(request)) {
 
             /*----------------------PUBLIC ENDPOINT-----------------------------*/
@@ -58,7 +66,7 @@ public class SessionFilter extends OncePerRequestFilter {
         }
 
         if (isRefreshEndpoint(request)) {
-            Session session = getRequestSession(request);
+
             ClientType clientType = getSessionClientType(request);
             setUpSessionAndClientRequestHeaders(request, session, clientType);
             /*----------------------REFRESH ENDPOINT-----------------------------*/
@@ -68,7 +76,7 @@ public class SessionFilter extends OncePerRequestFilter {
             return;
         }
 
-        Session session = sessionValidation(request);
+        session = sessionValidation(request);
         Instant initialSessionExpiry = session.getExpiresAt();
         boolean isReplaced = Boolean.TRUE.equals(request.getAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE));
         /*----------------------ENDPOINT-----------------------------*/

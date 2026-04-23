@@ -28,10 +28,10 @@ public class CartService {
        return cartRepository.save(cart);
     }
 
-    public Cart getOrCreateBySession(Session session) {
-        return cartRepository.getBySession((session))
-                .orElseGet(() -> cartRepository.save(new Cart(session)));
-    }
+//    public Cart getOrCreateBySession(Session session) {
+//        return cartRepository.getBySession((session))
+//                .orElseGet(() -> cartRepository.save(new Cart(session)));
+//    }
 
     public Optional<Cart> getBySession(Session session) {
         return cartRepository.getBySession(session);

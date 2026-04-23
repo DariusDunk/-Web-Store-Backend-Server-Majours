@@ -1,13 +1,13 @@
 import sessionCache from "./sessionCache.js";
 import {Backend_Url, WEB_CLIENT_NAME} from '../routes/config.js';
-import axios from 'axios';
+import axiosBackendClient from '../axiosBackendClient.js';
 
 const refreshInProgress = new Map();
 
 export async function fetchTokensOfSession(sessionID) {
 
     try {
-        const {data} = await axios.get(`${Backend_Url}/auth/tokens`,
+        const {data} = await axiosBackendClient.get(`${Backend_Url}/auth/tokens`,
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -21,19 +21,6 @@ export async function fetchTokensOfSession(sessionID) {
         throw error;
     }
 }
-
-//
-// async function createGuestSession() {
-//     try {
-//         const {data} = await axios.get(`${Backend_Url}/auth/session/guest/create/Web`);
-//
-//         // console.log("Guest session data: ", data);
-//
-//         return data;
-//     } catch (error) {
-//         console.error("Error creating guest session: ", error);
-//     }
-// }
 
 async function getSessionData(sessionId) {
     // 1. Check Cache
@@ -53,11 +40,6 @@ async function getSessionData(sessionId) {
     // 3. Create the actual work promise
     const fetchWork = async () => {
         try {
-            // if (!newSessionData) {
-            //     throw new Error('Backend returned empty session data');
-            // }
-
-            // console.log("💾 Cache Updated for:", sessionId);
 
             const freshData = await fetchTokensOfSession(sessionId);
             return {...freshData, _isCacheHit: false};
@@ -76,33 +58,6 @@ async function getSessionData(sessionId) {
 
     return await p;
 }
-
-//
-// async function setUpGuestSession(res) {
-//     try
-//     {
-//         const guestData = await createGuestSession();
-//         const {session_id, session_ttl} = guestData;
-//
-//         sessionCache.set(session_id, {session_id, is_guest: true, remember_me: false, session_ttl});
-//         // sessionId = session_id;
-//
-//         res.cookie('session_id', session_id, {
-//             maxAge: (session_ttl ?? 660) * 1000,
-//             secure: false,
-//             path: '/',
-//             sameSite: 'lax',
-//             httpOnly: true
-//         });
-//
-//         console.log("Guest session id for return: ", session_id);
-//         return session_id;
-//     }
-//     catch (error)
-//     {
-//         console.error("Error creating guest session: ", error);
-//     }
-// }
 
 export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
     const {isMe = false, req, res} = options;
@@ -175,7 +130,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
         let {'x-session-info': sessionData} = headers;
 
-        let responseSessionId = null;
+        let responseSessionId;
 
         responseSessionId = sessionData?.session_id;
         const {is_guest, session_id: refreshSessionId} = sessionDataAfterCacheRefresh;
@@ -216,9 +171,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
         const {
             session_id: newSessionId,
             access_token,
-            refresh_token,
-            access_expires_in,
-            refresh_expires_in,
             session_expires_in,
             is_guest,
             is_remember_me,
@@ -242,9 +194,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             sessionCache.setSession(
                 newSessionId,
                 access_token,
-                access_expires_in,
-                refresh_token,
-                refresh_expires_in,
                 is_guest,
                 is_remember_me,
                 session_expires_in);
@@ -264,9 +213,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             sessionCache.setSession(
                 oldSessionId,
                 access_token,
-                access_expires_in,
-                refresh_token,
-                refresh_expires_in,
                 is_guest,
                 is_remember_me,
                 session_expires_in);
@@ -343,9 +289,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
                 sessionCache.setSession(
                     session_id,
-                    null,
-                    null,
-                    null,
                     null,
                     is_guest,
                     is_remember_me,

@@ -13,9 +13,6 @@ public class RefreshResponseMapper {
                                                                 boolean isRememberMe,
                                                                 String validSessionId) {
         return new RefreshResponse(tokenRefreshResponse.accessToken(),
-                tokenRefreshResponse.expiresIn(),
-                tokenRefreshResponse.refreshExpiresIn(),
-                tokenRefreshResponse.refreshToken(),
                 Duration.between(Instant.now(), sessionExpiry).getSeconds(),
                 isGuest,
                 isRememberMe,

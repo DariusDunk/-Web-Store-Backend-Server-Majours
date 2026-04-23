@@ -9,9 +9,6 @@ import java.time.temporal.ChronoUnit;
 public class LoginResponseMapper {
     public static LoginResponse fromKeycloakResponseAndSession(KeycloakTokenResponse keycloakTokenResponse, Session session) {
         return new LoginResponse(keycloakTokenResponse.accessToken(),
-                keycloakTokenResponse.expiresIn(),
-                keycloakTokenResponse.refreshExpiresIn(),
-                keycloakTokenResponse.refreshToken(),
                 session.getSessionId(),
                 ChronoUnit.SECONDS.between(Instant.now(), session.getExpiresAt()));
     }

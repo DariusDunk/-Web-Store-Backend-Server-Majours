@@ -45,11 +45,11 @@ public class AuthController {
 
     }
 
-    @GetMapping("invalidate/{token}")
-    public ResponseEntity<?> logout(@PathVariable("token") String refreshToken) {
+    @GetMapping("logout")
+    public ResponseEntity<?> logout() {
         try {
 
-            return ResponseEntity.ok(authService.logout(refreshToken));
+            return ResponseEntity.ok(authService.logout());
 
 //            return ResponseEntity.ok(authService.createGuest(clientType));
         } catch (Exception e) {

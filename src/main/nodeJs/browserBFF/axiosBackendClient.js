@@ -31,6 +31,18 @@ axiosBackendClient.interceptors.response.use(
         }
 
         if (originalRequest._retry) {
+
+            sessionCache.safeDelete(sessionId);
+
+            res.cookie('session_id', "",
+                {
+                    maxAge: 0,
+                    secure: false,
+                    path: '/',
+                    sameSite: 'lax',
+                    httpOnly: true
+                });
+
             return Promise.reject(error);
         }
 

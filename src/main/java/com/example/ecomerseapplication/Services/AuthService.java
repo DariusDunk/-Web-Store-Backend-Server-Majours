@@ -118,11 +118,13 @@ public class AuthService {
     }
 
     @Transactional
-    public GuestSessionResponse logout(String refreshToken) {
+    public GuestSessionResponse logout() {
 
         Session session = sessionService.getRequestSession();
 
         try {
+
+            String refreshToken = session.getRefreshToken();
             session = sessionService.AuthToGuestSession(session);
 
             keycloakService.invalidateRefreshToken(refreshToken);
@@ -141,7 +143,7 @@ public class AuthService {
 
         String refreshToken;
         TokenRefreshResponse tokenRefreshResponse;
-        Session session= null;
+        Session session = null;
         try {
             session = SessionExtractor.getRequestSession().orElse(null);
 
@@ -155,9 +157,6 @@ public class AuthService {
                 session = sessionService.createGuestSession(session.getClientType());
                 sessionService.save(session);
                 return new RefreshResponse(null,
-                        0,
-                        0,
-                        null,
                         SessionService.calculateSessionTTLSeconds(session.getExpiresAt()),
                         true,
                         false,
@@ -183,9 +182,6 @@ public class AuthService {
             sessionService.save(session);
 
             return new RefreshResponse(null,
-                    0,
-                    0,
-                    null,
                     Duration.between(Instant.now(), session.getExpiresAt()).getSeconds(),
                     true,
                     false,
