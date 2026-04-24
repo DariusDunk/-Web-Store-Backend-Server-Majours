@@ -18,7 +18,7 @@ router.get('/getCart', async (req, res) => {
 
     const authIntent = req.get(authIntentHeader);
 
-    if (authIntent && !sessionId)
+    if (authIntent && (sessionId === undefined || sessionId === null))
     {
         return res.status(401).json({message: "Unauthorized cart activity"});
     }
@@ -81,8 +81,13 @@ router.post('/addToCart', async (req, res) => {
         
         const authIntent = req.get(authIntentHeader);
 
-        if (authIntent && !sessionId)
+        console.log("Auth intent in AddToCart: " + authIntent);
+
+        if (authIntent && (sessionId === undefined || sessionId === null))
         {
+
+            console.log("Zombie request detected, action rejected");
+
             return res.status(401).json({message: "Unauthorized cart activity"});
         }
 
@@ -145,7 +150,7 @@ router.post('/add/quantity', async (req, res) => {
         
         const authIntent = req.get(authIntentHeader);
 
-        if (authIntent && !sessionId)
+        if (authIntent && (sessionId === undefined || sessionId === null))
         {
             return res.status(401).json({message: "Unauthorized cart activity"});
         }
@@ -205,7 +210,7 @@ router.post('/addToCart/batch', async (req, res) => {
 
         const authIntent = req.get(authIntentHeader);
 
-        if (authIntent && !sessionId)
+        if (authIntent && (sessionId === undefined || sessionId === null))
         {
             return res.status(401).json({message: "Unauthorized cart activity"});
         }
@@ -269,7 +274,7 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
         
         const authIntent = req.get(authIntentHeader);
 
-        if (authIntent && !sessionId)
+        if (authIntent && (sessionId === undefined || sessionId === null))
         {
             return res.status(401).json({message: "Unauthorized cart activity"});
         }
@@ -330,7 +335,7 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
 
         const authIntent = req.get(authIntentHeader);
 
-        if (authIntent && !sessionId)
+        if (authIntent && (sessionId === undefined || sessionId === null))
         {
             return res.status(401).json({message: "Unauthorized cart activity"});
         }

@@ -66,15 +66,27 @@ public class Session {
 
     // Add these methods inside your Session.java entity class
 
-    public void markAsGuest(int lowPriorityMinutes) {
+    public void markAsGuestWithoutCart(int lowPriorityMinutes) {
+        MarkAsGuest();
+        this.expiresAt = Instant.now().plus(lowPriorityMinutes, ChronoUnit.MINUTES);
+
+    }
+
+    private void MarkAsGuest() {
         this.isGuest = true;
         this.customer = null;
         this.refreshToken = null;
         this.isRememberMeSession = false;
         this.isRevoked = false;
-        this.expiresAt = Instant.now().plus(lowPriorityMinutes, ChronoUnit.MINUTES);
         this.lastActivityAt = Instant.now();
     }
+
+    public void markAsGuestWithCart(int cartTtlDays) {
+        MarkAsGuest();
+        this.expiresAt = Instant.now().plus(cartTtlDays, ChronoUnit.DAYS);
+
+    }
+
 
     public void markAsCartActive(int cartTtlDays) {
 

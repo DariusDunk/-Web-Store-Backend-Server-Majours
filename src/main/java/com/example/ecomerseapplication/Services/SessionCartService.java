@@ -22,7 +22,7 @@ public class SessionCartService {
 
         if (cart == null) {
             cart = new Cart(session);
-            session.markAsCartActive(GlobalConstants.GUEST_SESSION_TTL_DAYS);
+            session.markAsCartActive(GlobalConstants.CART_GUEST_SESSION_TTL_DAYS);
             sessionService.save(session);
         }
 

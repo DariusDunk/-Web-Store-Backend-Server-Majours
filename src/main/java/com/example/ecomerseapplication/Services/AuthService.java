@@ -176,8 +176,10 @@ public class AuthService {
             }
             else
             {
-//                if (sessionService.)//todo napravi jivota tuk i moje bi v samiq markAsGuest metod da vzima v predvid dali ima koli4ka ili ne pitai 4 gemito ako trqbva
-                session.markAsGuest(GlobalConstants.LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
+                if (cartService.existsBySession(session))
+                    session.markAsGuestWithCart(GlobalConstants.CART_GUEST_SESSION_TTL_DAYS);
+                else
+                    session.markAsGuestWithoutCart(GlobalConstants.LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
             }
 
             sessionService.save(session);

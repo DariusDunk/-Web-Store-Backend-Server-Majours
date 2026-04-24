@@ -56,7 +56,7 @@ public class SessionService {
 
         boolean hasCart = cartService.existsBySession(session);
 
-        if (session.registerActivity(hasCart, LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, GUEST_SESSION_TTL_DAYS))
+        if (session.registerActivity(hasCart, LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES, CART_GUEST_SESSION_TTL_DAYS))
             sessionRepository.save(session);
     }
 
@@ -92,7 +92,7 @@ public class SessionService {
         Session session = new Session();
         session.setSessionId(generateSessionId());
         session.setClientType(clientType);
-        session.markAsGuest(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
+        session.markAsGuestWithoutCart(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
 
         return sessionRepository.save(session);
 
@@ -104,7 +104,7 @@ public class SessionService {
             throw new InvalidSessionException("Session is already a guest session");
         }
 
-        session.markAsGuest(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
+        session.markAsGuestWithoutCart(LOW_PRIORITY_GUEST_SESSION_TTL_MINUTES);
 
         return sessionRepository.save(session);
     }
