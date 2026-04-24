@@ -184,7 +184,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             _isCacheHit,
         } = newSessionData;
 
-        console.log("----------------------------------\nSession Data after refresh : ", newSessionData);
+        console.log("----------------------------------\nSession Data after cache check or refresh : ", newSessionData);
 
 
         console.log("Session TTL in refresh:", session_expires_in);

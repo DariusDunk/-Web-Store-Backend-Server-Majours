@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { Backend_Url } from './routes/config.js';
+import {Backend_Url} from './routes/config.js';
 import {refreshToken} from './services/interceptorTokenRefresh.js';
 import sessionCache from "./services/sessionCache.js";
 
-const axiosBackendClient = axios.create({ baseURL: Backend_Url , withCredentials: true});
+const axiosBackendClient = axios.create({baseURL: Backend_Url, withCredentials: true});
 
 const refreshPromises = new Map();
 
@@ -30,18 +30,18 @@ axiosBackendClient.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        const isGuestSession = sessionCache.get(sessionId)?.is_guest;
+
+        if (isGuestSession !== undefined && isGuestSession !== null && isGuestSession) {
+
+            // console.log("Guest session detected, rejecting refresh...");
+
+            return Promise.reject(error);
+        }
+
         if (originalRequest._retry) {
 
-            sessionCache.safeDelete(sessionId);
-
-            res.cookie('session_id', "",
-                {
-                    maxAge: 0,
-                    secure: false,
-                    path: '/',
-                    sameSite: 'lax',
-                    httpOnly: true
-                });
+            resolveUnauthorizedAuthRequest(sessionId, res);
 
             return Promise.reject(error);
         }
@@ -75,11 +75,26 @@ axiosBackendClient.interceptors.response.use(
                 if (updatedTokens && updatedTokens.access_token) {
                     originalRequest.headers['Authorization'] = 'Bearer ' + updatedTokens.access_token;
                 }
-              return axiosBackendClient(originalRequest)
+                return axiosBackendClient(originalRequest)
             })
             .catch(err => Promise.reject(err));
     }
 );
+
+function resolveUnauthorizedAuthRequest(sessionId, res) {
+
+    sessionCache.safeDelete(sessionId);
+
+    res.cookie('session_id', "",
+        {
+            maxAge: 0,
+            secure: false,
+            path: '/',
+            sameSite: 'lax',
+            httpOnly: true
+        });
+
+}
 
 export default axiosBackendClient;
 
