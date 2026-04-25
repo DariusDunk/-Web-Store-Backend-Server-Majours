@@ -1,26 +1,7 @@
 import sessionCache from "./sessionCache.js";
-import {Backend_Url, WEB_CLIENT_NAME} from '../routes/config.js';
-import axiosBackendClient from '../axiosBackendClient.js';
+import fetchTokensOfSession from "./refreshRequest.js";
 
 const refreshInProgress = new Map();
-
-export async function fetchTokensOfSession(sessionID) {
-
-    try {
-        const {data} = await axiosBackendClient.get(`${Backend_Url}/auth/tokens`,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-client_type': WEB_CLIENT_NAME,
-                    ...(sessionID && {'x-session-id': sessionID})
-                }
-            });
-        return data;
-    } catch (error) {
-        console.error("Error fetching tokens of session: ", error);
-        throw error;
-    }
-}
 
 async function getSessionData(sessionId) {
     // 1. Check Cache
@@ -76,6 +57,11 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
         } catch (err) {
 
             console.error("Error fetching session data:", err);
+
+            if (sessionId) {
+                sessionData = {session_id: sessionId}
+
+            }
 
         }
 

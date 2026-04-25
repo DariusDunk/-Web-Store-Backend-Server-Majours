@@ -17,7 +17,7 @@ router.get('/getFilters/:categoryName', async (req, res)=>{
                       'Content-Type': 'application/json',
                       'x-client_type': WEB_CLIENT_NAME,
                       ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                      ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                      ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                   },
                   bffContext: {
                       req, res

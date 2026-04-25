@@ -48,12 +48,17 @@ axiosBackendClient.interceptors.response.use(
 
         originalRequest._retry = true;
 
-        if (!refreshPromises.has(sessionId)) {
+        let refreshPromise = refreshPromises.get(sessionId);
+
+        if (!refreshPromise) {
             // console.log("Attempting to refresh token...");
 
-            const refreshPromise = refreshToken(sessionId, res)
+            refreshPromise = refreshToken(sessionId, res)
                 .catch(err => {
                     console.error("Refresh token failed: " + err);
+
+                    resolveUnauthorizedAuthRequest(sessionId, res);
+
                     throw err;
                 })
                 .finally(() => {
@@ -66,8 +71,7 @@ axiosBackendClient.interceptors.response.use(
             // console.log("Token refresh already in progress, request paused...");
         }
 
-        return refreshPromises
-            .get(sessionId)
+        return refreshPromise
             .then(() => {
 
                 const updatedTokens = sessionCache.get(sessionId);
@@ -77,13 +81,20 @@ axiosBackendClient.interceptors.response.use(
                 }
                 return axiosBackendClient(originalRequest)
             })
-            .catch(err => Promise.reject(err));
+            .catch(err => {
+
+               return Promise.reject(err)
+            });
     }
 );
 
 function resolveUnauthorizedAuthRequest(sessionId, res) {
 
+    console.log("session_id: " + sessionId + " is invalid, performing logout:");
+
     sessionCache.safeDelete(sessionId);
+
+    console.log("session_id: " + sessionId + " is invalid, clearing cookies:");
 
     res.cookie('session_id', "",
         {

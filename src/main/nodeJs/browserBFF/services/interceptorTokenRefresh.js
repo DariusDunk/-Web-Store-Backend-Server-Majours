@@ -1,5 +1,5 @@
 // import axiosBackendClient from '../axiosBackendClient.js';
-import {fetchTokensOfSession} from "./requestTokenManager.js";
+import fetchTokensOfSession from "./refreshRequest.js";
 import sessionCache from "./sessionCache.js";
 
 export async function refreshToken(sessionId, res) {

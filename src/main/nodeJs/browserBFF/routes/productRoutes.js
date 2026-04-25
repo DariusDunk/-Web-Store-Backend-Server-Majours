@@ -23,7 +23,7 @@ router.get('/featured/:page', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -52,7 +52,7 @@ router.get('/manufacturer/:manufacturerName/p:page', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -82,7 +82,7 @@ router.get('/category/:categoryName/p:page', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -115,7 +115,7 @@ router.get(`/review/overview/:productCode`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -148,8 +148,8 @@ router.get('/detail/:productCode', async (req, res) => {
                          headers: {
                              'Content-Type': 'application/json',
                              'x-client_type': WEB_CLIENT_NAME,
-                             ...(!sessionData.is_guest && {'Authorization': 'Bearer ' + sessionData.access_token}),
-                             ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                             ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                             ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                          },
                          bffContext: {
                              req, res
@@ -201,7 +201,7 @@ router.get('/suggest/:name', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -238,7 +238,7 @@ router.get(`/search`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -318,7 +318,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -362,7 +362,7 @@ router.post('/getPagedReviews', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -399,7 +399,7 @@ router.get(`/getReview/:productCode`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -439,7 +439,7 @@ router.post(`/addReview`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -479,7 +479,7 @@ router.post(`/updateReview`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -514,7 +514,7 @@ router.post(`/deleteReview`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res

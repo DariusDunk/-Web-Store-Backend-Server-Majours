@@ -30,7 +30,7 @@ router.get('/getCart', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -100,7 +100,7 @@ router.post('/addToCart', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -164,7 +164,7 @@ router.post('/add/quantity', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -221,7 +221,7 @@ router.post('/addToCart/batch', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -285,7 +285,7 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -346,7 +346,7 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 data: JSON.stringify(productCodes),
                 bffContext: {

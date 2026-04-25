@@ -107,7 +107,7 @@ router.post(`/removeFav/single`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 data: JSON.stringify(requestBody),
                 bffContext: {
@@ -145,7 +145,7 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 bffContext: {
                     req, res
@@ -178,7 +178,7 @@ router.post(`/removeFav/batch`, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-client_type': WEB_CLIENT_NAME,
                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                 },
                 data: JSON.stringify({current_page: currentPage, product_codes: productCodes}),
                 bffContext: {
@@ -217,7 +217,7 @@ router.get('/me', async (req, res) => {
                             'Content-Type': 'application/json',
                             'x-client_type': WEB_CLIENT_NAME,
                             ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                            ...(sessionData.session_id && {'x-session-id': sessionData.session_id}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                         },
                         bffContext: {
                             req, res

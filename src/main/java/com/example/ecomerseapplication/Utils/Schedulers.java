@@ -26,5 +26,4 @@ public class Schedulers {
         sessionRevoker.revokeExpiredSessions();
     }
 
-
 }
