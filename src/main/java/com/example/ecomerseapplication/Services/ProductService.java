@@ -64,6 +64,7 @@ public class ProductService {
                 .append("FROM online_shop.products p ")
                 .append("LEFT JOIN online_shop.manufacturers m ON p.manufacturer_id = m.manufacturer_id ")
                 .append("LEFT JOIN online_shop.product_categories c ON p.product_category_id = c.product_category_id ")
+//                .append("LEFT JOIN online_shop.sales s ON p.product_id = s.product_id")
                 .append("WHERE ");
 
         //-----------------word array WHERE clause buildup--------------------
@@ -377,9 +378,6 @@ public class ProductService {
         productRepository.save(product);
     }
 
-//    public void saveAll(List<Product> updatedQuantProducts) {
-//        productRepository.saveAll(updatedQuantProducts);
-//    }
 
     public Set<Integer> getRatingsOfCategory(ProductCategory category) {
         Set<Integer> dbrResponse = productRepository.getRatingsByCategory(category).orElse(new HashSet<>());

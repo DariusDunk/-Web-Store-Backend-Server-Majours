@@ -16,10 +16,12 @@ public class SaleProduct {
 
     @ManyToOne
     @MapsId("productId")
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne
     @MapsId("saleId")
+    @JoinColumn(name = "sale_id")
     private Sale sale;
 
     @Column(name = "override_discount_percentage")

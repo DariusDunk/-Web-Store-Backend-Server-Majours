@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -77,11 +78,23 @@ public class Product {
     @Column(name = "added_at")
     private Instant creationTimeStamp;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private Set<SaleProduct> saleProducts;
 
     public boolean isInStock() {
         return quantityInStock > 0;
     }
+
+
+    public Optional<SaleProduct> getSingleSaleProduct() {
+        if (saleProducts == null || saleProducts.isEmpty()) {
+            return Optional.empty();
+        }
+        if (saleProducts.size() > 1) {
+            throw new IllegalStateException("Multiple sales found for product");
+        }
+        return Optional.of(saleProducts.iterator().next());
+    }
+
 
 }
