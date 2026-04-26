@@ -14,7 +14,6 @@ public class DetailedProductResponse {
     public int salePriceStotinki;
     public String productCode;
     public String manufacturer;
-//    public Set<CategoryAttribute> attributes;
     public Set<AttributeOptionResponse> attributes;
     public String productDescription;
     public short rating;
@@ -22,7 +21,6 @@ public class DetailedProductResponse {
     public String model;
     @JsonProperty("productImages")
     public List<String> productImageURLs;
-//    public List<ReviewResponse> reviews;
     public boolean inFavourites = false;
     public boolean inCart = false;
     public boolean reviewed = false;

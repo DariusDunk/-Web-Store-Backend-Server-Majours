@@ -77,6 +77,9 @@ public class Product {
     @Column(name = "added_at")
     private Instant creationTimeStamp;
 
+    @OneToMany(mappedBy = "product")
+    private Set<SaleProduct> saleProducts;
+
     public boolean isInStock() {
         return quantityInStock > 0;
     }

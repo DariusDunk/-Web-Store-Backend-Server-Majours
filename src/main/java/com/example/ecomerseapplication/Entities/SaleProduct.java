@@ -1,10 +1,7 @@
 package com.example.ecomerseapplication.Entities;
 
 import com.example.ecomerseapplication.CompositeIdClasses.SaleProductId;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +13,14 @@ public class SaleProduct {
 
     @EmbeddedId
     private SaleProductId saleProductId;
+
+    @ManyToOne
+    @MapsId("productId")
+    private Product product;
+
+    @ManyToOne
+    @MapsId("saleId")
+    private Sale sale;
 
     @Column(name = "override_discount_percentage")
     private Short overrideDiscountPercentage;
