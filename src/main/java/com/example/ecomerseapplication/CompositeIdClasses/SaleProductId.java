@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.CompositeIdClasses;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

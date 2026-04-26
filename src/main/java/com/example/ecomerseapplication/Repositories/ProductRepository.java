@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
@@ -9,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,23 +18,32 @@ import java.util.Set;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
-    @Query(value =
-            "select p " +
-                    "from Product p " +
-                    "where p.productName ilike %:name% " +
-                    "order by p.rating, p.id ")
-    Page<Product> getByNameLike(@Param("name") String name, Pageable pageable);
 
-    @Query("select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse (p.productCode," +
+//    @Query("select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse (p.productCode," +
+//            " p.productName, " +
+//            "p.originalPriceStotinki, " +
+//            "p.salePriceStotinki, " +
+//            "p.rating, SIZE(p.reviews), " +
+//            "p.mainImageUrl,  " +
+//            "case when p.quantityInStock>0 then true else false end) " +
+//            "from Product p ")
+//    Page<CompactProductResponse> findAllAsResponseSortByRating(Pageable pageable);
+
+    @Query("select new com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto (p.productCode," +
             " p.productName, " +
             "p.originalPriceStotinki, " +
-            "p.salePriceStotinki, " +
+//            "p.salePriceStotinki, " +
+            "s.discountPercent, " +
+            "sp.overrideDiscountPercentage, " +
             "p.rating, SIZE(p.reviews), " +
             "p.mainImageUrl,  " +
             "case when p.quantityInStock>0 then true else false end) " +
-            "from Product p ")
-    Page<CompactProductResponse> findAllAsResponseSortByRating(Pageable pageable);
-
+            "from Product p " +
+            "left join p.saleProducts sp " +
+            "left join sp.sale s " +
+            "with s.isActive = true " +
+            "AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate")
+    Page<CompactProductDto> findAllAsResponseSortByRating(Pageable pageable);
 
     @Query(value =
             "select p.productName " +

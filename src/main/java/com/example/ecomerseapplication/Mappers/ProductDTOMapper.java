@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Mappers;
 import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -61,6 +62,45 @@ public class ProductDTOMapper {
                 productPage.getPageable(),
                 productPage.getTotalElements());
     }
+
+    public static Page<CompactProductResponse> compactProductPageToCompactDtoPage(Page<CompactProductDto> compactProductPage) {
+
+        List<CompactProductDto> compactProductDTOs = compactProductPage.getContent();
+
+        List<CompactProductResponse> compactProductResponses = compactProductDTOs
+                .stream()
+                .map(ProductDTOMapper::compactProductToResponse)
+                .toList();
+
+        return new PageImpl<>(compactProductResponses,
+                compactProductPage.getPageable(),
+                compactProductPage.getTotalElements());
+
+    }
+
+    private static CompactProductResponse compactProductToResponse(CompactProductDto productDto) {
+        CompactProductResponse compactProductResponse = new CompactProductResponse();
+        compactProductResponse.productCode = productDto.productCode();
+        compactProductResponse.imageUrl = productDto.imageUrl();
+        compactProductResponse.name = productDto.name();
+        compactProductResponse.rating = productDto.rating();
+        compactProductResponse.isInStock = productDto.isInStock();
+        compactProductResponse.originalPriceStotinki = productDto.originalPriceStotinki();
+        compactProductResponse.reviewCount = productDto.reviewCount();
+
+        if (productDto.defaultSaleDiscount() == null && productDto.explicitDiscount() == null) {
+            compactProductResponse.salePriceStotinki = productDto.originalPriceStotinki();
+        }
+        else
+        {
+            compactProductResponse.salePriceStotinki = calculateDiscountPrice(productDto.originalPriceStotinki(),
+                    productDto.defaultSaleDiscount(),
+                    productDto.explicitDiscount());
+        }
+
+        return compactProductResponse;
+    }
+
 
     public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs) {
 

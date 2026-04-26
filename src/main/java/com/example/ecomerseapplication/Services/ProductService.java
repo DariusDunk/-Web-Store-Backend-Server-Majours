@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.responses.*;
+import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
@@ -42,7 +43,10 @@ public class ProductService {
     }
 
     public Page<CompactProductResponse> findAllByRatingResponsePage(PageRequest pageRequest) {
-        return productRepository.findAllAsResponseSortByRating(pageRequest);
+
+        Page<CompactProductDto> products = productRepository.findAllAsResponseSortByRating(pageRequest);
+
+        return ProductDTOMapper.compactProductPageToCompactDtoPage(products);
     }
 
     private String buildOrderBy(String sort) {
