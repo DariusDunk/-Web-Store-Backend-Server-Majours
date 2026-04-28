@@ -46,7 +46,7 @@ public class ProductService {
 
         Page<CompactProductDto> products = productRepository.findAllAsResponseSortByRating(pageRequest);
 
-        return ProductDTOMapper.compactProductPageToCompactDtoPage(products);
+        return ProductDTOMapper.compactProductPageToCompactResponsePage(products);
     }
 
     private String buildOrderBy(String sort) {

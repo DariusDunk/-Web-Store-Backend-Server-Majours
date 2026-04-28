@@ -25,8 +25,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final ProductService productService;
-    private final CartProductService cartProductService;
-//    private final PurchaseService purchaseService;
+    //    private final PurchaseService purchaseService;
 //    private final PurchaseCartService purchaseCartService;
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
@@ -35,7 +34,6 @@ public class CustomerController {
     @Autowired
     public CustomerController(CustomerService customerService,
                               ProductService productService,
-                              CartProductService cartProductService,
 //                              PurchaseService purchaseService,
 //                              PurchaseCartService purchaseCartService,
                               KeycloakService keycloakService,
@@ -43,8 +41,7 @@ public class CustomerController {
 
         this.customerService = customerService;
         this.productService = productService;
-        this.cartProductService = cartProductService;
-//        this.purchaseService = purchaseService;
+        //        this.purchaseService = purchaseService;
 //        this.purchaseCartService = purchaseCartService;
         this.keycloakService = keycloakService;
         this.userIdExtractor = userIdExtractor;

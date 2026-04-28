@@ -63,7 +63,7 @@ public class ProductDTOMapper {
                 productPage.getTotalElements());
     }
 
-    public static Page<CompactProductResponse> compactProductPageToCompactDtoPage(Page<CompactProductDto> compactProductPage) {
+    public static Page<CompactProductResponse> compactProductPageToCompactResponsePage(Page<CompactProductDto> compactProductPage) {
 
         List<CompactProductDto> compactProductDTOs = compactProductPage.getContent();
 

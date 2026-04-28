@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.FavoriteOfCustomerId;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.FavoriteOfCustomer;
 import com.example.ecomerseapplication.Entities.Product;
@@ -30,21 +31,26 @@ public interface FavoriteOfCustomerRepository extends JpaRepository<FavoriteOfCu
             where foc.favoriteOfCustomerId.customer=:customer and foc.favoriteOfCustomerId.product.productCode in :productCodes
             """)
     @Modifying
-    void deleteBatch(@Param("customer")Customer customer, @Param("productCodes")List<String> productCodes);
+    void deleteBatch(@Param("customer") Customer customer, @Param("productCodes") List<String> productCodes);
 
     @Query("""
-            select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse(
+            select new com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto(
                         foc.favoriteOfCustomerId.product.productCode,
                         foc.favoriteOfCustomerId.product.productName,
                         foc.favoriteOfCustomerId.product.originalPriceStotinki,
-                        foc.favoriteOfCustomerId.product.salePriceStotinki,
+                        s.discountPercent,
+                        sp.overrideDiscountPercentage,
                         foc.favoriteOfCustomerId.product.rating,
                         SIZE(foc.favoriteOfCustomerId.product.reviews),
                         foc.favoriteOfCustomerId.product.mainImageUrl,
                         case when foc.favoriteOfCustomerId.product.quantityInStock>0 then true else false end)
                         from FavoriteOfCustomer foc
+                        left join foc.favoriteOfCustomerId.product.saleProducts sp
+                        left join sp.sale s
+                        with s.isActive = true
+                        and current_timestamp between s.startDate and s.endDate
                         where foc.favoriteOfCustomerId.customer.keycloakId = :customerId
                         order by foc.dateAdded desc
             """)
-    Page<CompactProductResponse> getFromFavouritesPage(@Param("customerId") String  customer, Pageable pageable);
+    Page<CompactProductDto> getFromFavouritesPage(@Param("customerId") String customer, Pageable pageable);
 }

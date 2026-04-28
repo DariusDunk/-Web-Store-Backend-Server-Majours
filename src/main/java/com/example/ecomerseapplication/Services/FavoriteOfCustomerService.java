@@ -3,13 +3,16 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.CompositeIdClasses.FavoriteOfCustomerId;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.FavoriteOfCustomer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.*;
+import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.FavoriteOfCustomerRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -117,7 +120,9 @@ public class FavoriteOfCustomerService {
     }
 
     public PageResponse<CompactProductResponse> getFromCustomerPaged(Customer customer, PageRequest pageRequest) {
-        return PageResponse.from(repository.getFromFavouritesPage(customer.getKeycloakId(), pageRequest));
+//        return PageResponse.from(repository.getFromFavouritesPage(customer.getKeycloakId(), pageRequest));
+       Page<CompactProductDto> productPage = repository.getFromFavouritesPage(customer.getKeycloakId(), pageRequest);
+        return PageResponse.from(ProductDTOMapper.compactProductPageToCompactResponsePage(productPage));
     }
 
 

@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.Product;
@@ -18,16 +17,6 @@ import java.util.Set;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
-
-//    @Query("select new com.example.ecomerseapplication.DTOs.responses.CompactProductResponse (p.productCode," +
-//            " p.productName, " +
-//            "p.originalPriceStotinki, " +
-//            "p.salePriceStotinki, " +
-//            "p.rating, SIZE(p.reviews), " +
-//            "p.mainImageUrl,  " +
-//            "case when p.quantityInStock>0 then true else false end) " +
-//            "from Product p ")
-//    Page<CompactProductResponse> findAllAsResponseSortByRating(Pageable pageable);
 
     @Query("select new com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto (p.productCode," +
             " p.productName, " +
