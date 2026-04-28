@@ -1,7 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.FavoriteOfCustomerId;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.FavoriteOfCustomer;

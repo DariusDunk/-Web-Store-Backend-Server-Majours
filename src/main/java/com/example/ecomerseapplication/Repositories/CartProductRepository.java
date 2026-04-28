@@ -1,8 +1,8 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.CartProductId;
-import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.CartProduct;
 import com.example.ecomerseapplication.Entities.Session;
@@ -35,17 +35,18 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     .example
                     .ecomerseapplication
                     .DTOs
-                    .responses
-                    .CartItemResponse(
+                    .serverDtos
+                    .CartItemDTO(
                       new com
                      .example
                      .ecomerseapplication
                      .DTOs
-                     .responses
-                     .CompactProductResponse(p.productCode,
+                     .serverDtos
+                     .CompactProductDto(p.productCode,
                      p.productName,
                      p.originalPriceStotinki,
-                     p.salePriceStotinki,
+                     s.discountPercent,
+                     sp.overrideDiscountPercentage,
                      p.rating,
                      size(p.reviews),
                      p.mainImageUrl,
@@ -55,6 +56,10 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     cc.quantity)
                     from CartProduct cc
                     join Product p on p = cc.cartProductId.product
+                    left join p.saleProducts sp
+                    left join sp.sale s
+                    with s.isActive = true
+                    AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate
                     where cc.cartProductId.cart.customer.keycloakId =:keycloakId
                     order by
                     case
@@ -65,13 +70,7 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     cc.dateAdded desc
                     """
     )
-    List<CartItemResponse> findDtoByCustomer(@Param("keycloakId") String customer);
-
-//    @Modifying
-//    @Query("delete from CustomerCart " +
-//            "where cartProductId.customer = ?1")
-//    void deleteAllByCustomer(Customer customer);
-
+    List<CartItemDTO> findDtoByCustomer(@Param("keycloakId") String customer);
 
     @Modifying
     @Query("delete from CartProduct where cartProductId.cart = ?1 and cartProductId.product.productCode = ?2 ")
@@ -99,17 +98,18 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     .example
                     .ecomerseapplication
                     .DTOs
-                    .responses
-                    .CartItemResponse(
+                    .serverDtos
+                    .CartItemDTO(
                       new com
                      .example
                      .ecomerseapplication
                      .DTOs
-                     .responses
-                     .CompactProductResponse(p.productCode,
+                     .serverDtos
+                     .CompactProductDto(p.productCode,
                      p.productName,
                      p.originalPriceStotinki,
-                     p.salePriceStotinki,
+                     s.discountPercent,
+                     sp.overrideDiscountPercentage,
                      p.rating,
                      size(p.reviews),
                      p.mainImageUrl,
@@ -119,6 +119,10 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     cc.quantity)
                     from CartProduct cc
                     join Product p on p = cc.cartProductId.product
+                    left join p.saleProducts sp
+                    left join sp.sale s
+                    with s.isActive = true
+                    AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate
                     where cc.cartProductId.cart.session =:session
                     order by
                     case
@@ -129,7 +133,7 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     cc.dateAdded desc
                     """
     )
-    List<CartItemResponse> findDtoBySession(@Param("session")Session session);
+    List<CartItemDTO> findDtoBySession(@Param("session")Session session);
 
 
     //todo tuk kato napravi6 otstupkite smeni izto4nika za cenite

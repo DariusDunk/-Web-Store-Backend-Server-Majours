@@ -4,10 +4,13 @@ import com.example.ecomerseapplication.CompositeIdClasses.CartProductId;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.DTOs.responses.MessageResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.CartLimitReachedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoStockForCartException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockExceededException;
+import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.Repositories.CartProductRepository;
 import com.example.ecomerseapplication.enums.ResultTypes;
@@ -149,11 +152,14 @@ public class CartProductService {
     }
 
     public List<CartItemResponse> getCartDtoByCustomer(Customer customer) {
-        return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
+        List<CartItemDTO> cartItemDTOList = cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
+        return ProductDTOMapper.cartItemtListToCartItemResponseList(cartItemDTOList);
     }
 
     public List<CartItemResponse> getCartDtoBySession(Session session) {
-        return cartProductRepository.findDtoBySession(session);
+        List<CartItemDTO> cartItemDTOList = cartProductRepository.findDtoBySession(session);
+
+       return ProductDTOMapper.cartItemtListToCartItemResponseList(cartItemDTOList);
     }
 
     @Transactional
@@ -269,7 +275,8 @@ public class CartProductService {
         Cart cart = cartService.getOrCreateByCustomer(customer);
         cartProductRepository.deleteBatchByCartAndPCodes(cart, productCodes);
 
-        return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
+//        return cartProductRepository.findDtoByCustomer(customer.getKeycloakId());
+        return getCartDtoByCustomer(customer);
     }
     
     @Transactional
@@ -278,7 +285,7 @@ public class CartProductService {
         Cart cart = sessionCartService.getOrCreateSessionCart(session);
         cartProductRepository.deleteBatchByCartAndPCodes(cart, productCodes);
 
-        return cartProductRepository.findDtoBySession(session);
+        return getCartDtoBySession(session);
     }
 
     public String addQuantityToCart(Product product, short quantity, Customer customer) {

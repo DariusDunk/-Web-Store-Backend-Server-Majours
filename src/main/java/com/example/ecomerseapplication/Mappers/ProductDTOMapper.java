@@ -1,8 +1,10 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
+import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
@@ -14,6 +16,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ProductDTOMapper {
+
+    public static List<CartItemResponse> cartItemtListToCartItemResponseList(List<CartItemDTO> cartItems) {
+        return cartItems.stream().map(ProductDTOMapper::cartItemToCartResponse).toList();
+    }
+
+    public static CartItemResponse cartItemToCartResponse(CartItemDTO cartItemDTO) {
+
+        CompactProductDto compactProductDto = cartItemDTO.compactProductDto();
+        CompactProductResponse compactProductResponse = ProductDTOMapper.compactProductToResponse(compactProductDto);
+
+        return new CartItemResponse(compactProductResponse,
+                cartItemDTO.dateAdded(),
+                cartItemDTO.quantity());
+    }
 
     public static CompactProductResponse entityToCompactResponse(Product product) {
 
