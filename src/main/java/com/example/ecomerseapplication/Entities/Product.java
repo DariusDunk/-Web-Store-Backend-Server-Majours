@@ -14,7 +14,7 @@ import java.util.Set;
 @Entity
 @Table(name = "products", schema = "online_shop")
 @Data
-@EqualsAndHashCode(exclude = {"productImages", "categoryAttributeSet"})
+@EqualsAndHashCode(exclude = {"productImages", "categoryAttributeSet", "saleProducts"})
 public class Product {
 
     @Id

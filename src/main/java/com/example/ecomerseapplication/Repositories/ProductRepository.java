@@ -6,6 +6,7 @@ import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -42,6 +43,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
                     "limit 7 ")
     List<String> getNameSuggestions(String name);
 
+    @EntityGraph(attributePaths = {"saleProducts", "saleProducts.sale"})
     Page<Product> getByManufacturer(Manufacturer manufacturer, Pageable pageable);
 
 //    Page<Product> getByProductCategoryOrderByRatingDesc(ProductCategory productCategory, Pageable pageable);
@@ -49,6 +51,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     Page<Product> getByProductCategory(ProductCategory productCategory, Pageable pageable);
 
     Optional<Product> getByProductCode(String productCode);
+
+    @EntityGraph(attributePaths = {"saleProducts", "saleProducts.sale"})
+    Optional<Product> findProductByProductCode(String productCode);
 
     @Query(value =
             """

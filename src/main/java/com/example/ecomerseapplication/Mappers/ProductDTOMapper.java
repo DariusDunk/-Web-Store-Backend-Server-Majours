@@ -82,7 +82,7 @@ public class ProductDTOMapper {
 
         return compactProductResponse;
     }
-    //todo izvikai tova v ostanalite maperi za produkt i napravi mapper ot query DTO-tata kym response DTO-tata
+
     private static int calculateDiscountPrice(int originalPrice, Short defaultDiscount, Short explicitDiscount) {
 
         if (defaultDiscount == null)
@@ -165,12 +165,16 @@ public class ProductDTOMapper {
 
         if (saleProduct != null) {
 
+            System.out.println("Sale product: " + saleProduct.getSale().getDiscountPercent());
+
             Sale sale = saleProduct.getSale();
 
             detailedProductResponse.salePriceStotinki = calculateDiscountPrice(originalPrice,
                     sale.getDiscountPercent(),
                     saleProduct.getOverrideDiscountPercentage());
         } else {
+
+            System.out.println("Sale product not found/null");
             detailedProductResponse.salePriceStotinki = product.getOriginalPriceStotinki();
         }
 

@@ -3,12 +3,14 @@ package com.example.ecomerseapplication.Entities;
 import com.example.ecomerseapplication.CompositeIdClasses.SaleProductId;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "sale_products", schema = "online_shop")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode()
 public class SaleProduct {
 
     @EmbeddedId

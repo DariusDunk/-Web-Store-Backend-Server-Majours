@@ -264,7 +264,7 @@ public class ProductService {
     }
 
     public DetailedProductResponse getByCodeForAuth(String productCode, Customer customer) {
-        Product product = findByPCode(productCode);
+        Product product = findByCodeWithRelations(productCode);
 
         List<AttributeName> attributeNames = new ArrayList<>();
 
@@ -309,7 +309,7 @@ public class ProductService {
 
 
     public DetailedProductResponse getByCodeForGuest(String productCode) {
-        Product product = findByPCode(productCode);
+        Product product = findByCodeWithRelations(productCode);
 
         List<AttributeName> attributeNames = new ArrayList<>();
 
@@ -376,6 +376,10 @@ public class ProductService {
 
     public Product findByPCode(String code) {
         return productRepository.getByProductCode(code).orElseThrow(() -> new EntityNotFoundException("Product not found with code: " + code));
+    }
+
+    public Product findByCodeWithRelations(String code) {
+        return productRepository.findProductByProductCode(code).orElseThrow(() -> new EntityNotFoundException("Product not found with code: " + code));
     }
 
     public void save(Product product) {

@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.time.Instant;
 @Table(name = "sales", schema = "online_shop")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Sale {
 
     @Column(name = "sale_id")
