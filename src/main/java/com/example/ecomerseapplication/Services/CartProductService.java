@@ -5,7 +5,7 @@ import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.DTOs.responses.MessageResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
-import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.CartLimitReachedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoStockForCartException;
@@ -359,14 +359,23 @@ public class CartProductService {
             return new CartSummaryResponse(0L, 0L);
         }
 
-        return cartProductRepository.getSummaryByCart(cart);
+
+       List<CartSummaryItem> cartSummaryItems = cartProductRepository.getSummaryByCartAsItem(cart);
+
+        return ProductDTOMapper.summaryItemsToResponse(cartSummaryItems);
+
+//        return cartProductRepository.getSummaryByCart(cart);
     }
 
     public CartSummaryResponse getSummary(Customer customer) {
 
         Cart cart = cartService.getOrCreateByCustomer(customer);
 
-        return cartProductRepository.getSummaryByCart(cart);
+        List<CartSummaryItem> cartSummaryItems = cartProductRepository.getSummaryByCartAsItem(cart);
+
+        return ProductDTOMapper.summaryItemsToResponse(cartSummaryItems);
+
+//        return cartProductRepository.getSummaryByCart(cart);
     }
 
     @Transactional

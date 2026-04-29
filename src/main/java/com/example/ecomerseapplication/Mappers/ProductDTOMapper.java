@@ -1,11 +1,9 @@
 package com.example.ecomerseapplication.Mappers;
 
-import com.example.ecomerseapplication.DTOs.responses.AttributeOptionResponse;
-import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
-import com.example.ecomerseapplication.DTOs.responses.DetailedProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
 import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,6 +14,28 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ProductDTOMapper {
+
+    public static CartSummaryResponse summaryItemsToResponse(List<CartSummaryItem> summaryItems) {
+
+        long totalPrice = 0L;
+        long totalQuantity = 0;
+
+        for (CartSummaryItem summaryItem : summaryItems) {
+            totalQuantity += summaryItem.getQuantity();
+
+            Short discountPercent = summaryItem.getDiscountPercent();
+            Short overrideDiscountPercentage = summaryItem.getOverrideDiscountPercentage();
+            int originalPrice = summaryItem.getOriginalPriceStotinki();
+
+            totalPrice += calculateDiscountPrice(
+                    originalPrice,
+                    discountPercent,
+                    overrideDiscountPercentage);
+        }
+
+        return new CartSummaryResponse(totalPrice, totalQuantity);
+
+    }
 
     public static List<CartItemResponse> cartItemtListToCartItemResponseList(List<CartItemDTO> cartItems) {
         return cartItems.stream().map(ProductDTOMapper::cartItemToCartResponse).toList();
@@ -65,6 +85,9 @@ public class ProductDTOMapper {
     //todo izvikai tova v ostanalite maperi za produkt i napravi mapper ot query DTO-tata kym response DTO-tata
     private static int calculateDiscountPrice(int originalPrice, Short defaultDiscount, Short explicitDiscount) {
 
+        if (defaultDiscount == null)
+            return originalPrice;
+
         if (explicitDiscount != null && !explicitDiscount.equals(defaultDiscount)) {
             return (originalPrice * (100 - explicitDiscount) + 50) / 100;
         } else {
@@ -103,16 +126,10 @@ public class ProductDTOMapper {
         compactProductResponse.isInStock = productDto.isInStock();
         compactProductResponse.originalPriceStotinki = productDto.originalPriceStotinki();
         compactProductResponse.reviewCount = productDto.reviewCount();
-
-        if (productDto.defaultSaleDiscount() == null && productDto.explicitDiscount() == null) {
-            compactProductResponse.salePriceStotinki = productDto.originalPriceStotinki();
-        }
-        else
-        {
-            compactProductResponse.salePriceStotinki = calculateDiscountPrice(productDto.originalPriceStotinki(),
+        compactProductResponse.salePriceStotinki = calculateDiscountPrice(
+                productDto.originalPriceStotinki(),
                     productDto.defaultSaleDiscount(),
                     productDto.explicitDiscount());
-        }
 
         return compactProductResponse;
     }

@@ -1,4 +1,5 @@
 package com.example.ecomerseapplication;
+import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
@@ -216,6 +217,15 @@ class EComerseApplicationTests {
         if (session != null) {
             System.out.println("Session is active");
         }
+    }
+
+    @Test
+    void testCartSummary() {
+        Customer customer = customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f");
+
+       CartSummaryResponse cartSummaryResponse = cartProductService.getSummary(customer);
+
+       System.out.println("Cart sumarry response: "+cartSummaryResponse);
     }
 
 }

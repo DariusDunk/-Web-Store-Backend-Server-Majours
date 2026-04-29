@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Repositories;
 import com.example.ecomerseapplication.CompositeIdClasses.CartProductId;
 import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
 import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.CartProduct;
 import com.example.ecomerseapplication.Entities.Session;
@@ -136,15 +137,30 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
     List<CartItemDTO> findDtoBySession(@Param("session")Session session);
 
 
-    //todo tuk kato napravi6 otstupkite smeni izto4nika za cenite
+    //todo smeni fetch-vaneto tuk s fetch-vane na OG cena + dvete namaleniq + koliqestvoto za vseki produkt v novo dto, sled koeto vyv service 6te se mapne i smetne cenata predi da se vyrne v response
     @Query(value = "select new " +
             "com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(sum(cc.cartProductId.product.salePriceStotinki*cc.quantity), sum(cc.quantity)) " +
             "from CartProduct cc " +
             "where cc.cartProductId.cart = ?1")
     CartSummaryResponse getSummaryByCart(Cart cart);
-//
-//    @Modifying
-//    void deleteCartProductByCustomerCartId_Cart(Cart customerCartIdCart);
+
+    @Query(
+"""
+select
+p.originalPriceStotinki as originalPriceStotinki,
+s.discountPercent as discountPercent,
+sp.overrideDiscountPercentage as overrideDiscountPercentage,
+cp.quantity as quantity
+from CartProduct cp
+join cp.cartProductId.product p
+left join p.saleProducts sp
+left join sp.sale s
+with s.isActive = true
+and current_timestamp between s.startDate and s.endDate
+where cp.cartProductId.cart=?1
+"""
+    )
+    List<CartSummaryItem> getSummaryByCartAsItem(Cart cart);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(
