@@ -136,14 +136,6 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
     )
     List<CartItemDTO> findDtoBySession(@Param("session")Session session);
 
-
-    //todo smeni fetch-vaneto tuk s fetch-vane na OG cena + dvete namaleniq + koliqestvoto za vseki produkt v novo dto, sled koeto vyv service 6te se mapne i smetne cenata predi da se vyrne v response
-    @Query(value = "select new " +
-            "com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(sum(cc.cartProductId.product.salePriceStotinki*cc.quantity), sum(cc.quantity)) " +
-            "from CartProduct cc " +
-            "where cc.cartProductId.cart = ?1")
-    CartSummaryResponse getSummaryByCart(Cart cart);
-
     @Query(
 """
 select

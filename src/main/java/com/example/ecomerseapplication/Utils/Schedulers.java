@@ -10,11 +10,13 @@ import org.springframework.stereotype.Component;
 public class Schedulers {
 
    private final SessionRevoker sessionRevoker;
+   private final SaleRevoker saleRevoker;
 
    @Autowired
-    public Schedulers(SessionRevoker sessionRevoker) {
+    public Schedulers(SessionRevoker sessionRevoker, SaleRevoker saleRevoker) {
         this.sessionRevoker = sessionRevoker;
-    }
+       this.saleRevoker = saleRevoker;
+   }
 
     @EventListener(ApplicationReadyEvent.class)
     public void revokeExpiredOnStartup() {
@@ -24,6 +26,16 @@ public class Schedulers {
     @Scheduled(fixedDelay = 300000, initialDelay = 300000)
     public void revokeExpiredPeriodically() {
         sessionRevoker.revokeExpiredSessions();
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void revokeExpiredSalesOnStartup() {
+        saleRevoker.revokeExpiredSales();
+    }
+
+    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Sofia")
+    public void revokeExpiredSalesPeriodically() {
+        saleRevoker.revokeExpiredSales();
     }
 
 }
