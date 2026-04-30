@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
             "case when p.quantityInStock>0 then true else false end) " +
             "from Product p " +
             "left join p.saleProducts sp " +
+            "with sp.isMain = true " +
             "left join sp.sale s " +
             "with s.isActive = true " +
             "AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate")
@@ -69,6 +69,26 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
                     where p.productCategory =?1
             """)
     Object getTotalPriceRange(ProductCategory productCategory);
+
+//    @Query(
+//"""
+//select min(
+//case
+//    when ((s.startDate<=current_timestamp and s.endDate>current_timestamp)
+//        and s.isActive = true)
+//    then case
+//            when (sp.overrideDiscountPercentage is not null)
+//            then (p.originalPriceStotinki * (100 - sp.overrideDiscountPercentage)+50)
+//)
+//from Product p
+//left join p.saleProducts sp
+//with sp.isMain = true
+//left join sp.sale s
+//where p.productCategory = ?1
+//"""
+//    )
+//    FiltersPriceRange getCategoryPriceRange(ProductCategory productCategory);
+
 
     List<Product> getAllByProductCodeIn(List<String> productCode);
 

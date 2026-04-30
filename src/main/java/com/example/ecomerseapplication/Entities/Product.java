@@ -86,14 +86,23 @@ public class Product {
     }
 
 
-    public Optional<SaleProduct> getSingleSaleProduct() {
+//    public Optional<SaleProduct> getSingleSaleProduct() {
+//        if (saleProducts == null || saleProducts.isEmpty()) {
+//            return Optional.empty();
+//        }
+//        if (saleProducts.size() > 1) {
+//            throw new IllegalStateException("Multiple sales found for product");
+//        }
+//        return Optional.of(saleProducts.iterator().next());
+//    }
+
+
+    public Optional<SaleProduct> getMainSaleProduct() {
         if (saleProducts == null || saleProducts.isEmpty()) {
             return Optional.empty();
         }
-        if (saleProducts.size() > 1) {
-            throw new IllegalStateException("Multiple sales found for product");
-        }
-        return Optional.of(saleProducts.iterator().next());
+
+        return saleProducts.stream().filter(SaleProduct::getIsMain).findFirst();
     }
 
 

@@ -39,14 +39,18 @@ public class SessionRevoker {
             cartProductService.deleteItemsBySession(expiredSessions);
             cartService.deleteCartsBySessions(expiredSessions);
 
+            boolean hasAuth = false;
+
             for (Session session : expiredSessions) {
 
                 if (session.getRefreshToken() != null
                         && session.getRefreshToken().isBlank()
-                        && !session.getIsGuest())
+                        && !session.getIsGuest()) {
                     keycloakService.invalidateRefreshToken(session.getRefreshToken());
+                    hasAuth = true;
+                }
             }
-            System.out.println("Revoked refresh tokens for expired sessions.");
+
 
             ZoneId zoneId = ZoneId.systemDefault();
             ZonedDateTime now = ZonedDateTime.now(zoneId);
@@ -54,6 +58,7 @@ public class SessionRevoker {
 
 
             System.out.println("-------------------------[" + now.format(formatter) + "]" + " Revoking expired sessions-------------------------");
+            if (hasAuth) System.out.println("Revoked refresh tokens for expired sessions.");
             System.out.println("-------------------------Revoked " + expiredSessions.size() + " expired sessions-------------------------");
         }
 

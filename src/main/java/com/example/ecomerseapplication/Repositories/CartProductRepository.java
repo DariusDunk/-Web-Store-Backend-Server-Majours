@@ -1,7 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.CartProductId;
-import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
 import com.example.ecomerseapplication.Entities.Cart;
@@ -19,11 +18,6 @@ import java.util.List;
 public interface CartProductRepository extends JpaRepository<CartProduct, CartProductId> {
 
     boolean existsByCartProductId(CartProductId cartProductId);
-
-//    @Query(value = "select cc " +
-//            "from CustomerCart cc " +
-//            "where cc.cartProductId.customer = ?1")
-//    List<CustomerCart> findByCustomer(Customer customer);
 
     @Query(value = "select cc " +
             "from CartProduct cc " +
@@ -58,6 +52,7 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     from CartProduct cc
                     join Product p on p = cc.cartProductId.product
                     left join p.saleProducts sp
+                    with sp.isMain = true
                     left join sp.sale s
                     with s.isActive = true
                     AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate
@@ -121,6 +116,7 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                     from CartProduct cc
                     join Product p on p = cc.cartProductId.product
                     left join p.saleProducts sp
+                    with sp.isMain = true
                     left join sp.sale s
                     with s.isActive = true
                     AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate
@@ -146,6 +142,7 @@ cp.quantity as quantity
 from CartProduct cp
 join cp.cartProductId.product p
 left join p.saleProducts sp
+with sp.isMain = true
 left join sp.sale s
 with s.isActive = true
 and current_timestamp between s.startDate and s.endDate

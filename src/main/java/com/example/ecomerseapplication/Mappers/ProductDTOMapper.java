@@ -61,9 +61,9 @@ public class ProductDTOMapper {
         compactProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
 
         int originalPrice = product.getOriginalPriceStotinki();
-        SaleProduct saleProduct = product.getSingleSaleProduct().orElse(null);
+        SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
 
-        if (saleProduct != null) {
+        if (saleProduct != null && saleProduct.getIsMain()) {
 
             Sale sale = saleProduct.getSale();
 
@@ -73,9 +73,6 @@ public class ProductDTOMapper {
         } else {
             compactProductResponse.salePriceStotinki = product.getOriginalPriceStotinki();
         }
-
-//        compactProductResponse.salePriceStotinki = product.getSalePriceStotinki();
-
 
         compactProductResponse.reviewCount = product.getReviews().size();
         compactProductResponse.isInStock = product.isInStock();
@@ -161,11 +158,11 @@ public class ProductDTOMapper {
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
 
         int originalPrice = product.getOriginalPriceStotinki();
-        SaleProduct saleProduct = product.getSingleSaleProduct().orElse(null);
+        SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
 
-        if (saleProduct != null) {
+        if (saleProduct != null && saleProduct.getIsMain()) {
 
-            System.out.println("Sale product: " + saleProduct.getSale().getDiscountPercent());
+//            System.out.println("Sale product: " + saleProduct.getSale().getDiscountPercent());
 
             Sale sale = saleProduct.getSale();
 
@@ -174,11 +171,10 @@ public class ProductDTOMapper {
                     saleProduct.getOverrideDiscountPercentage());
         } else {
 
-            System.out.println("Sale product not found/null");
+//            System.out.println("Sale product not found/null");
             detailedProductResponse.salePriceStotinki = product.getOriginalPriceStotinki();
         }
 
-//        detailedProductResponse.salePriceStotinki = product.getSalePriceStotinki();
         detailedProductResponse.isInStock = product.isInStock();
 
         return detailedProductResponse;

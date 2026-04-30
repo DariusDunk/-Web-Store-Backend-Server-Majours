@@ -45,6 +45,7 @@ public interface FavoriteOfCustomerRepository extends JpaRepository<FavoriteOfCu
                         case when foc.favoriteOfCustomerId.product.quantityInStock>0 then true else false end)
                         from FavoriteOfCustomer foc
                         left join foc.favoriteOfCustomerId.product.saleProducts sp
+                        with sp.isMain = true
                         left join sp.sale s
                         with s.isActive = true
                         and current_timestamp between s.startDate and s.endDate
