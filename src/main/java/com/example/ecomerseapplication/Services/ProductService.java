@@ -2,7 +2,7 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
-import com.example.ecomerseapplication.DTOs.serverDtos.FiltersPriceRangeDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
@@ -403,12 +403,15 @@ public class ProductService {
         return roundResponse;
     }
 
-    public Object[] getTotalPriceRangeOfCategory(ProductCategory category) {
-        Object[] result = (Object[]) productRepository.getTotalPriceRange(category);
-        if (result.length != 2) {
-            throw new ResourceNotFoundException("Incorrect or missing price range for category " + category.getCategoryName());
-        }
-        return result;
+    public FiltersPriceRange getTotalPriceRangeOfCategory(ProductCategory category) {
+//        Object[] result = (Object[]) productRepository.getTotalPriceRange(category);
+
+        return productRepository.getCategoryPriceRange(category);
+
+//        if (result.length != 2) {
+//            throw new ResourceNotFoundException("Incorrect or missing price range for category " + category.getCategoryName());
+//        }
+//        return result;
     }
 
 //    public FiltersPriceRangeDTO getTotalCategoryPriceRangeWithSales(ProductCategory category) {

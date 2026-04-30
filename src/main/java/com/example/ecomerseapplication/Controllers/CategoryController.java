@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
 import com.example.ecomerseapplication.DTOs.responses.CategoryFiltersResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Services.ManufacturerService;
@@ -61,10 +62,10 @@ public class CategoryController {
 
         categoryFiltersResponse.ratings = productService.getRatingsOfCategory(category);
 
-        Object[] totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
+        FiltersPriceRange totalPriceRange = productService.getTotalPriceRangeOfCategory(category);
 
-        categoryFiltersResponse.priceLowest = Integer.parseInt(totalPriceRange[0].toString());
-        categoryFiltersResponse.priceHighest = Integer.parseInt(totalPriceRange[1].toString());
+        categoryFiltersResponse.priceLowest = totalPriceRange.getPriceLowest();
+        categoryFiltersResponse.priceHighest = totalPriceRange.getPriceHighest();
 
 //        System.out.println("Filters: " + categoryFiltersResponse);
 

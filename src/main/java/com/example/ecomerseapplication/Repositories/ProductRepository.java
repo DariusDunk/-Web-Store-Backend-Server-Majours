@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
@@ -21,7 +22,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     @Query("select new com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto (p.productCode," +
             " p.productName, " +
             "p.originalPriceStotinki, " +
-//            "p.salePriceStotinki, " +
             "s.discountPercent, " +
             "sp.overrideDiscountPercentage, " +
             "p.rating, SIZE(p.reviews), " +
@@ -46,8 +46,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     @EntityGraph(attributePaths = {"saleProducts", "saleProducts.sale"})
     Page<Product> getByManufacturer(Manufacturer manufacturer, Pageable pageable);
 
-//    Page<Product> getByProductCategoryOrderByRatingDesc(ProductCategory productCategory, Pageable pageable);
-
     Page<Product> getByProductCategory(ProductCategory productCategory, Pageable pageable);
 
     Optional<Product> getByProductCode(String productCode);
@@ -63,32 +61,31 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
                     """)
     Optional<Set<Integer>> getRatingsByCategory(ProductCategory productCategory);
 
-    @Query(value = """
-                    select MIN (p.salePriceStotinki), MAX (p.salePriceStotinki)
-                    from Product p
-                    where p.productCategory =?1
-            """)
-    Object getTotalPriceRange(ProductCategory productCategory);
-
-//    @Query(
-//"""
-//select min(
-//case
-//    when ((s.startDate<=current_timestamp and s.endDate>current_timestamp)
-//        and s.isActive = true)
-//    then case
-//            when (sp.overrideDiscountPercentage is not null)
-//            then (p.originalPriceStotinki * (100 - sp.overrideDiscountPercentage)+50)
-//)
-//from Product p
-//left join p.saleProducts sp
-//with sp.isMain = true
-//left join sp.sale s
-//where p.productCategory = ?1
-//"""
-//    )
-//    FiltersPriceRange getCategoryPriceRange(ProductCategory productCategory);
-
+    @Query(
+"""
+select
+    MIN(
+    (p.originalPriceStotinki * (100 - CASE
+        WHEN (s.startDate <= CURRENT_TIMESTAMP AND (s.endDate IS NULL OR s.endDate > CURRENT_TIMESTAMP))
+        THEN COALESCE(sp.overrideDiscountPercentage, s.discountPercent, 0)
+        ELSE 0
+    END) + 50) / 100
+    ) as priceLowest,
+    MAX(
+                (p.originalPriceStotinki * (100 - CASE\s
+                    WHEN (s.startDate <= CURRENT_TIMESTAMP AND (s.endDate IS NULL OR s.endDate > CURRENT_TIMESTAMP))\s
+                    THEN COALESCE(sp.overrideDiscountPercentage, s.discountPercent, 0)
+                    ELSE 0\s
+                END) + 50) / 100
+            ) as priceHighest
+from Product p
+left join p.saleProducts sp
+on sp.isMain = true
+left join sp.sale s
+where p.productCategory = ?1
+"""
+    )
+    FiltersPriceRange getCategoryPriceRange(ProductCategory productCategory);
 
     List<Product> getAllByProductCodeIn(List<String> productCode);
 
