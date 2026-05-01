@@ -4,14 +4,13 @@ import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Sale;
 import com.example.ecomerseapplication.Entities.SaleProduct;
 import com.example.ecomerseapplication.MetaModels.Product_;
-import com.example.ecomerseapplication.Others.GlobalConstants;
 import jakarta.persistence.criteria.*;
 
 public class PriceExpressions {
 
     public static Expression<Number> finalPrice(
             Root<Product> root,
-            CriteriaQuery<?> query,
+//            CriteriaQuery<?> query,
             CriteriaBuilder cb
     ) {
         // Join main sale

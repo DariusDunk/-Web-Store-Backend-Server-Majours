@@ -1,14 +1,12 @@
 package com.example.ecomerseapplication.Specifications;
 
-import com.example.ecomerseapplication.Entities.CategoryAttribute;
-import com.example.ecomerseapplication.Entities.Manufacturer;
-import com.example.ecomerseapplication.Entities.Product;
-import com.example.ecomerseapplication.Entities.ProductCategory;
+import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.MetaModels.Product_;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
@@ -34,13 +32,24 @@ public class ProductSpecifications {
         });
     }
 
-    public static Specification<Product> priceBetween(int priceLowest, int priceHighest) {
-        return ((root, query, criteriaBuilder) -> criteriaBuilder.between(
-                root.get(Product_.SALE_PRICE_STOTINKI),
-                priceLowest,
-                priceHighest)
-        );
+    public static Specification<Product> manufacturerEquals(Manufacturer manufacturer) {
+        return (root, query, cb) ->
+
+        {
+            if (query != null) {
+                query.distinct(true);
+            }
+           return cb.equal(root.get(Product_.MANUFACTURER), manufacturer);
+        };
     }
+
+//    public static Specification<Product> priceBetween(int priceLowest, int priceHighest) {
+//        return ((root, query, criteriaBuilder) -> criteriaBuilder.between(
+//                root.get(Product_.SALE_PRICE_STOTINKI),
+//                priceLowest,
+//                priceHighest)
+//        );
+//    }
 
     public static Specification<Product> equalsCategory(ProductCategory productCategory) {
 
@@ -106,12 +115,58 @@ public class ProductSpecifications {
             } // important with joins
 
             Expression<Number> finalPrice =
-                    PriceExpressions.finalPrice(root, query, cb);
+                    PriceExpressions.finalPrice(root,
+//                            query,
+                            cb);
 
             return cb.and(
                     cb.ge(finalPrice, min),
                     cb.le(finalPrice, max)
             );
+        };
+    }
+
+    public static Specification<Product> sortByPrice(Sort.Direction direction) {
+        return (root, query, cb) -> {
+
+            if (query != null) {
+                query.distinct(true);
+
+                Expression<Number> finalPrice =
+                        PriceExpressions.finalPrice(root,
+//                                query,
+                                cb);
+
+                if (direction.isAscending()) {
+                    query.orderBy(cb.asc(finalPrice));
+                } else {
+                    query.orderBy(cb.desc(finalPrice));
+                }
+
+                query.orderBy(
+                        direction.isAscending()
+                                ? cb.asc(finalPrice)
+                                : cb.desc(finalPrice),
+                        cb.asc(root.get(Product_.ID))
+                );
+
+            }
+
+            return cb.conjunction(); // no filtering, only sorting
+        };
+    }
+
+    public static Specification<Product> joinMainSale() {
+        return (root, query, cb) -> {
+
+            Join<Product, SaleProduct> sp =
+                    root.join("saleProducts", JoinType.LEFT);
+
+            sp.on(cb.isTrue(sp.get("isMain")));
+
+            sp.join("sale", JoinType.LEFT);
+
+            return cb.conjunction();
         };
     }
 }

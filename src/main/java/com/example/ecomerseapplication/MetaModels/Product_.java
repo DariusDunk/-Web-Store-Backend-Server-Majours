@@ -50,4 +50,5 @@ public class Product_ {
 
     public static volatile SingularAttribute<Product, Review> reviews;
     public static final String REVIEWS = "reviews";
+    public static final String REVIEW_COUNT = "reviewCount";
 }

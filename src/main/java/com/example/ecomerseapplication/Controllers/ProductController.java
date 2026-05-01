@@ -135,14 +135,10 @@ public class ProductController {
 
 //        System.out.println("Chosen sort: " + ((sortOrder!=null&&!sortOrder.isBlank())? sortOrder: "none") );
 
-        Sort sort = (sortOrder != null && !sortOrder.isBlank())
-                ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
-                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
 
-        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
         Manufacturer manufacturer = manufacturerService.findByName(manufacturerName);
 
-        Page<CompactProductResponse> productResponsePage = productService.getByManufacturer(manufacturer, pageRequest);
+        Page<CompactProductResponse> productResponsePage = productService.getByManufacturer(manufacturer, page, sortOrder);
 
 //        System.out.println("Sorted content: "+ productResponsePage.getContent());
 

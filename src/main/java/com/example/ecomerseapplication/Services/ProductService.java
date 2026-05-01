@@ -5,12 +5,18 @@ import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
+import com.example.ecomerseapplication.MetaModels.Product_;
+import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
+import com.example.ecomerseapplication.Specifications.PriceExpressions;
 import com.example.ecomerseapplication.Specifications.ProductSpecifications;
+import com.example.ecomerseapplication.Utils.SortHelper;
+import com.example.ecomerseapplication.enums.ProductSortType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.*;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -18,10 +24,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -324,14 +328,6 @@ public class ProductService {
         return ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
     }
 
-
-    public Page<CompactProductResponse> getByManufacturer(Manufacturer manufacturer, Pageable pageable) {
-
-        Page<Product> productPage = productRepository.getByManufacturer(manufacturer, pageable);
-
-        return ProductDTOMapper.productPageToDtoPage(productPage);
-    }
-
     public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, Pageable pageable) {
         return ProductDTOMapper
                 .productPageToDtoPage(productRepository
@@ -374,6 +370,84 @@ public class ProductService {
 
     public Product findByCodeWithRelations(String code) {
         return productRepository.findProductByProductCode(code).orElseThrow(() -> new EntityNotFoundException("Product not found with code: " + code));
+    }
+
+    private Page<CompactProductResponse> getByManufacturerSortedByPrice(Manufacturer manufacturer, int page, Sort.Direction direction) {
+
+        int pageSize = PageContentLimit.limit;
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        // --- Query 1: SELECT p.id ... ORDER BY finalPrice ---
+        CriteriaQuery<Integer> idQuery = cb.createQuery(Integer.class);
+        Root<Product> idRoot = idQuery.from(Product.class);
+
+        // Reuse your existing price expression
+        Expression<Number> finalPrice = PriceExpressions.finalPrice(idRoot, cb);
+
+        idQuery.select(idRoot.get(Product_.ID))
+                .where(cb.equal(idRoot.get(Product_.MANUFACTURER), manufacturer))
+                .orderBy(
+                        direction.isAscending() ? cb.asc(finalPrice) : cb.desc(finalPrice),
+                        cb.asc(idRoot.get(Product_.ID))
+                );
+        // Note: no .distinct() here — we're selecting a single column, so duplicates are not a concern
+
+        List<Integer> orderedIds = entityManager.createQuery(idQuery)
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+        if (orderedIds.isEmpty()) {
+            return Page.empty(PageRequest.of(page, pageSize));
+        }
+
+        // --- Query 2: fetch full entities by ID, no joins, no DISTINCT ---
+        List<Product> products = productRepository.findAllById(orderedIds);
+
+        // Restore the order from Query 1, since findAllById does not guarantee order
+        Map<Integer, Product> productById = products.stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+        List<Product> orderedProducts = orderedIds.stream()
+                .map(productById::get)
+                .filter(Objects::nonNull)
+                .toList();
+
+        // --- Count query for pagination metadata ---
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Product> countRoot = countQuery.from(Product.class);
+        countQuery.select(cb.count(countRoot))
+                .where(cb.equal(countRoot.get(Product_.MANUFACTURER), manufacturer));
+        long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        return ProductDTOMapper.productPageToDtoPage(
+                new PageImpl<>(orderedProducts, PageRequest.of(page, pageSize), total)
+        );
+    }
+
+    public Page<CompactProductResponse> getByManufacturer(Manufacturer manufacturer, int page, String sortOrder) {
+
+        boolean isPriceSort = sortOrder != null
+                && !sortOrder.isBlank()
+                && (sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
+                || Objects.equals(sortOrder, ProductSortType.PRICE_DESC.getValue()));
+
+        if (isPriceSort) {
+            Sort.Direction dir = sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC;
+            return getByManufacturerSortedByPrice(manufacturer, page, dir);
+        }
+
+        Sort sort = (sortOrder != null && !sortOrder.isBlank())
+                ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
+                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+
+        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
+        Specification<Product> manufacturerEqualsSpec = ProductSpecifications.manufacturerEquals(manufacturer);
+
+        Page<Product> productPage = productRepository.findAll(manufacturerEqualsSpec, pageRequest);
+        return ProductDTOMapper.productPageToDtoPage(productPage);
     }
 
     public void save(Product product) {
