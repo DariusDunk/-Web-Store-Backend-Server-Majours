@@ -402,35 +402,179 @@ public class ProductService {
             );
         }
 
-    public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
-                                                                                      ProductCategory productCategory,
-                                                                                      int priceLowest,
-                                                                                      int priceHighest,
-                                                                                      List<Manufacturer> manufacturers,
-                                                                                      Integer rating,
-                                                                                      Pageable pageable) {
+        public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
+                                                                                          ProductCategory productCategory,
+                                                                                          int priceLowest,
+                                                                                          int priceHighest,
+                                                                                          List<Manufacturer> manufacturers,
+                                                                                          Integer rating,
+                                                                                          String sortOrder,
+                                                                                          int page) {
 
-        Specification<Product> productSpec =
-                ProductSpecifications.equalsCategory(productCategory)
-                        .and(ProductSpecifications.ratingEqualOrHigher(rating));
+            boolean isPriceSort = sortOrder != null
+                    && !sortOrder.isBlank()
+                    && (sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
+                    || Objects.equals(sortOrder, ProductSortType.PRICE_DESC.getValue()));
 
-        if (priceLowest != 0 && priceHighest != 0) {
-//            productSpec = productSpec.and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
-            productSpec = productSpec.and(ProductSpecifications.priceBetweenWSale(priceLowest, priceHighest));
+            if (isPriceSort) {
+                Sort.Direction dir = sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC;
+                return getByFiltersAndPriceSorted(
+                        categoryAttributes, productCategory,
+                        priceLowest, priceHighest,
+                        manufacturers, rating,
+                        dir, page);
+            }
+
+            // --- Non-price sort: use Specifications as before ---
+            Specification<Product> productSpec =
+                    ProductSpecifications.equalsCategory(productCategory)
+                            .and(ProductSpecifications.ratingEqualOrHigher(rating));
+
+            if (priceLowest != 0 && priceHighest != 0) {
+                // For the non-price-sort path, priceBetweenWSale builds its own finalPrice — no conflict here
+                // since sortByPrice is not called at all in this branch
+                productSpec = productSpec.and((root, query, cb) -> {
+                    if (query != null) query.distinct(true);
+                    Expression<Number> fp = PriceExpressions.finalPrice(root, cb);
+                    return cb.and(cb.ge(fp, priceLowest), cb.le(fp, priceHighest));
+                });
+            }
+
+            if (!manufacturers.isEmpty()) {
+                productSpec = productSpec.and(ProductSpecifications.manufacturerIn(manufacturers));
+            }
+
+            if (!categoryAttributes.isEmpty()) {
+                productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
+            }
+
+            Sort sort = (sortOrder != null && !sortOrder.isBlank())
+                    ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
+                    : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+
+            PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
+            return ProductDTOMapper.productPageToDtoPage(productRepository.findAll(productSpec, pageRequest));
         }
 
-        if (!manufacturers.isEmpty()) {
-            productSpec = productSpec.and(ProductSpecifications.manufacturerIn(manufacturers));
+        private Page<CompactProductResponse> getByFiltersAndPriceSorted(Set<CategoryAttribute> categoryAttributes,
+                                                                         ProductCategory productCategory,
+                                                                         int priceLowest,
+                                                                         int priceHighest,
+                                                                         List<Manufacturer> manufacturers,
+                                                                         Integer rating,
+                                                                         Sort.Direction direction,
+                                                                         int page) {
+            int pageSize = PageContentLimit.limit;
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+            // --- Query 1: SELECT p.id with all filters, ORDER BY finalPrice ---
+            CriteriaQuery<Integer> idQuery = cb.createQuery(Integer.class);
+            Root<Product> root = idQuery.from(Product.class);
+
+            // Build finalPrice ONCE — used for both the price range filter and the sort
+            Expression<Number> finalPrice = PriceExpressions.finalPrice(root, cb);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Category
+            predicates.add(cb.equal(root.get(Product_.PRODUCT_CATEGORY), productCategory));
+
+            // Rating
+            if (rating != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get(Product_.RATING), rating));
+            }
+
+            // Price range — reuses the same finalPrice expression, no extra join
+            if (priceLowest != 0 && priceHighest != 0) {
+                predicates.add(cb.ge(finalPrice, priceLowest));
+                predicates.add(cb.le(finalPrice, priceHighest));
+            }
+
+            // Manufacturers
+            if (!manufacturers.isEmpty()) {
+                predicates.add(root.get(Product_.MANUFACTURER).in(manufacturers));
+            }
+
+            // Attributes — each attribute group needs its own join
+            if (!categoryAttributes.isEmpty()) {
+                Map<Integer, Set<Integer>> groups = categoryAttributes.stream()
+                        .collect(Collectors.groupingBy(
+                                a -> a.getAttributeName().getId(),
+                                Collectors.mapping(CategoryAttribute::getId, Collectors.toSet())
+                        ));
+                for (var entry : groups.entrySet()) {
+                    Join<Product, CategoryAttribute> attrJoin =
+                            root.join(Product_.CATEGORY_ATTRIBUTE_SET, JoinType.INNER);
+                    predicates.add(attrJoin.get("id").in(entry.getValue()));
+                }
+            }
+
+            idQuery.select(root.get(Product_.ID))
+                    .where(predicates.toArray(new Predicate[0]))
+                    .orderBy(
+                            direction.isAscending() ? cb.asc(finalPrice) : cb.desc(finalPrice),
+                            cb.asc(root.get(Product_.ID))
+                    );
+
+            List<Integer> orderedIds = entityManager.createQuery(idQuery)
+                    .setFirstResult(page * pageSize)
+                    .setMaxResults(pageSize)
+                    .getResultList();
+
+            if (orderedIds.isEmpty()) {
+                return Page.empty(PageRequest.of(page, pageSize));
+            }
+
+            // --- Query 2: fetch full entities by ID, no joins, no DISTINCT ---
+            List<Product> products = productRepository.findAllById(orderedIds);
+
+            Map<Integer, Product> productById = products.stream()
+                    .collect(Collectors.toMap(Product::getId, p -> p));
+            List<Product> orderedProducts = orderedIds.stream()
+                    .map(productById::get)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            // --- Count query (applies all the same filters, without pagination or ordering) ---
+            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+            Root<Product> countRoot = countQuery.from(Product.class);
+            Expression<Number> countFinalPrice = PriceExpressions.finalPrice(countRoot, cb);
+
+            List<Predicate> countPredicates = new ArrayList<>();
+            countPredicates.add(cb.equal(countRoot.get(Product_.PRODUCT_CATEGORY), productCategory));
+            if (rating != null) {
+                countPredicates.add(cb.greaterThanOrEqualTo(countRoot.get(Product_.RATING), rating));
+            }
+            if (priceLowest != 0 && priceHighest != 0) {
+                countPredicates.add(cb.ge(countFinalPrice, priceLowest));
+                countPredicates.add(cb.le(countFinalPrice, priceHighest));
+            }
+            if (!manufacturers.isEmpty()) {
+                countPredicates.add(countRoot.get(Product_.MANUFACTURER).in(manufacturers));
+            }
+            if (!categoryAttributes.isEmpty()) {
+                Map<Integer, Set<Integer>> groups = categoryAttributes.stream()
+                        .collect(Collectors.groupingBy(
+                                a -> a.getAttributeName().getId(),
+                                Collectors.mapping(CategoryAttribute::getId, Collectors.toSet())
+                        ));
+                for (var entry : groups.entrySet()) {
+                    Join<Product, CategoryAttribute> attrJoin =
+                            countRoot.join(Product_.CATEGORY_ATTRIBUTE_SET, JoinType.INNER);
+                    countPredicates.add(attrJoin.get("id").in(entry.getValue()));
+                }
+            }
+
+            countQuery.select(cb.countDistinct(countRoot))
+                    .where(countPredicates.toArray(new Predicate[0]));
+            long total = entityManager.createQuery(countQuery).getSingleResult();
+
+            return ProductDTOMapper.productPageToDtoPage(
+                    new PageImpl<>(orderedProducts, PageRequest.of(page, pageSize), total)
+            );
         }
-
-        if (!categoryAttributes.isEmpty()) {
-            productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
-        }
-
-        Page<Product> products = productRepository.findAll(productSpec, pageable);
-
-        return ProductDTOMapper.productPageToDtoPage(products);
-    }
 
     public Product findByPCode(String code) {
         return productRepository.getByProductCode(code).orElseThrow(() -> new EntityNotFoundException("Product not found with code: " + code));

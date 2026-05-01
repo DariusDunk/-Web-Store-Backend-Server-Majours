@@ -164,9 +164,7 @@ public class ProductController {
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody @Valid ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
 
-        Sort sort = (productFilterRequest.sortOrder != null && !productFilterRequest.sortOrder.isBlank())
-                ? SortHelper.buildProdSort(ProductSortType.valueOf(productFilterRequest.sortOrder.toUpperCase()).getValue())
-                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+
 
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
@@ -181,7 +179,7 @@ public class ProductController {
 
         ProductCategory productCategory = productCategoryService.findByName(productFilterRequest.productCategory);
 
-        PageRequest pageRequest = PageRequest.of(page, 10, sort);
+
 
         return ResponseEntity.ok(PageResponse.from(
                 productService.getByCategoryFiltersManufacturerAndPriceRange(
@@ -191,7 +189,8 @@ public class ProductController {
                         productFilterRequest.priceHighest,
                         manufacturerList,
                         productFilterRequest.rating,
-                        pageRequest)));
+                        productFilterRequest.sortOrder,
+                        page)));
     }
 
     @PostMapping("reviews/paged")

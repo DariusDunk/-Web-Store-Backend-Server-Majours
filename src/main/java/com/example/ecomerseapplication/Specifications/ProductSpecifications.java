@@ -107,55 +107,30 @@ public class ProductSpecifications {
     }
 
 
-    public static Specification<Product> priceBetweenWSale(Integer min, Integer max) {
-        return (root, query, cb) -> {
-
-            if (query != null) {
-                query.distinct(true);
-            } // important with joins
-
-            Expression<Number> finalPrice =
-                    PriceExpressions.finalPrice(root,
-//                            query,
-                            cb);
-
-            return cb.and(
-                    cb.ge(finalPrice, min),
-                    cb.le(finalPrice, max)
-            );
-        };
-    }
-
-    public static Specification<Product> sortByPrice(Sort.Direction direction) {
-        return (root, query, cb) -> {
-
-            if (query != null) {
-                query.distinct(true);
-
-                Expression<Number> finalPrice =
-                        PriceExpressions.finalPrice(root,
-//                                query,
-                                cb);
-
-                if (direction.isAscending()) {
-                    query.orderBy(cb.asc(finalPrice));
-                } else {
-                    query.orderBy(cb.desc(finalPrice));
+        public static Specification<Product> priceBetweenWSale(Integer min, Integer max, Expression<Number> finalPrice) {
+            return (root, query, cb) -> {
+                if (query != null) {
+                    query.distinct(true);
                 }
-
-                query.orderBy(
-                        direction.isAscending()
-                                ? cb.asc(finalPrice)
-                                : cb.desc(finalPrice),
-                        cb.asc(root.get(Product_.ID))
+                return cb.and(
+                        cb.ge(finalPrice, min),
+                        cb.le(finalPrice, max)
                 );
+            };
+        }
 
-            }
-
-            return cb.conjunction(); // no filtering, only sorting
-        };
-    }
-
+        public static Specification<Product> sortByPrice(Sort.Direction direction, Expression<Number> finalPrice) {
+            return (root, query, cb) -> {
+                if (query != null) {
+                    query.distinct(true);
+                    query.orderBy(
+                            direction.isAscending() ? cb.asc(finalPrice) : cb.desc(finalPrice),
+                            cb.asc(root.get(Product_.ID))
+                    );
+                }
+                return cb.conjunction();
+            };
+        }
     public static Specification<Product> joinMainSale() {
         return (root, query, cb) -> {
 
