@@ -72,10 +72,10 @@ select
     END) + 50) / 100
     ) as priceLowest,
     MAX(
-                (p.originalPriceStotinki * (100 - CASE\s
-                    WHEN (s.startDate <= CURRENT_TIMESTAMP AND (s.endDate IS NULL OR s.endDate > CURRENT_TIMESTAMP))\s
+                (p.originalPriceStotinki * (100 - CASE
+                    WHEN (s.startDate <= CURRENT_TIMESTAMP AND (s.endDate IS NULL OR s.endDate > CURRENT_TIMESTAMP))
                     THEN COALESCE(sp.overrideDiscountPercentage, s.discountPercent, 0)
-                    ELSE 0\s
+                    ELSE 0
                 END) + 50) / 100
             ) as priceHighest
 from Product p

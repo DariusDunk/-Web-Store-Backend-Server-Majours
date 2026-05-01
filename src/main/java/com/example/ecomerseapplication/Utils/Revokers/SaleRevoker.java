@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.Utils;
+package com.example.ecomerseapplication.Utils.Revokers;
 
 import com.example.ecomerseapplication.Entities.Sale;
 import com.example.ecomerseapplication.Services.SaleProductService;

@@ -332,14 +332,6 @@ public class ProductService {
         return ProductDTOMapper.productPageToDtoPage(productPage);
     }
 
-
-//    public List<CompactProductResponse> getFeaturedProducts() {
-//        return productRepository.getProductsByRating()
-//                .stream()
-//                .map(ProductDTOMapper::entityToCompactResponse)
-//                .collect(Collectors.toList());
-//    }
-
     public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, Pageable pageable) {
         return ProductDTOMapper
                 .productPageToDtoPage(productRepository
@@ -359,7 +351,8 @@ public class ProductService {
                         .and(ProductSpecifications.ratingEqualOrHigher(rating));
 
         if (priceLowest != 0 && priceHighest != 0) {
-            productSpec = productSpec.and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
+//            productSpec = productSpec.and(ProductSpecifications.priceBetween(priceLowest, priceHighest));
+            productSpec = productSpec.and(ProductSpecifications.priceBetweenWSale(priceLowest, priceHighest));
         }
 
         if (!manufacturers.isEmpty()) {
@@ -404,19 +397,9 @@ public class ProductService {
     }
 
     public FiltersPriceRange getTotalPriceRangeOfCategory(ProductCategory category) {
-//        Object[] result = (Object[]) productRepository.getTotalPriceRange(category);
 
         return productRepository.getCategoryPriceRange(category);
-
-//        if (result.length != 2) {
-//            throw new ResourceNotFoundException("Incorrect or missing price range for category " + category.getCategoryName());
-//        }
-//        return result;
     }
-
-//    public FiltersPriceRangeDTO getTotalCategoryPriceRangeWithSales(ProductCategory category) {
-//
-//    }
 
     public List<Product> getByCodes(List<String> codes) {
         List<Product> products = productRepository.getAllByProductCodeIn(codes);

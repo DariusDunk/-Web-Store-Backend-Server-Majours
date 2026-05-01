@@ -5,12 +5,12 @@ import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.MetaModels.Product_;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -95,5 +95,23 @@ public class ProductSpecifications {
             }
             return criteriaBuilder.greaterThanOrEqualTo(root.get(Product_.RATING), rating);
         });
+    }
+
+
+    public static Specification<Product> priceBetweenWSale(Integer min, Integer max) {
+        return (root, query, cb) -> {
+
+            if (query != null) {
+                query.distinct(true);
+            } // important with joins
+
+            Expression<Number> finalPrice =
+                    PriceExpressions.finalPrice(root, query, cb);
+
+            return cb.and(
+                    cb.ge(finalPrice, min),
+                    cb.le(finalPrice, max)
+            );
+        };
     }
 }
