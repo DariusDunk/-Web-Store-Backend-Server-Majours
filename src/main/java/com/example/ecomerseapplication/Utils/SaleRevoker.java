@@ -31,7 +31,7 @@ public class SaleRevoker {
 
         if (!expiredSales.isEmpty())
         {
-            saleProductService.deleteBySales(expiredSales);
+            saleProductService.unmarkAsMainBySales(expiredSales);
             saleService.markAsInActive(expiredSales);
 
             ZoneId zoneId = ZoneId.systemDefault();

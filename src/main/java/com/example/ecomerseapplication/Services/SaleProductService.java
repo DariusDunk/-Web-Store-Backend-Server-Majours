@@ -17,7 +17,11 @@ public class SaleProductService {
         this.saleProductRepository = saleProductRepository;
     }
 
-    public void deleteBySales(List<Sale> sales) {
-        saleProductRepository.deleteBySaleIn(sales);
+//    public void deleteBySales(List<Sale> sales) {
+//        saleProductRepository.deleteBySaleIn(sales);
+//    }
+
+    public void unmarkAsMainBySales(List<Sale> sales) {
+        saleProductRepository.unmarkIsMainBySales(sales);
     }
 }
