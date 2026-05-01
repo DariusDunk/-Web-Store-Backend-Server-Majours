@@ -150,20 +150,12 @@ public class ProductController {
                                                                                       @PathVariable int page,
                                                                                       @RequestParam(required = false, name = "sort") String sortOrder) {
 
-        if (name.equals("Бензинови машини") || name.equals("електрически машини"))//TODO TOVA 6TE TRQBVA DA GO MAHA6 KATO SLOJI6 NOVITE RODITELSKI KATEGORII
+        if (name.equals("Бензинови машини") || name.equals("електрически машини"))
             return ResponseEntity.notFound().build();
-
-//        System.out.println("Chosen sort: " + ((sortOrder!=null&&!sortOrder.isBlank())? sortOrder: "none") );
-
-        Sort sort = (sortOrder != null && !sortOrder.isBlank())
-                ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
-                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
-
-        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
 
         ProductCategory productCategory = productCategoryService.findByName(name);
 
-        Page<CompactProductResponse> productResponsePage = productService.getByCategory(productCategory, pageRequest);
+        Page<CompactProductResponse> productResponsePage = productService.getByCategory(productCategory, page, sortOrder);
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }

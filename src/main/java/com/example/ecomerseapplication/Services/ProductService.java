@@ -328,11 +328,79 @@ public class ProductService {
         return ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
     }
 
-    public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, Pageable pageable) {
-        return ProductDTOMapper
-                .productPageToDtoPage(productRepository
-                        .getByProductCategory(productCategory, pageable));
-    }
+        public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, int page, String sortOrder) {
+
+            boolean isPriceSort = sortOrder != null
+                    && !sortOrder.isBlank()
+                    && (sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
+                    || Objects.equals(sortOrder, ProductSortType.PRICE_DESC.getValue()));
+
+            if (isPriceSort) {
+                Sort.Direction dir = sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC;
+                return getByCategorySortedByPrice(productCategory, page, dir);
+            }
+
+            Sort sort = (sortOrder != null && !sortOrder.isBlank())
+                    ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
+                    : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+
+            PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
+            return ProductDTOMapper.productPageToDtoPage(
+                    productRepository.getByProductCategory(productCategory, pageRequest)
+            );
+        }
+
+        private Page<CompactProductResponse> getByCategorySortedByPrice(ProductCategory productCategory, int page, Sort.Direction direction) {
+
+            int pageSize = PageContentLimit.limit;
+
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+            // --- Query 1: SELECT p.id ORDER BY finalPrice ---
+            CriteriaQuery<Integer> idQuery = cb.createQuery(Integer.class);
+            Root<Product> idRoot = idQuery.from(Product.class);
+
+            Expression<Number> finalPrice = PriceExpressions.finalPrice(idRoot, cb);
+
+            idQuery.select(idRoot.get(Product_.ID))
+                    .where(cb.equal(idRoot.get(Product_.PRODUCT_CATEGORY), productCategory))
+                    .orderBy(
+                            direction.isAscending() ? cb.asc(finalPrice) : cb.desc(finalPrice),
+                            cb.asc(idRoot.get(Product_.ID))
+                    );
+
+            List<Integer> orderedIds = entityManager.createQuery(idQuery)
+                    .setFirstResult(page * pageSize)
+                    .setMaxResults(pageSize)
+                    .getResultList();
+
+            if (orderedIds.isEmpty()) {
+                return Page.empty(PageRequest.of(page, pageSize));
+            }
+
+            // --- Query 2: fetch full entities by ID, no joins, no DISTINCT ---
+            List<Product> products = productRepository.findAllById(orderedIds);
+
+            Map<Integer, Product> productById = products.stream()
+                    .collect(Collectors.toMap(Product::getId, p -> p));
+            List<Product> orderedProducts = orderedIds.stream()
+                    .map(productById::get)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            // --- Count query ---
+            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+            Root<Product> countRoot = countQuery.from(Product.class);
+            countQuery.select(cb.count(countRoot))
+                    .where(cb.equal(countRoot.get(Product_.PRODUCT_CATEGORY), productCategory));
+            long total = entityManager.createQuery(countQuery).getSingleResult();
+
+            return ProductDTOMapper.productPageToDtoPage(
+                    new PageImpl<>(orderedProducts, PageRequest.of(page, pageSize), total)
+            );
+        }
 
     public Page<CompactProductResponse> getByCategoryFiltersManufacturerAndPriceRange(Set<CategoryAttribute> categoryAttributes,
                                                                                       ProductCategory productCategory,
