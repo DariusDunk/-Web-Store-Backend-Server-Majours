@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -41,9 +43,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
                     "order by p.rating, p.productName " +
                     "limit 7 ")
     List<String> getNameSuggestions(String name);
-
-//    @EntityGraph(attributePaths = {"saleProducts", "saleProducts.sale"})
-//    Page<Product> getByManufacturer(Manufacturer manufacturer, Pageable pageable);
 
     Page<Product> getByProductCategory(ProductCategory productCategory, Pageable pageable);
 
@@ -88,4 +87,29 @@ where p.productCategory = ?1
 
     List<Product> getAllByProductCodeIn(List<String> productCode);
 
+
+    @Query(
+"""
+select p.productCode as productCode,
+p.productName as name,
+p.originalPriceStotinki as originalPriceStotinki,
+(
+p.originalPriceStotinki *
+ (100 - coalesce(sp.overrideDiscountPercentage, s.discountPercent, 0)) + 50
+) / 100 as discountedPriceStotinki,
+p.rating as rating,
+p.reviewCount as reviewCount,
+p.mainImageUrl as imageUrl,
+p.quantityInStock > 0 as isInStock
+from Product p
+join p.saleProducts sp
+join sp.sale s
+where s.id = :saleId
+  and s.isActive = true
+  and current_timestamp between s.startDate and s.endDate
+  and sp.isMain = true
+order by coalesce(sp.overrideDiscountPercentage, s.discountPercent, 0) desc
+"""
+    )
+    List<CompactProductProjection> getProductsOfSale(@Param("saleId") long saleId, Pageable pageable);
 }

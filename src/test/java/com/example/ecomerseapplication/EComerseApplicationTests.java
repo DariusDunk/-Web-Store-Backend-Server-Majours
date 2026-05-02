@@ -23,7 +23,7 @@ class EComerseApplicationTests {
     @Autowired
     private CategoryAttributeRepository categoryAttributeRepository;
     @Autowired
-    private ProductCategoryRepository productCategoryRepository;
+    private CategoryRepository categoryRepository;
     @Autowired
     private AttributeNameRepository attributeNameRepository;
     @Autowired
@@ -46,7 +46,7 @@ class EComerseApplicationTests {
     }
 
     @Autowired
-    ProductCategoryService categoryService;
+    CategoryService categoryService;
 
     @Autowired
     CategoryAttributeService categoryAttributeService;
@@ -59,9 +59,9 @@ class EComerseApplicationTests {
 
     @Test
     void attributeTest() {
-        Optional<ProductCategory> productCategory = categoryService.findById(4);
+        ProductCategory productCategory = categoryService.findById(4);
 
-        List<CategoryAttribute> categoryAttributeList = categoryAttributeService.getByCategory(productCategory.orElse(null));
+        List<CategoryAttribute> categoryAttributeList = categoryAttributeService.getByCategory(productCategory);
 
         System.out.println(categoryAttributeList.getFirst().getAttributeOption());
     }
@@ -116,7 +116,7 @@ class EComerseApplicationTests {
 
     @Test
     void getAttributesOfCategory(){
-        List<AttributeOptionDTO> attributes = productCategoryRepository.getAttributesOfCategory(5);
+        List<AttributeOptionDTO> attributes = categoryRepository.getAttributesOfCategory(5);
 
         for ( AttributeOptionDTO attributeOptionDTO : attributes) {
             System.out.println(attributeOptionDTO);
@@ -129,7 +129,7 @@ class EComerseApplicationTests {
         List<AttributeName> names = attributeNameRepository.getAllByIdIn(List.of(
                 1, 2, 3, 4, 5));
 
-       List<String > units = productCategoryRepository.getMeasurementUnitsOfCategoryAttributes(5,names );
+       List<String > units = categoryRepository.getMeasurementUnitsOfCategoryAttributes(5,names );
 
 
         for ( String unit : units) {

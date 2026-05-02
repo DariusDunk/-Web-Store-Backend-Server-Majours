@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Repositories;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Integer> {
+public interface CategoryRepository extends JpaRepository<ProductCategory, Integer> {
 
     Optional<ProductCategory> findByCategoryName(String name);
 
@@ -51,4 +52,19 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
                                                 and aog.attributesOfGroupId.attributeName in :attributeNames
             """)
     List<String> getMeasurementUnitsOfCategoryAttributes(@Param("categoryId")int categoryId, @Param("attributeNames")List<AttributeName> attributeNameIds);
+
+    @Query(
+"""
+select
+pc.id
+from ProductCategory pc
+join pc.products p
+group by pc
+order by sum(p.reviewCount) desc,
+avg(p.rating) desc,
+count(p.id) desc
+"""
+            )
+    List<Integer> getTopCategoriesIds(Pageable pageable);
+
 }

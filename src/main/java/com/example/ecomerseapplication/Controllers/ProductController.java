@@ -42,23 +42,25 @@ public class ProductController {
     private final CategoryAttributeService categoryAttributeService;
     private final CustomerService customerService;
     private final ReviewService reviewService;
-    private final ProductCategoryService productCategoryService;
+    private final CategoryService categoryService;
     private final ManufacturerService manufacturerService;
     private final PurchaseCartService purchaseCartService;
     private final UserIdExtractor userIdExtractor;
     private final SessionService sessionService;
+    private final ProductRowService productRowService;
 
     @Autowired
-    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, ProductCategoryService productCategoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, UserIdExtractor userIdExtractor, SessionService sessionService) {
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, CategoryService categoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, UserIdExtractor userIdExtractor, SessionService sessionService, ProductRowService productRowService) {
         this.productService = productService;
         this.categoryAttributeService = categoryAttributeService;
         this.customerService = customerService;
         this.reviewService = reviewService;
-        this.productCategoryService = productCategoryService;
+        this.categoryService = categoryService;
         this.manufacturerService = manufacturerService;
         this.purchaseCartService = purchaseCartService;
         this.userIdExtractor = userIdExtractor;
         this.sessionService = sessionService;
+        this.productRowService = productRowService;
     }
 
     @GetMapping("findall")
@@ -153,9 +155,12 @@ public class ProductController {
         if (name.equals("Бензинови машини") || name.equals("електрически машини"))
             return ResponseEntity.notFound().build();
 
-        ProductCategory productCategory = productCategoryService.findByName(name);
+        ProductCategory productCategory = categoryService.findByName(name);
 
-        Page<CompactProductResponse> productResponsePage = productService.getByCategory(productCategory, page, sortOrder);
+        Page<CompactProductResponse> productResponsePage = productService.getByCategory(productCategory,
+                page,
+                sortOrder,
+                PageContentLimit.limit);
 
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(PageResponse.from(productResponsePage));
     }
@@ -177,7 +182,7 @@ public class ProductController {
         if (productFilterRequest.manufacturerNames != null)
             manufacturerList = manufacturerService.getByNames(productFilterRequest.manufacturerNames);
 
-        ProductCategory productCategory = productCategoryService.findByName(productFilterRequest.productCategory);
+        ProductCategory productCategory = categoryService.findByName(productFilterRequest.productCategory);
 
 
 
@@ -222,7 +227,7 @@ public class ProductController {
 
     @GetMapping("review/specific")
     @PreAuthorize("hasRole(@roles.customer())")
-    public ResponseEntity<?> getSpecificReviewData(@RequestParam("productCode") @NotBlank String productCode) {//todo produlji custom exception rabotata ot tuk
+    public ResponseEntity<?> getSpecificReviewData(@RequestParam("productCode") @NotBlank String productCode) {
 
 //        System.out.println("IUD " + userId + " PCODE " + productCode);
         String customerId = userIdExtractor.getUserId();
@@ -349,4 +354,16 @@ public class ProductController {
 
         return ResponseEntity.ok().body("Ревюто е изтрито");
     }
+
+    @GetMapping("topSalesProducts")
+    public ResponseEntity<?> getTopSalesProducts() {
+        return ResponseEntity.ok(productRowService.getTopActiveSaleProducts());
+    }
+
+    @GetMapping("topCategoryProducts")
+    public ResponseEntity<?> getTopCategoryProducts() {
+        return ResponseEntity.ok(productRowService.getTopCategoryProducts());
+    }
+
+
 }

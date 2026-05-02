@@ -27,26 +27,6 @@ where c.session.sessionId in ?1
 """)
     void deleteBySessions(List<String> sessionIds);
 
-//    @Query(
-//"""
-//select new com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse(c.id.)
-//from Cart c
-//where c.session=?1
-//""")
-//    CartSummaryResponse getSummaryBySession(Session session);
-
-//    @Modifying(clearAutomatically = true, flushAutomatically = true)
-//    @Query(
-//"""
-//update Cart
-//set customer =:customer,
-//session = null
-//where session = :session
-//
-//"""
-//    )
-//    void sessionToUserCart(@Param("session") Session session, @Param("customer") Customer customer);
-
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from Cart where session.sessionId = ?1")
     void deleteBySession(String sessionId);

@@ -1,6 +1,9 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProjection;
 import com.example.ecomerseapplication.Entities.Sale;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,5 +34,17 @@ where s.isActive = true and s.endDate<current_timestamp
 """
     )
     List<Sale> getExpiredSales();
+
+    @Query(
+"""
+select s.id as id, s.name as name
+from Sale s
+where s.isActive = true
+and current_timestamp between s.startDate and s.endDate
+order by s.discountPercent desc, s.startDate desc
+"""
+    )
+    List<CompactSaleProjection> findActiveAndNotExpired(Pageable pageable);
+
 
 }

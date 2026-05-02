@@ -12,9 +12,6 @@ import java.util.List;
 @Repository
 public interface SaleProductRepository extends JpaRepository<SaleProduct, SaleProductId> {
 
-//    @Modifying(clearAutomatically = true, flushAutomatically = true)
-//    void deleteBySaleIn(List<Sale> sales);
-
     @Query(
 """
 update SaleProduct sp

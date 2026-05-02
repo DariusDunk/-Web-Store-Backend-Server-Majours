@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
@@ -33,17 +34,17 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CartProductService cartProductService;
     private final ReviewService reviewService;
-    private final ProductCategoryService productCategoryService;
+    private final CategoryService categoryService;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, ProductCategoryService productCategoryService, FavoriteOfCustomerService favoriteOfCustomerService) {
+    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, CategoryService categoryService, FavoriteOfCustomerService favoriteOfCustomerService) {
         this.productRepository = productRepository;
         this.cartProductService = cartProductService;
         this.reviewService = reviewService;
-        this.productCategoryService = productCategoryService;
+        this.categoryService = categoryService;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
     }
 
@@ -277,7 +278,7 @@ public class ProductService {
             attributeNames.add(categoryAttribute.getAttributeName());
         }
 
-        List<String[]> attributeNameMUnitPairs = productCategoryService
+        List<String[]> attributeNameMUnitPairs = categoryService
                 .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
 
         DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
@@ -322,13 +323,13 @@ public class ProductService {
             attributeNames.add(categoryAttribute.getAttributeName());
         }
 
-        List<String[]> attributeNameMUnitPairs = productCategoryService
+        List<String[]> attributeNameMUnitPairs = categoryService
                 .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
 
         return ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
     }
 
-        public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, int page, String sortOrder) {
+        public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, int page, String sortOrder, int pageSize) {
 
             boolean isPriceSort = sortOrder != null
                     && !sortOrder.isBlank()
@@ -346,7 +347,7 @@ public class ProductService {
                     ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
                     : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
 
-            PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
+            PageRequest pageRequest = PageRequest.of(page, pageSize, sort);
             return ProductDTOMapper.productPageToDtoPage(
                     productRepository.getByProductCategory(productCategory, pageRequest)
             );
@@ -687,5 +688,16 @@ public class ProductService {
         }
 
         return products;
+    }
+
+    public List<CompactProductResponse> getProductsOfSale(long saleId) {
+        List<CompactProductProjection> productProjections = productRepository
+                .getProductsOfSale(saleId, PageRequest.of(0, 5));
+
+       return ProductDTOMapper.compactProjectionListToResponseList(productProjections);
+    }
+
+    public List<CompactProductResponse> getTopProductsOfCategory(ProductCategory category) {
+        return getByCategory(category, 0, ProductSortType.POPULARITY.getValue(), 5).getContent();
     }
 }

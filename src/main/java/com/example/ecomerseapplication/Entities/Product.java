@@ -32,8 +32,6 @@ public class Product {
 
     @Column(name = "original_price_stotinki")
     private int originalPriceStotinki;
-    @Column(name = "sale_price_stotinki")
-    private int salePriceStotinki;
 
     @Column(name = "product_code", columnDefinition = "character varying(10)")
     private String productCode;
@@ -84,17 +82,6 @@ public class Product {
     public boolean isInStock() {
         return quantityInStock > 0;
     }
-
-
-//    public Optional<SaleProduct> getSingleSaleProduct() {
-//        if (saleProducts == null || saleProducts.isEmpty()) {
-//            return Optional.empty();
-//        }
-//        if (saleProducts.size() > 1) {
-//            throw new IllegalStateException("Multiple sales found for product");
-//        }
-//        return Optional.of(saleProducts.iterator().next());
-//    }
 
 
     public Optional<SaleProduct> getMainSaleProduct() {

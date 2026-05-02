@@ -4,6 +4,7 @@ import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -199,6 +200,24 @@ public class ProductDTOMapper {
             }
         }
         return attributeOptionResponses;
+    }
+
+    public static List<CompactProductResponse> compactProjectionListToResponseList(List<CompactProductProjection> productProjections) {
+
+        return productProjections.stream().map(ProductDTOMapper::compactProjectionToResponse).toList();
+    }
+
+    public static CompactProductResponse compactProjectionToResponse(CompactProductProjection productProjection) {
+        CompactProductResponse response = new CompactProductResponse();
+        response.productCode = productProjection.getProductCode();
+        response.salePriceStotinki = productProjection.getDiscountedPriceStotinki();
+        response.isInStock = productProjection.isInStock();
+        response.name = productProjection.getName();
+        response.imageUrl = productProjection.getImageUrl();
+        response.rating = productProjection.getRating();
+        response.originalPriceStotinki = productProjection.getOriginalPriceStotinki();
+        response.reviewCount = productProjection.getReviewCount();
+        return response;
     }
 
 }

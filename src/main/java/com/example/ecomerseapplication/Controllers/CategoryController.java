@@ -6,7 +6,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Filt
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Services.ManufacturerService;
-import com.example.ecomerseapplication.Services.ProductCategoryService;
+import com.example.ecomerseapplication.Services.CategoryService;
 import com.example.ecomerseapplication.Services.ProductService;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,12 @@ import java.util.*;
 public class CategoryController {
 
 
-    private final ProductCategoryService categoryService;
+    private final CategoryService categoryService;
     private final ManufacturerService manufacturerService;
     private final ProductService productService;
 
     @Autowired
-    public CategoryController(ProductCategoryService categoryService, ManufacturerService manufacturerService, ProductService productService) {
+    public CategoryController(CategoryService categoryService, ManufacturerService manufacturerService, ProductService productService) {
         this.categoryService = categoryService;
         this.manufacturerService = manufacturerService;
         this.productService = productService;

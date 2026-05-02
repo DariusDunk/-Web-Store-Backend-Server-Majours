@@ -43,14 +43,6 @@ public class ProductSpecifications {
         };
     }
 
-//    public static Specification<Product> priceBetween(int priceLowest, int priceHighest) {
-//        return ((root, query, criteriaBuilder) -> criteriaBuilder.between(
-//                root.get(Product_.SALE_PRICE_STOTINKI),
-//                priceLowest,
-//                priceHighest)
-//        );
-//    }
-
     public static Specification<Product> equalsCategory(ProductCategory productCategory) {
 
         return ((root, query, criteriaBuilder) ->

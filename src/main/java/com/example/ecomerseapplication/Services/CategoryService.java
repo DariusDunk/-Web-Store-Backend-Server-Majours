@@ -3,51 +3,51 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
-import com.example.ecomerseapplication.Repositories.ProductCategoryRepository;
+import com.example.ecomerseapplication.Repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class ProductCategoryService {
+public class CategoryService {
 
-    private final ProductCategoryRepository productCategoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public ProductCategoryService(ProductCategoryRepository productCategoryRepository) {
-        this.productCategoryRepository = productCategoryRepository;
+    public CategoryService(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
     }
 
     public List<ProductCategory> findAll() {
-        return productCategoryRepository.findAll();
+        return categoryRepository.findAll();
     }
 
     public List<String> getAllCategoryNames() {
-        List<String> names = productCategoryRepository.getAllNames();
+        List<String> names = categoryRepository.getAllNames();
         if (names.isEmpty())
             throw new ResourceNotFoundException("No categories found");
         return names;
     }
 
-    public Optional<ProductCategory> findById(int id) {
-        return productCategoryRepository.findById(id);
+    public ProductCategory findById(int id) {
+        return categoryRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Product Category not found with id: " + id));
     }
 
     public ProductCategory findByName(String name) {
-        return productCategoryRepository.findByCategoryName(name).orElseThrow(()->new ResourceNotFoundException("Product Category not found with name: " + name));
+        return categoryRepository.findByCategoryName(name).orElseThrow(()->new ResourceNotFoundException("Product Category not found with name: " + name));
     }
 
     public List<AttributeOptionDTO> getAttributesOfCategory(int categoryId) {
-        return productCategoryRepository.getAttributesOfCategory(categoryId);
+        return categoryRepository.getAttributesOfCategory(categoryId);
     }
 
     public List<String[]> getSpecificAttributesOfCategory(int categoryId,
                                                                          List<AttributeName> attributeNames) {
-        List<String> combinations = productCategoryRepository.getMeasurementUnitsOfCategoryAttributes(categoryId, attributeNames);
+        List<String> combinations = categoryRepository.getMeasurementUnitsOfCategoryAttributes(categoryId, attributeNames);
 
         if (combinations.isEmpty()) {
             return new ArrayList<>();
@@ -64,5 +64,10 @@ public class ProductCategoryService {
         }
 
         return attributeOptionResponses;
+    }
+
+
+    public List<Integer> getTopCategories() {
+        return categoryRepository.getTopCategoriesIds(PageRequest.of(0, 6));
     }
 }

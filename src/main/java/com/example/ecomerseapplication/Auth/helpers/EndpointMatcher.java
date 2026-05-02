@@ -11,21 +11,6 @@ public class EndpointMatcher {
 
     private final AntPathMatcher matcher = new AntPathMatcher();
 
-//    private final List<String> PUBLIC_AND_SEMI_PROTECTED_ENDPOINTS = List.of(
-//            "/auth/**",
-//            "/cart/*",
-//            "/cart/add/quantity",
-//            "/attributes/**",
-//            "/category/**",
-//            "/manufacturer/**",
-//            "/product/*",
-//            "/product/*/review/overview",
-//            "/product/manufacturer/*/p*",
-//            "/product/category/*/p*",
-//            "/product/filter/*",
-//            "/product/reviews/paged"
-//    );
-
     private final List<String> PUBLIC_ENDPOINTS = List.of(
             "/attributes/**",
             "/category/**",

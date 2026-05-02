@@ -12,4 +12,6 @@ public class GlobalConstants {
     public static final String CLIENT_TYPE_ATTRIBUTE = "clientType";
     public static final String SESSION_ID_HEADER = "x-session-id";
     public static final String CLIENT_TYPE_HEADER = "x-client_type";
+    public static final String PRODUCT_ROW_TYPE_SALE = "sale";
+    public static final String PRODUCT_ROW_TYPE_CATEGORY = "category";
 }
