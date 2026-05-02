@@ -54,10 +54,22 @@ public class ProductService {
         return ProductDTOMapper.compactProductPageToCompactResponsePage(products);
     }
 
-    private String buildOrderBy(String sort) {
+    private String buildNativeOrderBy(String sort) {
         return switch (sort) {
-            case "price_asc" -> " ORDER BY p.sale_price_stotinki ASC ";
-            case "price_desc" -> " ORDER BY p.sale_price_stotinki DESC ";
+            case "price_asc" -> """
+            ORDER BY COALESCE(
+                p.original_price_stotinki * (1 - sp.override_discount_percentage / 100.0),
+                p.original_price_stotinki * (1 - s.discount_percent / 100.0),
+                p.original_price_stotinki
+            ) ASC
+        """;
+            case "price_desc" -> """
+            ORDER BY COALESCE(
+                p.original_price_stotinki * (1 - sp.override_discount_percentage / 100.0),
+                p.original_price_stotinki * (1 - s.discount_percent / 100.0),
+                p.original_price_stotinki
+            ) DESC
+        """;
             case "newest" -> " ORDER BY p.added_at DESC ";
             case "review_count" -> " ORDER BY p.review_count DESC ";
             default -> " ORDER BY p.product_name DESC ";
@@ -68,30 +80,19 @@ public class ProductService {
 
         String[] words = search.toLowerCase().split("\\s+");
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT p.* ")
-                .append("FROM online_shop.products p ")
-                .append("LEFT JOIN online_shop.manufacturers m ON p.manufacturer_id = m.manufacturer_id ")
-                .append("LEFT JOIN online_shop.product_categories c ON p.product_category_id = c.product_category_id ")
-//                .append("LEFT JOIN online_shop.sales s ON p.product_id = s.product_id")
-                .append("WHERE ");
+        String sql = "SELECT p.* " +
+                "FROM online_shop.products p " +
+                "LEFT JOIN online_shop.manufacturers m ON p.manufacturer_id = m.manufacturer_id " +
+                "LEFT JOIN online_shop.product_categories c ON p.product_category_id = c.product_category_id " +
+                nativeSaleJoin() +
+                "WHERE " +
 
-        //-----------------word array WHERE clause buildup--------------------
-        for (int i = 0; i < words.length; i++) {
-            if (i > 0) sql.append(" AND ");
-            sql.append("(")
-                    .append("LOWER(p.product_name) LIKE :word")
-                    .append(i + 1)
-                    .append(" OR LOWER(m.manufacturer_name) LIKE :word")
-                    .append(i + 1)
-                    .append(" OR LOWER(c.category_name) LIKE :word")
-                    .append(i + 1)
-                    .append(") ");
-        }
-        sql.append(buildOrderBy(sortOrder))
-                .append("LIMIT :limit OFFSET :offset");
+                //-----------------word array WHERE clause buildup--------------------
+                buildWhereClause(words) +
+                buildNativeOrderBy(sortOrder) +
+                "LIMIT :limit OFFSET :offset";
 
-        Query query = entityManager.createNativeQuery(sql.toString(), Product.class);
+        Query query = entityManager.createNativeQuery(sql, Product.class);
 
         for (int i = 0; i < words.length; i++) {
             query.setParameter("word" + (i + 1), "%" + words[i].toLowerCase() + "%");
@@ -99,10 +100,15 @@ public class ProductService {
         query.setParameter("limit", pageRequest.getPageSize());
         query.setParameter("offset", pageRequest.getOffset());
 
-
-        // Word-level WHERE conditions
         return executePagedSearchQuery(pageRequest, words, query
         );
+    }
+
+    private String nativeSaleJoin() {
+        return "LEFT JOIN online_shop.sale_products sp ON p.product_id = sp.product_id AND sp.is_main = true " +
+                "LEFT JOIN online_shop.sales s ON sp.sale_id = s.sale_id AND s.is_active = true " +
+                "AND s.start_date <= NOW() " +
+                "AND s.end_date > NOW() ";
     }
 
     private @NonNull Page<CompactProductResponse> executePagedSearchQuery(PageRequest pageRequest, String[] words, Query query
@@ -113,26 +119,15 @@ public class ProductService {
         List<Product> products = query.getResultList();
 
         // --- Count query for total ---
-        StringBuilder countSql = new StringBuilder();
-        countSql.append("SELECT COUNT(*) FROM online_shop.products p ")
-                .append("LEFT JOIN online_shop.manufacturers m ON p.manufacturer_id = m.manufacturer_id ")
-                .append("LEFT JOIN online_shop.product_categories c ON p.product_category_id = c.product_category_id ")
-                .append("WHERE ");
 
 
-        for (int i = 0; i < words.length; i++) {
-            if (i > 0) countSql.append(" AND ");
-            countSql.append("(")
-                    .append("LOWER(p.product_name) LIKE :word")
-                    .append(i + 1)
-                    .append(" AND LOWER(m.manufacturer_name) LIKE :word")
-                    .append(i + 1)
-                    .append(" AND LOWER(c.category_name) LIKE :word")
-                    .append(i + 1)
-                    .append(") ");
-        }
+        String countSql = "SELECT COUNT(*) FROM online_shop.products p " +
+                "LEFT JOIN online_shop.manufacturers m ON p.manufacturer_id = m.manufacturer_id " +
+                "LEFT JOIN online_shop.product_categories c ON p.product_category_id = c.product_category_id " +
+                "WHERE " +
+                buildWhereClause(words);
 
-        Query countQuery = entityManager.createNativeQuery(countSql.toString());
+        Query countQuery = entityManager.createNativeQuery(countSql);
         for (int i = 0; i < words.length; i++) {
             countQuery.setParameter("word" + (i + 1), "%" + words[i].toLowerCase() + "%");
         }
@@ -237,18 +232,8 @@ public class ProductService {
                 .append("WHERE ");
 
         //-----------------word array WHERE clause buildup--------------------
-        for (int i = 0; i < words.length; i++) {
-            if (i > 0) sql.append(" AND ");
-            sql.append("(")
-                    .append("LOWER(p.product_name) LIKE :word")
-                    .append(i + 1)
-                    .append(" OR LOWER(m.manufacturer_name) LIKE :word")
-                    .append(i + 1)
-                    .append(" OR LOWER(c.category_name) LIKE :word")
-                    .append(i + 1)
-                    .append(") ");
-        }
-        sql.append(" ORDER BY relevance_score DESC ")
+        sql.append(buildWhereClause(words));
+        sql.append(" ORDER BY relevance_score DESC, p.rating DESC ")
                 .append("LIMIT :limit OFFSET :offset");
 
         Query query = entityManager.createNativeQuery(sql.toString(), Product.class);
@@ -262,6 +247,21 @@ public class ProductService {
 
         return executePagedSearchQuery(pageRequest, words, query
         );
+    }
+
+    private String buildWhereClause(String[] words) {
+        StringBuilder where = new StringBuilder();
+
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) where.append(" AND ");
+            where.append("(")
+                    .append("LOWER(p.product_name) LIKE :word").append(i + 1)
+                    .append(" OR LOWER(m.manufacturer_name) LIKE :word").append(i + 1)
+                    .append(" OR LOWER(c.category_name) LIKE :word").append(i + 1)
+                    .append(")");
+        }
+
+        return where.toString();
     }
 
     public List<String> getNameSuggestions(String name) {
@@ -358,7 +358,7 @@ public class ProductService {
 
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-            // --- Query 1: SELECT p.id ORDER BY finalPrice ---
+            // ---  SELECT p.id + ORDER BY finalPrice ---
             CriteriaQuery<Integer> idQuery = cb.createQuery(Integer.class);
             Root<Product> idRoot = idQuery.from(Product.class);
 
@@ -380,7 +380,7 @@ public class ProductService {
                 return Page.empty(PageRequest.of(page, pageSize));
             }
 
-            // --- Query 2: fetch full entities by ID, no joins, no DISTINCT ---
+            // --- fetch by IDs ---
             List<Product> products = productRepository.findAllById(orderedIds);
 
             Map<Integer, Product> productById = products.stream()
@@ -390,7 +390,7 @@ public class ProductService {
                     .filter(Objects::nonNull)
                     .toList();
 
-            // --- Count query ---
+            // --- Pagination Count query ---
             CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
             Root<Product> countRoot = countQuery.from(Product.class);
             countQuery.select(cb.count(countRoot))
@@ -427,14 +427,12 @@ public class ProductService {
                         dir, page);
             }
 
-            // --- Non-price sort: use Specifications as before ---
             Specification<Product> productSpec =
                     ProductSpecifications.equalsCategory(productCategory)
                             .and(ProductSpecifications.ratingEqualOrHigher(rating));
 
             if (priceLowest != 0 && priceHighest != 0) {
-                // For the non-price-sort path, priceBetweenWSale builds its own finalPrice — no conflict here
-                // since sortByPrice is not called at all in this branch
+
                 productSpec = productSpec.and((root, query, cb) -> {
                     if (query != null) query.distinct(true);
                     Expression<Number> fp = PriceExpressions.finalPrice(root, cb);
@@ -469,13 +467,10 @@ public class ProductService {
             int pageSize = PageContentLimit.limit;
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-            // --- Query 1: SELECT p.id with all filters, ORDER BY finalPrice ---
+            // ---  SELECT p.id + ORDER BY finalPrice ---
             CriteriaQuery<Integer> idQuery = cb.createQuery(Integer.class);
             Root<Product> root = idQuery.from(Product.class);
-
-            // Build finalPrice ONCE — used for both the price range filter and the sort
             Expression<Number> finalPrice = PriceExpressions.finalPrice(root, cb);
-
             List<Predicate> predicates = new ArrayList<>();
 
             // Category
@@ -486,7 +481,7 @@ public class ProductService {
                 predicates.add(cb.greaterThanOrEqualTo(root.get(Product_.RATING), rating));
             }
 
-            // Price range — reuses the same finalPrice expression, no extra join
+            // Price range
             if (priceLowest != 0 && priceHighest != 0) {
                 predicates.add(cb.ge(finalPrice, priceLowest));
                 predicates.add(cb.le(finalPrice, priceHighest));
@@ -497,7 +492,7 @@ public class ProductService {
                 predicates.add(root.get(Product_.MANUFACTURER).in(manufacturers));
             }
 
-            // Attributes — each attribute group needs its own join
+            // Attributes
             if (!categoryAttributes.isEmpty()) {
                 Map<Integer, Set<Integer>> groups = categoryAttributes.stream()
                         .collect(Collectors.groupingBy(
@@ -527,7 +522,7 @@ public class ProductService {
                 return Page.empty(PageRequest.of(page, pageSize));
             }
 
-            // --- Query 2: fetch full entities by ID, no joins, no DISTINCT ---
+            // --- fetch by IDs ---
             List<Product> products = productRepository.findAllById(orderedIds);
 
             Map<Integer, Product> productById = products.stream()
@@ -537,7 +532,7 @@ public class ProductService {
                     .filter(Objects::nonNull)
                     .toList();
 
-            // --- Count query (applies all the same filters, without pagination or ordering) ---
+            // --- Pagination Count query ---
             CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
             Root<Product> countRoot = countQuery.from(Product.class);
             Expression<Number> countFinalPrice = PriceExpressions.finalPrice(countRoot, cb);
@@ -590,11 +585,9 @@ public class ProductService {
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        // --- Query 1: SELECT p.id ... ORDER BY finalPrice ---
+        // ---  SELECT p.id + ORDER BY finalPrice ---
         CriteriaQuery<Integer> idQuery = cb.createQuery(Integer.class);
         Root<Product> idRoot = idQuery.from(Product.class);
-
-        // Reuse your existing price expression
         Expression<Number> finalPrice = PriceExpressions.finalPrice(idRoot, cb);
 
         idQuery.select(idRoot.get(Product_.ID))
@@ -603,7 +596,6 @@ public class ProductService {
                         direction.isAscending() ? cb.asc(finalPrice) : cb.desc(finalPrice),
                         cb.asc(idRoot.get(Product_.ID))
                 );
-        // Note: no .distinct() here — we're selecting a single column, so duplicates are not a concern
 
         List<Integer> orderedIds = entityManager.createQuery(idQuery)
                 .setFirstResult(page * pageSize)
@@ -614,10 +606,10 @@ public class ProductService {
             return Page.empty(PageRequest.of(page, pageSize));
         }
 
-        // --- Query 2: fetch full entities by ID, no joins, no DISTINCT ---
+        // --- fetch by IDs ---
         List<Product> products = productRepository.findAllById(orderedIds);
 
-        // Restore the order from Query 1, since findAllById does not guarantee order
+        // re-order
         Map<Integer, Product> productById = products.stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
         List<Product> orderedProducts = orderedIds.stream()
@@ -625,7 +617,7 @@ public class ProductService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        // --- Count query for pagination metadata ---
+        // --- Pagination Count query ---
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Product> countRoot = countQuery.from(Product.class);
         countQuery.select(cb.count(countRoot))

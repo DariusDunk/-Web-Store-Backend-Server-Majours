@@ -8,6 +8,7 @@ import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,30 +55,41 @@ public class ProductDTOMapper {
     public static CompactProductResponse entityToCompactResponse(Product product) {
 
         CompactProductResponse compactProductResponse = new CompactProductResponse();
+        int originalPrice = product.getOriginalPriceStotinki();
+        SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
+
         compactProductResponse.productCode = product.getProductCode();
         compactProductResponse.name = product.getProductName();
         compactProductResponse.imageUrl = product.getMainImageUrl();
         compactProductResponse.rating = product.getRating();
         compactProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
-
-        int originalPrice = product.getOriginalPriceStotinki();
-        SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
-
-        if (saleProduct != null && saleProduct.getIsMain()) {
-
-            Sale sale = saleProduct.getSale();
-
-            compactProductResponse.salePriceStotinki = calculateDiscountPrice(originalPrice,
-                    sale.getDiscountPercent(),
-                    saleProduct.getOverrideDiscountPercentage());
-        } else {
-            compactProductResponse.salePriceStotinki = product.getOriginalPriceStotinki();
-        }
-
+        compactProductResponse.salePriceStotinki = calculatePriceForDto(product, saleProduct, originalPrice);
         compactProductResponse.reviewCount = product.getReviews().size();
         compactProductResponse.isInStock = product.isInStock();
 
         return compactProductResponse;
+    }
+
+    private static int calculatePriceForDto(Product product, SaleProduct saleProduct, int originalPrice) {
+        if (saleProduct != null && saleProduct.getIsMain()) {
+
+            Sale sale = saleProduct.getSale();
+            Instant now = Instant.now();
+            Short saleDiscount = null;
+            Short overrideDiscountPercentage = null;
+
+            if (sale.getIsActive() && sale.getStartDate().isBefore(now) && sale.getEndDate().isAfter(now))
+            {
+                saleDiscount = sale.getDiscountPercent();
+                overrideDiscountPercentage = saleProduct.getOverrideDiscountPercentage();
+            }
+
+            return calculateDiscountPrice(originalPrice,
+                    saleDiscount,
+                    overrideDiscountPercentage);
+        } else {
+            return product.getOriginalPriceStotinki();
+        }
     }
 
     private static int calculateDiscountPrice(int originalPrice, Short defaultDiscount, Short explicitDiscount) {
@@ -102,7 +114,6 @@ public class ProductDTOMapper {
     public static Page<CompactProductResponse> compactProductPageToCompactResponsePage(Page<CompactProductDto> compactProductPage) {
 
         List<CompactProductDto> compactProductDTOs = compactProductPage.getContent();
-
         List<CompactProductResponse> compactProductResponses = compactProductDTOs
                 .stream()
                 .map(ProductDTOMapper::compactProductToResponse)
@@ -115,6 +126,7 @@ public class ProductDTOMapper {
     }
 
     private static CompactProductResponse compactProductToResponse(CompactProductDto productDto) {
+
         CompactProductResponse compactProductResponse = new CompactProductResponse();
         compactProductResponse.productCode = productDto.productCode();
         compactProductResponse.imageUrl = productDto.imageUrl();
@@ -135,6 +147,8 @@ public class ProductDTOMapper {
     public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs) {
 
         DetailedProductResponse detailedProductResponse = new DetailedProductResponse();
+        int originalPrice = product.getOriginalPriceStotinki();
+        SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
 
         detailedProductResponse.productCode = product.getProductCode();
         detailedProductResponse.name = product.getProductName();
@@ -144,40 +158,25 @@ public class ProductDTOMapper {
         detailedProductResponse.productDescription = product.getProductDescription();
         detailedProductResponse.deliveryCost = product.getDeliveryCost();
         detailedProductResponse.model = product.getModel();
+        detailedProductResponse.productImageURLs = processDetailedProductImages(product);
+        detailedProductResponse.rating = product.getRating();
+        detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
+        detailedProductResponse.salePriceStotinki = calculatePriceForDto(product, saleProduct, originalPrice);
+        detailedProductResponse.isInStock = product.isInStock();
+
+        return detailedProductResponse;
+    }
+
+    private static List<String > processDetailedProductImages(Product product) {
         if (product.getProductImages() != null && !product.getProductImages().isEmpty()) {
-            detailedProductResponse.productImageURLs = product
+            return product
                     .getProductImages()
                     .stream()
                     .map((ProductImage::getImageFileName))
                     .toList();
         } else {
-            detailedProductResponse.productImageURLs = List.of();
+            return List.of();
         }
-
-        detailedProductResponse.rating = product.getRating();
-        detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
-
-        int originalPrice = product.getOriginalPriceStotinki();
-        SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
-
-        if (saleProduct != null && saleProduct.getIsMain()) {
-
-//            System.out.println("Sale product: " + saleProduct.getSale().getDiscountPercent());
-
-            Sale sale = saleProduct.getSale();
-
-            detailedProductResponse.salePriceStotinki = calculateDiscountPrice(originalPrice,
-                    sale.getDiscountPercent(),
-                    saleProduct.getOverrideDiscountPercentage());
-        } else {
-
-//            System.out.println("Sale product not found/null");
-            detailedProductResponse.salePriceStotinki = product.getOriginalPriceStotinki();
-        }
-
-        detailedProductResponse.isInStock = product.isInStock();
-
-        return detailedProductResponse;
     }
 
     private static Set<AttributeOptionResponse> formAttributeOptionResponses(Product product, List<String[]> attributeNameMUnitPairs) {
