@@ -10,5 +10,5 @@ public interface CompactProductProjection {
     short getRating();
     int getReviewCount();
     String getImageUrl();
-    boolean isInStock();
+    boolean getIsInStock();
 }

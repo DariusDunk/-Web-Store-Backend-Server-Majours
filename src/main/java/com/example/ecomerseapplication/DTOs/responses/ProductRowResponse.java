@@ -7,8 +7,8 @@ import java.util.List;
 public record ProductRowResponse(
         @JsonProperty("type")
         String type,
-        @JsonProperty("name")
-        String name,
+        @JsonProperty("title")
+        String title,
         @JsonProperty("products")
         List<CompactProductResponse> products) {
 

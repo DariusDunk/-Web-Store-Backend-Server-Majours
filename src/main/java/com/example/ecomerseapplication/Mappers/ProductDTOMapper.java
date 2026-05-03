@@ -211,7 +211,7 @@ public class ProductDTOMapper {
         CompactProductResponse response = new CompactProductResponse();
         response.productCode = productProjection.getProductCode();
         response.salePriceStotinki = productProjection.getDiscountedPriceStotinki();
-        response.isInStock = productProjection.isInStock();
+        response.isInStock = productProjection.getIsInStock();
         response.name = productProjection.getName();
         response.imageUrl = productProjection.getImageUrl();
         response.rating = productProjection.getRating();
