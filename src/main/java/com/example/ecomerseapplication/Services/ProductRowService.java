@@ -2,8 +2,10 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.ProductRowResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProjection;
 import com.example.ecomerseapplication.Entities.ProductCategory;
+import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
 import org.springframework.stereotype.Service;
 
@@ -65,13 +67,15 @@ public class ProductRowService {
 
             ProductCategory category = categoryService.findById(categoryId);
             String name = category.getCategoryName();
-            List<CompactProductResponse> products = productService.getTopProductsOfCategory(category);
+            List<CompactProductProjection> products = productService.getTopProductsOfCategory(category);
+
+            List<CompactProductResponse> productResponses = ProductDTOMapper.compactProjectionListToResponseList(products);
 
             if (products.isEmpty()) {
                 continue;
             }
 
-            productRowResponses.add(new ProductRowResponse(GlobalConstants.PRODUCT_ROW_TYPE_CATEGORY, name, products));
+            productRowResponses.add(new ProductRowResponse(GlobalConstants.PRODUCT_ROW_TYPE_CATEGORY, name, productResponses));
         }
         return productRowResponses;
     }

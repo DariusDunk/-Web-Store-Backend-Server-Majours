@@ -1,11 +1,12 @@
 package com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces;
 
-public interface CompactProductProjection {
+public interface CompactSaleProductProjection {
     String getProductCode();
     String getName();
     int getOriginalPriceStotinki();
-    Short getDefaultSaleDiscount();
-    Short getExplicitDiscount();
+    int getDiscountedPriceStotinki();
+//    Short getDefaultSaleDiscount();
+//    Short getExplicitDiscount();
     short getRating();
     int getReviewCount();
     String getImageUrl();

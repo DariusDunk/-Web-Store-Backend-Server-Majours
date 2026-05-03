@@ -43,11 +43,32 @@ async function getSessionData(sessionId) {
 export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
     const {isMe = false, req, res} = options;
 
-    const makeResponse = (axiosResponse) => ({
-        status: axiosResponse?.status || 200,
-        data: axiosResponse?.data ?? {},
-        headers: axiosResponse?.headers ?? {}
-    });
+    // const makeResponse = (axiosResponse) => ({
+    //     status: axiosResponse?.status || 200,
+    //     data: axiosResponse?.data ?? {},
+    //     headers: axiosResponse?.headers ?? {}
+    // });
+
+    const makeResponse = (axiosResponse) => {
+        {
+            // If it's already an Axios response
+            if (axiosResponse && typeof axiosResponse === 'object' && 'data' in axiosResponse && 'status' in axiosResponse) {
+                return {
+                    status: axiosResponse.status,
+                    data: axiosResponse.data ?? {},
+                    headers: axiosResponse.headers ?? {}
+                };
+            }
+
+            // Otherwise treat it as raw data
+            return {
+                status: 200,
+                data: axiosResponse ?? {},
+                headers: {}
+            };
+        }
+    };
+
     let sessionData;
     try {
 

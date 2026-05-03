@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
@@ -20,21 +21,7 @@ import java.util.Set;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
 
-    @Query("select new com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto (p.productCode," +
-            " p.productName, " +
-            "p.originalPriceStotinki, " +
-            "s.discountPercent, " +
-            "sp.overrideDiscountPercentage, " +
-            "p.rating, SIZE(p.reviews), " +
-            "p.mainImageUrl,  " +
-            "case when p.quantityInStock>0 then true else false end) " +
-            "from Product p " +
-            "left join p.saleProducts sp " +
-            "with sp.isMain = true " +
-            "left join sp.sale s " +
-            "with s.isActive = true " +
-            "AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate")
-    Page<CompactProductDto> findAllAsResponseSortByRating(Pageable pageable);
+
 
     @Query(value =
             "select p.productName " +
@@ -108,8 +95,51 @@ where s.id = :saleId
   and s.isActive = true
   and current_timestamp between s.startDate and s.endDate
   and sp.isMain = true
-order by coalesce(sp.overrideDiscountPercentage, s.discountPercent, 0) desc
+  and p.quantityInStock>0
+order by coalesce(sp.overrideDiscountPercentage, s.discountPercent, 0) desc,
+p.reviewCount desc,
+p.rating desc
 """
     )
-    List<CompactProductProjection> getProductsOfSale(@Param("saleId") long saleId, Pageable pageable);
+    List<CompactSaleProductProjection> getProductsOfSale(@Param("saleId") long saleId, Pageable pageable);
+
+    @Query("select new com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto (p.productCode," +
+            " p.productName, " +
+            "p.originalPriceStotinki, " +
+            "s.discountPercent, " +
+            "sp.overrideDiscountPercentage, " +
+            "p.rating, SIZE(p.reviews), " +
+            "p.mainImageUrl,  " +
+            "case when p.quantityInStock>0 then true else false end) " +
+            "from Product p " +
+            "left join p.saleProducts sp " +
+            "with sp.isMain = true " +
+            "left join sp.sale s " +
+            "with s.isActive = true " +
+            "AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate")
+    Page<CompactProductDto> findAllAsResponseSortByRating(Pageable pageable);
+
+    @Query(
+"""
+select p.productCode as productCode,
+p.productName as name,
+p.originalPriceStotinki as originalPriceStotinki,
+s.discountPercent as defaultSaleDiscount,
+sp.overrideDiscountPercentage as explicitDiscount,
+p.rating as rating,
+p.reviewCount as reviewCount,
+p.mainImageUrl as imageUrl,
+p.quantityInStock>0 as isInStock
+from Product p
+left join p.saleProducts sp
+on sp.isMain = true
+left join sp.sale s
+  on s.isActive = true
+  and current_timestamp between s.startDate and s.endDate
+join p.productCategory pc
+where p.quantityInStock>0 and pc.id = :categoryId
+order by (p.rating * log(p.reviewCount + 1)) desc
+"""
+    )
+    List<CompactProductProjection> getTopProductsOfCategory(@Param("categoryId") int id, Pageable pageable);
 }

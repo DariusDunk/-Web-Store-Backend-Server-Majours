@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
@@ -691,13 +692,14 @@ public class ProductService {
     }
 
     public List<CompactProductResponse> getProductsOfSale(long saleId) {
-        List<CompactProductProjection> productProjections = productRepository
-                .getProductsOfSale(saleId, PageRequest.of(0, 5));
+        List<CompactSaleProductProjection> productProjections = productRepository
+                .getProductsOfSale(saleId, PageRequest.of(0, 8));
 
-       return ProductDTOMapper.compactProjectionListToResponseList(productProjections);
+       return ProductDTOMapper.compactSaleProjectionListToResponseList(productProjections);
     }
 
-    public List<CompactProductResponse> getTopProductsOfCategory(ProductCategory category) {
-        return getByCategory(category, 0, ProductSortType.POPULARITY.getValue(), 5).getContent();
+    public List<CompactProductProjection> getTopProductsOfCategory(ProductCategory category) {
+//        return getByCategory(category, 0, ProductSortType.POPULARITY.getValue(), 8).getContent();
+        return productRepository.getTopProductsOfCategory(category.getId(), PageRequest.of(0, 8));
     }
 }

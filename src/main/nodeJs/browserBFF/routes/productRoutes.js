@@ -2,6 +2,7 @@ import express from 'express';
 import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
+import {getTopProductsOfTopSales, getTopProductsOfTopCategories} from "../services/homePageRequests.js";
 
 const router = express.Router();
 
@@ -36,6 +37,39 @@ router.get('/featured/:page', async (req, res) => {
 
     } catch (error) {
         console.error('Search: Error fetching data:', error);
+        return res.status(error.response?.status || 500).end();
+    }
+});
+
+router.get('/homePage', async (req, res) => {
+
+    const sessionId = req.cookies.session_id;
+
+    try {
+
+        const productRowsResponse = await fetchWithSessionTokens(
+            sessionId,
+            async (sessionData) => {
+                const results = await Promise.all([
+                    getTopProductsOfTopSales(req, res, sessionData),
+                    getTopProductsOfTopCategories(req, res, sessionData)
+                ]);
+
+                // console.log("RAW RESULTS:", JSON.stringify(results, null, 2));
+
+                return results
+                    .map(r => Array.isArray(r) ? r : [])
+                    .flat();
+            },
+            { req, res }
+        );
+
+        // console.log("Home page response: ", JSON.stringify(productRowsResponse));
+
+        return res.status(200).json(productRowsResponse.data);
+
+    } catch (error) {
+        console.error('Search: Error fetching home page data:', error);
         return res.status(error.response?.status || 500).end();
     }
 });

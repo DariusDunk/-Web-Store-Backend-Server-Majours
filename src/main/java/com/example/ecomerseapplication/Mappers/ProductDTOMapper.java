@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -202,12 +203,12 @@ public class ProductDTOMapper {
         return attributeOptionResponses;
     }
 
-    public static List<CompactProductResponse> compactProjectionListToResponseList(List<CompactProductProjection> productProjections) {
+    public static List<CompactProductResponse> compactSaleProjectionListToResponseList(List<CompactSaleProductProjection> productProjections) {
 
-        return productProjections.stream().map(ProductDTOMapper::compactProjectionToResponse).toList();
+        return productProjections.stream().map(ProductDTOMapper::compactSaleProjectionToResponse).toList();
     }
 
-    public static CompactProductResponse compactProjectionToResponse(CompactProductProjection productProjection) {
+    public static CompactProductResponse compactSaleProjectionToResponse(CompactSaleProductProjection productProjection) {
         CompactProductResponse response = new CompactProductResponse();
         response.productCode = productProjection.getProductCode();
         response.salePriceStotinki = productProjection.getDiscountedPriceStotinki();
@@ -220,4 +221,24 @@ public class ProductDTOMapper {
         return response;
     }
 
+    public static List<CompactProductResponse> compactProjectionListToResponseList(List<CompactProductProjection> products) {
+        return products.stream().map(ProductDTOMapper::compactProjectionToResponse).toList();
+    }
+
+    public static CompactProductResponse compactProjectionToResponse(CompactProductProjection productProjection) {
+        CompactProductResponse response = new CompactProductResponse();
+        int originalPrice = productProjection.getOriginalPriceStotinki();
+        Short defaultDiscount = productProjection.getDefaultSaleDiscount();
+        Short explicitDiscount = productProjection.getExplicitDiscount();
+
+        response.productCode = productProjection.getProductCode();
+        response.salePriceStotinki = calculateDiscountPrice(originalPrice, defaultDiscount, explicitDiscount);
+        response.isInStock = productProjection.getIsInStock();
+        response.name = productProjection.getName();
+        response.imageUrl = productProjection.getImageUrl();
+        response.rating = productProjection.getRating();
+        response.originalPriceStotinki = originalPrice;
+        response.reviewCount = productProjection.getReviewCount();
+        return response;
+    }
 }
