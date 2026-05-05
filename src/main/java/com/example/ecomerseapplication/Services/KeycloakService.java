@@ -38,8 +38,6 @@ public class KeycloakService {
     //    private final CustomerService customerService;
     private final WebClient keycloakWebClient;
 
-    //    @Value("${keycloak.server-url}")
-//    private String serverUrl;
     @Value("${keycloak.admin-realm}")
     private String adminRealm;
     @Value("${keycloak.admin.client-id}")

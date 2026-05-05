@@ -115,12 +115,6 @@ public class ProductController {
 
         DetailedProductResponse response = productService.getByCodeAndWithSession(productCode, session);
 
-//        System.out.println("\n" +
-//                "----------------------------------\n" +
-//                "Detailed product response: "+ response+
-//                " \n----------------------------------\n");
-
-//        return ResponseEntity.ok(productService.getByCodeAndWithSession(productCode, session));
         return ResponseEntity.ok(response);
 
     }
@@ -216,12 +210,6 @@ public class ProductController {
 
         var response = PageResponse.from(reviewPage);
 
-//        System.out.println(" \n" +
-//                "----------------------------------\n" +
-//                "Paged Reviews response: " + response + "  \n" +
-//                "----------------------------------\n");
-
-//        return ResponseEntity.ok(PageResponse.from(reviewPage));
         return ResponseEntity.ok(response);
     }
 

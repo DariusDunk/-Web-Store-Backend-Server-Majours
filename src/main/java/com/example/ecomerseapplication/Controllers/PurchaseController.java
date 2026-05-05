@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.Auth.helpers.UserIdExtractor;
+import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
 import com.example.ecomerseapplication.DTOs.requests.SavedRecipientDetailsRequest;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
@@ -22,21 +23,20 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
 
     private final CustomerService customerService;
 
-    private final CartProductService cartProductService;
-
-    private final PurchaseCartService purchaseCartService;
-    private final ProductService productService;
     private final UserIdExtractor userIdExtractor;
+    private final SessionService sessionService;
 
     @Autowired
-    public PurchaseController(PurchaseService purchaseService, SavedPurchaseDetailsService purchaseDetailsService, CustomerService customerService, CartProductService cartProductService, PurchaseCartService purchaseCartService, ProductService productService, UserIdExtractor userIdExtractor) {
+    public PurchaseController(PurchaseService purchaseService,
+                              SavedPurchaseDetailsService purchaseDetailsService,
+                              CustomerService customerService,
+                              UserIdExtractor userIdExtractor,
+                              SessionService sessionService) {
         this.purchaseService = purchaseService;
         this.purchaseDetailsService = purchaseDetailsService;
         this.customerService = customerService;
-        this.cartProductService = cartProductService;
-        this.purchaseCartService = purchaseCartService;
-        this.productService = productService;
         this.userIdExtractor = userIdExtractor;
+        this.sessionService = sessionService;
     }
 
     @PostMapping("savedetails")
@@ -61,92 +61,25 @@ public class PurchaseController {//TODO kogato stigne6 tuk premahni vsqkakvo izp
         return purchaseDetailsService.getByCustomer(customer);
     }
 
-//    @PostMapping("complete") TODO napravi
-//    @Transactional
-//    public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest purchaseRequest) {
+    @PostMapping("complete")
+    @Transactional
+    public ResponseEntity<?> createPurchase(@RequestBody PurchaseRequest request) {
 
-//        Customer customer = customerService.findById(purchaseRequest.customerId);
-//
-//        if (customer==null)
-//          return  ResponseEntity.notFound().build();
-//
-//        if (purchaseRequest.savedRecipientDetailsRequest == null) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//
-//        Purchase purchase = PurchaseMapper.requestToEntity(purchaseRequest.savedRecipientDetailsRequest);
-//
-//        purchase.setCustomer(customer);
-//
-//        List<CustomerCart> customerCarts = customerCartService.cartsByCustomer(customer);
-//
-//        List<Product> updatedQuantProducts = new ArrayList<>();
-//
-//        if (customerCarts.isEmpty())
-//            return ResponseEntity.notFound().build();
-//
-//        for (CustomerCart cart : customerCarts) {
-//            Product currectProduct = cart.getCustomerCartId().getProduct();
-//            if (currectProduct.getQuantityInStock() < cart.getQuantity()) {
-//                return ResponseEntity.badRequest().build();//TODO tuk kato se vru6ta custom response, trqbva da kazva to4no koi produkt nqma broiki
-//            }
-//
-//            currectProduct.setQuantityInStock(currectProduct.getQuantityInStock() - cart.getQuantity());
-//
-//            updatedQuantProducts.add(currectProduct);
-//
-//        }
-//
-//        productService.saveAll(updatedQuantProducts);
-//
-//
-//        int totalCost = 0;
-//
-//        for (CustomerCart customerCart:customerCarts) {
-//            totalCost+=customerCart
-//                    .getCustomerCartId()
-//                    .getProduct()
-//                    .getSalePriceStotinki()*customerCart.getQuantity();
-//        }
-//
-//        purchase.setTotalCost(totalCost);
-//
-//        Purchase managedPurchase = purchaseService.save(purchase);
-//
-//        PurchaseCartId purchaseCartId;
-//
-//        List<PurchaseCart> purchaseCarts = new ArrayList<>();
-//
-//        for (CustomerCart customerCart:customerCarts)
-//        {
-//            purchaseCartId = new PurchaseCartId();
-//            purchaseCartId.setPurchase(managedPurchase);
-//            purchaseCartId.setProduct(customerCart
-//                    .getCustomerCartId()
-//                    .getProduct());
-//
-//            purchaseCarts.add(new PurchaseCart(purchaseCartId,
-//                    customerCart.getQuantity()));
-//        }
-//
-//        purchaseCartService.saveCarts(purchaseCarts);
-//
-//        PurchaseResponse purchaseResponse = PurchaseMapper.entityToResponse(purchase);
-//
-//        for (CustomerCart customerCart:customerCarts) {
-//
-//            CompactProductResponse compactProduct = ProductDTOMapper
-//                    .entityToCompactResponse(customerCart.getCustomerCartId().getProduct());
-//
-//            CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
-//            pair.compactProductResponse = compactProduct;
-//            pair.quantity = customerCart.getQuantity();
-//
-//            purchaseResponse.productQuantityPairs.add(pair);
-//        }
-//
-//        customerCartService.clearCart(customer);
+        Session session = sessionService.getRequestSession();
 
-//        return purchaseService.completePurchase(purchaseRequest);
-//    }
+        if (session.getIsGuest()) {
+            if (request.email().isBlank()) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+        else
+        {
+            Customer customer = session.getCustomer();
+            return ResponseEntity.ok(purchaseService.completePurchase(request, customer));
+        }
+
+        //todo sloji sled metoda za poukpkata da ima metod za izpra6tane na imeil
+
+        return ResponseEntity.badRequest().build();
+    }
 }

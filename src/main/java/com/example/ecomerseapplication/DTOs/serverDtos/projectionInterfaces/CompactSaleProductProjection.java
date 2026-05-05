@@ -5,9 +5,7 @@ public interface CompactSaleProductProjection {
     String getName();
     int getOriginalPriceStotinki();
     int getDiscountedPriceStotinki();
-//    Short getDefaultSaleDiscount();
-//    Short getExplicitDiscount();
-    short getRating();
+short getRating();
     int getReviewCount();
     String getImageUrl();
     boolean getIsInStock();

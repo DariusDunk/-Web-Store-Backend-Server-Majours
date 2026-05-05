@@ -65,14 +65,14 @@ public class ProductDTOMapper {
         compactProductResponse.imageUrl = product.getMainImageUrl();
         compactProductResponse.rating = product.getRating();
         compactProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
-        compactProductResponse.salePriceStotinki = calculatePriceForDto(product, saleProduct, originalPrice);
+        compactProductResponse.salePriceStotinki = calculatePriceForDto(saleProduct, originalPrice);
         compactProductResponse.reviewCount = product.getReviews().size();
         compactProductResponse.isInStock = product.isInStock();
 
         return compactProductResponse;
     }
 
-    private static int calculatePriceForDto(Product product, SaleProduct saleProduct, int originalPrice) {
+    public static int calculatePriceForDto(SaleProduct saleProduct, int originalPrice) {
         if (saleProduct != null && saleProduct.getIsMain()) {
 
             Sale sale = saleProduct.getSale();
@@ -90,7 +90,7 @@ public class ProductDTOMapper {
                     saleDiscount,
                     overrideDiscountPercentage);
         } else {
-            return product.getOriginalPriceStotinki();
+            return originalPrice;
         }
     }
 
@@ -163,7 +163,7 @@ public class ProductDTOMapper {
         detailedProductResponse.productImageURLs = processDetailedProductImages(product);
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
-        detailedProductResponse.salePriceStotinki = calculatePriceForDto(product, saleProduct, originalPrice);
+        detailedProductResponse.salePriceStotinki = calculatePriceForDto(saleProduct, originalPrice);
         detailedProductResponse.isInStock = product.isInStock();
 
         return detailedProductResponse;

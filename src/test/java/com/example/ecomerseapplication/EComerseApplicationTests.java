@@ -5,7 +5,6 @@ import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PageContentLimit;
-import com.example.ecomerseapplication.Others.PurchaseCodeGenerator;
 import com.example.ecomerseapplication.Repositories.*;
 import com.example.ecomerseapplication.Services.*;
 import org.junit.jupiter.api.Test;
@@ -78,10 +77,10 @@ class EComerseApplicationTests {
 //        System.out.println(BCrypt.checkpw(candidate, pwHash));
 //    }
 
-    @Test
-    void codeHashTest() {
-        System.out.println(PurchaseCodeGenerator.generateCode(LocalDateTime.now()));
-    }
+//    @Test
+//    void codeHashTest() {
+//        System.out.println(PurchaseCodeGenerator.generateCode(LocalDateTime.now()));
+//    }
 
 //    @Test
 //    void passwordCheck() {

@@ -178,4 +178,15 @@ and cp.cartProductId.product.id in :productIds
             @Param("sessionCart") Cart sessionCart,
             @Param("productIds") List<Integer> productIds
     );
+
+    @Modifying()
+    @Query(
+"""
+delete
+from CartProduct cp
+where cp.cartProductId.cart.customer.keycloakId = :customerId
+and cp.cartProductId.product.productCode in :productCodes
+"""
+    )
+    void deleteBatchByCustomerAndCodes(@Param("customerId")String customerId, @Param("productCodes") List<String> productCodes);
 }

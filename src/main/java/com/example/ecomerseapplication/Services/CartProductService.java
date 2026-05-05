@@ -473,4 +473,8 @@ public class CartProductService {
 
         return mergedItems;
     }
+
+    public void removeBatchFromCart(Customer customer, List<String> productCodes) {
+        cartProductRepository.deleteBatchByCustomerAndCodes(customer.getKeycloakId(), productCodes);
+    }
 }

@@ -691,6 +691,16 @@ public class ProductService {
         return products;
     }
 
+    public List<Product> getByCodesForPurchaseWithLocking(List<String> codes) {
+        List<Product> products = productRepository.getByCodesForSaleWithLocking(codes);
+
+        if (products.isEmpty()) {
+            throw new ResourceNotFoundException("No products found with codes: " + codes);
+        }
+
+        return products;
+    }
+
     public List<CompactProductResponse> getProductsOfSale(long saleId) {
         List<CompactSaleProductProjection> productProjections = productRepository
                 .getProductsOfSale(saleId, PageRequest.of(0, 8));

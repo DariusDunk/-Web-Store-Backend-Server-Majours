@@ -6,14 +6,14 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Comp
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -74,6 +74,22 @@ where p.productCategory = ?1
 
     List<Product> getAllByProductCodeIn(List<String> productCode);
 
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+    })
+    @Query(
+"""
+select p
+from Product  p
+join p.saleProducts sp on sp.isMain = true
+join sp.sale s on s.isActive = true
+and current_timestamp between s.startDate and s.endDate
+where p.productCode in ?1
+"""
+    )
+    List<Product> getByCodesForSaleWithLocking(List<String> productCodes);
 
     @Query(
 """

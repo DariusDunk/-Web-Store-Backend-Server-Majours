@@ -179,4 +179,26 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleUserIdExtractExceptions() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    @ExceptionHandler(StockForNamedProductExceeded.class)
+    public ResponseEntity<?> handleStockForNamedProductExceededExceptions(StockForNamedProductExceeded ex) {
+        String productName = ex.getProductName();
+        int quantityInStock = ex.getQuantity();
+        return ResponseEntity.badRequest().body(new ErrorResponse(ErrorType.DEMAND_EXCEEDS_SUPPLY,
+                "Неналично количество за продукт",
+                HttpStatus.BAD_REQUEST.value(),
+                "Изисканото количество надхвърля наличното за продукта: " + productName
+                        + "\nНалично количество: " + quantityInStock + "бр."
+        ));
+    }
+
+    @ExceptionHandler(PessimisticLockOrTimeoutPurchaseException.class)
+    public ResponseEntity<?> handleProductLockOrTimeoutExceptionsForPurchase() {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
+                ErrorType.RESOURCE_CONFLICT,
+                "Продукти в изчакване",
+                HttpStatus.CONFLICT.value(),
+                "Един или повече от продуктите вече са в процес на закупуване от друг потребите, моля опитайте отново."
+        ));
+    }
 }
