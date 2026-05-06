@@ -236,7 +236,7 @@ router.get('/me', async (req, res) => {
 
             if (responseData?.session_id)
             {
-                console.log("Replacing session_id in responseData: ", sessionId, " with ", responseData.session_id, " from '/me' request'")
+                // console.log("Replacing session_id in responseData: ", sessionId, " with ", responseData.session_id, " from '/me' request'")
 
                 sessionId = responseData.session_id;
             }
@@ -256,7 +256,7 @@ router.get('/me', async (req, res) => {
 
                 if (errorResponse?.guestError) {
 
-                    console.log("Guest error detected in '/me' request, creating guest session");
+                    // console.log("Guest error detected in '/me' request, creating guest session");
 
                     const {headers} = error.response;
 
@@ -269,7 +269,7 @@ router.get('/me', async (req, res) => {
                             sessionData = JSON.parse(sessionData);
 
                             const {session_id} = sessionData;
-                            console.log("Replacing session_id in responseData: ", sessionId, " with ", session_id, " from '/me' request's error handling")
+                            // console.log("Replacing session_id in responseData: ", sessionId, " with ", session_id, " from '/me' request's error handling")
                             sessionId = session_id;
                         }
                     }

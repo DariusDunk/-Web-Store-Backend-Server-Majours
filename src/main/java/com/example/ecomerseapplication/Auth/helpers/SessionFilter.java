@@ -45,7 +45,7 @@ public class SessionFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper wrappedResponse =
                 new ContentCachingResponseWrapper(response);
 
-        String requestLabel = "[For request: " + request.getRequestURI() + "]";
+//        String requestLabel = "[For request: " + request.getRequestURI() + "]";
 
         String accessToken = request.getHeader("Authorization");
         Session session = getRequestSession(request);
@@ -88,10 +88,10 @@ public class SessionFilter extends OncePerRequestFilter {
 
         if (isReplaced || !initialSessionExpiry.equals(finalSessionExpiry)) {
 
-            System.out.println(" \n" +
-                    "----------------------------------\nThe session has been replaced or the expiry time has changed.\n" +
-                    "Old expiry: "+ initialSessionExpiry + " new expiri: "+ finalSessionExpiry + " \n" +
-                    "----------------------------------\n");
+//            System.out.println(" \n" +
+//                    "----------------------------------\nThe session has been replaced or the expiry time has changed.\n" +
+//                    "Old expiry: "+ initialSessionExpiry + " new expiri: "+ finalSessionExpiry + " \n" +
+//                    "----------------------------------\n");
 
             try {
                 String json = mapper.writeValueAsString(
@@ -105,13 +105,13 @@ public class SessionFilter extends OncePerRequestFilter {
         wrappedResponse.copyBodyToResponse();
         Collection<String> headerNames = wrappedResponse.getHeaderNames();
 
-        System.out.println(requestLabel + "------ Response Headers ------");
-
-        for (String headerName : headerNames) {
-            System.out.println(headerName + ": " + response.getHeader(headerName));
-        }
-
-        System.out.println("------------------------------");
+//        System.out.println(requestLabel + "------ Response Headers ------");
+//
+//        for (String headerName : headerNames) {
+//            System.out.println(headerName + ": " + response.getHeader(headerName));
+//        }
+//
+//        System.out.println("------------------------------");
 
     }
 
@@ -137,13 +137,12 @@ public class SessionFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String sessionId = request.getHeader(GlobalConstants.SESSION_ID_HEADER);
 
-        System.out.println("\n" +
-                "----------------------------------\n" +
-                "FOR REQUEST ["+path+"]RECEIVED SESSION ID TO FILTER: " + sessionId + "\n" +
-                "----------------------------------\n");
+//        System.out.println("\n" +
+//                "----------------------------------\n" +
+//                "FOR REQUEST ["+path+"]RECEIVED SESSION ID TO FILTER: " + sessionId + "\n" +
+//                "----------------------------------\n");
 
         if (sessionId != null) {
-//            return sessionService.getActiveByIdOptional(sessionId).orElse(null);
             return sessionService.getByIdOptional(sessionId).orElse(null);
         }
         return null;
@@ -153,7 +152,7 @@ public class SessionFilter extends OncePerRequestFilter {
         String clientTypeName = request.getHeader(GlobalConstants.CLIENT_TYPE_HEADER);
         String path = request.getRequestURI();
 
-        System.out.println("FOR REQUEST ["+path+"]CLIENT TYPE: " + clientTypeName + "\n-----------------------------------------\n");
+//        System.out.println("FOR REQUEST ["+path+"]CLIENT TYPE: " + clientTypeName + "\n-----------------------------------------\n");
 
         if (clientTypeName == null)
             clientTypeName = "Web";
@@ -168,7 +167,6 @@ public class SessionFilter extends OncePerRequestFilter {
 
     private Session replaceIfInvalidSession(Session session, @NonNull HttpServletRequest request) {
 
-//        Session session = getRequestSession(request);
         ClientType clientType = getSessionClientType(request);
 
         if (session == null || session.getIsRevoked() || session.getExpiresAt().isBefore(Instant.now())) {
@@ -176,10 +174,10 @@ public class SessionFilter extends OncePerRequestFilter {
             session = sessionService.createGuestSession(clientType);
             request.setAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE, true);
 
-            System.out.println("\n" +
-                    "----------------------------------\n" +
-                    "SESSION REPLACED WITH NEW SESSION: "+ session.getSessionId() +
-                    "\n----------------------------------\n");
+//            System.out.println("\n" +
+//                    "----------------------------------\n" +
+//                    "SESSION REPLACED WITH NEW SESSION: "+ session.getSessionId() +
+//                    "\n----------------------------------\n");
 
         } else {
             request.setAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE, false);
@@ -193,14 +191,12 @@ public class SessionFilter extends OncePerRequestFilter {
     private boolean isPublicEndpoint(HttpServletRequest request) {
         String path = request.getRequestURI();
 
-        System.out.println("\n" +
-                "----------------------------------\nCurrent Request Path: '" + path + "'\n" +
-                "----------------------------------\n");
+//        System.out.println("\n" +
+//                "----------------------------------\nCurrent Request Path: '" + path + "'\n" +
+//                "----------------------------------\n");
 
-        boolean isPublic = endpointMatcher.isPublic(path);
-
-        System.out.println("Endpoint " + path + " is " + (isPublic ? "public" : "private") + "\n");
-        return isPublic;
+        //        System.out.println("Endpoint " + path + " is " + (isPublic ? "public" : "private") + "\n");
+        return endpointMatcher.isPublic(path);
     }
 
     private boolean isRefreshEndpoint(HttpServletRequest request) {

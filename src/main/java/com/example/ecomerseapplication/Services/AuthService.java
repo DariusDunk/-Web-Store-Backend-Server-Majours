@@ -147,11 +147,11 @@ public class AuthService {
         try {
             session = SessionExtractor.getRequestSession().orElse(null);
 
-            System.out.println("\n" +
-                    "----------------------------------\nSession in refresh is: " + session.getSessionId()
-                    + "\nIs expired or revked: "
-                    + (session.isExpired() || session.getIsRevoked()) + "\n" +
-                    "----------------------------------\n");
+//            System.out.println("\n" +
+//                    "----------------------------------\nSession in refresh is: " + session.getSessionId()
+//                    + "\nIs expired or revked: "
+//                    + (session.isExpired() || session.getIsRevoked()) + "\n" +
+//                    "----------------------------------\n");
 
             if (session.getIsRevoked() || session.isExpired()) {
                 session = sessionService.createGuestSession(session.getClientType());

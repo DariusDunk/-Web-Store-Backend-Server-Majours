@@ -7,7 +7,7 @@ async function getSessionData(sessionId) {
     // 1. Check Cache
     const cachedData = sessionCache.get(sessionId);
     if (cachedData) {
-        console.log("✅ Cache Hit:", sessionId);
+        // console.log("✅ Cache Hit:", sessionId);
         return {...cachedData, _isCacheHit: true};
     }
 
@@ -165,7 +165,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
                 }
             }
-            console.log("----------------------------------\nResponse headers: ", res.headers, "\n----------------------------------\n");
+            // console.log("----------------------------------\nResponse headers: ", res.headers, "\n----------------------------------\n");
         }
         else
             console.warn(" \n" +
@@ -191,16 +191,16 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             _isCacheHit,
         } = newSessionData;
 
-        console.log("----------------------------------\nSession Data after cache check or refresh : ", newSessionData);
+        // console.log("----------------------------------\nSession Data after cache check or refresh : ", newSessionData);
 
-
-        console.log("Session TTL in refresh:", session_expires_in);
-        console.log("Cookie maxAge in refresh:", (session_expires_in ?? 3600) * 1000);
+        //
+        // console.log("Session TTL in refresh:", session_expires_in);
+        // console.log("Cookie maxAge in refresh:", (session_expires_in ?? 3600) * 1000);
 
         if (newSessionId && newSessionId !== oldSessionId) {
 
-            console.log("----------------------------------\nReplacing session cookie from refresh request with new session:  \n" + newSessionId +
-                "----------------------------------\n ");
+            // console.log("----------------------------------\nReplacing session cookie from refresh request with new session:  \n" + newSessionId +
+            //     "----------------------------------\n ");
 
             sessionCache.safeDelete(oldSessionId);
             // sessionCache.set(newSessionId, newSessionData);
@@ -262,7 +262,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
         const {headers} = responseObject;
 
-        console.log("----------------------------------\nResponse Headers: ", headers, "\n----------------------------------\n");
+        // console.log("----------------------------------\nResponse Headers: ", headers, "\n----------------------------------\n");
 
         if (headers) {
             let {'x-session-info': sessionData} = headers;
@@ -275,20 +275,20 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
             const {session_id, session_expires_in, is_guest, is_replaced, is_remember_me} = sessionData;
 
-            console.log("Session TTL in headers:", session_expires_in);
-            console.log("Cookie maxAge in headers:", (session_expires_in ?? 3600) * 1000);
-
-            console.log("----------------------------------\nSession Data after request headers: ", sessionData);
-
-            console.log("----------------------------------\nSession ID from headers: ", session_id);
-            console.log("----------------------------------\nIs_replaced from headers: ", is_replaced);
+            // console.log("Session TTL in headers:", session_expires_in);
+            // console.log("Cookie maxAge in headers:", (session_expires_in ?? 3600) * 1000);
+            //
+            // console.log("----------------------------------\nSession Data after request headers: ", sessionData);
+            //
+            // console.log("----------------------------------\nSession ID from headers: ", session_id);
+            // console.log("----------------------------------\nIs_replaced from headers: ", is_replaced);
 
             if (session_id) {
                 responseObject.newSessionId = session_id;
 
                 if (is_replaced) {
-                    console.log("----------------------------------\nReplacing session cookie and cache from headers with new session:  \n" + session_id +
-                        "----------------------------------\n ");
+                    // console.log("----------------------------------\nReplacing session cookie and cache from headers with new session:  \n" + session_id +
+                    //     "----------------------------------\n ");
                     sessionCache.safeDelete(oldSessionId);
                 }
 

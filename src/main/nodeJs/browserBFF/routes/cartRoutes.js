@@ -48,11 +48,11 @@ router.get('/getCart', async (req, res) => {
 
         sessionId = newSessionId||sessionId;
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "New session id after get cart response: \n" + sessionId +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "New session id after get cart response: \n" + sessionId +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
 
@@ -81,12 +81,12 @@ router.post('/addToCart', async (req, res) => {
         
         const authIntent = req.get(authIntentHeader);
 
-        console.log("Auth intent in AddToCart: " + authIntent);
+        // console.log("Auth intent in AddToCart: " + authIntent);
 
         if (authIntent && (sessionId === undefined || sessionId === null))
         {
 
-            console.log("Zombie request detected, action rejected");
+            // console.log("Zombie request detected, action rejected");
 
             return res.status(401).json({message: "Unauthorized cart activity"});
         }
@@ -111,19 +111,19 @@ router.post('/addToCart', async (req, res) => {
         const {data: responseData, newSessionId} =  response;
 
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "Response for addToCart: \n" + JSON.stringify(response) +
-        " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "Response for addToCart: \n" + JSON.stringify(response) +
+        // " \n" +
+        //     "----------------------------------\n")
 
         sessionId = newSessionId||sessionId;
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "New session id after response: \n" + sessionId +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "New session id after response: \n" + sessionId +
+        //     " \n" +
+        //     "----------------------------------\n")
 
 
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
@@ -175,19 +175,19 @@ router.post('/add/quantity', async (req, res) => {
         const {data: responseData, newSessionId} =  response;
 
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "Response for addQuantity: \n" + JSON.stringify(response) +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "Response for addQuantity: \n" + JSON.stringify(response) +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         sessionId = newSessionId||sessionId;
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "New session id after addQuantity response: \n" + sessionId +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "New session id after addQuantity response: \n" + sessionId +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
         const cartSummaryData = await cartSummaryResponse?.data;
@@ -232,19 +232,19 @@ router.post('/addToCart/batch', async (req, res) => {
         const {data: responseData, newSessionId} =  response;
 
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "Response for /addToCart/batch: \n" + JSON.stringify(response) +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "Response for /addToCart/batch: \n" + JSON.stringify(response) +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         sessionId = newSessionId||sessionId;
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "New session id after /addToCart/batch response: \n" + sessionId +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "New session id after /addToCart/batch response: \n" + sessionId +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
         responseData.cartSummary = await cartSummaryResponse?.data;
@@ -296,19 +296,19 @@ router.post('/removeFromCart/:productCode', async (req, res) => {
         const {data: responseData, newSessionId} =  response;
 
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "Response for removeFromCart: \n" + JSON.stringify(response) +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "Response for removeFromCart: \n" + JSON.stringify(response) +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         sessionId = newSessionId||sessionId;
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "New session id after removeFromCart response: \n" + sessionId +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "New session id after removeFromCart response: \n" + sessionId +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
         const cartSummaryData = await cartSummaryResponse?.data;
@@ -358,19 +358,19 @@ router.post(`/removeFromCart/batch/turbo`, async (req, res) => {
         const {data: responseData, newSessionId} =  response;
 
 
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "Response for /removeFromCart/batch/turbo: \n" + JSON.stringify(response) +
-            " \n" +
-            "----------------------------------\n")
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "Response for /removeFromCart/batch/turbo: \n" + JSON.stringify(response) +
+        //     " \n" +
+        //     "----------------------------------\n")
 
         sessionId = newSessionId||sessionId;
-
-        console.log(" \n" +
-            "----------------------------------\n" +
-            "New session id after /removeFromCart/batch/turbo response: \n" + sessionId +
-            " \n" +
-            "----------------------------------\n")
+        //
+        // console.log(" \n" +
+        //     "----------------------------------\n" +
+        //     "New session id after /removeFromCart/batch/turbo response: \n" + sessionId +
+        //     " \n" +
+        //     "----------------------------------\n")
         const cartSummaryResponse = await getCartSummary(req, res, sessionId);
         const cartSummaryData = await cartSummaryResponse?.data;
 
