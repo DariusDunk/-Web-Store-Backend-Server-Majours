@@ -6,6 +6,7 @@ import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
 import com.example.ecomerseapplication.DTOs.requests.RecipientDataRequest;
 import com.example.ecomerseapplication.DTOs.responses.SuccessfulPurchaseResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.PurchaseProductDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.TotalsDTO;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
@@ -17,6 +18,7 @@ import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,66 +51,40 @@ public class PurchaseService {
 
         List<ProductQuantityForCartRequest> productPairs = request.products();
         List<String> productCodes = productPairs.stream().map(ProductQuantityForCartRequest::productCode).toList();
-        List<Product> productsForPurchase;
-        try {
-            productsForPurchase = productService.getByCodesForPurchaseWithLocking(productCodes);
-        } catch (PessimisticLockException | LockTimeoutException e) {
-            throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock or timeout exception occurred during purchase");
-        }
-        int productTotal;
-        int shippingFee;
-        int totalCost;
+        List<Product> productsForPurchase = getLockedProductsForPurchase(productCodes);
         RecipientDataRequest recipientData = request.recipientData();
         PaymentMethod paymentMethod = request.paymentMethod();
         String purchaseCode = generateCode(LocalDateTime.now());
-
-
         Map<String, Product> productByCodeMap = Map
                 .copyOf(productsForPurchase
                         .stream()
                         .collect(HashMap::new,
                 (m, v) -> m.put(v.getProductCode(), v), HashMap::putAll)
                 );
-        Map<String, PurchaseProductDTO> purchaseProductMap = new HashMap<>();
 
-        for (ProductQuantityForCartRequest productPair:productPairs) {
-            Product product = productByCodeMap.get(productPair.productCode());
-            if (product == null)
-                throw new ResourceNotFoundException("Product not found!");
+        validateStock(productPairs, productByCodeMap);
 
-            if (product.getQuantityInStock() < productPair.quantity())
-                throw new StockForNamedProductExceeded("Stock exceeded for product during purchase",
-                        product.getProductName(),
-                        product.getQuantityInStock());
+        Map<String, PurchaseProductDTO> purchaseProductMap = buildPurchaseItems(productPairs, productByCodeMap);
+        TotalsDTO totals = calculateTotals(purchaseProductMap);
+        Purchase purchase = createAuthPurchase(customer, totals, recipientData, purchaseCode, paymentMethod);
 
-            SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
+        savePurchaseItems(productsForPurchase, purchase, purchaseProductMap);
+        cartCleanup(request, customer, productCodes);
 
-          int finalPrice =  ProductDTOMapper.calculatePriceForDto(saleProduct, product.getOriginalPriceStotinki());
+        return PurchaseMapper.entityToSuccessResponse(purchase);
+    }
 
-          purchaseProductMap.put(productPair.productCode(), new PurchaseProductDTO(product, productPair.quantity(), finalPrice));
-          product.setQuantityInStock(product.getQuantityInStock() - productPair.quantity());
+    private void cartCleanup(PurchaseRequest request, Customer customer, List<String> productCodes) {
+        if (!request.isDirectPurchase())
+        {
+            cartProductService.removeBatchFromCart(customer, productCodes);
         }
+    }
 
-        productTotal = purchaseProductMap.values().stream().mapToInt(PurchaseProductDTO::finalPrice).sum();
-        int freeShippingThresholdCents = 6000;
-        shippingFee = productTotal >= freeShippingThresholdCents ? 0 : 100;
-        totalCost = productTotal + shippingFee;
-
-        Purchase purchase = new Purchase(customer,
-                totalCost,
-                recipientData.contactName(),
-                recipientData.contactNumber(),
-                recipientData.address(),
-                purchaseCode,
-                shippingFee,
-                productTotal,
-                paymentMethod);
-
-        purchase = save(purchase);
-
+    private void savePurchaseItems(List<Product> productsForPurchase, Purchase purchase, Map<String, PurchaseProductDTO> purchaseProductMap) {
         List<PurchaseCart> purchaseCarts = new ArrayList<>();
 
-        for (Product currectProduct:productsForPurchase)
+        for (Product currectProduct: productsForPurchase)
         {
             PurchaseCartId purchaseCartId = new PurchaseCartId();
             purchaseCartId.setPurchase(purchase);
@@ -122,13 +98,70 @@ public class PurchaseService {
         }
 
         purchaseCartService.saveCarts(purchaseCarts);
+    }
 
-        if (!request.isDirectPurchase())
-        {
-            cartProductService.removeBatchFromCart(customer, productCodes);
+    private Purchase createAuthPurchase(Customer customer, TotalsDTO totals, RecipientDataRequest recipientData, String purchaseCode, PaymentMethod paymentMethod) {
+        Purchase purchase = new Purchase(customer,
+                totals.totalCost(),
+                recipientData.contactName(),
+                recipientData.contactNumber(),
+                recipientData.address(),
+                purchaseCode,
+                totals.shippingFee(),
+                totals.productTotal(),
+                paymentMethod);
+
+       return save(purchase);
+    }
+
+    private static TotalsDTO calculateTotals(Map<String, PurchaseProductDTO> purchaseProductMap) {
+       int productTotal = purchaseProductMap.values().stream().mapToInt(PurchaseProductDTO::finalPrice).sum();
+        int freeShippingThresholdCents = 6000;
+        int shippingFee = productTotal >= freeShippingThresholdCents ? 0 : 100;
+        int totalCost = productTotal + shippingFee;
+
+        return new TotalsDTO(productTotal, shippingFee, totalCost);
+    }
+
+    @NonNull
+    private static Map<String, PurchaseProductDTO> buildPurchaseItems(List<ProductQuantityForCartRequest> productPairs, Map<String, Product> productByCodeMap) {
+        Map<String, PurchaseProductDTO> purchaseProductMap = new HashMap<>();
+
+        for (ProductQuantityForCartRequest productPair: productPairs) {
+            Product product = productByCodeMap.get(productPair.productCode());
+
+            SaleProduct saleProduct = product.getMainSaleProduct().orElse(null);
+
+            int finalPrice =  ProductDTOMapper.calculatePriceForDto(saleProduct, product.getOriginalPriceStotinki());
+
+            purchaseProductMap.put(productPair.productCode(), new PurchaseProductDTO(product, productPair.quantity(), finalPrice));
+            product.setQuantityInStock(product.getQuantityInStock() - productPair.quantity());
         }
+        return purchaseProductMap;
+    }
 
-        return PurchaseMapper.entityToSuccessResponse(purchase);
+    private static void validateStock(List<ProductQuantityForCartRequest> productPairs, Map<String, Product> productByCodeMap) {
+        for (ProductQuantityForCartRequest productPair: productPairs) {
+            Product product = productByCodeMap.get(productPair.productCode());
+            if (product == null)
+                throw new ResourceNotFoundException("Product not found!");
+
+            if (product.getQuantityInStock() < productPair.quantity())
+                throw new StockForNamedProductExceeded("Stock exceeded for product during purchase",
+                        product.getProductName(),
+                        product.getQuantityInStock());
+            
+        }
+    }
+
+    private List<Product> getLockedProductsForPurchase(List<String> productCodes) {
+        List<Product> productsForPurchase;
+        try {
+            productsForPurchase = productService.getByCodesForPurchaseWithLocking(productCodes);
+        } catch (PessimisticLockException | LockTimeoutException e) {
+            throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock or timeout exception occurred during purchase");
+        }
+        return productsForPurchase;
     }
 
 
