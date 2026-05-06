@@ -6,17 +6,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface SavedPurchaseDetailsRepo extends JpaRepository<SavedPurchaseDetails, Long> {
+public interface SavedPurchaseDetailsRepository extends JpaRepository<SavedPurchaseDetails, Long> {
 //    Optional<SavedPurchaseDetails> getByCustomer(Customer customer); TODO vyrvni tova sled kato migraciqta priklu4i
 
 
+//    @Query("""
+//select spd
+//from SavedPurchaseDetails spd
+//where spd.customer.keycloakId =:keycloakId
+//        """)
+//    List<SavedPurchaseDetails> getByCustomer(@Param("keycloakId")String customer);
+
+
     @Query("""
-        select spd
-                from SavedPurchaseDetails spd
-                        where spd.customer.keycloakId =:keycloakId
+select spd
+from SavedPurchaseDetails spd
+where spd.customer.keycloakId =:keycloakId
         """)
-    List<SavedPurchaseDetails> getByCustomer(@Param("keycloakId")String customer);
+    Optional<SavedPurchaseDetails> getByCustomer(@Param("keycloakId")String customerId);
 }

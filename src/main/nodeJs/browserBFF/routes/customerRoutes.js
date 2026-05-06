@@ -68,6 +68,10 @@ router.get(`recipientTemplates/get`, async (req, res) => {
                 });
         },
             {req, res});
+
+        const responseData = await response.data;
+        return res.status(response.status).json(responseData);
+
     }
     catch (error) {
         if (error.response) {

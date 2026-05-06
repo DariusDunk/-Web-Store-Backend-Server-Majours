@@ -137,7 +137,7 @@ public class CustomerController {
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);
 
-        return purchaseDetailsService.getByCustomer(customer);
+        return ResponseEntity.ok(purchaseDetailsService.getByCustomer(customer));
     }
 
 //    
