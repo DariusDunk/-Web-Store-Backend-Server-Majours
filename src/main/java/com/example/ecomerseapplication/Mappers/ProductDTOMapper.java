@@ -51,7 +51,8 @@ public class ProductDTOMapper {
 
         return new CartItemResponse(compactProductResponse,
                 cartItemDTO.dateAdded(),
-                cartItemDTO.quantity());
+                cartItemDTO.quantity(),
+                cartItemDTO.stockQuantity());
     }
 
     public static CompactProductResponse entityToCompactResponse(Product product) {

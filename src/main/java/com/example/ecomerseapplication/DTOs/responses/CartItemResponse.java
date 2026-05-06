@@ -9,6 +9,8 @@ public record CartItemResponse(
         CompactProductResponse compactProductResponse,
         @JsonProperty("date_added")
         Instant dateAdded,
-        short quantity
+        short quantity,
+        @JsonProperty("stock_quantity")
+        int quantityInStock
 ) {
 }

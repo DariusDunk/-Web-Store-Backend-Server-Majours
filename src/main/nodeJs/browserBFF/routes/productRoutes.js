@@ -10,36 +10,36 @@ const timestamp = () => {
     const now = new Date();
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
-
-router.get('/featured/:page', async (req, res) => {
-
-    const page = req.params.page;
-    const sessionId = req.cookies.session_id;
-
-    try {
-
-        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-client_type': WEB_CLIENT_NAME,
-                    ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                    ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
-                },
-                bffContext: {
-                    req, res
-                }
-            });
-        }, {req, res});
-
-        const data = await response.data;
-        return res.status(response.status).json(data);
-
-    } catch (error) {
-        console.error('Search: Error fetching data:', error);
-        return res.status(error.response?.status || 500).end();
-    }
-});
+//
+// router.get('/featured/:page', async (req, res) => {
+//
+//     const page = req.params.page;
+//     const sessionId = req.cookies.session_id;
+//
+//     try {
+//
+//         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+//             return await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'x-client_type': WEB_CLIENT_NAME,
+//                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+//                     ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+//                 },
+//                 bffContext: {
+//                     req, res
+//                 }
+//             });
+//         }, {req, res});
+//
+//         const data = await response.data;
+//         return res.status(response.status).json(data);
+//
+//     } catch (error) {
+//         console.error('Search: Error fetching data:', error);
+//         return res.status(error.response?.status || 500).end();
+//     }
+// });
 
 router.get('/homePage', async (req, res) => {
 
@@ -57,9 +57,14 @@ router.get('/homePage', async (req, res) => {
 
                 // console.log("RAW RESULTS:", JSON.stringify(results, null, 2));
 
-                return results
+                const flattenedList = results
                     .map(r => Array.isArray(r) ? r : [])
                     .flat();
+
+                return {
+                    status: 200,
+                    data: flattenedList,
+                    headers: results[0]?.headers || results[1]?.headers || {}}
             },
             { req, res }
         );
@@ -201,6 +206,7 @@ router.get('/detail/:productCode', async (req, res) => {
                  ])
 
                  return {
+                     status: 200,
                      data: {
                          productDetails: prodRes.data,
                          ratingOverview: reviewRes.data
@@ -213,7 +219,7 @@ router.get('/detail/:productCode', async (req, res) => {
         // const productDetails = productDetailResponse.data;
         // const ratingOverview = ratingOverviewResponse.data;
 
-        // console.log('productDetails response:', response);
+        console.log('productDetails response:', JSON.stringify(response));
 
         return res.status(200).json(response.data);
 

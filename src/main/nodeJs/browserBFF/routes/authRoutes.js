@@ -118,6 +118,7 @@ router.post(`/login`, async (req, res) => {
             ]);
 
             return {
+                status: 200,
                 data: {user: userResponse?.data, cartSummary: cartSummary?.data},
                 headers: cartSummary?.headers
             }

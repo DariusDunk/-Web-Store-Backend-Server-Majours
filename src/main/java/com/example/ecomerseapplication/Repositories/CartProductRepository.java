@@ -48,7 +48,8 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                      case when p.quantityInStock>0 then true else false end
                      ),
                     cc.dateAdded,
-                    cc.quantity)
+                    cc.quantity,
+                    p.quantityInStock)
                     from CartProduct cc
                     join Product p on p = cc.cartProductId.product
                     left join p.saleProducts sp
@@ -112,7 +113,8 @@ public interface CartProductRepository extends JpaRepository<CartProduct, CartPr
                      case when p.quantityInStock>0 then true else false end
                      ),
                     cc.dateAdded,
-                    cc.quantity)
+                    cc.quantity,
+                    p.quantityInStock)
                     from CartProduct cc
                     join Product p on p = cc.cartProductId.product
                     left join p.saleProducts sp

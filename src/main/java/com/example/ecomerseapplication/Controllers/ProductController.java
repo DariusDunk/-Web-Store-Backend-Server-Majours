@@ -115,6 +115,8 @@ public class ProductController {
 
         DetailedProductResponse response = productService.getByCodeAndWithSession(productCode, session);
 
+//        System.out.println("Product detail response: " + response);
+
         return ResponseEntity.ok(response);
 
     }

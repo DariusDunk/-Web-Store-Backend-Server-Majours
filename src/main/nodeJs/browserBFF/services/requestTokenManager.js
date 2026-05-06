@@ -52,19 +52,19 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
     const makeResponse = (axiosResponse) => {
         {
             // If it's already an Axios response
-            if (axiosResponse && typeof axiosResponse === 'object' && 'data' in axiosResponse && 'status' in axiosResponse) {
+            // if (axiosResponse && typeof axiosResponse === 'object' && 'data' in axiosResponse && 'status' in axiosResponse) {
                 return {
-                    status: axiosResponse.status,
+                    status: axiosResponse.status ||200,
                     data: axiosResponse.data ?? {},
                     headers: axiosResponse.headers ?? {}
-                };
-            }
+            //     };
+            // }
 
             // Otherwise treat it as raw data
-            return {
-                status: 200,
-                data: axiosResponse ?? {},
-                headers: {}
+            // return {
+            //     status: 200,
+            //     data: axiosResponse ?? {},
+            //     headers: {}
             };
         }
     };

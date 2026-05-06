@@ -17,11 +17,9 @@ export async function getTopProductsOfTopSales(req, res, sessionData) {
                 }
             });
 
-        const responseData = response.data;
+        // console.log("Top products of top categories: " + JSON.stringify(responseData))
 
-        console.log("Top products of top categories: " + JSON.stringify(responseData))
-
-        return responseData;
+        return response.data;
     }
     catch (error) {
         console.error('-------------------Error getting top products of top sales-------------------\n', error);
@@ -45,11 +43,9 @@ export async function getTopProductsOfTopCategories(req, res, sessionData) {
                 }
             });
 
-        const responseData = response.data;
+        // console.log("Top products of top categories: " + JSON.stringify(responseData))
 
-        console.log("Top products of top categories: " + JSON.stringify(responseData))
-
-        return responseData;
+        return response.data;
     }
     catch (error) {
         console.error('-------------------Error getting top products of top categories-------------------\n', error);
