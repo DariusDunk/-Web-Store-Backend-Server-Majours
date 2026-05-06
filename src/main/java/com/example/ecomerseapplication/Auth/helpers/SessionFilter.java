@@ -19,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Collection;
 
 @Component
 public class SessionFilter extends OncePerRequestFilter {

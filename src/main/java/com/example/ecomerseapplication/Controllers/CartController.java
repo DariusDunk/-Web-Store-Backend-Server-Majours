@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductQuantityForCartRequest;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
-import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Session;
