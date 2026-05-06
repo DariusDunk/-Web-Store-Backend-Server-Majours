@@ -9,7 +9,6 @@ const timestamp = () => {
   const now = new Date();
   return `[${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}]`;
 };
-//todo kato stigne6 do tuk 6te ima da menq6 vis4ki zaqvki v endpointovete spored novata logika
 
 const authIntentHeader = 'x-auth-intent';
 

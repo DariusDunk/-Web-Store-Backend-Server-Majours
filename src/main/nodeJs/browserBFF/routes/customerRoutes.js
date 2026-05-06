@@ -11,6 +11,74 @@ const timestamp = () => {
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
 
+router.post(`/recipientTemplates/set`, async (req, res) =>
+    {
+        const sessionId = req.cookies.session_id;
+
+        try {
+            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                return await axiosBackendClient.post(`${Backend_Url}/customer/recipientTemplates/set`, req.body, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                            ...(sessionData.session_id && {'x-session-id': sessionId})
+                        },
+                        bffContext: {
+                            req, res
+                        }
+                    },
+                    {req, res});
+            });
+
+            return res.status(response.status).end();
+        } catch (error) {
+
+            if (error.response) {
+                console.warn(`${timestamp()} Handled backend error for setting recipient templates`);
+
+                const status = error.response.status;
+
+                return res.status(status || 500).end();
+            }
+
+            console.error('-------------------Unexpected error setting recipient templates-------------------\n', error);
+            return res.status(500).end();
+        }
+
+    }
+);
+
+router.get(`recipientTemplates/get`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+
+    try{
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.get(`${Backend_Url}/customer/recipientTemplates/get`,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-client_type': WEB_CLIENT_NAME,
+                        ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                        ...(sessionData.session_id && {'x-session-id': sessionId})
+                    },
+                    bffContext: {
+                        req, res
+                    }
+                });
+        },
+            {req, res});
+    }
+    catch (error) {
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for fetching recipient templates`);
+            return res.status(error.response.status||500).end();
+        }
+        console.error('-------------------Unexpected error fetching recipient templates-------------------\n', error);
+        return res.status(500).end();
+    }
+})
+
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page
     const sessionId = req.cookies.session_id;
@@ -39,8 +107,6 @@ router.get('/getFavourites/:page', async (req, res) => {
             console.warn(`${timestamp()} Handled backend error for fetching favourites`);
 
             const status = error.response.status;
-
-            // console.log("error statis: ", status );
 
             return res.status(status||500).end();
         }

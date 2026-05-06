@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping("purchase/")
-public class PurchaseController {//TODO sloji tezi endpoint-ove vyv spisyka za public/protected endpoints
+public class PurchaseController {
 
     private final PurchaseService purchaseService;
     private final SessionService sessionService;
