@@ -87,7 +87,6 @@ public class Session {
 
     }
 
-
     public void markAsCartActive(int cartTtlDays) {
 
         if (Boolean.TRUE.equals(this.isGuest)) {

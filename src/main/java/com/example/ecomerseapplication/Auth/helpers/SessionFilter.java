@@ -103,7 +103,7 @@ public class SessionFilter extends OncePerRequestFilter {
             }
         }
         wrappedResponse.copyBodyToResponse();
-        Collection<String> headerNames = wrappedResponse.getHeaderNames();
+//        Collection<String> headerNames = wrappedResponse.getHeaderNames();
 
 //        System.out.println(requestLabel + "------ Response Headers ------");
 //
@@ -134,7 +134,7 @@ public class SessionFilter extends OncePerRequestFilter {
     }
 
     private Session getRequestSession(HttpServletRequest request) {
-        String path = request.getRequestURI();
+//        String path = request.getRequestURI();
         String sessionId = request.getHeader(GlobalConstants.SESSION_ID_HEADER);
 
 //        System.out.println("\n" +
@@ -150,7 +150,7 @@ public class SessionFilter extends OncePerRequestFilter {
 
     private ClientType getSessionClientType(HttpServletRequest request) {
         String clientTypeName = request.getHeader(GlobalConstants.CLIENT_TYPE_HEADER);
-        String path = request.getRequestURI();
+//        String path = request.getRequestURI();
 
 //        System.out.println("FOR REQUEST ["+path+"]CLIENT TYPE: " + clientTypeName + "\n-----------------------------------------\n");
 

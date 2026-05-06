@@ -474,7 +474,11 @@ public class CartProductService {
         return mergedItems;
     }
 
-    public void removeBatchFromCart(Customer customer, List<String> productCodes) {
-        cartProductRepository.deleteBatchByCustomerAndCodes(customer.getKeycloakId(), productCodes);
+    public void removeBatchFromCartCustomer(Customer customer, List<String> productCodes) {
+        cartProductRepository.deleteBatchByCustomerIdAndCodes(customer.getKeycloakId(), productCodes);
+    }
+
+    public void removeBatchFromCartSession(Session session, List<String> productCodes) {
+        cartProductRepository.deleteBatchBySessionIdAndCodes(session.getSessionId(), productCodes);
     }
 }

@@ -6,6 +6,7 @@ import com.example.ecomerseapplication.DTOs.requests.ProductForCartRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductQuantityForCartRequest;
 import com.example.ecomerseapplication.DTOs.responses.CartItemResponse;
 import com.example.ecomerseapplication.DTOs.responses.ErrorResponse;
+import com.example.ecomerseapplication.Entities.Cart;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.Session;
@@ -33,14 +34,18 @@ public class CartController {
     private final CustomerService customerService ;
     private final CartProductService cartProductService;
     private final ProductService productService;
+    private final CartService cartService;
+    private final SessionCartService sessionCartService;
 
     @Autowired
-    public CartController(SessionService sessionService, UserIdExtractor userIdExtractor, CustomerService customerService, CartProductService cartProductService, ProductService productService) {
+    public CartController(SessionService sessionService, UserIdExtractor userIdExtractor, CustomerService customerService, CartProductService cartProductService, ProductService productService, CartService cartService, SessionCartService sessionCartService) {
         this.sessionService = sessionService;
         this.userIdExtractor = userIdExtractor;
         this.customerService = customerService;
         this.cartProductService = cartProductService;
         this.productService = productService;
+        this.cartService = cartService;
+        this.sessionCartService = sessionCartService;
     }
 
     @GetMapping("get")
@@ -188,6 +193,16 @@ public class CartController {
         Customer customer = customerService.getById(userId);
         return ResponseEntity.ok(cartProductService.getSummary(customer));
 
+    }
+
+    @GetMapping("createCartForSession")
+    public ResponseEntity<?> createCartForSession() {
+
+        Session session = sessionService.getRequestSession();
+
+        sessionCartService.getOrCreateSessionCart(session);
+
+        return ResponseEntity.ok().build();
     }
 
 }

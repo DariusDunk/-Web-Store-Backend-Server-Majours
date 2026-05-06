@@ -47,10 +47,58 @@ public class PurchaseService {
     }
 
     @Transactional
-    public SuccessfulPurchaseResponse completePurchase(PurchaseRequest request, Customer customer) {
+    public SuccessfulPurchaseResponse completePurchaseForGuest(PurchaseRequest request, Session session) {
+        PurchaseCompletionDTO result = getPurchaseCompletionDTO(request);
+        Purchase purchase = createGuestPurchase(session, result.totals(), result.recipientData(), result.purchaseCode(), result.paymentMethod(),request.email());
 
+        savePurchaseItems(result.productsForPurchase(), purchase, result.purchaseProductMap());
+        sessionCartCleanup(request, session, result.productCodes());
+
+        return PurchaseMapper.entityToSuccessResponse(purchase);
+    }
+
+    @Transactional
+    public SuccessfulPurchaseResponse completePurchaseForCustomer(PurchaseRequest request, Customer customer) {
+
+        PurchaseCompletionDTO result = getPurchaseCompletionDTO(request);
+        Purchase purchase = createAuthPurchase(customer, result.totals(), result.recipientData(), result.purchaseCode(), result.paymentMethod());
+
+        savePurchaseItems(result.productsForPurchase(), purchase, result.purchaseProductMap());
+        customerCartCleanup(request, customer, result.productCodes());
+
+        return PurchaseMapper.entityToSuccessResponse(purchase);
+    }
+
+    private void sessionCartCleanup(PurchaseRequest request, Session session, List<String> productCodes) {
+        if (!request.isDirectPurchase())
+        {
+            cartProductService.removeBatchFromCartSession(session, productCodes);
+        }
+    }
+
+    private Purchase createGuestPurchase(Session session, TotalsDTO totals, RecipientDataRequest recipientData, String purchaseCode, PaymentMethod paymentMethod, String email) {
+        Purchase purchase = new Purchase(session,
+                totals.totalCost(),
+                recipientData.contactName(),
+                recipientData.contactNumber(),
+                recipientData.address(),
+                purchaseCode,
+                totals.shippingFee(),
+                totals.productTotal(),
+                paymentMethod,
+                email);
+
+        return save(purchase);
+    }
+
+
+    @NonNull
+    private PurchaseCompletionDTO getPurchaseCompletionDTO(PurchaseRequest request) {
         List<ProductQuantityForCartRequest> productPairs = request.products();
-        List<String> productCodes = productPairs.stream().map(ProductQuantityForCartRequest::productCode).toList();
+        List<String> productCodes = productPairs
+                .stream()
+                .map(ProductQuantityForCartRequest::productCode)
+                .toList();
         List<Product> productsForPurchase = getLockedProductsForPurchase(productCodes);
         RecipientDataRequest recipientData = request.recipientData();
         PaymentMethod paymentMethod = request.paymentMethod();
@@ -66,18 +114,16 @@ public class PurchaseService {
 
         Map<String, PurchaseProductDTO> purchaseProductMap = buildPurchaseItems(productPairs, productByCodeMap);
         TotalsDTO totals = calculateTotals(purchaseProductMap);
-        Purchase purchase = createAuthPurchase(customer, totals, recipientData, purchaseCode, paymentMethod);
-
-        savePurchaseItems(productsForPurchase, purchase, purchaseProductMap);
-        cartCleanup(request, customer, productCodes);
-
-        return PurchaseMapper.entityToSuccessResponse(purchase);
+        return new PurchaseCompletionDTO(productCodes, productsForPurchase, recipientData, paymentMethod, purchaseCode, purchaseProductMap, totals);
     }
 
-    private void cartCleanup(PurchaseRequest request, Customer customer, List<String> productCodes) {
+    private record PurchaseCompletionDTO(List<String> productCodes, List<Product> productsForPurchase, RecipientDataRequest recipientData, PaymentMethod paymentMethod, String purchaseCode, Map<String, PurchaseProductDTO> purchaseProductMap, TotalsDTO totals) {
+    }
+
+    private void customerCartCleanup(PurchaseRequest request, Customer customer, List<String> productCodes) {
         if (!request.isDirectPurchase())
         {
-            cartProductService.removeBatchFromCart(customer, productCodes);
+            cartProductService.removeBatchFromCartCustomer(customer, productCodes);
         }
     }
 
@@ -165,9 +211,9 @@ public class PurchaseService {
     }
 
 
-    public List<Purchase> getByCustomer(Customer customer) {
-        return purchaseRepository.getByCustomer(customer.getKeycloakId());
-    }
+//    public List<Purchase> getByCustomer(Customer customer) {
+//        return purchaseRepository.getByCustomer(customer.getKeycloakId());
+//    }
 
     public static String generateCode(LocalDateTime timeStamp)  {
         int year = timeStamp.getYear();

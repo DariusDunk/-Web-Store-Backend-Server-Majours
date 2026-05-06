@@ -28,7 +28,8 @@ public class EndpointMatcher {
             "/cart/remove/*",
             "/cart/add/quantity",
             "/product/detail/*",
-            "/product/reviews/paged"
+            "/product/reviews/paged",
+            "/puchase/complete"
     );//todo purchase endpoint-ovete predstoqt da se dobavqt
 
     public boolean isPublicOrSemiProtected(String path) {

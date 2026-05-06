@@ -188,5 +188,17 @@ where cp.cartProductId.cart.customer.keycloakId = :customerId
 and cp.cartProductId.product.productCode in :productCodes
 """
     )
-    void deleteBatchByCustomerAndCodes(@Param("customerId")String customerId, @Param("productCodes") List<String> productCodes);
+    void deleteBatchByCustomerIdAndCodes(@Param("customerId")String customerId, @Param("productCodes") List<String> productCodes);
+
+
+    @Modifying()
+    @Query(
+            """
+            delete
+            from CartProduct cp
+            where cp.cartProductId.cart.session.sessionId = :sessionId
+            and cp.cartProductId.product.productCode in :productCodes
+            """
+    )
+    void deleteBatchBySessionIdAndCodes(@Param("sessionId")String sessionId, @Param("productCodes") List<String> productCodes);
 }

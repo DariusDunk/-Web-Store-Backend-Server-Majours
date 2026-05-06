@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,22 +31,22 @@ public class CustomerController {
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
+    private final SavedPurchaseDetailsService purchaseDetailsService;
 
     @Autowired
     public CustomerController(CustomerService customerService,
                               ProductService productService,
-//                              PurchaseService purchaseService,
-//                              PurchaseCartService purchaseCartService,
                               KeycloakService keycloakService,
-                              UserIdExtractor userIdExtractor, FavoriteOfCustomerService favoriteOfCustomerService) {
+                              UserIdExtractor userIdExtractor,
+                              FavoriteOfCustomerService favoriteOfCustomerService,
+                              SavedPurchaseDetailsService purchaseDetailsService) {
 
         this.customerService = customerService;
         this.productService = productService;
-        //        this.purchaseService = purchaseService;
-//        this.purchaseCartService = purchaseCartService;
         this.keycloakService = keycloakService;
         this.userIdExtractor = userIdExtractor;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
+        this.purchaseDetailsService = purchaseDetailsService;
     }
 
  
@@ -118,6 +119,27 @@ public class CustomerController {
                 request.currentPage()));
     }
 
+    @PostMapping("recipientTemplates/set")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> savePurchaseInformation(@RequestBody @Valid SavedRecipientDetailsRequest savedPurchaseDetailsResponse) {
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getById(userId);
+        SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsResponse, customer);
+
+        purchaseDetailsService.saveDetails(purchaseDetails);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("recipientTemplates/get")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> getPurchaseInformation() {
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getById(userId);
+
+        return purchaseDetailsService.getByCustomer(customer);
+    }
 
 //    
 //    @GetMapping("purchase_history")//TODO kato go napravi6 trqbva da ima validacii na vhodnite danni i fetch-natite entitiy-ta

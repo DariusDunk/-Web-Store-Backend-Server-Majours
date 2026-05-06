@@ -41,8 +41,9 @@ public class Purchase {
 
     private String purchaseCode;
 
-    @Column(name = "session_id")
-    private String sessionId;
+    @JoinColumn(name = "session_id")
+    @ManyToOne
+    private Session session;
 
     @Column(name = "shipping_fee")
     private int shippingFee;
@@ -58,7 +59,18 @@ public class Purchase {
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
 
-    public Purchase(Customer customer, int totalCost, String contactName, String contactNumber, String address, String purchaseCode, int shippingFee, int productTotal, PaymentMethod paymentMethod) {
+    @Column(name = "email")
+    private String email;
+
+    public Purchase(Customer customer,
+                    int totalCost,
+                    String contactName,
+                    String contactNumber,
+                    String address,
+                    String purchaseCode,
+                    int shippingFee,
+                    int productTotal,
+                    PaymentMethod paymentMethod) {
 
         this.customer = customer;
         this.totalCost = totalCost;
@@ -72,16 +84,27 @@ public class Purchase {
         this.paymentMethod = paymentMethod;
     }
 
-    public Purchase(int totalCost, String contactName, String contactNumber, String address, String purchaseCode, String sessionId, int shippingFee, int productTotal, PaymentMethod paymentMethod) {
+    public Purchase(Session session,
+                    int totalCost,
+                    String contactName,
+                    String contactNumber,
+                    String address,
+                    String purchaseCode,
+                    int shippingFee,
+                    int productTotal,
+                    PaymentMethod paymentMethod,
+                    String email) {
+
+        this.session = session;
         this.totalCost = totalCost;
         this.contactName = contactName;
         this.contactNumber = contactNumber;
         this.address = address;
         this.purchaseCode = purchaseCode;
-        this.sessionId = sessionId;
         this.shippingFee = shippingFee;
         this.productTotal = productTotal;
         this.deliveryStatus = DeliveryStatus.PROCESSING;
         this.paymentMethod = paymentMethod;
+        this.email = email;
     }
 }
