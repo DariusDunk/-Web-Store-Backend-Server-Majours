@@ -44,7 +44,7 @@ public class SessionFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper wrappedResponse =
                 new ContentCachingResponseWrapper(response);
 
-//        String requestLabel = "[For request: " + request.getRequestURI() + "]";
+        String requestLabel = "[For request: " + request.getRequestURI() + "]";
 
         String accessToken = request.getHeader("Authorization");
         Session session = getRequestSession(request);
@@ -87,10 +87,10 @@ public class SessionFilter extends OncePerRequestFilter {
 
         if (isReplaced || !initialSessionExpiry.equals(finalSessionExpiry)) {
 
-//            System.out.println(" \n" +
-//                    "----------------------------------\nThe session has been replaced or the expiry time has changed.\n" +
-//                    "Old expiry: "+ initialSessionExpiry + " new expiri: "+ finalSessionExpiry + " \n" +
-//                    "----------------------------------\n");
+            System.out.println(" \n" +
+                    "----------------------------------\nThe session has been replaced or the expiry time has changed.\n" +
+                    "Old expiry: "+ initialSessionExpiry + " new expiri: "+ finalSessionExpiry + " \n" +
+                    "----------------------------------\n");
 
             try {
                 String json = mapper.writeValueAsString(
@@ -133,13 +133,13 @@ public class SessionFilter extends OncePerRequestFilter {
     }
 
     private Session getRequestSession(HttpServletRequest request) {
-//        String path = request.getRequestURI();
+        String path = request.getRequestURI();
         String sessionId = request.getHeader(GlobalConstants.SESSION_ID_HEADER);
 
-//        System.out.println("\n" +
-//                "----------------------------------\n" +
-//                "FOR REQUEST ["+path+"]RECEIVED SESSION ID TO FILTER: " + sessionId + "\n" +
-//                "----------------------------------\n");
+        System.out.println("\n" +
+                "----------------------------------\n" +
+                "FOR REQUEST ["+path+"]RECEIVED SESSION ID TO FILTER: " + sessionId + "\n" +
+                "----------------------------------\n");
 
         if (sessionId != null) {
             return sessionService.getByIdOptional(sessionId).orElse(null);
@@ -173,10 +173,10 @@ public class SessionFilter extends OncePerRequestFilter {
             session = sessionService.createGuestSession(clientType);
             request.setAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE, true);
 
-//            System.out.println("\n" +
-//                    "----------------------------------\n" +
-//                    "SESSION REPLACED WITH NEW SESSION: "+ session.getSessionId() +
-//                    "\n----------------------------------\n");
+            System.out.println("\n" +
+                    "----------------------------------\n" +
+                    "SESSION REPLACED WITH NEW SESSION: "+ session.getSessionId() +
+                    "\n----------------------------------\n");
 
         } else {
             request.setAttribute(GlobalConstants.IS_REPLACED_ATTRIBUTE, false);

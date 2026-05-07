@@ -317,6 +317,8 @@ public class KeycloakService {
 
         if (refreshToken == null) throw new RefreshRequestFailedException("Refresh token is null");
 
+        System.out.println("[START] refresh token from db for refresh request :" + refreshToken);
+
         String refreshUrl = "/realms/" + realmName + "/protocol/openid-connect/token";
 
         try {

@@ -47,4 +47,6 @@ public class PurchaseController {
         //todo sloji sled metoda za poukpkata da ima metod za izpra6tane na imeil
 
     }
+
+
 }

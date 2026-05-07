@@ -42,6 +42,7 @@ public class PurchaseService {
         this.cartProductService = cartProductService;
     }
 
+
     public Purchase save(Purchase purchase) {
         return purchaseRepository.save(purchase);
     }
@@ -162,8 +163,8 @@ public class PurchaseService {
 
     private static TotalsDTO calculateTotals(Map<String, PurchaseProductDTO> purchaseProductMap) {
        int productTotal = purchaseProductMap.values().stream().mapToInt(PurchaseProductDTO::finalPrice).sum();
-        int freeShippingThresholdCents = 6000;
-        int shippingFee = productTotal >= freeShippingThresholdCents ? 0 : 100;
+        int freeShippingThresholdCents = 10000;
+        int shippingFee = productTotal >= freeShippingThresholdCents ? 0 : 1000;
         int totalCost = productTotal + shippingFee;
 
         return new TotalsDTO(productTotal, shippingFee, totalCost);

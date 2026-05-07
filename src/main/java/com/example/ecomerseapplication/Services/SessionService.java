@@ -94,6 +94,10 @@ public class SessionService {
 
     }
 
+    public Session fetchByIdWithLocNullable(String sessionId) {
+        return sessionRepository.findBySessionId(sessionId).orElse(null);
+    }
+
     public Session AuthToGuestSession(Session session) {
 
         if (session.getIsGuest()) {

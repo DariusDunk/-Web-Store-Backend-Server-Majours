@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +38,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     @EntityGraph(attributePaths = {"saleProducts", "saleProducts.sale"})
     Optional<Product> findProductByProductCode(String productCode);
+
+    @EntityGraph(attributePaths = {"saleProducts", "saleProducts.sale"})
+    List<Product> findAllByProductCodeIn(List<String> productCodes);
 
     @Query(value =
             """

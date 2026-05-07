@@ -17,6 +17,8 @@ import com.example.ecomerseapplication.Others.GlobalConstants;
 import com.example.ecomerseapplication.enums.UserRole;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -147,11 +149,14 @@ public class AuthService {
         try {
             session = SessionExtractor.getRequestSession().orElse(null);
 
-//            System.out.println("\n" +
-//                    "----------------------------------\nSession in refresh is: " + session.getSessionId()
-//                    + "\nIs expired or revked: "
-//                    + (session.isExpired() || session.getIsRevoked()) + "\n" +
-//                    "----------------------------------\n");
+            if (session == null)
+                throw new InvalidSessionException("Session not found/null in refresh");
+
+            System.out.println("\n" +
+                    "----------------------------------\nSession in refresh is: " + session.getSessionId()
+                    + "\nIs expired or revked: "
+                    + (session.isExpired() || session.getIsRevoked()) + "\n" +
+                    "----------------------------------\n");
 
             if (session.getIsRevoked() || session.isExpired()) {
                 session = sessionService.createGuestSession(session.getClientType());
@@ -165,9 +170,48 @@ public class AuthService {
             else
                 refreshToken = session.getRefreshToken();
 
+//            Session updatedLockedSession = sessionService.fetchByIdWithLocNullable(session.getSessionId());
+//
+//            if (updatedLockedSession == null)
+//                throw new InvalidSessionException("Locked session not found/null in refresh");
+
+//            if (!session.getRefreshToken().equals(updatedLockedSession.getRefreshToken()))
+//            {
+//                System.out.println("Session refresh token has been updated, rolling back session refresh");
+//
+//                return new RefreshResponse(null,
+//                        SessionService.calculateSessionTTLSeconds(updatedLockedSession.getExpiresAt()),
+//                        false,
+//                        updatedLockedSession.getIsRememberMeSession(),
+//                        updatedLockedSession.getSessionId(),
+//                        true);
+//            }
+//
             tokenRefreshResponse = keycloakService.refreshBothTokens(refreshToken);
+
+            System.out.println("[SUCCESS] New refresh token in keycloak: " + tokenRefreshResponse.refreshToken() );
+
         } catch (Exception e) {
             System.out.println("Error refreshing token in keycloak, session will be treated as a guest: \n" + e.getMessage() + "\n -------------------------------------------------------");
+
+//            if ((e instanceof LockTimeoutException || e instanceof PessimisticLockException)
+//                    && session!=null) {
+//                Session refetchedSession = sessionService.getById(session.getSessionId());
+//                if (refetchedSession != null)
+//                {
+//                    if (!session.getRefreshToken().equals(refetchedSession.getRefreshToken()))
+//                    {
+//                        System.out.println("Session refresh token has been updated, rolling back session refresh");
+//
+//                        return new RefreshResponse(null,
+//                                SessionService.calculateSessionTTLSeconds(refetchedSession.getExpiresAt()),
+//                                false,
+//                                refetchedSession.getIsRememberMeSession(),
+//                                refetchedSession.getSessionId(),
+//                                true);
+//                    }
+//                }
+//            }
 
             if (session == null) {
 
@@ -194,7 +238,7 @@ public class AuthService {
         try {
 
             session.markAsAuthenticated(session.getCustomer(),
-                    refreshToken,
+                    tokenRefreshResponse.refreshToken(),
                     session.getIsRememberMeSession(),
                     tokenRefreshResponse.refreshExpiresIn(),
                     GlobalConstants.NORMAL_SESSION_TTL_HOURS);

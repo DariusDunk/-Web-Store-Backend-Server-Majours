@@ -10,36 +10,52 @@ const timestamp = () => {
     const now = new Date();
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
-//
-// router.get('/featured/:page', async (req, res) => {
-//
-//     const page = req.params.page;
-//     const sessionId = req.cookies.session_id;
-//
-//     try {
-//
-//         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-//             return await axiosBackendClient.get(`${Backend_Url}/product/findall?${new URLSearchParams({page: page || 0})}`, {
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     'x-client_type': WEB_CLIENT_NAME,
-//                     ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-//                     ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
-//                 },
-//                 bffContext: {
-//                     req, res
-//                 }
-//             });
-//         }, {req, res});
-//
-//         const data = await response.data;
-//         return res.status(response.status).json(data);
-//
-//     } catch (error) {
-//         console.error('Search: Error fetching data:', error);
-//         return res.status(error.response?.status || 500).end();
-//     }
-// });
+
+router.post('/byCodesWithStockValidation', async (req, res) =>
+    {
+    const {productCodes} = req.body;
+    const sessionId = req.cookies.session_id;
+
+    console.log('Product codes to fetch:', productCodes);
+
+    try
+    {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                await axiosBackendClient.post(`${Backend_Url}/product/codes/stockValidation`, {productCodes}, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-client_type': WEB_CLIENT_NAME,
+                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                        ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                    },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            },
+            {req, res});
+
+        const responseData = response.data;
+
+        console.log('Products responseData:', responseData);
+
+        return res.status(response.status).json(responseData);
+    }
+    catch (error)
+    {
+
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for fetching product data`);
+            return res.status(error.response.status||500).json(error.response.data);
+        }
+
+        console.error('-------------------Unexpected error fetching product data-------------------\n', error);
+        return res.status(error.response?.status || 500).json({error: 'Internal server error'});
+
+    }
+
+    }
+)
 
 router.get('/homePage', async (req, res) => {
 
@@ -219,7 +235,7 @@ router.get('/detail/:productCode', async (req, res) => {
         // const productDetails = productDetailResponse.data;
         // const ratingOverview = ratingOverviewResponse.data;
 
-        console.log('productDetails response:', JSON.stringify(response));
+        // console.log('productDetails response:', JSON.stringify(response));
 
         return res.status(200).json(response.data);
 

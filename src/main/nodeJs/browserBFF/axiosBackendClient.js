@@ -19,6 +19,8 @@ axiosBackendClient.interceptors.response.use(
         // console.log("Request failed due to unauthorized access.");
 
         if (!originalRequest?.bffContext) {
+            console.error("No BFF context found in request during interceptor refresh, rejecting request.");
+
             return Promise.reject(error);
         }
 

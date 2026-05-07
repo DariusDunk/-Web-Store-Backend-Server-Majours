@@ -1,11 +1,13 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.requests.ProductCodeQuantityPairRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.MetaModels.Product_;
 import com.example.ecomerseapplication.Others.PageContentLimit;
@@ -579,6 +581,37 @@ public class ProductService {
 
     public Product findByCodeWithRelations(String code) {
         return productRepository.findProductByProductCode(code).orElseThrow(() -> new EntityNotFoundException("Product not found with code: " + code));
+    }
+
+    public List<Product> findByCodesWithSale(List<String> codes) {
+        return productRepository.findAllByProductCodeIn(codes);
+    }
+
+    public List<CompactProductQuantityPairResponse> findByCodesAndQuantityInspect(List<ProductCodeQuantityPairRequest> requestList) {
+
+        List<String> codes = requestList.stream().map(ProductCodeQuantityPairRequest::productCode).toList();
+        List<Product> products = findByCodesWithSale(codes);
+        List<CompactProductQuantityPairResponse> productResponses = new ArrayList<>();
+        Map<String, Short> codeQuantityMap = Map
+                .copyOf(requestList
+                        .stream()
+                        .collect(HashMap::new,
+                                (m, v) -> m.put(v.productCode(), v.quantity()), HashMap::putAll)
+                );
+        for (Product product : products) {
+            if (product.getQuantityInStock() < codeQuantityMap.get(product.getProductCode())) {
+                throw new StockForNamedProductExceeded("Requested purchase quantity exceeded for product " + product.getProductName(),
+                        product.getProductName(),
+                        codeQuantityMap.get(product.getProductCode()));
+            }
+
+            CompactProductQuantityPairResponse productResponse = new CompactProductQuantityPairResponse();
+            productResponse.compactProductResponse = ProductDTOMapper.entityToCompactResponse(product);
+            productResponse.quantity = codeQuantityMap.get(product.getProductCode());
+
+            productResponses.add(productResponse);
+        }
+        return productResponses;
     }
 
     private Page<CompactProductResponse> getByManufacturerSortedByPrice(Manufacturer manufacturer, int page, Sort.Direction direction) {
