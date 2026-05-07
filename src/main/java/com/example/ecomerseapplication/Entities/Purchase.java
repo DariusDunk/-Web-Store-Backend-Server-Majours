@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -53,10 +55,12 @@ public class Purchase {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private DeliveryStatus deliveryStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private PaymentMethod paymentMethod;
 
     @Column(name = "email")

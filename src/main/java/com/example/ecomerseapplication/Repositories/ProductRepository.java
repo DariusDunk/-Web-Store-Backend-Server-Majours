@@ -14,7 +14,6 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -87,8 +86,8 @@ where p.productCategory = ?1
 """
 select p
 from Product  p
-join p.saleProducts sp on sp.isMain = true
-join sp.sale s on s.isActive = true
+left join p.saleProducts sp on sp.isMain = true
+left join sp.sale s on s.isActive = true
 and current_timestamp between s.startDate and s.endDate
 where p.productCode in ?1
 """

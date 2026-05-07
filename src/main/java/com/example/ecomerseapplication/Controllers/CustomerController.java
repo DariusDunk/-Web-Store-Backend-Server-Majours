@@ -134,10 +134,14 @@ public class CustomerController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> getPurchaseInformation() {
 
+        System.out.println("Inside getPurchaseInformation");
+
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);
+        SavedPurchaseDetailsResponse response = purchaseDetailsService.getByCustomer(customer);
 
-        return ResponseEntity.ok(purchaseDetailsService.getByCustomer(customer));
+        System.out.println("getPurchaseInformation Response: " + response);
+        return ResponseEntity.ok(response);
     }
 
 //    

@@ -23,9 +23,11 @@ router.post('/complete', async (req, res)=>{
       return res.status(401).json({message: "Unauthorized purchase activity"});
     }
 
+    const reqBody = req.body;
+
     const response = await fetchWithSessionTokens(sessionId,
         async (sessionData) => {
-          return await axiosBackendClient.post(`${Backend_Url}/purchase/complete`, {
+          return await axiosBackendClient.post(`${Backend_Url}/purchase/complete`, reqBody,{
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -40,6 +42,8 @@ router.post('/complete', async (req, res)=>{
           })
         },
         {req, res});
+
+    console.log("Purchase response: ", JSON.stringify(response));
 
     const responseData = response.data;
 

@@ -190,8 +190,10 @@ public class PurchaseService {
     private static void validateStock(List<ProductQuantityForCartRequest> productPairs, Map<String, Product> productByCodeMap) {
         for (ProductQuantityForCartRequest productPair: productPairs) {
             Product product = productByCodeMap.get(productPair.productCode());
-            if (product == null)
+            if (product == null) {
+                System.out.println("Product not found for code: " + productPair.productCode());
                 throw new ResourceNotFoundException("Product not found!");
+            }
 
             if (product.getQuantityInStock() < productPair.quantity())
                 throw new StockForNamedProductExceeded("Stock exceeded for product during purchase",

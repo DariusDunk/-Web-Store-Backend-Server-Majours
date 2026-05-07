@@ -13,15 +13,15 @@ const timestamp = () => {
 
 router.post('/byCodesWithStockValidation', async (req, res) =>
     {
-    const {productCodes} = req.body;
+    const productCodesQuantityPairs = req.body;
     const sessionId = req.cookies.session_id;
 
-    console.log('Product codes to fetch:', productCodes);
+    // console.log('Product codes to fetch:', productCodesQuantityPairs);
 
     try
     {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                await axiosBackendClient.post(`${Backend_Url}/product/codes/stockValidation`, {productCodes}, {
+              return await axiosBackendClient.post(`${Backend_Url}/product/codes/stockValidation`, productCodesQuantityPairs, {
                     headers: {
                         'Content-Type': 'application/json',
                         'x-client_type': WEB_CLIENT_NAME,
@@ -37,7 +37,7 @@ router.post('/byCodesWithStockValidation', async (req, res) =>
 
         const responseData = response.data;
 
-        console.log('Products responseData:', responseData);
+        // console.log('Products responseData:', responseData);
 
         return res.status(response.status).json(responseData);
     }

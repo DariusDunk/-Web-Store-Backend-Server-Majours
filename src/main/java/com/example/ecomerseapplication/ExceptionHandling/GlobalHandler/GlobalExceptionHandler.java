@@ -123,7 +123,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleEntityNotFoundExceptions() {
+    public ResponseEntity<?> handleEntityNotFoundExceptions(ResourceNotFoundException ex) {
+        System.out.println("--------------------Resource not found-----------------");
+        System.out.println(ex.getMessage());
+        System.out.println("-------------------------------------------------------");
         return ResponseEntity.notFound().build();
     }
 

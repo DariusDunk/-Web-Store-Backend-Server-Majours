@@ -50,8 +50,10 @@ router.post(`/recipientTemplates/set`, async (req, res) =>
     }
 );
 
-router.get(`recipientTemplates/get`, async (req, res) => {
+router.get(`/recipientTemplates/get`, async (req, res) => {
     const sessionId = req.cookies.session_id;
+
+    console.log("Session id in get recipient templates: ", sessionId);
 
     try{
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -71,6 +73,9 @@ router.get(`recipientTemplates/get`, async (req, res) => {
             {req, res});
 
         const responseData = await response.data;
+
+        console.log("Response data in get recipient templates: ", JSON.stringify(responseData));
+
         return res.status(response.status).json(responseData);
 
     }

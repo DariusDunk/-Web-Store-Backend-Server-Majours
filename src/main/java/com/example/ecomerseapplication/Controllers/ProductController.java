@@ -358,11 +358,11 @@ public class ProductController {
     @PostMapping("codes/stockValidation")
     public ResponseEntity<?> getProductsByCodesWithStockValidation(@RequestBody List<ProductCodeQuantityPairRequest> pairRequestList) {
 
-        System.out.println("In product fetch for purchase: " + pairRequestList);
+//        System.out.println("In product fetch for purchase: " + pairRequestList);
 
         List<CompactProductQuantityPairResponse> response = productService.findByCodesAndQuantityInspect(pairRequestList);
 
-        System.out.println("Response: " + response);
+//        System.out.println("Response: " + response);
 
         return ResponseEntity.ok(response);
     }

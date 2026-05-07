@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
+import com.example.ecomerseapplication.DTOs.responses.SuccessfulPurchaseResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ public class PurchaseController {
     @Transactional
     public ResponseEntity<?> createPurchase(@RequestBody PurchaseRequest request) {
 
+        System.out.println("inside purchase controller");
+
         Session session = sessionService.getRequestSession();
 
         if (session.getIsGuest()) {
@@ -41,7 +44,9 @@ public class PurchaseController {
         else
         {
             Customer customer = session.getCustomer();
-            return ResponseEntity.ok(purchaseService.completePurchaseForCustomer(request, customer));
+            SuccessfulPurchaseResponse response = purchaseService.completePurchaseForCustomer(request, customer);
+            System.out.println("Successful purchase response: " + response);
+            return ResponseEntity.ok(response);
         }
 
         //todo sloji sled metoda za poukpkata da ima metod za izpra6tane na imeil
