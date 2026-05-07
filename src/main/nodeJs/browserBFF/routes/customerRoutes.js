@@ -28,9 +28,10 @@ router.post(`/recipientTemplates/set`, async (req, res) =>
                         bffContext: {
                             req, res
                         }
-                    },
-                    {req, res});
-            });
+                    }
+                    );
+            },
+                {req, res});
 
             return res.status(response.status).end();
         } catch (error) {

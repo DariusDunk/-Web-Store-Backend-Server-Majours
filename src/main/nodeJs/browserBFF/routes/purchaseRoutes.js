@@ -3,6 +3,7 @@ const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
+import {getCartSummary} from "../services/cartSummaryFetcher.js"
 
 
 const timestamp = () => {
@@ -43,9 +44,15 @@ router.post('/complete', async (req, res)=>{
         },
         {req, res});
 
-    console.log("Purchase response: ", JSON.stringify(response));
+    // console.log("Purchase response: ", JSON.stringify(response));
 
-    const responseData = response.data;
+    const {data: responseData, newSessionId} = response;
+
+    sessionId = newSessionId || sessionId;
+
+    const cartSummaryResponse = await getCartSummary(req, res, sessionId);
+
+    responseData.cartSummary = cartSummaryResponse?.data;
 
     return res.status(response.status).json(responseData || {});
 
@@ -55,10 +62,10 @@ router.post('/complete', async (req, res)=>{
 
     if (error.response) {
       console.warn(`${timestamp()} Handled backend error for complete purchase request`);
-      return res.status(error.response.status || 500).end();
+      return res.status(error.response.status || 500).json(error.response.data);
     }
 
-    return res.status(500).json({error: "Invalid response from backend"});
+    return res.status(500).end();
   }
 })
 

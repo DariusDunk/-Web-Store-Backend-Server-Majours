@@ -602,7 +602,7 @@ public class ProductService {
             if (product.getQuantityInStock() < codeQuantityMap.get(product.getProductCode())) {
                 throw new StockForNamedProductExceeded("Requested purchase quantity exceeded for product " + product.getProductName(),
                         product.getProductName(),
-                        codeQuantityMap.get(product.getProductCode()));
+                        product.getQuantityInStock());
             }
 
             CompactProductQuantityPairResponse productResponse = new CompactProductQuantityPairResponse();

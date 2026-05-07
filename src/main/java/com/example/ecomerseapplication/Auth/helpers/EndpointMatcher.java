@@ -19,8 +19,9 @@ public class EndpointMatcher {
             "/product/*/review/overview",
             "/product/manufacturer/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
             "/product/category/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
-            "/product/filter/*"
-    );//todo purchase endpoint-ovete predstoqt da se dobavqt
+            "/product/filter/*",
+            "/product/codes/stockValidation"
+    );
 
     private final List<String> SEMI_PROTECTED_ENDPOINTS = List.of(
             "/auth/**",
@@ -29,8 +30,8 @@ public class EndpointMatcher {
             "/cart/add/quantity",
             "/product/detail/*",
             "/product/reviews/paged",
-            "/puchase/complete"
-    );//todo purchase endpoint-ovete predstoqt da se dobavqt
+            "/purchase/*"
+    );
 
     public boolean isPublicOrSemiProtected(String path) {
 

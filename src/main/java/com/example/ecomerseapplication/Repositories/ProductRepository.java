@@ -86,13 +86,13 @@ where p.productCategory = ?1
 """
 select p
 from Product  p
-left join p.saleProducts sp on sp.isMain = true
+/*left join p.saleProducts sp on sp.isMain = true
 left join sp.sale s on s.isActive = true
-and current_timestamp between s.startDate and s.endDate
+and current_timestamp between s.startDate and s.endDate*/
 where p.productCode in ?1
 """
     )
-    List<Product> getByCodesForSaleWithLocking(List<String> productCodes);
+    List<Product> getByCodesForSaleWithLocking(List<String> productCodes);//todo napravi vtora zaqvka za joinovete v bude6te
 
     @Query(
 """

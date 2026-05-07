@@ -54,7 +54,6 @@ public class PurchaseService {
 
         savePurchaseItems(result.productsForPurchase(), purchase, result.purchaseProductMap());
         sessionCartCleanup(request, session, result.productCodes());
-
         return PurchaseMapper.entityToSuccessResponse(purchase);
     }
 
@@ -100,10 +99,13 @@ public class PurchaseService {
                 .stream()
                 .map(ProductQuantityForCartRequest::productCode)
                 .toList();
+
         List<Product> productsForPurchase = getLockedProductsForPurchase(productCodes);
+
         RecipientDataRequest recipientData = request.recipientData();
         PaymentMethod paymentMethod = request.paymentMethod();
         String purchaseCode = generateCode(LocalDateTime.now());
+
         Map<String, Product> productByCodeMap = Map
                 .copyOf(productsForPurchase
                         .stream()
