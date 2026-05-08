@@ -113,6 +113,13 @@
       networks:
         - si
 
+    webstore-mailhog:
+      image: mailhog/mailhog
+      container_name: mailhog
+      ports:
+        - "1025:1025"
+        - "8025:8025"
+
   volumes:
     webstore_keycloak_db_data:
     webstore_main_db_data:

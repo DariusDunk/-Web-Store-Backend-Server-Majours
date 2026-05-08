@@ -20,7 +20,8 @@ public class EndpointMatcher {
             "/product/manufacturer/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
             "/product/category/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
             "/product/filter/*",
-            "/product/codes/stockValidation"
+            "/product/codes/stockValidation",
+            "/emails/*"
     );
 
     private final List<String> SEMI_PROTECTED_ENDPOINTS = List.of(
