@@ -49,15 +49,14 @@ public class TestMailController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/test-pdf-invoice")
-    public ResponseEntity<?> testPdfInvoice(@RequestParam String customerId, @RequestParam String purchaseCode) {
-        InvoiceFullDTO invoiceFullDTO = invoiceService.buildInvoice(purchaseCode, customerId);
-        byte[] pdf = pdfService.generateInvoicePdf(invoiceFullDTO);
-        emailService.sendEmailWithPDFAttachment( "test@test.com",
-                "PDF Test",
-                "PDF attachment for invoice.",
-                pdf,
-                "invoice");
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/test-pdf-invoice")
+//    public ResponseEntity<?> testPdfInvoice(@RequestParam String customerId, @RequestParam String purchaseCode) {
+//        byte[] invoicePdf = invoiceService.buildInvoice(purchaseCode, customerId);
+//        emailService.sendEmailWithPDFAttachment( "test@test.com",
+//                "PDF Test",
+//                "PDF attachment for invoice.",
+//                invoicePdf,
+//                "invoice");
+//        return ResponseEntity.ok().build();
+//    }
 }

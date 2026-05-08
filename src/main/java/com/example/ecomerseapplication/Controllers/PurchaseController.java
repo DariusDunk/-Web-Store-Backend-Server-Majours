@@ -6,7 +6,6 @@ import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +17,19 @@ public class PurchaseController {
 
     private final PurchaseService purchaseService;
     private final SessionService sessionService;
+    private final InvoiceService invoiceService;
 
     @Autowired
     public PurchaseController(PurchaseService purchaseService,
-                              SessionService sessionService) {
+                              SessionService sessionService, InvoiceService invoiceService) {
         this.purchaseService = purchaseService;
         this.sessionService = sessionService;
+        this.invoiceService = invoiceService;
     }
 
     @PostMapping("complete")
     @Transactional
     public ResponseEntity<?> createPurchase(@RequestBody PurchaseRequest request) {
-
-        System.out.println("inside purchase controller");
 
         Session session = sessionService.getRequestSession();
 
@@ -38,27 +37,18 @@ public class PurchaseController {
             if (request.email().isBlank()) {
                 return ResponseEntity.badRequest().build();
             }
+            SuccessfulPurchaseResponse response = purchaseService.completePurchaseForGuest(request, session);
 
-            return ResponseEntity.ok(purchaseService.completePurchaseForGuest(request, session));
+            invoiceService.sentInvoiceEmailForGuest(response.purchaseCode(), request.email(), session.getSessionId());
+
+            return ResponseEntity.ok(response);
 
         } else {
             Customer customer = session.getCustomer();
             SuccessfulPurchaseResponse response = purchaseService.completePurchaseForCustomer(request, customer);
-            System.out.println("Successful purchase response: " + response);
+            invoiceService.sentInvoiceEmailForCustomer(response.purchaseCode(), customer);
             return ResponseEntity.ok(response);
         }
 
-        //todo sloji sled metoda za poukpkata da ima metod za izpra6tane na imeil
-
     }
-
-//    @GetMapping("invoice/{purchaseCode}")
-//    @PreAuthorize("hasRole(@roles.customer())")
-//    public ResponseEntity<?> getInvoice(@PathVariable String purchaseCode) {
-//
-//        Session session = sessionService.getRequestSession();
-//        Customer customer = session.getCustomer();
-//
-//        return purchaseService.getInvoiceOfPurchase(purchaseCode, customer);
-//    }
 }

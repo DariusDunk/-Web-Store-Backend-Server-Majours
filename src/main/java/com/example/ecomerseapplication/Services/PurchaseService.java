@@ -5,12 +5,9 @@ import com.example.ecomerseapplication.DTOs.requests.ProductQuantityForCartReque
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
 import com.example.ecomerseapplication.DTOs.requests.RecipientDataRequest;
 import com.example.ecomerseapplication.DTOs.responses.SuccessfulPurchaseResponse;
-import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductPricePairDTO;
-import com.example.ecomerseapplication.DTOs.serverDtos.InvoiceFullDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.PurchaseProductDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.TotalsDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.InvoicePurchaseProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
@@ -22,7 +19,6 @@ import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,8 +127,13 @@ public class PurchaseService {
 
 
 
-    public InvoicePurchaseProjection getInvoiceOfPurchase(String purchaseCode, String customerId) {
+    public InvoicePurchaseProjection getInvoiceOfPurchaseForCustomer(String purchaseCode, String customerId) {
         return purchaseRepository.getByCodeAndCustomerId(customerId, purchaseCode)
+                .orElseThrow(()->new ResourceNotFoundException("Purchase not found"));
+    }
+
+    public InvoicePurchaseProjection getInvoiceOfPurchaseForGuest(String purchaseCode, String sessionId) {
+        return purchaseRepository.getByCodeAndSessionId(sessionId, purchaseCode)
                 .orElseThrow(()->new ResourceNotFoundException("Purchase not found"));
     }
 
