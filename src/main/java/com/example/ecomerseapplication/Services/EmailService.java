@@ -1,8 +1,11 @@
 package com.example.ecomerseapplication.Services;
 
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,5 +23,37 @@ public class EmailService {
         message.setText(text);
 
         mailSender.send(message);
+    }
+
+    public void sendEmailWithPDFAttachment(
+            String to,
+            String subject,
+            String text,
+            byte[] pdfBytes,
+            String attachmentName
+    ) {
+
+        try {
+
+            MimeMessage message =
+                    mailSender.createMimeMessage();
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true);
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(text);
+
+            helper.addAttachment(
+                    attachmentName+".pdf",
+                    new ByteArrayResource(pdfBytes)
+            );
+
+            mailSender.send(message);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

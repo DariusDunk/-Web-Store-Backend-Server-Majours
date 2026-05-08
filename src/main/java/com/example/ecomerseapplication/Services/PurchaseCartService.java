@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Entities.PurchaseCart;
 import com.example.ecomerseapplication.Repositories.PurchaseCartRepository;
@@ -30,5 +31,9 @@ public class PurchaseCartService {
 
     public Boolean isProductPurchased(String productCode, String  userId) {
         return purchaseCartRepository.isProductPurchased(productCode, userId);
+    }
+
+    public List<PurchaseProductProjection> getByPurchaseCode(String purchaseCode) {
+        return purchaseCartRepository.getProductProjectionsOfPurchase(purchaseCode);
     }
 }

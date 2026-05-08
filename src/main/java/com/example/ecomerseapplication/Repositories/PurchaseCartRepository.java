@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Entities.PurchaseCart;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +25,25 @@ public interface PurchaseCartRepository extends JpaRepository<PurchaseCart, Purc
                 where pc.purchaseCartId.product.productCode = :productCode and pc.purchaseCartId.purchase.customer.keycloakId = :userId)
             """)
     Boolean isProductPurchased(@Param("productCode") String productCode, @Param("userId") String userId);
+
+    @Query(
+"""
+select p.productCode as productCode,
+p.productName as productName,
+p.originalPriceStotinki as originalPriceStotinki,
+s.discountPercent as defaultSaleDiscount,
+sp.overrideDiscountPercentage explicitDiscount,
+p.rating as rating,
+p.mainImageUrl as imageUrl,
+pc.quantity as quantity
+from PurchaseCart pc
+join pc.purchaseCartId.product p
+join pc.purchaseCartId.purchase pu
+left join p.saleProducts sp on sp.isMain = true
+left join sp.sale s on s.isActive = true
+and current_timestamp between s.startDate and s.endDate
+where pu.purchaseCode = ?1
+"""
+    )
+    List<PurchaseProductProjection> getProductProjectionsOfPurchase(String purchaseCode);
 }

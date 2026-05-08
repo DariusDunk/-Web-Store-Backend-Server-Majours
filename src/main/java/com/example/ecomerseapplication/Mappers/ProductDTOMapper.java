@@ -95,7 +95,7 @@ public class ProductDTOMapper {
         }
     }
 
-    private static int calculateDiscountPrice(int originalPrice, Short defaultDiscount, Short explicitDiscount) {
+    public static int calculateDiscountPrice(int originalPrice, Short defaultDiscount, Short explicitDiscount) {
 
         if (defaultDiscount == null)
             return originalPrice;
