@@ -38,7 +38,6 @@ public class PurchaseController {
                 return ResponseEntity.badRequest().build();
             }
 
-            System.out.println("Email: " + request.email());
             SuccessfulPurchaseResponse response = purchaseService.completePurchaseForGuest(request, session);
 
             invoiceService.sentInvoiceEmailForGuest(response.purchaseCode(), request.email(), session.getSessionId());
@@ -48,7 +47,9 @@ public class PurchaseController {
         } else {
             Customer customer = session.getCustomer();
             SuccessfulPurchaseResponse response = purchaseService.completePurchaseForCustomer(request, customer);
+
             invoiceService.sentInvoiceEmailForCustomer(response.purchaseCode(), customer);
+
             return ResponseEntity.ok(response);
         }
 
