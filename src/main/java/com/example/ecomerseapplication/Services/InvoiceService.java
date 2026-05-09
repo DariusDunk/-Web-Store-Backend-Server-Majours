@@ -68,7 +68,7 @@ public class InvoiceService {
         byte[] pdfBytes = pdfService.generateInvoicePdf(pdfHTML);
         String emailHTML = invoiceHtmlService.buildEmailHTML(invoiceFullDTO);
 
-        emailService.sendEmailWithPDFAttachment(email, "Успешно обработена поръчка в Агромаг",
+        emailService.sendHTMLEmailWithPDFAttachment(email, "Успешно обработена поръчка в Агромаг",
                 emailHTML,
                 pdfBytes,
                 "invoice.pdf");

@@ -37,6 +37,8 @@ public class PurchaseController {
             if (request.email().isBlank()) {
                 return ResponseEntity.badRequest().build();
             }
+
+            System.out.println("Email: " + request.email());
             SuccessfulPurchaseResponse response = purchaseService.completePurchaseForGuest(request, session);
 
             invoiceService.sentInvoiceEmailForGuest(response.purchaseCode(), request.email(), session.getSessionId());

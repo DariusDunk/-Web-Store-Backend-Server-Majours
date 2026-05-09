@@ -39,11 +39,11 @@ public class InvoiceHtmlService {
                     .append("</td>");
 
             html.append("<td style='text-align:right;'>")
-                    .append(String.format(locale, "%.2f лв.", price))
+                    .append(String.format(locale, "%.2f €.", price))
                     .append("</td>");
 
             html.append("<td style='text-align:right;'>")
-                    .append(String.format(locale, "%.2f лв.", totalLine))
+                    .append(String.format(locale, "%.2f €.", totalLine))
                     .append("</td>");
 
             html.append("</tr>");
@@ -65,21 +65,21 @@ public class InvoiceHtmlService {
         html.append("<tr>")
                 .append("<td style='text-align:right;'>Общо продукти:</td>")
                 .append("<td style='width:120px; text-align:right;'>")
-                .append(String.format(locale, "%.2f лв.", productTotal))
+                .append(String.format(locale, "%.2f €.", productTotal))
                 .append("</td>")
                 .append("</tr>");
 
         html.append("<tr>")
                 .append("<td style='text-align:right;'>Доставка:</td>")
                 .append("<td style='text-align:right;'>")
-                .append(String.format(locale, "%.2f лв.", shippingFee))
+                .append(String.format(locale, "%.2f €.", shippingFee))
                 .append("</td>")
                 .append("</tr>");
 
         html.append("<tr>")
                 .append("<td style='text-align:right; font-weight:bold; font-size:16px; border-top:1px double #000; padding-top:10px;'>Сума за плащане:</td>")
                 .append("<td style='text-align:right; font-weight:bold; font-size:16px; border-top:1px double #000; padding-top:10px;'>")
-                .append(String.format(locale, "%.2f лв.", totalCost))
+                .append(String.format(locale, "%.2f €.", totalCost))
                 .append("</td>")
                 .append("</tr>");
 
@@ -236,7 +236,7 @@ public class InvoiceHtmlService {
                 .append("<br>");
 
         html.append("<b>Метод на плащане:</b> ")
-                .append(escapeHtml(invoice.invoicePurchaseProjection().getPaymentMethod().toString()));
+                .append(escapeHtml(invoice.invoicePurchaseProjection().getPaymentMethod().getDisplayNameBg()));
 
         html.append("</p>");
 

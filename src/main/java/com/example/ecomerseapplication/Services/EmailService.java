@@ -13,22 +13,24 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private final String senderEmail = "noreply@agromag.local";
 
     public void sendEmail(String to, String subject, String text) {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(to);
+        message.setFrom(senderEmail);
         message.setSubject(subject);
         message.setText(text);
 
         mailSender.send(message);
     }
 
-    public void sendEmailWithPDFAttachment(
+    public void sendHTMLEmailWithPDFAttachment(
             String to,
             String subject,
-            String text,
+            String html,
             byte[] pdfBytes,
             String attachmentName
     ) {
@@ -39,14 +41,16 @@ public class EmailService {
                     mailSender.createMimeMessage();
 
             MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true);
+                    new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(to);
+            helper.setFrom(senderEmail);
             helper.setSubject(subject);
-            helper.setText(text);
+
+            helper.setText(html, true);
 
             helper.addAttachment(
-                    attachmentName+".pdf",
+                    attachmentName + ".pdf",
                     new ByteArrayResource(pdfBytes)
             );
 

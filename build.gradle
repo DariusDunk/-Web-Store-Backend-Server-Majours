@@ -49,7 +49,7 @@ dependencies {
             {
                 exclude group: 'commons-logging', module: 'commons-logging'
             }
-    implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.10'
+//    implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.10'
 
 
     compileOnly 'org.projectlombok:lombok'
