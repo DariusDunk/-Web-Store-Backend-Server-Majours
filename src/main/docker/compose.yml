@@ -120,6 +120,17 @@
         - "1025:1025"
         - "8025:8025"
 
+    webstore-tensorflow-serving:
+      image: tensorflow/serving
+      ports:
+        - "8500:8500"
+        - "8501:8501"
+      volumes:
+        - ../../../models:/models
+        - ./configs/models.config:/config/models.config
+      command:
+        --model_config_file=/config/models.config
+
   volumes:
     webstore_keycloak_db_data:
     webstore_main_db_data:
