@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# TensorFlow / ML models
+models/
+*.pb
+*.ckpt
+*.h5
+*.keras
+saved_model.pb
+variables/
+assets/
