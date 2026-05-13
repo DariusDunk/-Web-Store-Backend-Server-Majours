@@ -46,12 +46,14 @@ public class TensorFlowServingService {
 
             categoryClasses = mapper.readValue(
                     catStream,
-                    new TypeReference<Map<String, String>>() {}
+                    new TypeReference<>() {
+                    }
             );
 
             manufacturerClasses = mapper.readValue(
                     manStream,
-                    new TypeReference<Map<String, String>>() {}
+                    new TypeReference<>() {
+                    }
             );
 
         } catch (IOException e) {
