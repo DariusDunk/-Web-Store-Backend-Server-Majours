@@ -1,7 +1,6 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 

@@ -23,7 +23,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.*;
 import lombok.NonNull;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
