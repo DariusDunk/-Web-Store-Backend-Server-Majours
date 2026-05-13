@@ -3,6 +3,9 @@ import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
 import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import {getTopProductsOfTopSales, getTopProductsOfTopCategories} from "../services/homePageRequests.js";
+import multer from "multer";
+import FormData from "form-data";
+const upload = multer();
 
 const router = express.Router();
 
@@ -11,51 +14,137 @@ const timestamp = () => {
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
 
-router.post('/byCodesWithStockValidation', async (req, res) =>
-    {
-    const productCodesQuantityPairs = req.body;
-    const sessionId = req.cookies.session_id;
+router.post("/image-search",
+    upload.single("image"),
+    async (req, res) => {
 
-    // console.log('Product codes to fetch:', productCodesQuantityPairs);
+        const sessionId = req.cookies.session_id;
+        const file = req.file;
+
+        const formData = new FormData();
+
+        formData.append(
+            "image",
+            file.buffer,
+            file.originalname
+        );
+
+        try
+        {
+            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                    return await axiosBackendClient.post(
+                        `${Backend_Url}/product/imageSearch`,
+                        formData,
+                        {
+                            headers: {
+                                'x-client_type': WEB_CLIENT_NAME,
+                                ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                                ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                                ...(formData.getHeaders())
+                            },
+                            bffContext: {
+                                req, res
+                            }
+                        }
+                    );
+                },
+                {req, res});
+
+            res.status(response.status).json(response.data);
+        }
+        catch (error) {
+            if (error.response) {
+                console.warn(`${timestamp()} Handled backend error for image search`);
+                return res.status(error.response.status || 500).json(error.response.data);
+            }
+
+            console.error('-------------------Unexpected error for image search-------------------\n', error);
+            return res.status(error.response?.status || 500).json({error: 'Internal server error'});
+        }
+
+    }
+);
+
+router.post("/catman", async (req, res) => {
+    const {manufacturerNames, categoryNames, page} = req.body;
+    const sessionId = req.cookies.session_id;
 
     try
     {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-              return await axiosBackendClient.post(`${Backend_Url}/product/codes/stockValidation`, productCodesQuantityPairs, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
-                    },
-                    bffContext: {
-                        req, res
+                return await axiosBackendClient.post(`${Backend_Url}/product/catManSearch`, {
+                        manufacturers: manufacturerNames,
+                        categories: categoryNames,
+                        page: page,
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
                     }
-                });
+                );
             },
             {req, res});
 
         const responseData = response.data;
 
-        // console.log('Products responseData:', responseData);
+        res.status(response.status).json(responseData);
 
-        return res.status(response.status).json(responseData);
-    }
-    catch (error)
-    {
-
+    }catch (error) {
         if (error.response) {
-            console.warn(`${timestamp()} Handled backend error for fetching product data`);
-            return res.status(error.response.status||500).json(error.response.data);
+            console.warn(`${timestamp()} Handled backend error for catman search`);
+            return res.status(error.response.status || 500).json(error.response.data);
         }
 
-        console.error('-------------------Unexpected error fetching product data-------------------\n', error);
+        console.error('-------------------Unexpected error for catman search-------------------\n', error);
         return res.status(error.response?.status || 500).json({error: 'Internal server error'});
+    }
+});
+
+
+router.post('/byCodesWithStockValidation', async (req, res) => {
+        const productCodesQuantityPairs = req.body;
+        const sessionId = req.cookies.session_id;
+
+        // console.log('Product codes to fetch:', productCodesQuantityPairs);
+
+        try {
+            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                    return await axiosBackendClient.post(`${Backend_Url}/product/codes/stockValidation`, productCodesQuantityPairs, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
+                        bffContext: {
+                            req, res
+                        }
+                    });
+                },
+                {req, res});
+
+            const responseData = response.data;
+
+            // console.log('Products responseData:', responseData);
+
+            return res.status(response.status).json(responseData);
+        } catch (error) {
+
+            if (error.response) {
+                console.warn(`${timestamp()} Handled backend error for fetching product data`);
+                return res.status(error.response.status || 500).json(error.response.data);
+            }
+
+            console.error('-------------------Unexpected error fetching product data-------------------\n', error);
+            return res.status(error.response?.status || 500).json({error: 'Internal server error'});
+
+        }
 
     }
-
-    }
-)
+);
 
 router.get('/homePage', async (req, res) => {
 
