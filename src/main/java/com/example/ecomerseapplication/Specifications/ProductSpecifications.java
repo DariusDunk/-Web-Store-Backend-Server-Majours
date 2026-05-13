@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,10 @@ public class ProductSpecifications {
 
         return ((root, query, criteriaBuilder) ->
         {
-            assert query != null;
-            query.distinct(true);
+            if (query != null) {
+                query.distinct(true);
+            }
+//            query.distinct(true);
             Join<Product, Manufacturer> join = root.join(Product_.MANUFACTURER);
             return join.in(manufacturers);
         });
@@ -39,7 +42,7 @@ public class ProductSpecifications {
             if (query != null) {
                 query.distinct(true);
             }
-           return cb.equal(root.get(Product_.MANUFACTURER), manufacturer);
+            return cb.equal(root.get(Product_.MANUFACTURER), manufacturer);
         };
     }
 
@@ -99,41 +102,61 @@ public class ProductSpecifications {
     }
 
 
-        public static Specification<Product> priceBetweenWSale(Integer min, Integer max, Expression<Number> finalPrice) {
-            return (root, query, cb) -> {
-                if (query != null) {
-                    query.distinct(true);
-                }
-                return cb.and(
-                        cb.ge(finalPrice, min),
-                        cb.le(finalPrice, max)
-                );
-            };
-        }
+    public static Specification<Product> priceBetweenWSale(Integer min, Integer max, Expression<Number> finalPrice) {
+        return (root, query, cb) -> {
+            if (query != null) {
+                query.distinct(true);
+            }
+            return cb.and(
+                    cb.ge(finalPrice, min),
+                    cb.le(finalPrice, max)
+            );
+        };
+    }
 
-        public static Specification<Product> sortByPrice(Sort.Direction direction, Expression<Number> finalPrice) {
-            return (root, query, cb) -> {
-                if (query != null) {
-                    query.distinct(true);
-                    query.orderBy(
-                            direction.isAscending() ? cb.asc(finalPrice) : cb.desc(finalPrice),
-                            cb.asc(root.get(Product_.ID))
-                    );
-                }
-                return cb.conjunction();
-            };
-        }
+    public static Specification<Product> sortByPrice(Sort.Direction direction, Expression<Number> finalPrice) {
+        return (root, query, cb) -> {
+            if (query != null) {
+                query.distinct(true);
+                query.orderBy(
+                        direction.isAscending() ? cb.asc(finalPrice) : cb.desc(finalPrice),
+                        cb.asc(root.get(Product_.ID))
+                );
+            }
+            return cb.conjunction();
+        };
+    }
+
     public static Specification<Product> joinMainSale() {
         return (root, query, cb) -> {
 
-            Join<Product, SaleProduct> sp =
-                    root.join("saleProducts", JoinType.LEFT);
-
+            Join<Product, SaleProduct> sp = root.join("saleProducts", JoinType.LEFT);
             sp.on(cb.isTrue(sp.get("isMain")));
 
-            sp.join("sale", JoinType.LEFT);
+            Join<SaleProduct, Sale> sale = sp.join("sale", JoinType.LEFT);
+
+            // --- active sale condition ---
+            sale.on(
+                    cb.and(
+                            cb.isTrue(sale.get("isActive")),
+                            cb.lessThanOrEqualTo(sale.get("startDate"), cb.currentTimestamp()),
+                            cb.or(
+                                    cb.isNull(sale.get("endDate")),
+                                    cb.greaterThan(sale.get("endDate"), cb.currentTimestamp())
+                            )
+                    ));
 
             return cb.conjunction();
+        };
+    }
+
+    public static Specification<Product> categoryIn(List<ProductCategory> categories) {
+
+        return (root, query, cb) -> {
+            if (query != null) {
+                query.distinct(true);
+            }
+            return root.get(Product_.PRODUCT_CATEGORY).in(categories);
         };
     }
 }

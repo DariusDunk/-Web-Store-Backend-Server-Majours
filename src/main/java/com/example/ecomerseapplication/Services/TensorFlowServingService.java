@@ -4,10 +4,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.PredictionResponseDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.tensorflow.framework.DataType;
 import org.tensorflow.framework.TensorProto;
@@ -21,25 +18,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class TensorFlowServingService {
 
     private Map<String, String> categoryClasses;
     private Map<String, String> manufacturerClasses;
-    private final ManagedChannel channel;
     private final PredictionServiceGrpc.PredictionServiceBlockingStub Stub;
-    @Value("${tensorflow.serving.grpc-address}")
-    private String channelAddress;
-    @Value("${tensorflow.serving.grpc-port}")
-    private int channelPort;
 
-    public TensorFlowServingService() {
-        this.channel = ManagedChannelBuilder
-                .forAddress(channelAddress, channelPort)
-                .usePlaintext()
-                .build();
+    public TensorFlowServingService(ManagedChannel channel) {
         this.Stub = PredictionServiceGrpc.newBlockingStub(channel);
     }
 
@@ -72,14 +59,6 @@ public class TensorFlowServingService {
         }
     }
 
-    @PreDestroy
-    public void shutdown() throws InterruptedException {
-        if (channel != null && !channel.isShutdown()) {
-            channel.shutdown();
-            channel.awaitTermination(5, TimeUnit.SECONDS);
-        }
-    }
-
     public PredictionResponseDTO gRPCRequest(BufferedImage image) {
 
         float[][][][] inputData = preprocessImage(image);
@@ -104,7 +83,6 @@ public class TensorFlowServingService {
             }
         }
 
-
         TensorProto inputTensor = tensorBuilder.build();
 
         Predict.PredictRequest request = Predict.PredictRequest.newBuilder()
@@ -128,9 +106,9 @@ public class TensorFlowServingService {
 
         List<Float> manufacturerPredictions =
                 manufacturerTensor.getFloatValList();
-
-        System.out.println("Category predictions: " + categoryPredictions);
-        System.out.println("Manufacturer predictions: " + manufacturerPredictions);
+//
+//        System.out.println("Category predictions: " + categoryPredictions);
+//        System.out.println("Manufacturer predictions: " + manufacturerPredictions);
 
         Map<String, Float> categoryPredictionsMap = new HashMap<>();
 
@@ -139,9 +117,6 @@ public class TensorFlowServingService {
         Map<String, Float> manufacturerPredictionsMap = new HashMap<>();
 
         mapPredictions(manufacturerPredictions, manufacturerClasses, manufacturerPredictionsMap);
-
-        System.out.println("Category sum gRPC = " +
-                categoryPredictions.stream().mapToDouble(Float::doubleValue).sum());
 
         return new PredictionResponseDTO(categoryPredictionsMap, manufacturerPredictionsMap);
     }

@@ -70,4 +70,8 @@ public class CategoryService {
     public List<Integer> getTopCategories() {
         return categoryRepository.getTopCategoriesIds(PageRequest.of(0, 6));
     }
+
+    public List<ProductCategory> getAllByNames(List<String> names) {
+        return categoryRepository.findAllByCategoryNameIn(names);
+    }
 }

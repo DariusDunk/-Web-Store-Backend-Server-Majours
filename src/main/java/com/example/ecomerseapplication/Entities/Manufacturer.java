@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = "products")
+@AllArgsConstructor
 public class Manufacturer {
 
     @Id
@@ -22,12 +24,7 @@ public class Manufacturer {
     @Column(name = "manufacturer_name", columnDefinition = "character varying(30)")
     private String manufacturerName;
 
-    public Manufacturer(int id, String manufacturerName) {
-        this.id = id;
-        this.manufacturerName = manufacturerName;
-    }
-
     @JsonIgnore
-    @OneToMany(mappedBy = "manufacturer")
+    @OneToMany(mappedBy = "manufacturer", fetch = FetchType.LAZY)
     private List<Product> products;
 }

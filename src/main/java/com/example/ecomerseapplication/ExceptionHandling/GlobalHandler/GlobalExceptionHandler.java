@@ -204,4 +204,45 @@ public class GlobalExceptionHandler {
                 "Един или повече от продуктите вече са в процес на закупуване от друг потребите, моля опитайте отново."
         ));
     }
+
+    @ExceptionHandler(NoCategoryAndManufacturerPresentException.class)
+    public ResponseEntity<?> handleNoCategoryAndManufacturerPresentExceptions() {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
+    }
+
+    @ExceptionHandler(InvalidImageException.class)
+    public ResponseEntity<?> handleInvalidImageExceptions(InvalidImageException ex) {
+        String title = "", message = "";
+
+        switch (ex.getType()) {
+            case "empty" -> {
+                title = "Не открита снимка";
+                message = "Заявката трябвада съдържа снимка!";
+            }
+            case "contentType" -> {
+                title = "Неправилен тип на съдържание";
+                message = "Неподходящ тип на изпратеното съдържание!";
+            }
+            case "decoding" -> {
+                title = "Невалиден файл";
+                message = "Изпратеният файл е невалиден!";
+            }
+            case "size-small" -> {
+                title = "Недостатъчен размер";
+                message = "Изпратеното изображение е прекалено малко!";
+            }
+            case "size-large" -> {
+                title = "Ограничение за размер";
+                message = "Изпратеното изображение е прекалено голямо!";
+            }
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(ErrorType.VALIDATION_ERROR
+                , title,
+                HttpStatus.BAD_REQUEST.value(),
+                message);
+
+        return ResponseEntity.badRequest().body(errorResponse);
+
+    }
 }

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -161,4 +162,30 @@ order by (p.rating * log(p.reviewCount + 1)) desc
 """
     )
     List<CompactProductProjection> getTopProductsOfCategory(@Param("categoryId") int id, Pageable pageable);
+
+
+    @Query(
+"""
+select p.productCode as productCode,
+p.productName as name,
+p.originalPriceStotinki as originalPriceStotinki,
+s.discountPercent as defaultSaleDiscount,
+sp.overrideDiscountPercentage as explicitDiscount,
+p.rating as rating,
+p.reviewCount as reviewCount,
+p.mainImageUrl as imageUrl,
+p.quantityInStock>0 as isInStock
+from Product p
+left join p.saleProducts sp
+on sp.isMain = true
+left join sp.sale s
+  on s.isActive = true
+  and current_timestamp between s.startDate and s.endDate
+join p.productCategory pc
+join p.manufacturer m
+where pc.categoryName in :categoryNames and m.manufacturerName in :manufacturerNames
+"""
+    )
+    List<CompactProductProjection> CategoryAndManufacturerNames(@Param("categoryNames")List<String> categoryNames,
+                                                                @Param("manufacturerNames") List<String> manufacturerNames);
 }

@@ -19,8 +19,6 @@ public class PriceExpressions {
 
         Join<SaleProduct, Sale> sale = sp.join("sale", JoinType.LEFT);
 
-        Expression<Number> originalPrice = root.get(Product_.ORIGINAL_PRICE_STOTINKI);
-
         // --- active sale condition ---
         Predicate saleActive = cb.and(
                 cb.isTrue(sale.get("isActive")),
@@ -32,6 +30,8 @@ public class PriceExpressions {
         );
 
         // --- discount ---
+        Expression<Number> originalPrice = root.get(Product_.ORIGINAL_PRICE_STOTINKI);
+
         Expression<Number> discount = cb.coalesce(
                 sp.get("overrideDiscountPercentage"),
                 sale.get("discountPercent")

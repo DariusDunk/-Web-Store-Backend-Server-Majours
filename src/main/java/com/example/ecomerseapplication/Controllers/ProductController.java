@@ -16,6 +16,7 @@ import com.example.ecomerseapplication.enums.ProductSortType;
 import com.example.ecomerseapplication.enums.ReviewSortType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -48,9 +53,10 @@ public class ProductController {
     private final UserIdExtractor userIdExtractor;
     private final SessionService sessionService;
     private final ProductRowService productRowService;
+    private final ImageSearchService imageSearchService;
 
     @Autowired
-    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, CategoryService categoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, UserIdExtractor userIdExtractor, SessionService sessionService, ProductRowService productRowService) {
+    public ProductController(ProductService productService, CategoryAttributeService categoryAttributeService, CustomerService customerService, ReviewService reviewService, CategoryService categoryService, ManufacturerService manufacturerService, PurchaseCartService purchaseCartService, UserIdExtractor userIdExtractor, SessionService sessionService, ProductRowService productRowService, ImageSearchService imageSearchService) {
         this.productService = productService;
         this.categoryAttributeService = categoryAttributeService;
         this.customerService = customerService;
@@ -61,6 +67,7 @@ public class ProductController {
         this.userIdExtractor = userIdExtractor;
         this.sessionService = sessionService;
         this.productRowService = productRowService;
+        this.imageSearchService = imageSearchService;
     }
 
     @GetMapping("findall")
@@ -166,7 +173,6 @@ public class ProductController {
                                                                                                @PathVariable int page) {
 
 
-
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
         if (productFilterRequest.filterAttributes != null) {
@@ -179,7 +185,6 @@ public class ProductController {
             manufacturerList = manufacturerService.getByNames(productFilterRequest.manufacturerNames);
 
         ProductCategory productCategory = categoryService.findByName(productFilterRequest.productCategory);
-
 
 
         return ResponseEntity.ok(PageResponse.from(
@@ -367,5 +372,22 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping(path = "imageSearch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> getProductsByImage(@RequestParam("image") MultipartFile image) throws IOException {
+        BufferedImage bufferedImage =
+                imageSearchService.validateImageInput(image);
 
+        return ResponseEntity.ok(imageSearchService.findByImage(bufferedImage));
+    }
+
+    @PostMapping("catManSearch")
+    public ResponseEntity<?> getByCategoryAndManufacturerLists(@RequestBody CatManRequest request) {
+
+        List<ProductCategory> categories = categoryService.getAllByNames(request.categories());
+        List<Manufacturer> manufacturers = manufacturerService.getByNames(request.manufacturers());
+
+        return ResponseEntity.ok(productService.getByCategoriesAndManufacturers(categories,
+                manufacturers,
+                request.page()));
+    }
 }

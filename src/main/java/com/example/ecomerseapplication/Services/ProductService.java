@@ -7,6 +7,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Comp
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoCategoryAndManufacturerPresentException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.MetaModels.Product_;
@@ -22,6 +23,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.*;
 import lombok.NonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -744,5 +746,40 @@ public class ProductService {
     public List<CompactProductProjection> getTopProductsOfCategory(ProductCategory category) {
 //        return getByCategory(category, 0, ProductSortType.POPULARITY.getValue(), 8).getContent();
         return productRepository.getTopProductsOfCategory(category.getId(), PageRequest.of(0, 8));
+    }
+
+    public ImageSearchPagedResponse getByCategoriesAndManufacturers(List<ProductCategory> categories, List<Manufacturer> manufacturers, int page) {
+
+        if (manufacturers.isEmpty() && categories.isEmpty()) {
+            throw new NoCategoryAndManufacturerPresentException("No categories or manufacturers found from inference");
+        }
+
+        int pageSize = PageContentLimit.limit;
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        // ---  SELECT p.id + ORDER BY finalPrice ---
+        CriteriaQuery<Product> productQuery = cb.createQuery(Product.class);
+        Root<Product> root = productQuery.from(Product.class);
+        Expression<Number> finalPrice = PriceExpressions.finalPrice(root, cb);
+
+        Specification<Product> sp = ProductSpecifications.joinMainSale();
+
+        if (!manufacturers.isEmpty()) {
+            sp = sp.and(ProductSpecifications.manufacturerIn(manufacturers));
+        }
+
+        if (!categories.isEmpty()) {
+            sp = sp.and(ProductSpecifications.categoryIn(categories));
+        }
+
+        Page<Product> products = productRepository.findAll(sp,  PageRequest.of(page, pageSize));
+
+        Page<CompactProductResponse> response = ProductDTOMapper.productPageToDtoPage(products);
+
+        return new ImageSearchPagedResponse(PageResponse.from(response),
+                categories.stream().map(ProductCategory::getCategoryName).toList(),
+                manufacturers.stream().map(Manufacturer::getManufacturerName).toList());
+
     }
 }

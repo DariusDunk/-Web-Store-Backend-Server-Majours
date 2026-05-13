@@ -59,7 +59,7 @@ dependencies {
     implementation 'io.grpc:grpc-netty-shaded:1.75.0'
     implementation 'io.grpc:grpc-protobuf:1.75.0'
     implementation 'io.grpc:grpc-stub:1.75.0'
-    implementation 'com.google.protobuf:protobuf-java:4.33.0-RC1'
+    implementation 'com.google.protobuf:protobuf-java:4.34.1'
 
 
 
@@ -80,7 +80,7 @@ dependencyManagement {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:4.33.0-RC1:windows-x86_64@exe'
+        artifact = 'com.google.protobuf:protoc:4.34.1:windows-x86_64@exe'
     }
     plugins {
         grpc {

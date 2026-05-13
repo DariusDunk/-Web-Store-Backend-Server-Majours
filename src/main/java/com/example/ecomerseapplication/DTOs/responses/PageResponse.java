@@ -12,7 +12,8 @@ public record PageResponse<T>(
         boolean last
 ) {
 
-    public static <T> PageResponse<T> from(Page<T> page) {
+    public static <T> PageResponse<T> from(Page<T> page)
+    {
         return new PageResponse<>(
                 page.getContent(),
                 page.getNumber(),
