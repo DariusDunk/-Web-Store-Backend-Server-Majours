@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Auth.config;
 
-import com.example.ecomerseapplication.Auth.helpers.EndpointMatcher;
 import  org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -23,7 +22,7 @@ import java.util.Map;
 @EnableMethodSecurity
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, EndpointMatcher endpointMatcher) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // Disable CSRF for simplicity (useful for APIs)
                 .csrf(AbstractHttpConfigurer::disable)
