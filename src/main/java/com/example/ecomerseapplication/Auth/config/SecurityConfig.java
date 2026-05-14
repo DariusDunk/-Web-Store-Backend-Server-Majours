@@ -32,9 +32,32 @@ public class SecurityConfig {
                 // Define access rules
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                request -> endpointMatcher.isPublicOrSemiProtected(request.getRequestURI())
+//                                request -> endpointMatcher.isPublicOrSemiProtected(request.getRequestURI())
+//----------------------------------public endpoints----------------------------------
+                                "/attributes/**",
+                                "/category/**",
+                                "/manufacturer/**",
+                                "/product/*",
+                                "/product/*/review/overview",
+                                "/product/manufacturer/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
+                                "/product/category/*/p*",//todo opravi strukturata na URL-a da dyrji "p" i samata stranica otdeleni
+                                "/product/filter/*",
+                                "/product/codes/stockValidation",
+                                "/emails/*",
+                                "/error",
+//----------------------------------public endpoints----------------------------------
+//----------------------------------semi-protected endpoints----------------------------------
+                                "/auth/**",
+                                "/cart/*",
+                                "/cart/remove/*",
+                                "/cart/add/quantity",
+                                "/product/detail/*",
+                                "/product/reviews/paged",
+                                "/purchase/*"
+//----------------------------------semi-protected endpoints----------------------------------
                         ).permitAll() // public endpoints
-                        .anyRequest().authenticated() // everything else needs auth
+//                                .requestMatchers("/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 // Tell Spring this is a resource server using JWT tokens (from Keycloak)
                 .oauth2ResourceServer(oauth2 -> oauth2

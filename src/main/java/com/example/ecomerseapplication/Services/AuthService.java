@@ -168,23 +168,7 @@ public class AuthService {
             else
                 refreshToken = session.getRefreshToken();
 
-//            Session updatedLockedSession = sessionService.fetchByIdWithLocNullable(session.getSessionId());
-//
-//            if (updatedLockedSession == null)
-//                throw new InvalidSessionException("Locked session not found/null in refresh");
 
-//            if (!session.getRefreshToken().equals(updatedLockedSession.getRefreshToken()))
-//            {
-//                System.out.println("Session refresh token has been updated, rolling back session refresh");
-//
-//                return new RefreshResponse(null,
-//                        SessionService.calculateSessionTTLSeconds(updatedLockedSession.getExpiresAt()),
-//                        false,
-//                        updatedLockedSession.getIsRememberMeSession(),
-//                        updatedLockedSession.getSessionId(),
-//                        true);
-//            }
-//
             tokenRefreshResponse = keycloakService.refreshBothTokens(refreshToken);
 
 //            System.out.println("[SUCCESS] New refresh token in keycloak: " + tokenRefreshResponse.refreshToken() );
@@ -192,24 +176,6 @@ public class AuthService {
         } catch (Exception e) {
             System.out.println("Error refreshing token in keycloak, session will be treated as a guest: \n" + e.getMessage() + "\n -------------------------------------------------------");
 
-//            if ((e instanceof LockTimeoutException || e instanceof PessimisticLockException)
-//                    && session!=null) {
-//                Session refetchedSession = sessionService.getById(session.getSessionId());
-//                if (refetchedSession != null)
-//                {
-//                    if (!session.getRefreshToken().equals(refetchedSession.getRefreshToken()))
-//                    {
-//                        System.out.println("Session refresh token has been updated, rolling back session refresh");
-//
-//                        return new RefreshResponse(null,
-//                                SessionService.calculateSessionTTLSeconds(refetchedSession.getExpiresAt()),
-//                                false,
-//                                refetchedSession.getIsRememberMeSession(),
-//                                refetchedSession.getSessionId(),
-//                                true);
-//                    }
-//                }
-//            }
 
             if (session == null) {
 
