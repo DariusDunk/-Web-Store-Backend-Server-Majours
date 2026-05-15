@@ -170,6 +170,7 @@ public class ProductController {
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody @Valid ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
 
+        System.out.println("Filter request: " + productFilterRequest);
 
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 

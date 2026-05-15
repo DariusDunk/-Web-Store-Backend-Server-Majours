@@ -755,13 +755,6 @@ public class ProductService {
 
         int pageSize = PageContentLimit.limit;
 
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
-        // ---  SELECT p.id + ORDER BY finalPrice ---
-        CriteriaQuery<Product> productQuery = cb.createQuery(Product.class);
-        Root<Product> root = productQuery.from(Product.class);
-        Expression<Number> finalPrice = PriceExpressions.finalPrice(root, cb);
-
         Specification<Product> sp = ProductSpecifications.joinMainSale();
 
         if (!manufacturers.isEmpty()) {

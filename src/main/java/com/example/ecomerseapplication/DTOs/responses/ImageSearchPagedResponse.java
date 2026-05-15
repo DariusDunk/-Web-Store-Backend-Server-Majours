@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record ImageSearchPagedResponse(
-        @JsonProperty("products")
+        @JsonProperty("product_page")
         PageResponse<CompactProductResponse> products,
-        @JsonProperty("category_names")
+        @JsonProperty("categories")
         List<String> categoryNames,
-        @JsonProperty("manufacturer_names")
+        @JsonProperty("manufacturers")
         List<String> manufacturerNames
         ) {
 }

@@ -19,8 +19,12 @@ router.post("/image-search",
     async (req, res) => {
 
         const sessionId = req.cookies.session_id;
-        const file = req.file;
 
+        if (!req.file) {
+            return res.status(400).json({ error: "Missing file" });
+        }
+
+        const file = req.file;
         const formData = new FormData();
 
         formData.append(
@@ -31,15 +35,17 @@ router.post("/image-search",
 
         try
         {
-            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            const response = await fetchWithSessionTokens(sessionId, async (
+                // sessionData
+                ) => {
                     return await axiosBackendClient.post(
                         `${Backend_Url}/product/imageSearch`,
                         formData,
                         {
                             headers: {
                                 'x-client_type': WEB_CLIENT_NAME,
-                                ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                                ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                                // ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                                // ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                                 ...(formData.getHeaders())
                             },
                             bffContext: {
@@ -66,29 +72,32 @@ router.post("/image-search",
 );
 
 router.post("/catman", async (req, res) => {
-    const {manufacturerNames, categoryNames, page} = req.body;
+    const requestBody = req.body;
     const sessionId = req.cookies.session_id;
+    const{categories, manufacturers, page} = requestBody;
 
     try
     {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.post(`${Backend_Url}/product/catManSearch`, {
-                        manufacturers: manufacturerNames,
-                        categories: categoryNames,
-                        page: page,
-                    }, {
+                return await axiosBackendClient.post(`${Backend_Url}/product/catManSearch`,
+                {categories:categories, manufacturers: manufacturers, page: page}, {
                         headers: {
                             'Content-Type': 'application/json',
                             'x-client_type': WEB_CLIENT_NAME,
                             ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
                             ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
                         },
+                        bffContext: {
+                            req, res
+                        }
                     }
                 );
             },
             {req, res});
 
         const responseData = response.data;
+
+        console.log("catman response: ", responseData);
 
         res.status(response.status).json(responseData);
 
