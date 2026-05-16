@@ -137,6 +137,10 @@ public class PurchaseService {
                 .orElseThrow(()->new ResourceNotFoundException("Purchase not found"));
     }
 
+    public int getPurchaseCountOfCustomer(String userId) {
+        return purchaseRepository.countByCustomer_KeycloakId(userId);
+    }
+
     private record PurchaseCompletionDTO(List<String> productCodes, List<Product> productsForPurchase, RecipientDataRequest recipientData, PaymentMethod paymentMethod, String purchaseCode, Map<String, PurchaseProductDTO> purchaseProductMap, TotalsDTO totals) {
     }
 

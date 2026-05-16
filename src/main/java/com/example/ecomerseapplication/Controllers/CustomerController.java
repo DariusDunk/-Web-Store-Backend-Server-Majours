@@ -25,27 +25,31 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final ProductService productService;
-    //    private final PurchaseService purchaseService;
+        private final PurchaseService purchaseService;
 //    private final PurchaseCartService purchaseCartService;
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
     private final SavedPurchaseDetailsService purchaseDetailsService;
+    private final ReviewService reviewService;
 
     @Autowired
     public CustomerController(CustomerService customerService,
-                              ProductService productService,
+                              ProductService productService, PurchaseService purchaseService,
                               KeycloakService keycloakService,
                               UserIdExtractor userIdExtractor,
                               FavoriteOfCustomerService favoriteOfCustomerService,
-                              SavedPurchaseDetailsService purchaseDetailsService) {
+                              SavedPurchaseDetailsService purchaseDetailsService, ReviewService reviewService) {
 
         this.customerService = customerService;
         this.productService = productService;
+        this.purchaseService = purchaseService;
+
         this.keycloakService = keycloakService;
         this.userIdExtractor = userIdExtractor;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
         this.purchaseDetailsService = purchaseDetailsService;
+        this.reviewService = reviewService;
     }
 
  
@@ -209,5 +213,38 @@ public class CustomerController {
                         userRole
                 )
         );
+    }
+
+
+
+    @GetMapping("profile")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> getFullCustomerProfileData() {
+
+        String userId = userIdExtractor.getUserId();
+        Customer customer = customerService.getByIdWithRelations(userId);
+        int purchaseCount = purchaseService.getPurchaseCountOfCustomer(userId);
+        int reviewCount = reviewService.countByCustomerId(userId);
+        int favouritesCount = favoriteOfCustomerService.getFavoritesCount(customer);
+
+        String purchaseAddress = customer.getSavedPurchaseDetails() == null
+                ? "N/A"
+                : customer.getSavedPurchaseDetails().getAddress();
+
+        CustomerProfileResponse response = new CustomerProfileResponse(
+                customer.getFirstName() + " " + customer.getLastName(),
+                customer.getEmail(),
+                customer.getRegistrationDate(),
+                customer.getPhoneNumber(),
+                purchaseAddress,
+                favouritesCount,
+                customer.getCustomerPfp(),
+                reviewCount,
+                purchaseCount
+
+        );
+
+        return ResponseEntity.ok(response);
+
     }
 }

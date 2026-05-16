@@ -46,4 +46,5 @@ where pu.purchaseCode = ?1
 """
     )
     List<PurchaseProductProjection> getProductProjectionsOfPurchase(String purchaseCode);
+
 }

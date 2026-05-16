@@ -202,6 +202,10 @@ public class ReviewService {
                     request.ratingValue(),
                     pageable);
     }
+
+    public int countByCustomerId(String userId) {
+        return reviewRepository.countByCustomer_KeycloakId(userId);
+    }
 }
 
 

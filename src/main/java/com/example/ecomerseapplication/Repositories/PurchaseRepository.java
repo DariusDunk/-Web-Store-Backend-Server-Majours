@@ -58,4 +58,6 @@ and p.purchaseCode = :purchaseCode
     )
     Optional<InvoicePurchaseProjection> getByCodeAndSessionId(@Param("sessionId")String sessionId, @Param("purchaseCode")String purchaseCode);
 
+    int countByCustomer_KeycloakId(String customerKeycloakId);
+
 }

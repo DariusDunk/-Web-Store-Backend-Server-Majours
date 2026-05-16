@@ -11,6 +11,44 @@ const timestamp = () => {
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
 
+router.get('/profile', async (req, res) => {
+    const sessionId = req.cookies.session_id;
+
+    try{
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                return await axiosBackendClient.get(`${Backend_Url}/customer/profile`,
+                    {
+                        headers:
+                            {
+                                'Content-Type': 'application/json',
+                                'x-client_type': WEB_CLIENT_NAME,
+                                ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                                ...(sessionData.session_id && {'x-session-id': sessionId})
+                            },
+                        bffContext: {
+                            req, res
+                        }
+                    }
+                );
+            },
+            {req, res}
+        );
+
+        const responseData = response.data;
+
+        return res.status(response.status).json(responseData);
+
+    }
+    catch (error) {
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for fetching profile`);
+            return res.status(error.response.status||500).end();
+        }
+        console.error('-------------------Unexpected error fetching profile-------------------\n', error);
+        return res.status(500).end();
+    }
+})
 
 router.post(`/recipientTemplates/set`, async (req, res) =>
     {

@@ -216,4 +216,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                         where r.product=:product and r.customer.keycloakId =:keycloakId)
             """)
     Boolean existsByProductAndKID(@Param("product")Product product, @Param("keycloakId")String keycloakId);
+
+    int countByCustomer_KeycloakId(String customerKeycloakId);
 }

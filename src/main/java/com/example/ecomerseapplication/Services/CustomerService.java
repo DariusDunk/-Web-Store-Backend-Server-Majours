@@ -21,7 +21,13 @@ public class CustomerService {
     }
 
     public Customer getById(String userId) {
-        return customerRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("No user found with ID "+ userId));
+        return customerRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID "+ userId));
+    }
+
+    public Customer getByIdWithRelations(String userId) {
+        return customerRepository.getCustomersByKeycloakId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("No user found with ID " + userId));
     }
 
     public Customer save(Customer customer) {

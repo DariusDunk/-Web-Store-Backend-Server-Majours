@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -34,7 +33,7 @@ public class Customer {
 
     @CreationTimestamp
     @Column(name = "registration_date")
-    private LocalDate registrationDate;
+    private Instant registrationDate;
 
     @Column(name = "customer_pfp")
     private String customerPfp = "default_pfp.png";
@@ -44,6 +43,9 @@ public class Customer {
 
     @OneToOne(mappedBy = "customer")
     private SavedPurchaseDetails savedPurchaseDetails;
+
+    @OneToMany(mappedBy = "favoriteOfCustomerId.customer", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private List<FavoriteOfCustomer> favoritesOfCustomer;
 
     @OneToMany(mappedBy = "customer")
     private List<Review> reviews;
