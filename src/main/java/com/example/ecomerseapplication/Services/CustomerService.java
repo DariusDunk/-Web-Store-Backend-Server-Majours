@@ -1,10 +1,13 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.requests.UserDataUpdateRequest;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Repositories.CustomerRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomerService {
@@ -39,4 +42,14 @@ public class CustomerService {
         }
     }
 
+    @Transactional
+    public void updateCustomerByIdFromProfile(String userId, @Valid UserDataUpdateRequest request) {
+
+        Customer customer = getById(userId);
+        customer.updateCustomerData(
+                request.firstName(),
+                request.familyName(),
+                request.phoneNumber()
+        );
+    }
 }

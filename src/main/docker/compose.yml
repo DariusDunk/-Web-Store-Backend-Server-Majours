@@ -119,6 +119,8 @@
       ports:
         - "1025:1025"
         - "8025:8025"
+      networks:
+        - si
 
     webstore-tensorflow-serving:
       image: tensorflow/serving
@@ -130,6 +132,8 @@
         - ./configs/models.config:/config/models.config
       command:
         --model_config_file=/config/models.config
+      networks:
+        - si
 
   volumes:
     webstore_keycloak_db_data:

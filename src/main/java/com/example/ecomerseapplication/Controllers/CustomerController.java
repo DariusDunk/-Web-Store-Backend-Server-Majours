@@ -25,8 +25,8 @@ public class CustomerController {
 
     private final CustomerService customerService;
     private final ProductService productService;
-        private final PurchaseService purchaseService;
-//    private final PurchaseCartService purchaseCartService;
+    private final PurchaseService purchaseService;
+    //    private final PurchaseCartService purchaseCartService;
     private final KeycloakService keycloakService;
     private final UserIdExtractor userIdExtractor;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
@@ -52,7 +52,7 @@ public class CustomerController {
         this.reviewService = reviewService;
     }
 
- 
+
     @PostMapping("favorite/add/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> addProductToFavourites(@PathVariable @NotBlank String productCode) {
@@ -79,7 +79,7 @@ public class CustomerController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
-    
+
     @DeleteMapping("favourites/remove/{productCode}")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFavFromProdPage(@PathVariable String productCode) {
@@ -93,7 +93,7 @@ public class CustomerController {
         return ResponseEntity.noContent().build();
     }
 
-    
+
     @DeleteMapping("favorite/remove/single")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromFavourites(@RequestBody @Valid RemoveOneFavRequest request) {
@@ -108,7 +108,7 @@ public class CustomerController {
                 request.currentPage()));
     }
 
-    
+
     @DeleteMapping("favorite/remove/batch")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> removeFromFavouritesBatch(@RequestBody @Valid RemoveFavBatchRequest request) {
@@ -198,7 +198,6 @@ public class CustomerController {
 //
 //        return customerService.passwordUpdate(customer, request.password);
 //    }
-    
     @GetMapping("me")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
@@ -216,7 +215,6 @@ public class CustomerController {
     }
 
 
-
     @GetMapping("profile")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> getFullCustomerProfileData() {
@@ -232,7 +230,8 @@ public class CustomerController {
                 : customer.getSavedPurchaseDetails().getAddress();
 
         CustomerProfileResponse response = new CustomerProfileResponse(
-                customer.getFirstName() + " " + customer.getLastName(),
+                customer.getFirstName(),
+                customer.getLastName(),
                 customer.getEmail(),
                 customer.getRegistrationDate(),
                 customer.getPhoneNumber(),
@@ -245,6 +244,25 @@ public class CustomerController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("update")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> updateCustomerData(@RequestBody @Valid UserDataUpdateRequest request) {
+        String userId = userIdExtractor.getUserId();
+
+        try
+        {
+            customerService.updateCustomerByIdFromProfile(userId, request);
+        }
+        catch (Exception e)
+            {
+            System.out.println("Error updating customer data: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+
+        return ResponseEntity.ok().build();
 
     }
+
 }

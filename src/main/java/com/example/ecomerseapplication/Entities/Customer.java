@@ -59,4 +59,10 @@ public class Customer {
         this.lastName = lastName;
         this.email = email;
     }
+
+    public void updateCustomerData(String firstName, String lastName, String phoneNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+    }
 }

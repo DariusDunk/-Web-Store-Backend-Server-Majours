@@ -11,6 +11,41 @@ const timestamp = () => {
     return `[${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}]`;
 };
 
+router.post(`/updateProfile`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const {firstName, lastName, phone} = req.body;
+    const requestBody = {first_name: firstName, last_name: lastName, phone_number: phone};
+
+    try{
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.post(`${Backend_Url}/customer/update`,requestBody,
+                {
+                    headers:
+                        {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                            ...(sessionData.session_id && {'x-session-id': sessionId})
+                        },
+                    bffContext: {
+                        req, res
+                    }
+                });
+        },
+            {req, res});
+
+        return res.status(response.status).end();
+    }
+    catch (error) {
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for updating profile`);
+            return res.status(error.response.status||500).end();
+        }
+        console.error('-------------------Unexpected error updating profile-------------------\n', error);
+        return res.status(500).end();
+    }
+})
+
 router.get('/profile', async (req, res) => {
     const sessionId = req.cookies.session_id;
 

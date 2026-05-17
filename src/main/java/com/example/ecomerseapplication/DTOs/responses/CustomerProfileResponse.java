@@ -6,8 +6,10 @@ import java.time.Instant;
 
 
 public record CustomerProfileResponse(
-        @JsonProperty("customer_name")
-        String customerName,
+        @JsonProperty("first_name")
+        String firstName,
+        @JsonProperty("last_name")
+        String familyName,
         @JsonProperty("email")
         String email,
         @JsonProperty("register_date")
