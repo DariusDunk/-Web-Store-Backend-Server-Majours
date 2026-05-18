@@ -1,9 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.DTOs.responses.ProductForCompactPurchaseHistoryResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactPurchaseProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.Product;

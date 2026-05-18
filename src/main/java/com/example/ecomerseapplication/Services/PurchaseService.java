@@ -17,7 +17,6 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.Pessim
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
-import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import com.example.ecomerseapplication.enums.PaymentMethod;
 import jakarta.persistence.LockTimeoutException;

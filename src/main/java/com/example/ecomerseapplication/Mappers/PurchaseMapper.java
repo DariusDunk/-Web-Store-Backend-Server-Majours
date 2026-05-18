@@ -1,7 +1,6 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.*;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactPurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,32 +9,23 @@ import java.util.List;
 import java.util.Map;
 
 public class PurchaseMapper {
-
-//    public static Purchase requestToEntity(SavedRecipientDetailsRequest savedRecipientDetailsRequest) {
-//        Purchase purchase = new Purchase();
-//        purchase.setPurchaseCode(PurchaseCodeGenerator.generateCode(purchase.getDate()));
-//        purchase.setAddress(savedRecipientDetailsRequest.address);
-//        purchase.setContactName(savedRecipientDetailsRequest.contactName);
-//        purchase.setContactNumber(savedRecipientDetailsRequest.contactNumber);
 //
-//        return purchase;
+//    public static PurchaseResponse entityToResponse(Purchase purchase) {
+//        PurchaseResponse purchaseResponse = new PurchaseResponse();
+//        purchaseResponse.purchaseCode = purchase.getPurchaseCode();
+//        purchaseResponse.totalCost = purchase.getTotalCost();
+//        purchaseResponse.dateOfPurchase = purchase.getDate();
+//
+//        SavedPurchaseDetailsResponse savedPurchaseDetailsResponse = new SavedPurchaseDetailsResponse();
+//
+//        savedPurchaseDetailsResponse.address = purchase.getAddress();
+//        savedPurchaseDetailsResponse.contactName = purchase.getContactName();
+//        savedPurchaseDetailsResponse.contactNumber = purchase.getContactNumber();
+//
+//        purchaseResponse.savedPurchaseDetailsResponse = savedPurchaseDetailsResponse;
+//
+//        return purchaseResponse;
 //    }
-    public static PurchaseResponse entityToResponse(Purchase purchase) {
-        PurchaseResponse purchaseResponse = new PurchaseResponse();
-        purchaseResponse.purchaseCode = purchase.getPurchaseCode();
-        purchaseResponse.totalCost = purchase.getTotalCost();
-        purchaseResponse.dateOfPurchase = purchase.getDate();
-
-        SavedPurchaseDetailsResponse savedPurchaseDetailsResponse = new SavedPurchaseDetailsResponse();
-
-        savedPurchaseDetailsResponse.address = purchase.getAddress();
-        savedPurchaseDetailsResponse.contactName = purchase.getContactName();
-        savedPurchaseDetailsResponse.contactNumber = purchase.getContactNumber();
-
-        purchaseResponse.savedPurchaseDetailsResponse = savedPurchaseDetailsResponse;
-
-        return purchaseResponse;
-    }
 
     public static SuccessfulPurchaseResponse entityToSuccessResponse(Purchase purchase) {
         return new SuccessfulPurchaseResponse(purchase.getPurchaseCode(),
