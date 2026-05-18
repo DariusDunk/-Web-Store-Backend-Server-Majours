@@ -1,11 +1,14 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
+import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.DTOs.responses.SuccessfulPurchaseResponse;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -53,5 +56,18 @@ public class PurchaseController {
             return ResponseEntity.ok(response);
         }
 
+    }
+
+    @GetMapping("purchase-history/p/{page}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> getPurchaseHistory(@PathVariable int page) {
+
+        Session session = sessionService.getRequestSession();
+        Customer customer = session.getCustomer();
+        PageResponse<CompactPurchaseResponse> response = purchaseService.getPurchasesOfCustomer(customer, page);
+
+        System.out.println("Response: " + response);
+
+        return ResponseEntity.ok(response);
     }
 }

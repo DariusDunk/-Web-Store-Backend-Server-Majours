@@ -1,10 +1,12 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Entities.PurchaseCart;
 import com.example.ecomerseapplication.Repositories.PurchaseCartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -35,5 +37,9 @@ public class PurchaseCartService {
 
     public List<PurchaseProductProjection> getByPurchaseCode(String purchaseCode) {
         return purchaseCartRepository.getProductProjectionsOfPurchase(purchaseCode);
+    }
+
+    public List<PurchaseProductPairProjection> getProductsForCompactPurchaseHistory(List<Long> purchaseIds) {
+        return purchaseCartRepository.getProductsForCompactPurchaseHistory(purchaseIds);
     }
 }

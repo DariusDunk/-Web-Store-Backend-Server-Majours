@@ -13,4 +13,6 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
 
     @EntityGraph(attributePaths = {"savedPurchaseDetails"})
     Optional<Customer> getCustomersByKeycloakId(String keycloakId);
+
+    Optional<Customer> getCustomersByEmail(String email);
 }

@@ -4,20 +4,28 @@ import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
 import com.example.ecomerseapplication.DTOs.requests.ProductQuantityForCartRequest;
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
 import com.example.ecomerseapplication.DTOs.requests.RecipientDataRequest;
+import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
+import com.example.ecomerseapplication.DTOs.responses.PageResponse;
+import com.example.ecomerseapplication.DTOs.responses.ProductForCompactPurchaseHistoryResponse;
 import com.example.ecomerseapplication.DTOs.responses.SuccessfulPurchaseResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.PurchaseProductDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.TotalsDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.InvoicePurchaseProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
+import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import com.example.ecomerseapplication.enums.PaymentMethod;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -26,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Service
 public class PurchaseService {
@@ -139,6 +149,40 @@ public class PurchaseService {
 
     public int getPurchaseCountOfCustomer(String userId) {
         return purchaseRepository.countByCustomer_KeycloakId(userId);
+    }
+
+
+
+    public PageResponse<CompactPurchaseResponse> getPurchasesOfCustomer(Customer customer, int page) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "date");
+
+        Page<Purchase> purchases = purchaseRepository.getPurchasesByCustomer_KeycloakId(customer.getKeycloakId(), PageRequest.of(page, 10, sort));
+        List<Long> purchaseIds = purchases.getContent().stream().map(Purchase::getId).toList();
+        List<PurchaseProductPairProjection> purchaseProductPairs = purchaseCartService.getProductsForCompactPurchaseHistory(purchaseIds);
+        Map<Long, List<Product>> productsOfPurchaseMap =
+                purchaseProductPairs.stream().collect(groupingBy(
+                        PurchaseProductPairProjection::getPurchaseId,
+                        mapping(PurchaseProductPairProjection::getPurchaseProduct, toList())
+                ));
+
+
+
+        Map<Long, List<ProductForCompactPurchaseHistoryResponse>> purchaseProductMap = new HashMap<>();
+
+        for (Map.Entry<Long, List<Product>> entry : productsOfPurchaseMap.entrySet()) {
+            List<ProductForCompactPurchaseHistoryResponse> mappedProducts = entry.getValue()
+                    .stream()
+                    .limit(3)
+                    .map(ProductDTOMapper::entityToCompactPurchIhistoryResp)
+                    .toList();
+            purchaseProductMap.put(entry.getKey(), mappedProducts);
+        }
+
+        Page<CompactPurchaseResponse> compactPurchasePage = PurchaseMapper.purchasePageToCompactResponsePage(purchases, purchaseProductMap);
+
+        return PageResponse.from(compactPurchasePage);
+
     }
 
     private record PurchaseCompletionDTO(List<String> productCodes, List<Product> productsForPurchase, RecipientDataRequest recipientData, PaymentMethod paymentMethod, String purchaseCode, Map<String, PurchaseProductDTO> purchaseProductMap, TotalsDTO totals) {

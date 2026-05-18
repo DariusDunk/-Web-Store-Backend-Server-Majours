@@ -10,6 +10,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "purchases", schema = "online_shop")
@@ -28,7 +30,7 @@ public class Purchase {
 
     @Column(name = "purchase_date", updatable = false)
     @CreationTimestamp
-    private Instant date;//todo kato stigne6 do rabota s pokupkite vij dali nqkyde kydeto se izpolzva tazi promenliva nqma da ima nujda ot promeni
+    private Instant date;
 
     @Column(name = "total_cost")
     private int totalCost;
@@ -65,6 +67,11 @@ public class Purchase {
 
     @Column(name = "email")
     private String email;
+
+    @OneToMany(mappedBy = "purchaseCartId.purchase",
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH},
+            orphanRemoval = true)
+    List<PurchaseCart> purchaseProducts;
 
     public Purchase(Customer customer,
                     int totalCost,

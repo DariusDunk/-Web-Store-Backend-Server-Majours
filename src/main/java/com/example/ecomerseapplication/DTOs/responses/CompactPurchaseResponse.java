@@ -1,14 +1,30 @@
 package com.example.ecomerseapplication.DTOs.responses;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Instant;
 import java.util.List;
 
-public class CompactPurchaseResponse {
-    public String purchaseCode;
-    public Instant purchaseDate;
-    public int totalCost;
 
-    public List<CompactProductQuantityPairResponse> compactProductQuantityPairs;
+public record CompactPurchaseResponse(
+        @JsonProperty("purchase_code")
+         String purchaseCode,
+         @JsonProperty("purchase_date")
+         Instant purchaseDate,
+         @JsonProperty("total_cost")
+         int totalCost,
+         @JsonProperty("shipping_fee")
+         int shippingFee,
+         @JsonProperty("status")
+         String status,
+         @JsonProperty("invoice_url")
+         String invoiceUrl,
+         @JsonProperty("delivery_address")
+         String deliveryAddress,
+         @JsonProperty("products")
+         List<ProductForCompactPurchaseHistoryResponse> compactProducts
+) {
+
 
 
 }

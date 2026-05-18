@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactPurchaseProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
@@ -241,5 +242,31 @@ public class ProductDTOMapper {
         response.originalPriceStotinki = originalPrice;
         response.reviewCount = productProjection.getReviewCount();
         return response;
+    }
+
+    public static ProductForCompactPurchaseHistoryResponse compactPurchaseProjToCompactPurchHistoryResp(CompactPurchaseProductProjection projection) {
+        return new ProductForCompactPurchaseHistoryResponse(projection.getProductName(),
+                projection.getProductCode(),
+                projection.getImageUrl());
+    }
+
+
+//
+//    public static List<ProductForCompactPurchaseHistoryResponse> compactPurchaseProjListToCompactPurchHistoryRespList(List<CompactPurchaseProductProjection> projections) {
+//
+//        return projections.stream().map(ProductDTOMapper::compactPurchaseProjToCompactPurchHistoryResp).toList();
+//
+//    }
+
+
+    public static ProductForCompactPurchaseHistoryResponse entityToCompactPurchIhistoryResp(Product product) {
+
+        return new ProductForCompactPurchaseHistoryResponse(product.getProductName(),
+                product.getProductCode(),
+                product.getMainImageUrl());
+    }
+
+    public static List<ProductForCompactPurchaseHistoryResponse> entityListToCompactPurchIhistoryRespList(List<Product> products) {
+        return products.stream().map(ProductDTOMapper::entityToCompactPurchIhistoryResp).toList();
     }
 }

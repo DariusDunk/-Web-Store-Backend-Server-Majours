@@ -8,6 +8,49 @@ import axiosBackendClient from '../axiosBackendClient.js';
 import axios from 'axios';
 import {getCartSummary} from "../services/cartSummaryFetcher.js"
 
+const timestamp = () => {
+    const now = new Date();
+    return `[${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}]`;
+};
+
+router.post(`/forgotten-password/:email`, async (req, res) => {
+        const {email} = req.params;
+        const sessionId = req.cookies.session_id;
+
+        try {
+            const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                    return await axiosBackendClient.post(`${Backend_Url}/authd/forgotten-password/${email}`, {},
+                        {
+                            headers:
+                                {
+                                    'Content-Type': 'application/json',
+                                    'x-client_type': WEB_CLIENT_NAME,
+                                    ...(sessionData?.access_token && {'Authorization': 'Bearer ' + sessionData.access_token}),
+                                    ...(sessionData.session_id && {'x-session-id': sessionId})
+                                },
+                            bffContext: {
+                                req, res
+                            }
+                        });
+                },
+                {req, res});
+
+            return res.status(response.status).end();
+
+        } catch (error) {
+
+            if (error.response) {
+                console.warn(`${timestamp()} Handled backend error for forgotten password`);
+                return res.status(error.response.status || 500).end();
+            }
+
+            console.error('-------------------Unexpected error in forgotten password-------------------\n', error);
+            return res.status(500).end();
+        }
+
+
+    }
+);
 
 
 router.post(`/register`, async (req, res) => {

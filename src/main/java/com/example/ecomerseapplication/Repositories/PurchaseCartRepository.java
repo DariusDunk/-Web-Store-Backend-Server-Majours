@@ -1,9 +1,12 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactPurchaseProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Entities.PurchaseCart;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -46,5 +49,33 @@ where pu.purchaseCode = ?1
 """
     )
     List<PurchaseProductProjection> getProductProjectionsOfPurchase(String purchaseCode);
+
+
+//    @Query(
+//"""
+//select p.productName as productName,
+//p.productCode as productCode,
+//p.mainImageUrl as imageUrl
+//from PurchaseCart pc
+//join pc.purchaseCartId.product p
+//join pc.purchaseCartId.purchase pur
+//where pur.id = ?1
+//
+//"""
+//    )
+//    List<CompactPurchaseProductProjection> getProductsForCompactPurchaseHistory(@Param("purchaseId") long purchaseId, Pageable pageable);
+
+    @Query(
+            """
+select pur.id as purchaseId,
+ p as purchaseProduct
+from PurchaseCart pc
+join pc.purchaseCartId.product p
+join pc.purchaseCartId.purchase pur
+where pur.id in :purchaseIds
+order by pur.id desc, p.id
+"""
+    )
+    List<PurchaseProductPairProjection> getProductsForCompactPurchaseHistory(@Param("purchaseIds") List<Long> purchaseIds);
 
 }

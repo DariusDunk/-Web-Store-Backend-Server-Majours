@@ -66,4 +66,14 @@ public class AuthController {
 
       return ResponseEntity.status(HttpStatus.CREATED).body(authService.createGuest(clientTypeName));
     }
+
+    @PostMapping("forgotten-password/{email}")
+    public ResponseEntity<?> forgottenPasswordRequest(@PathVariable("email") String email) {
+
+        authService.forgottenPasswordRequest(email);
+
+        return ResponseEntity.ok().build();
+    }
+
+
 }

@@ -342,4 +342,27 @@ public class KeycloakService {
             throw new RefreshRequestFailedException("Failed to refresh Keycloak token: " + e.getMessage(), e);
         }
     }
+
+
+
+    public void passwordChangeRequestForCustomerId(String userId) {
+        String adminToken = getAdminAccessToken();
+        String passwordChangeUrl = "/admin/realms/" + userRealm + "/users/" + userId + "/execute-actions-email?lifespan=1800";
+
+        try
+        {
+            keycloakWebClient.put()
+                    .uri(passwordChangeUrl)
+                    .headers(h -> h.setBearerAuth(adminToken))
+                    .bodyValue(List.of("UPDATE_PASSWORD"))
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error sending password change email: " + e.getMessage());
+            throw e;
+        }
+    }
 }

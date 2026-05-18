@@ -13,14 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final KeycloakService keycloakService;
 //    private final PurchaseRepository purchaseRepository;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository
+    public CustomerService(CustomerRepository customerRepository,
 //                           PurchaseRepository purchaseRepository,
-    ) {
+                           KeycloakService keycloakService) {
         this.customerRepository = customerRepository;
 //        this.purchaseRepository = purchaseRepository;
+        this.keycloakService = keycloakService;
     }
 
     public Customer getById(String userId) {
@@ -51,5 +53,13 @@ public class CustomerService {
                 request.familyName(),
                 request.phoneNumber()
         );
+    }
+
+    public void changePassword(String customerId) {
+        keycloakService.passwordChangeRequestForCustomerId(customerId);
+    }
+
+    public Customer getByEmail(String email) {
+        return customerRepository.getCustomersByEmail(email).orElseThrow(()-> new ResourceNotFoundException("No user found with email: " + email));
     }
 }

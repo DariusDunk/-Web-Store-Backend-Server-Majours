@@ -32,6 +32,7 @@ public class CustomerController {
     private final FavoriteOfCustomerService favoriteOfCustomerService;
     private final SavedPurchaseDetailsService purchaseDetailsService;
     private final ReviewService reviewService;
+    private final SessionService sessionService;
 
     @Autowired
     public CustomerController(CustomerService customerService,
@@ -39,7 +40,7 @@ public class CustomerController {
                               KeycloakService keycloakService,
                               UserIdExtractor userIdExtractor,
                               FavoriteOfCustomerService favoriteOfCustomerService,
-                              SavedPurchaseDetailsService purchaseDetailsService, ReviewService reviewService) {
+                              SavedPurchaseDetailsService purchaseDetailsService, ReviewService reviewService, SessionService sessionService) {
 
         this.customerService = customerService;
         this.productService = productService;
@@ -50,6 +51,7 @@ public class CustomerController {
         this.favoriteOfCustomerService = favoriteOfCustomerService;
         this.purchaseDetailsService = purchaseDetailsService;
         this.reviewService = reviewService;
+        this.sessionService = sessionService;
     }
 
 
@@ -246,7 +248,7 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("update")
+    @PatchMapping("update")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> updateCustomerData(@RequestBody @Valid UserDataUpdateRequest request) {
         String userId = userIdExtractor.getUserId();
@@ -263,6 +265,17 @@ public class CustomerController {
 
         return ResponseEntity.ok().build();
 
+    }
+
+    @PostMapping("password-change")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> changeUserPassword() {
+        Session session = sessionService.getRequestSession();
+        Customer customer = session.getCustomer();
+
+        customerService.changePassword(customer.getKeycloakId());
+
+        return ResponseEntity.ok().build();
     }
 
 }

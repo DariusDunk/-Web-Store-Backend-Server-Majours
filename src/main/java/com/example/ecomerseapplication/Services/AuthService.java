@@ -228,4 +228,15 @@ public class AuthService {
         return new GuestSessionResponse(session.getSessionId(),
                 Duration.between(Instant.now(), session.getExpiresAt()).getSeconds());
     }
+
+    public void forgottenPasswordRequest(String email) {
+
+        if (!email.contains("@")) {
+            throw new ValidationException("Въведеният имейл е невалиден");
+        }
+
+        Customer customer = customerService.getByEmail(email);
+
+        keycloakService.passwordChangeRequestForCustomerId(customer.getKeycloakId());
+    }
 }

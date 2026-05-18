@@ -1,9 +1,13 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.*;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactPurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
+import java.util.Map;
 
 public class PurchaseMapper {
 
@@ -41,14 +45,31 @@ public class PurchaseMapper {
                 purchase.getPaymentMethod().name());
     }
 
-    public static CompactPurchaseResponse purchaseDataToResponse(Purchase purchase, List<CompactProductQuantityPairResponse> pairs) {
-        CompactPurchaseResponse response = new CompactPurchaseResponse();
 
-        response.purchaseCode = purchase.getPurchaseCode();
-        response.purchaseDate = purchase.getDate();
-        response.totalCost = purchase.getTotalCost();
-        response.compactProductQuantityPairs = pairs;
+    public static Page<CompactPurchaseResponse> purchasePageToCompactResponsePage(Page<Purchase> purchasePage,
+                                                                                  Map<Long, List<ProductForCompactPurchaseHistoryResponse>> purchaseProductMap) {
+        return new PageImpl<>(purchaseListToCompactResponseList(purchasePage.getContent(), purchaseProductMap), purchasePage.getPageable(), purchasePage.getTotalElements());
+    }
 
-        return response;
+    public static List<CompactPurchaseResponse> purchaseListToCompactResponseList(List<Purchase> purchases,
+                                                                                  Map<Long, List<ProductForCompactPurchaseHistoryResponse>> purchaseProductMap) {
+        return purchases
+                .stream()
+                .map(purchase -> purchaseDataToCompactResponse(purchase, purchaseProductMap.get(purchase.getId())))
+                .toList();
+    }
+
+    public static CompactPurchaseResponse purchaseDataToCompactResponse(Purchase purchase, List<ProductForCompactPurchaseHistoryResponse> mappedProducts ) {
+
+        return new CompactPurchaseResponse(purchase.getPurchaseCode(),
+                purchase.getDate(),
+                purchase.getTotalCost(),
+                purchase.getShippingFee(),
+                purchase.getDeliveryStatus().name(),
+                "",
+                purchase.getAddress(),
+                mappedProducts
+
+        );
     }
 }
