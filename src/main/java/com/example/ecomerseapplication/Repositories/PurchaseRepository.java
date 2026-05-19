@@ -75,7 +75,8 @@ select
 p.productTotal as productTotal,
 p.contactName as recipientName,
 p.paymentMethod as paymentMethod,
-p.contactNumber as recipientPhone
+p.contactNumber as recipientPhone,
+p.deliveryDate as deliveryDate
 from Purchase p
 join p.customer c
 where p.purchaseCode = :purchaseCode and c.keycloakId = :customerId

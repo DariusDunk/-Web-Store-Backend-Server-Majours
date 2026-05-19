@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.DTOs.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.Instant;
 import java.util.List;
 
 public record DetailedPurchaseAdditionalDataResponse(
@@ -14,6 +15,8 @@ public record DetailedPurchaseAdditionalDataResponse(
         String recipientPhone,
         @JsonProperty("payment_method")
         String paymentMethod,
+        @JsonProperty("delivery_date")
+        Instant deliveryDate,
         @JsonProperty("products")
         List<DetailedPurchaseProductResponse> products
         ) {

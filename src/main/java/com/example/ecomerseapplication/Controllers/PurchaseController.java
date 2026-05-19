@@ -78,7 +78,7 @@ public class PurchaseController {
 
         DetailedPurchaseAdditionalDataResponse response = purchaseService.getDetailedPurchaseInfo(code, customer.getKeycloakId());
 
-        System.out.println("Response: " + response);
+//        System.out.println("Response: " + response);
         return ResponseEntity.ok(response);
 
     }
@@ -93,4 +93,17 @@ public class PurchaseController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("request-refund/c/{code}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> requestRefundForPurchase(@PathVariable String code) {
+        Session session = sessionService.getRequestSession();
+        Customer customer = session.getCustomer();
+
+        purchaseService.requestRefundForPurchase(code, customer.getKeycloakId());
+
+        return ResponseEntity.ok().build();
+    }
+
+
 }

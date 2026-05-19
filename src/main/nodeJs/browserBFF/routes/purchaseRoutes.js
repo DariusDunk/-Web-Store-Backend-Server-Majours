@@ -14,28 +14,63 @@ const timestamp = () => {
 
 const authIntentHeader = 'x-auth-intent';
 
-router.patch(`/cancel/:code`, async (req, res) => {
+router.post(`/refund-request/:code`, async (req, res) => {
     try {
         const sessionId = req.cookies.session_id;
         const {code} = req.params;
 
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-          await axiosBackendClient.patch(`${Backend_Url}/purchase/cancel/c/${code}`, {}, {
-            headers:
-                {
-                  'Content-Type': 'application/json',
-                  'x-client_type': WEB_CLIENT_NAME,
-                  ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                  ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
-                },
-            bffContext: {
-              req, res
-            }
-          });
-        },
+              return await axiosBackendClient.patch(`${Backend_Url}/purchase/request-refund/c/${code}`, {}, {
+                    headers:
+                        {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            },
             {req, res});
 
-      return res.status(response.status).end();
+        return res.status(response.status).end();
+
+    } catch (error) {
+        console.error("error in refund request: ", error);
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for refund request`);
+            return res.status(error.response.status || 500).json(error.response.data);
+        }
+        return res.status(500).end();
+    }
+})
+
+router.post(`/cancel/:code`, async (req, res) => {
+    try {
+        const sessionId = req.cookies.session_id;
+        const {code} = req.params;
+
+        console.log("in cancel");
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+               return await axiosBackendClient.patch(`${Backend_Url}/purchase/cancel/c/${code}`, {}, {
+                    headers:
+                        {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            },
+            {req, res});
+
+        return res.status(response.status).end();
 
     } catch (error) {
 
@@ -54,22 +89,21 @@ router.get(`/detail/:code`, async (req, res) => {
         const sessionId = req.cookies.session_id;
         const {code} = req.params;
 
-        const response = await fetchWithSessionTokens(sessionId, async () => {
-            return await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                    return await axiosBackendClient.get(`${Backend_Url}/purchase/detail/c/${code}`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-client_type': WEB_CLIENT_NAME,
-                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
-                        },
-                        bffContext: {
-                            req, res
-                        }
-                    });
-                }
-            );
-        }, {req, res});
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                return await axiosBackendClient.get(`${Backend_Url}/purchase/detail/c/${code}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-client_type': WEB_CLIENT_NAME,
+                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                        ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                    },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            },
+            {req, res}
+        );
 
         const responseData = response.data;
 
@@ -88,7 +122,7 @@ router.get(`/detail/:code`, async (req, res) => {
 
         return res.status(500).end();
     }
-})
+});
 
 router.get(`/history/:page`, async (req, res) => {
     try {

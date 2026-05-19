@@ -13,6 +13,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Prod
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.BadPurchaseCancelRequestException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.BadPurchaseRefundRequestException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
@@ -31,7 +32,11 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -191,11 +196,7 @@ public class PurchaseService {
         try {
             Purchase purchase = getPurchaseByCodeAndCustomerWithLock(code, keycloakId);
 
-            if (!purchase.getDeliveryStatus().equals(DeliveryStatus.PROCESSING) ) {
-                throw new BadPurchaseCancelRequestException("Purchase is not in processing status");
-            }
-
-            purchase.setDeliveryStatus(DeliveryStatus.CANCELLED);
+            purchase.cancelPurchase();
 
             List<PurchaseCart> purchaseCarts = purchaseCartService.getByPurchase(purchase);
 
@@ -227,6 +228,26 @@ public class PurchaseService {
 
         } catch (PessimisticLockException | LockTimeoutException e) {
             throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock or timeout exception occurred during purchase cancellation",
+                    "Поръчка в изчакване",
+                    "Заявката не беше успешна, моля опитайте отново");
+        }
+
+    }
+
+    @Transactional
+    public void requestRefundForPurchase(String code, String keycloakId) {
+
+        final long refundDays = 15;
+
+        try
+        {
+            Purchase purchase = getPurchaseByCodeAndCustomerWithLock(code, keycloakId);
+
+            purchase.setRefundRequested(refundDays);
+        }
+        catch (PessimisticLockException | LockTimeoutException e)
+        {
+            throw new PessimisticLockOrTimeoutPurchaseException("Purchase lock exception for requesting refund",
                     "Поръчка в изчакване",
                     "Заявката не беше успешна, моля опитайте отново");
         }
@@ -370,6 +391,7 @@ public class PurchaseService {
                 purchaseProjection.getRecipientName(),
                 purchaseProjection.getRecipientPhone(),
                 purchaseProjection.getPaymentMethod(),
+                purchaseProjection.getDeliveryDate(),
                 purchaseProducts
         );
 

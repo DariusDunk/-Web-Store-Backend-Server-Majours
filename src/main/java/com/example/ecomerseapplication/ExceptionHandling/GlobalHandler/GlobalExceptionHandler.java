@@ -250,6 +250,18 @@ public class GlobalExceptionHandler {
         System.out.println("--------------------Bad order cancel request-----------------");
         System.out.println(exception.getMessage());
         System.out.println("-------------------------------------------------------");
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+
+    @ExceptionHandler(BadPurchaseRefundRequestException.class)
+    public ResponseEntity<?> handleBadOrderCancelRequestExceptions(BadPurchaseRefundRequestException exception) {
+        System.out.println("--------------------Bad order refund request-----------------");
+        System.out.println(exception.getMessage());
+        System.out.println("-------------------------------------------------------");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+                exception.getTitle(),
+                HttpStatus.BAD_REQUEST.value(),
+                exception.getDetail()));
     }
 }
