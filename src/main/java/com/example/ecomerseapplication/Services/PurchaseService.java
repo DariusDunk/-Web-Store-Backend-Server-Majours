@@ -12,14 +12,11 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Invo
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ProductForDetailedPurchaseProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.Entities.*;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.BadPurchaseCancelRequestException;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.BadPurchaseRefundRequestException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
-import com.example.ecomerseapplication.enums.DeliveryStatus;
 import com.example.ecomerseapplication.enums.PaymentMethod;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
@@ -32,11 +29,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
