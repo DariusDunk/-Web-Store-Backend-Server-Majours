@@ -129,12 +129,6 @@ public class PurchaseService {
         return new PurchaseCompletionDTO(productCodes, productsForPurchase, recipientData, paymentMethod, purchaseCode, purchaseProductMap, totals);
     }
 
-//    public InvoicePurchaseProjection getInvoiceOfPurchase(String purchaseCode, Customer customer) {
-//       return getByCodeAndCustomer(purchaseCode, customer);
-//    }
-
-
-
     public InvoicePurchaseProjection getInvoiceOfPurchaseForCustomer(String purchaseCode, String customerId) {
         return purchaseRepository.getInvoiceDataByCodeAndCustomerId(customerId, purchaseCode)
                 .orElseThrow(()->new ResourceNotFoundException("Purchase not found"));
@@ -245,6 +239,10 @@ public class PurchaseService {
                     "Заявката не беше успешна, моля опитайте отново");
         }
 
+    }
+
+    private Purchase getPurchaseByCodeAndCustomer(String purchaseCode, String keycloakId) {
+        return purchaseRepository.getPurchasesByPurchaseCodeAndCustomer_KeycloakId(purchaseCode, keycloakId);
     }
 
     private record PurchaseCompletionDTO(List<String> productCodes,
@@ -385,6 +383,7 @@ public class PurchaseService {
                 purchaseProjection.getRecipientPhone(),
                 purchaseProjection.getPaymentMethod(),
                 purchaseProjection.getDeliveryDate(),
+                "http://localhost:3000/purchase/invoice/" + purchaseCode,
                 purchaseProducts
         );
 

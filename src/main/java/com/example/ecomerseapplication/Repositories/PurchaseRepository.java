@@ -85,9 +85,22 @@ where p.purchaseCode = :purchaseCode and c.keycloakId = :customerId
     AdditionalPurchaseDataProjection getAdditionalPurchaseDataByPurchaseCodeAndCustomer(@Param("purchaseCode") String purchaseCode,
                                                                                         @Param("customerId")String customerId);
 
+    /**
+     * Retrieves a purchase by customer Keycloak ID and purchase code with a pessimistic write lock.
+     * <p>
+     * <strong>CRITICAL:</strong> This method contains a <code>PESSIMISTIC_WRITE</code> lock.
+     * Only use this for requests that strictly require transactional locking to prevent race conditions.
+     * </p>
+     *
+     * @param customerKeycloakId The unique Keycloak ID of the customer.
+     * @param purchaseCode       The unique code of the purchase.
+     * @return An Optional containing the found Purchase, or empty if none matches.
+     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
     })
     Optional<Purchase> getByCustomer_KeycloakIdAndPurchaseCode(String customerKeycloakId, String purchaseCode);
+
+    Purchase getPurchasesByPurchaseCodeAndCustomer_KeycloakId(String purchaseCode, String customerKeycloakId);
 }

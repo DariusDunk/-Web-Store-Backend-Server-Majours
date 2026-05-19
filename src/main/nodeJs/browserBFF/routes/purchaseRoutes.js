@@ -14,6 +14,54 @@ const timestamp = () => {
 
 const authIntentHeader = 'x-auth-intent';
 
+router.get(`/invoice/:code`, async (req, res) => {
+    try {
+        const sessionId = req.cookies.session_id;
+        const {code} = req.params;
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData)=>{
+            return await axiosBackendClient.get(`${Backend_Url}/purchase/invoice/${code}`,
+                {
+                    headers:
+                        {
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
+                    bffContext: {
+                        req, res
+                    },
+                    responseType: "stream"
+                });
+        },
+            {req, res});
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename=invoice-${code}.pdf`
+        );
+
+        response.data.on("error", (err) => {
+            console.error("PDF stream error:", err);
+            res.status(500).end();
+        });
+
+        response.data.pipe(res);
+
+        return;
+    }
+
+    catch (error) {
+        console.error("error in get invoice: ", error)
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for get invoice request`);
+            return res.status(error.response.status || 500).json(error.response.data);
+        }
+        return res.status(500).end();
+    }
+})
+
 router.post(`/refund-request/:code`, async (req, res) => {
     try {
         const sessionId = req.cookies.session_id;
@@ -106,8 +154,6 @@ router.get(`/detail/:code`, async (req, res) => {
         );
 
         const responseData = response.data;
-
-        console.log("Purchase detail response: ", JSON.stringify(responseData));
 
         return res.status(response.status).json(responseData || {});
 

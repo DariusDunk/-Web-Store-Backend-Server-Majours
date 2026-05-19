@@ -17,8 +17,6 @@ public record CompactPurchaseResponse(
          int shippingFee,
          @JsonProperty("status")
          String status,
-         @JsonProperty("invoice_url")
-         String invoiceUrl,
          @JsonProperty("delivery_address")
          String deliveryAddress,
          @JsonProperty("products")

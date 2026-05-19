@@ -63,6 +63,12 @@ public class InvoiceService {
         mainInvoiceEmailAction(invoiceFullDTO, email);
     }
 
+    public byte[] getInvoicePdfForPurchase(String purchaseCode, String keycloakId) {
+        InvoiceFullDTO invoiceFullDTO = buildInvoiceForCustomer(purchaseCode, keycloakId);
+        String pdfHTML = invoiceHtmlService.buildInvoicePdfString(invoiceFullDTO);
+        return pdfService.generateInvoicePdf(pdfHTML);
+    }
+
     private void mainInvoiceEmailAction(InvoiceFullDTO invoiceFullDTO, String email) {
         String pdfHTML = invoiceHtmlService.buildInvoicePdfString(invoiceFullDTO);
         byte[] pdfBytes = pdfService.generateInvoicePdf(pdfHTML);

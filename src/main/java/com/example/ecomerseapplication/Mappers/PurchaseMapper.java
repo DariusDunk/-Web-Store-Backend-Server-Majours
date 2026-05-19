@@ -56,7 +56,6 @@ public class PurchaseMapper {
                 purchase.getTotalCost(),
                 purchase.getShippingFee(),
                 purchase.getDeliveryStatus().name(),
-                "",
                 purchase.getAddress(),
                 mappedProducts
 

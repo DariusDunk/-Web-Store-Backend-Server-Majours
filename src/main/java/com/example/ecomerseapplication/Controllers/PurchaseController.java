@@ -5,6 +5,8 @@ import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,5 +107,20 @@ public class PurchaseController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/invoice/{purchaseCode}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable String purchaseCode) {
+
+        Session session = sessionService.getRequestSession();
+        Customer customer = session.getCustomer();
+
+        byte[] pdfBytes = invoiceService.getInvoicePdfForPurchase(purchaseCode,customer.getKeycloakId());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=invoice-" + purchaseCode + ".pdf")
+                .body(pdfBytes);
+    }
 
 }
