@@ -3,10 +3,14 @@ package com.example.ecomerseapplication.Repositories;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AdditionalPurchaseDataProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.InvoicePurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -39,7 +43,7 @@ from Purchase p
 where p.customer.keycloakId = :customerId and p.purchaseCode = :purchaseCode
 """
     )
-    Optional<InvoicePurchaseProjection> getByCodeAndCustomerId(@Param("customerId")String customerKeycloakId, @Param("purchaseCode")String purchaseCode);
+    Optional<InvoicePurchaseProjection> getInvoiceDataByCodeAndCustomerId(@Param("customerId")String customerKeycloakId, @Param("purchaseCode")String purchaseCode);
 
 
     @Query(
@@ -80,4 +84,9 @@ where p.purchaseCode = :purchaseCode and c.keycloakId = :customerId
     AdditionalPurchaseDataProjection getAdditionalPurchaseDataByPurchaseCodeAndCustomer(@Param("purchaseCode") String purchaseCode,
                                                                                         @Param("customerId")String customerId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+    })
+    Optional<Purchase> getByCustomer_KeycloakIdAndPurchaseCode(String customerKeycloakId, String purchaseCode);
 }

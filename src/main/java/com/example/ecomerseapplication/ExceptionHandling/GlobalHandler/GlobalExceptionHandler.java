@@ -196,12 +196,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PessimisticLockOrTimeoutPurchaseException.class)
-    public ResponseEntity<?> handleProductLockOrTimeoutExceptionsForPurchase() {
+    public ResponseEntity<?> handleProductLockOrTimeoutExceptionsForPurchase(PessimisticLockOrTimeoutPurchaseException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
                 ErrorType.RESOURCE_CONFLICT,
-                "Продукти в изчакване",
-                HttpStatus.CONFLICT.value(),
-                "Един или повече от продуктите вече са в процес на закупуване от друг потребите, моля опитайте отново."
+                exception.getTitle(),
+                HttpStatus.CONFLICT.value()
+                ,exception.getDetail()
         ));
     }
 
@@ -243,6 +243,13 @@ public class GlobalExceptionHandler {
                 message);
 
         return ResponseEntity.badRequest().body(errorResponse);
+    }
 
+    @ExceptionHandler(BadPurchaseCancelRequestException.class)
+    public ResponseEntity<?> handleBadOrderCancelRequestExceptions(BadPurchaseCancelRequestException exception) {
+        System.out.println("--------------------Bad order cancel request-----------------");
+        System.out.println(exception.getMessage());
+        System.out.println("-------------------------------------------------------");
+        return ResponseEntity.badRequest().build();
     }
 }

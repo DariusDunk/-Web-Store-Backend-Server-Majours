@@ -726,7 +726,7 @@ public class ProductService {
     }
 
     public List<Product> getByCodesForPurchaseWithLocking(List<String> codes) {
-        List<Product> products = productRepository.getByCodesForSaleWithLocking(codes);
+        List<Product> products = productRepository.getByCodesForPurchaseWithLocking(codes);
 
         if (products.isEmpty()) {
             throw new ResourceNotFoundException("No products found with codes: " + codes);
@@ -773,5 +773,9 @@ public class ProductService {
                 categories.stream().map(ProductCategory::getCategoryName).toList(),
                 manufacturers.stream().map(Manufacturer::getManufacturerName).toList());
 
+    }
+
+    public List<Product> getByIdSetWithLock(Set<Integer> productIds) {
+        return productRepository.getAllByIdIn(productIds);
     }
 }

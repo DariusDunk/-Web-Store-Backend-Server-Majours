@@ -12,11 +12,13 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Invo
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ProductForDetailedPurchaseProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.BadPurchaseCancelRequestException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
+import com.example.ecomerseapplication.enums.DeliveryStatus;
 import com.example.ecomerseapplication.enums.PaymentMethod;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
@@ -136,7 +138,7 @@ public class PurchaseService {
 
 
     public InvoicePurchaseProjection getInvoiceOfPurchaseForCustomer(String purchaseCode, String customerId) {
-        return purchaseRepository.getByCodeAndCustomerId(customerId, purchaseCode)
+        return purchaseRepository.getInvoiceDataByCodeAndCustomerId(customerId, purchaseCode)
                 .orElseThrow(()->new ResourceNotFoundException("Purchase not found"));
     }
 
@@ -179,7 +181,65 @@ public class PurchaseService {
 
     }
 
-    private record PurchaseCompletionDTO(List<String> productCodes, List<Product> productsForPurchase, RecipientDataRequest recipientData, PaymentMethod paymentMethod, String purchaseCode, Map<String, PurchaseProductDTO> purchaseProductMap, TotalsDTO totals) {
+    public Purchase getPurchaseByCodeAndCustomerWithLock(String purchaseCode, String customerId) {
+        return purchaseRepository.getByCustomer_KeycloakIdAndPurchaseCode(customerId, purchaseCode).orElseThrow(() -> new ResourceNotFoundException("Purchase not found"));
+    }
+
+    @Transactional
+    public void cancelPurchase(String code, String keycloakId) {
+
+        try {
+            Purchase purchase = getPurchaseByCodeAndCustomerWithLock(code, keycloakId);
+
+            if (!purchase.getDeliveryStatus().equals(DeliveryStatus.PROCESSING) ) {
+                throw new BadPurchaseCancelRequestException("Purchase is not in processing status");
+            }
+
+            purchase.setDeliveryStatus(DeliveryStatus.CANCELLED);
+
+            List<PurchaseCart> purchaseCarts = purchaseCartService.getByPurchase(purchase);
+
+            Set<Integer> productIds = purchaseCarts
+                    .stream()
+                    .map(purchaseCart -> purchaseCart.getPurchaseCartId().getProduct().getId())
+                    .collect(toSet());
+
+            List<Product> purchaseProducts = productService.getByIdSetWithLock(productIds);
+
+            Map<Integer, Product> productMap = purchaseProducts.stream()
+                    .collect(Collectors.toMap(
+                            Product::getId,
+                            p -> p,
+                            (oldValue, newValue) -> newValue,
+                            HashMap::new
+                    ));
+
+            for (PurchaseCart purchaseCart: purchaseCarts) {
+                int productId = purchaseCart.getPurchaseCartId().getProduct().getId();
+                int quantity = purchaseCart.getQuantity();
+                Product product = productMap.get(productId);
+                if (product==null) {
+                    throw new ResourceNotFoundException("Product for purchase cancel not found");
+                }
+
+                product.setQuantityInStock(product.getQuantityInStock() + quantity);
+            }
+
+        } catch (PessimisticLockException | LockTimeoutException e) {
+            throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock or timeout exception occurred during purchase cancellation",
+                    "Поръчка в изчакване",
+                    "Заявката не беше успешна, моля опитайте отново");
+        }
+
+    }
+
+    private record PurchaseCompletionDTO(List<String> productCodes,
+                                         List<Product> productsForPurchase,
+                                         RecipientDataRequest recipientData,
+                                         PaymentMethod paymentMethod,
+                                         String purchaseCode, Map<String,
+                                         PurchaseProductDTO> purchaseProductMap,
+                                         TotalsDTO totals) {
     }
 
     private void customerCartCleanup(PurchaseRequest request, Customer customer, List<String> productCodes) {
@@ -269,7 +329,9 @@ public class PurchaseService {
         try {
             productsForPurchase = productService.getByCodesForPurchaseWithLocking(productCodes);
         } catch (PessimisticLockException | LockTimeoutException e) {
-            throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock or timeout exception occurred during purchase");
+            throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock or timeout exception occurred during purchase",
+                    "Продукти в изчакване",
+                    "Един или повече от продуктите вече са в процес на закупуване от друг потребите, моля опитайте отново.");
         }
         return productsForPurchase;
     }

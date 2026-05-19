@@ -82,4 +82,15 @@ public class PurchaseController {
         return ResponseEntity.ok(response);
 
     }
+
+    @PatchMapping("cancel/c/{code}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> cancelPurchase(@PathVariable String code) {
+        Session session = sessionService.getRequestSession();
+        Customer customer = session.getCustomer();
+
+        purchaseService.cancelPurchase(code, customer.getKeycloakId());
+
+        return ResponseEntity.ok().build();
+    }
 }

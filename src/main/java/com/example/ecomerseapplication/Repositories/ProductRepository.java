@@ -92,7 +92,7 @@ and current_timestamp between s.startDate and s.endDate*/
 where p.productCode in ?1
 """
     )
-    List<Product> getByCodesForSaleWithLocking(List<String> productCodes);//todo napravi vtora zaqvka za joinovete v bude6te
+    List<Product> getByCodesForPurchaseWithLocking(List<String> productCodes);//todo napravi vtora zaqvka za joinovete v bude6te
 
     @Query(
 """
@@ -162,6 +162,9 @@ order by (p.rating * log(p.reviewCount + 1)) desc
     )
     List<CompactProductProjection> getTopProductsOfCategory(@Param("categoryId") int id, Pageable pageable);
 
-
-
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+    })
+    List<Product> getAllByIdIn(Set<Integer> ids);
 }
