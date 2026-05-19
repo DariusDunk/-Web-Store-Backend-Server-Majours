@@ -4,13 +4,12 @@ import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
 import com.example.ecomerseapplication.DTOs.requests.ProductQuantityForCartRequest;
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
 import com.example.ecomerseapplication.DTOs.requests.RecipientDataRequest;
-import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
-import com.example.ecomerseapplication.DTOs.responses.PageResponse;
-import com.example.ecomerseapplication.DTOs.responses.ProductForCompactPurchaseHistoryResponse;
-import com.example.ecomerseapplication.DTOs.responses.SuccessfulPurchaseResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.PurchaseProductDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.TotalsDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AdditionalPurchaseDataProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.InvoicePurchaseProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ProductForDetailedPurchaseProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
@@ -150,8 +149,6 @@ public class PurchaseService {
         return purchaseRepository.countByCustomer_KeycloakId(userId);
     }
 
-
-
     public PageResponse<CompactPurchaseResponse> getPurchasesOfCustomer(Customer customer, int page) {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "date");
@@ -164,8 +161,6 @@ public class PurchaseService {
                         PurchaseProductPairProjection::getPurchaseId,
                         mapping(PurchaseProductPairProjection::getPurchaseProduct, toList())
                 ));
-
-
 
         Map<Long, List<ProductForCompactPurchaseHistoryResponse>> purchaseProductMap = new HashMap<>();
 
@@ -297,4 +292,26 @@ public class PurchaseService {
 
         return String.format("%d%02d%s%02d",hour, month*7+minute+ day*3,randomDigits,year);
     }
+
+    public DetailedPurchaseAdditionalDataResponse getDetailedPurchaseInfo(String purchaseCode, String customerId) {
+        AdditionalPurchaseDataProjection purchaseProjection = purchaseRepository
+                .getAdditionalPurchaseDataByPurchaseCodeAndCustomer(purchaseCode, customerId);
+
+        List<ProductForDetailedPurchaseProjection> productProjections = purchaseCartService
+                .getProductsForDetailedPurchase(purchaseCode);
+
+        List<DetailedPurchaseProductResponse> purchaseProducts = ProductDTOMapper
+                .detailedPurchaseProdProjectionListToResponseList(productProjections);
+
+        return new DetailedPurchaseAdditionalDataResponse(
+                purchaseProjection.getProductTotal(),
+                purchaseProjection.getRecipientName(),
+                purchaseProjection.getRecipientPhone(),
+                purchaseProjection.getPaymentMethod(),
+                purchaseProducts
+        );
+
+    }
+
+
 }

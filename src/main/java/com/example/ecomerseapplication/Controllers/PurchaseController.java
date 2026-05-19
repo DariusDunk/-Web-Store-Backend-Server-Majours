@@ -1,9 +1,7 @@
 package com.example.ecomerseapplication.Controllers;
 
 import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
-import com.example.ecomerseapplication.DTOs.responses.CompactPurchaseResponse;
-import com.example.ecomerseapplication.DTOs.responses.PageResponse;
-import com.example.ecomerseapplication.DTOs.responses.SuccessfulPurchaseResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +64,22 @@ public class PurchaseController {
         Customer customer = session.getCustomer();
         PageResponse<CompactPurchaseResponse> response = purchaseService.getPurchasesOfCustomer(customer, page);
 
-        System.out.println("Response: " + response);
+//        System.out.println("Response: " + response);
 
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("detail/c/{code}")
+    @PreAuthorize("hasRole(@roles.customer())")
+    public ResponseEntity<?> getPurchaseDetails(@PathVariable String code) {
+        Session session = sessionService.getRequestSession();
+        Customer customer = session.getCustomer();
+
+        DetailedPurchaseAdditionalDataResponse response = purchaseService.getDetailedPurchaseInfo(code, customer.getKeycloakId());
+
+        System.out.println("Response: " + response);
+        return ResponseEntity.ok(response);
+
     }
 }

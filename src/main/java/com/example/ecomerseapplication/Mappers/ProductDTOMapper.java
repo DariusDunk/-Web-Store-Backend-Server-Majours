@@ -3,10 +3,7 @@ package com.example.ecomerseapplication.Mappers;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CartItemDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CartSummaryItem;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactPurchaseProductProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.*;
 import com.example.ecomerseapplication.Entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -268,5 +265,22 @@ public class ProductDTOMapper {
 
     public static List<ProductForCompactPurchaseHistoryResponse> entityListToCompactPurchIhistoryRespList(List<Product> products) {
         return products.stream().map(ProductDTOMapper::entityToCompactPurchIhistoryResp).toList();
+    }
+
+
+    public static DetailedPurchaseProductResponse detailedPurchaseProdProjectionToResponse(ProductForDetailedPurchaseProjection projection) {
+
+        return new DetailedPurchaseProductResponse(projection.getProductCode(),
+                projection.getProductName(),
+                projection.getSinglePrice(),
+                projection.getRating(),
+                projection.getReviewCount(),
+                projection.getImageUrl(),
+                projection.getQuantity());
+
+    }
+
+    public static List<DetailedPurchaseProductResponse> detailedPurchaseProdProjectionListToResponseList(List<ProductForDetailedPurchaseProjection> projections) {
+        return projections.stream().map(ProductDTOMapper::detailedPurchaseProdProjectionToResponse).toList();
     }
 }

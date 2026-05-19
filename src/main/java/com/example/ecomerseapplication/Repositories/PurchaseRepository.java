@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AdditionalPurchaseDataProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.InvoicePurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import org.springframework.data.domain.Page;
@@ -62,8 +63,21 @@ and p.purchaseCode = :purchaseCode
 
     int countByCustomer_KeycloakId(String customerKeycloakId);
 
-//    @EntityGraph(attributePaths = {"purchaseProducts"})
     Page<Purchase> getPurchasesByCustomer_KeycloakId(String customerKeycloakId, Pageable pageable);
 
+    @Query(
+"""
+select
+p.productTotal as productTotal,
+p.contactName as recipientName,
+p.paymentMethod as paymentMethod,
+p.contactNumber as recipientPhone
+from Purchase p
+join p.customer c
+where p.purchaseCode = :purchaseCode and c.keycloakId = :customerId
+"""
+    )
+    AdditionalPurchaseDataProjection getAdditionalPurchaseDataByPurchaseCodeAndCustomer(@Param("purchaseCode") String purchaseCode,
+                                                                                        @Param("customerId")String customerId);
 
 }

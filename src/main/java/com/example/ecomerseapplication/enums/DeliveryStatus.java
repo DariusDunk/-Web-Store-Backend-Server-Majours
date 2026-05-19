@@ -3,7 +3,7 @@ package com.example.ecomerseapplication.enums;
 public enum DeliveryStatus {
 
     PROCESSING,
-    SHIPPING,
+    SHIPPED,
     DELIVERED,
     CANCELLED,
     REFUNDED,

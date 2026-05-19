@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ProductForDetailedPurchaseProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
@@ -40,5 +41,9 @@ public class PurchaseCartService {
 
     public List<PurchaseProductPairProjection> getProductsForCompactPurchaseHistory(List<Long> purchaseIds) {
         return purchaseCartRepository.getProductsForCompactPurchaseHistory(purchaseIds);
+    }
+
+    public List<ProductForDetailedPurchaseProjection> getProductsForDetailedPurchase(String purchaseCode) {
+        return purchaseCartRepository.getProductsForDetailedPurchaseHistory(purchaseCode);
     }
 }

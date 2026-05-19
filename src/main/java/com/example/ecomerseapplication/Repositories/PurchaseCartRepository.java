@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ProductForDetailedPurchaseProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
@@ -75,5 +76,21 @@ order by pur.id desc, p.id
 """
     )
     List<PurchaseProductPairProjection> getProductsForCompactPurchaseHistory(@Param("purchaseIds") List<Long> purchaseIds);
+
+    @Query(
+"""
+select pr.productCode as productCode,
+pr.productName as productName,
+pc.singlePrice as singlePrice,
+pr.rating as rating,
+pr.reviewCount as reviewCount,
+pr.mainImageUrl as imageUrl,
+pc.quantity as quantity
+from PurchaseCart pc
+join pc.purchaseCartId.purchase pu
+join pc.purchaseCartId.product pr
+where pu.purchaseCode = ?1
+""")
+    List<ProductForDetailedPurchaseProjection> getProductsForDetailedPurchaseHistory(String purchaseCode);
 
 }
