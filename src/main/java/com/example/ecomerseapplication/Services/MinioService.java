@@ -13,7 +13,7 @@ public class MinioService {
 
     private final MinioClient minioClient;
 
-    @Value("${minio.bucket}")
+    @Value("${minio.productsBucket}")
     private String bucket;
 
     public MinioService(MinioClient minioClient) {
