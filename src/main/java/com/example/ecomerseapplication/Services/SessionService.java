@@ -94,9 +94,9 @@ public class SessionService {
 
     }
 
-    public Session fetchByIdWithLocNullable(String sessionId) {
-        return sessionRepository.findBySessionId(sessionId).orElse(null);
-    }
+//    public Session fetchByIdWithLocNullable(String sessionId) {
+//        return sessionRepository.findBySessionId(sessionId).orElse(null);
+//    }
 
     public Session AuthToGuestSession(Session session) {
 
@@ -122,5 +122,12 @@ public class SessionService {
 
     public Optional<Session> getByIdOptional(String sessionId) {
         return sessionRepository.findById(sessionId);
+    }
+
+
+    public Integer getActiveSessions() {
+        Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
+
+        return sessionRepository.getActiveSessionCount(fiveMinutesAgo);
     }
 }

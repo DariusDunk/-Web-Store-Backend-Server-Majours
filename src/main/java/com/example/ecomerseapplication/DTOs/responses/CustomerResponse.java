@@ -9,7 +9,6 @@ public record CustomerResponse(
         String customerPfp,
         @JsonProperty("role")
         String role
-//        Long userId
         ) {
 
 }

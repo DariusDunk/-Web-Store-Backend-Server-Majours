@@ -1,4 +1,4 @@
-package com.example.ecomerseapplication.configs;
+package com.example.ecomerseapplication.Configs;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;

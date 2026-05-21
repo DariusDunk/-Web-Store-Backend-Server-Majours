@@ -1,27 +1,25 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.Entities.Session;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface SessionRepository extends JpaRepository<Session,String> {
 
-//    @Query(value = """
-//select count (s)
-//from Session s
-//where s.lastActivityAt<:fiveMinsAgo
-//""")
-//    int getActiveSessionCount(@Param("fiveMinsAgo") String timeThreshold);//Todo test/optimize
+    @Query(value = """
+select count (s)
+from Session s
+where s.isRevoked = false
+and s.lastActivityAt<:fiveMinsAgo
+and s.expiresAt <CURRENT_TIMESTAMP
+""")
+    int getActiveSessionCount(@Param("fiveMinsAgo")Instant fiveMinutesAgo);
 
 
     @Query(value =
@@ -42,11 +40,11 @@ and s.sessionId = :session_id
             and s.isRevoked = false
             """)
     List<Session> getExpired();
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({
-            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
-    })
-    Optional<Session> findBySessionId(String sessionId);
+//
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @QueryHints({
+//            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+//    })
+//    Optional<Session> findBySessionId(String sessionId);
 
 }
