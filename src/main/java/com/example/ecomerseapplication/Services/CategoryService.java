@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.CategoryRepository;
@@ -22,8 +23,8 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<ProductCategory> findAll() {
-        return categoryRepository.findAll();
+    public List<CompactAdminCategoryProjection> findAllCompact() {
+        return categoryRepository.findAllCompact();
     }
 
     public List<String> getAllCategoryNames() {

@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +59,7 @@ select
 pc.id
 from ProductCategory pc
 join pc.products p
+where pc.isDeleted = false
 group by pc
 order by sum(p.reviewCount) desc,
 avg(p.rating) desc,
@@ -67,4 +69,13 @@ count(p.id) desc
     List<Integer> getTopCategoriesIds(Pageable pageable);
 
     List<ProductCategory> findAllByCategoryNameIn(List<String> categoryNames);
+
+    @Query(
+"""
+select pc.id as id,
+pc.categoryName as name,
+pc.isDeleted as isDeleted
+from ProductCategory pc
+""")
+    List<CompactAdminCategoryProjection> findAllCompact();
 }

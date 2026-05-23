@@ -45,4 +45,7 @@ public class ProductCategory {
             inverseJoinColumns = @JoinColumn(name = "attr_group_id"))
     private List<AttributeGroup> attributeGroups;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
 }
