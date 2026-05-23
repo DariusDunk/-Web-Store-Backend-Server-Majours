@@ -2,8 +2,6 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.responses.DetailedAttributeGroupResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOfGroupDTO;
-import com.example.ecomerseapplication.DTOs.serverDtos.DetailedAttributeGroupsWithCategoryResponse;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeGroupsWithCategoryProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfGroupProjection;
 import com.example.ecomerseapplication.Entities.AttributeGroup;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
