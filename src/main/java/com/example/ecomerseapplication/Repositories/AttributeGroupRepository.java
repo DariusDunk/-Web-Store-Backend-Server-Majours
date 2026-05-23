@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -24,4 +25,6 @@ exists (
 from AttributeGroup ag
 """)
     List<AttributeGroupsWithCategoryProjection> getAllWithCategory(@Param("categoryId") int categoryId);
+
+    List<AttributeGroup> getAttributeGroupByGroupNameIn(Collection<String> groupNames);
 }

@@ -32,11 +32,13 @@ public class ProductCategory {
     private ProductCategory parentCategory;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "productCategory")
+    @OneToMany(mappedBy = "productCategory",
+            cascade = {CascadeType.DETACH,CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<Product> products;
 
     @JsonIgnore
-    @OneToMany(cascade = {CascadeType.DETACH,CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, mappedBy = "productCategory")
+    @OneToMany(cascade = {CascadeType.DETACH,CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},
+            mappedBy = "productCategory")
     private List<CategoryAttribute> categoryAttributes;
 
     @ManyToMany
@@ -47,5 +49,10 @@ public class ProductCategory {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+
+    public void updateCategory(String name, List<AttributeGroup> attributeGroups){
+        this.categoryName = name;
+        this.attributeGroups = attributeGroups;
+    }
 
 }

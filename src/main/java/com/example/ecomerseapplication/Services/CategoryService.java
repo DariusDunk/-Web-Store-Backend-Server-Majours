@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.requests.UpdateCategoryRequest;
 import com.example.ecomerseapplication.DTOs.responses.DetailedCategoryResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOfGroupDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
@@ -7,6 +8,7 @@ import com.example.ecomerseapplication.DTOs.serverDtos.DetailedAttributeGroupsWi
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeGroupsWithCategoryProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfGroupProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
+import com.example.ecomerseapplication.Entities.AttributeGroup;
 import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,6 +94,7 @@ public class CategoryService {
     }
 
 
+    @Transactional
     public DetailedCategoryResponse getDetailedCategory(Integer categoryId) {
         ProductCategory category = findById(categoryId);
         List<AttributeGroupsWithCategoryProjection> attributeGroups = attributeGroupService.getAllWithACategory(categoryId);
@@ -140,6 +144,14 @@ public class CategoryService {
         }
 
         return new DetailedCategoryResponse(category.getCategoryName(), category.getIsDeleted(), groupResponseList);
+    }
+
+    @Transactional
+    public void updateCategory(UpdateCategoryRequest request) {
+        ProductCategory category = findById(request.id());
+        List<AttributeGroup> attributeGroups = attributeGroupService.getByNames(request.attributeGroups());
+
+        category.updateCategory(request.name(), attributeGroups);
     }
 }
 

@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeGroupsWithCategoryProjection;
+import com.example.ecomerseapplication.Entities.AttributeGroup;
 import com.example.ecomerseapplication.Repositories.AttributeGroupRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,5 +17,9 @@ public class AttributeGroupService {
 
     public List<AttributeGroupsWithCategoryProjection> getAllWithACategory(int categoryId) {
         return attributeGroupRepository.getAllWithCategory(categoryId);
+    }
+
+    public List<AttributeGroup> getByNames(List<String> strings) {
+        return attributeGroupRepository.getAttributeGroupByGroupNameIn(strings);
     }
 }

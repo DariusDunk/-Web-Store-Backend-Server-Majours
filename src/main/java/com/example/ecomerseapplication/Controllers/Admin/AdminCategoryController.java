@@ -45,9 +45,14 @@ public class AdminCategoryController {
 
         return ResponseEntity.ok(categoryService.getDetailedCategory(categoryId));
     }
-//
-//    @PostMapping("update")
-//    @PreAuthorize("hasRole(@roles.admin())")
-//    public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequest request) {}
+
+    @PatchMapping("update")
+    @PreAuthorize("hasRole(@roles.admin())")
+    public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequest request) {
+
+        categoryService.updateCategory(request);
+
+        return ResponseEntity.noContent().build();
+    }
 
 }
