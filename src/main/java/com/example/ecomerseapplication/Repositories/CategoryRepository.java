@@ -76,6 +76,7 @@ select pc.id as id,
 pc.categoryName as name,
 pc.isDeleted as isDeleted
 from ProductCategory pc
+order by pc.isDeleted asc, pc.id asc
 """)
     List<CompactAdminCategoryProjection> findAllCompact();
 }
