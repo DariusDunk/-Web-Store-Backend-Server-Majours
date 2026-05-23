@@ -7,6 +7,7 @@ import com.example.ecomerseapplication.Mappers.CategoryMapper;
 import com.example.ecomerseapplication.Services.AttributeNameService;
 import com.example.ecomerseapplication.Services.CategoryAttributeService;
 import com.example.ecomerseapplication.Services.CategoryService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -55,4 +56,12 @@ public class AdminCategoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("create")
+    @PreAuthorize("hasRole(@roles.admin())")
+    public ResponseEntity<?> createCategory(@RequestBody UpdateCategoryRequest request) {
+
+        categoryService.createCategory(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }

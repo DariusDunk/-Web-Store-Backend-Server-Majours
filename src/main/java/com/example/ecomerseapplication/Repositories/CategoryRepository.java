@@ -15,13 +15,14 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository<ProductCategory, Integer> {
 
-    Optional<ProductCategory> findByCategoryName(String name);
+    Optional<ProductCategory> findByCategoryNameAndIsDeleted(String categoryName, Boolean isDeleted);
 
     @Query(value = "select c.categoryName " +
             "from ProductCategory c " +
-            "where c.categoryName!= 'електрически машини' AND c.categoryName!= 'Бензинови машини' " +
+//            "where c.categoryName!= 'електрически машини' AND c.categoryName!= 'Бензинови машини' " +
+            "where c.isDeleted = false " +
             "order by c.categoryName asc")
-    List<String> getAllNames();
+    List<String> getAllNamesActive();
 
     @Query(value =
     """

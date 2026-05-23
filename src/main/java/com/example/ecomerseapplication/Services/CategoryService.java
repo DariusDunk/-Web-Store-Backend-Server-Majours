@@ -45,7 +45,7 @@ public class CategoryService {
     }
 
     public List<String> getAllCategoryNames() {
-        List<String> names = categoryRepository.getAllNames();
+        List<String> names = categoryRepository.getAllNamesActive();
         if (names.isEmpty())
             throw new ResourceNotFoundException("No categories found");
         return names;
@@ -55,8 +55,8 @@ public class CategoryService {
         return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product Category not found with id: " + id));
     }
 
-    public ProductCategory findByName(String name) {
-        return categoryRepository.findByCategoryName(name).orElseThrow(() -> new ResourceNotFoundException("Product Category not found with name: " + name));
+    public ProductCategory findByNameActive(String name) {
+        return categoryRepository.findByCategoryNameAndIsDeleted(name, false).orElseThrow(() -> new ResourceNotFoundException("Product Category not found with name: " + name));
     }
 
     public List<AttributeOptionDTO> getAttributesOfCategory(int categoryId) {
@@ -98,8 +98,6 @@ public class CategoryService {
     public DetailedCategoryResponse getDetailedCategory(Integer categoryId) {
         ProductCategory category = findById(categoryId);
         List<AttributeGroupsWithCategoryProjection> attributeGroups = attributeGroupService.getAllWithACategory(categoryId);
-
-        System.out.println("Attribute groups: \n");
 
         for (AttributeGroupsWithCategoryProjection attributeGroup : attributeGroups) {
             System.out.println(attributeGroup);
@@ -151,7 +149,15 @@ public class CategoryService {
         ProductCategory category = findById(request.id());
         List<AttributeGroup> attributeGroups = attributeGroupService.getByNames(request.attributeGroups());
 
-        category.updateCategory(request.name(), attributeGroups);
+        category.updateCategory(request.name(), attributeGroups, request.isDeleted());
+    }
+
+    public void createCategory(UpdateCategoryRequest request) {
+        ProductCategory category = new ProductCategory();
+        List<AttributeGroup> attributeGroups = attributeGroupService.getByNames(request.attributeGroups());
+
+        category.updateCategory(request.name(), attributeGroups, request.isDeleted());
+        categoryRepository.save(category);
     }
 }
 

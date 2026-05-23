@@ -50,9 +50,10 @@ public class ProductCategory {
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    public void updateCategory(String name, List<AttributeGroup> attributeGroups){
+    public void updateCategory(String name, List<AttributeGroup> attributeGroups, Boolean isDeleted){
         this.categoryName = name;
         this.attributeGroups = attributeGroups;
+        this.isDeleted = isDeleted;
     }
 
 }

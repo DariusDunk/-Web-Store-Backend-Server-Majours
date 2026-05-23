@@ -44,7 +44,7 @@ public class CategoryController {
     @GetMapping("filters")
     public ResponseEntity<?> getAttributes(@RequestParam @NotBlank String categoryName) {
 
-        ProductCategory category = categoryService.findByName(categoryName);
+        ProductCategory category = categoryService.findByNameActive(categoryName);
 
         CategoryFiltersResponse categoryFiltersResponse = new CategoryFiltersResponse();
 

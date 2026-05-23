@@ -156,7 +156,7 @@ public class ProductController {
         if (name.equals("Бензинови машини") || name.equals("електрически машини"))
             return ResponseEntity.notFound().build();
 
-        ProductCategory productCategory = categoryService.findByName(name);
+        ProductCategory productCategory = categoryService.findByNameActive(name);
 
         Page<CompactProductResponse> productResponsePage = productService.getByCategory(productCategory,
                 page,
@@ -170,7 +170,7 @@ public class ProductController {
     public ResponseEntity<PageResponse<CompactProductResponse>> productByFilterAndManufacturer(@RequestBody @Valid ProductFilterRequest productFilterRequest,
                                                                                                @PathVariable int page) {
 
-        System.out.println("Filter request: " + productFilterRequest);
+//        System.out.println("Filter request: " + productFilterRequest);
 
         Set<CategoryAttribute> categoryAttributeSet = new HashSet<>();
 
@@ -183,7 +183,7 @@ public class ProductController {
         if (productFilterRequest.manufacturerNames != null)
             manufacturerList = manufacturerService.getByNames(productFilterRequest.manufacturerNames);
 
-        ProductCategory productCategory = categoryService.findByName(productFilterRequest.productCategory);
+        ProductCategory productCategory = categoryService.findByNameActive(productFilterRequest.productCategory);
 
 
         return ResponseEntity.ok(PageResponse.from(
