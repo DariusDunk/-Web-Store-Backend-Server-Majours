@@ -10,6 +10,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import adminSessionRoutes from "./routes/admin/adminSessionRoutes.js";
 import adminCategoryRoutes from "./routes/admin/adminCategoryRoutes.js";
 import adminAttributeRoutes from "./routes/admin/adminAttributeRoutes.js";
+import adminSaleRoutes from "./routes/admin/adminSaleRoutes.js";
 import cookieParser from 'cookie-parser';
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/cart', cartRoutes)
 app.use('/admin/session', adminSessionRoutes)
 app.use('/admin/category', adminCategoryRoutes)
 app.use('/admin/attribute', adminAttributeRoutes)
+app.use('/admin/sale', adminSaleRoutes)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

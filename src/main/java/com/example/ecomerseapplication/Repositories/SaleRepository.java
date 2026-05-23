@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedSaleProjection;
 import com.example.ecomerseapplication.Entities.Sale;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -46,4 +47,19 @@ order by s.discountPercent desc, s.startDate desc
     List<CompactSaleProjection> findActiveAndNotExpired(Pageable pageable);
 
 
+    @Query(
+"""
+select s.name as name,
+s.discountPercent as defaultDiscount,
+s.startDate as startDate,
+s.endDate as endDate,
+s.isActive as isActive,
+(select count (sp)
+from SaleProduct sp
+where sp.sale.id = s.id
+) as productCount
+from Sale s
+"""
+    )
+    List<DetailedSaleProjection> getAllSalesProjection();
 }
