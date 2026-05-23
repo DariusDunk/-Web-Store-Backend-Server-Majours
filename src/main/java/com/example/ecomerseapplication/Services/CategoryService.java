@@ -11,7 +11,6 @@ import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Repositories.CategoryRepository;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -140,7 +139,7 @@ public class CategoryService {
             groupResponseList.add(groupResponse);
         }
 
-        return new DetailedCategoryResponse(category.getCategoryName(), groupResponseList);
+        return new DetailedCategoryResponse(category.getCategoryName(), category.getIsDeleted(), groupResponseList);
     }
 }
 

@@ -7,6 +7,8 @@ import java.util.List;
 
 public record DetailedCategoryResponse(@JsonProperty("name")
                                        String name,
+                                       @JsonProperty("is_deleted")
+                                       Boolean isDeleted,
                                        @JsonProperty("attribute_groups")
                                        List<DetailedAttributeGroupsWithCategoryResponse> attributeGroups) {
 }

@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Controllers.Admin;
 
+import com.example.ecomerseapplication.DTOs.requests.UpdateCategoryRequest;
 import com.example.ecomerseapplication.DTOs.responses.CompactCategoryAdminResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
 import com.example.ecomerseapplication.Mappers.CategoryMapper;
@@ -9,9 +10,7 @@ import com.example.ecomerseapplication.Services.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -46,6 +45,9 @@ public class AdminCategoryController {
 
         return ResponseEntity.ok(categoryService.getDetailedCategory(categoryId));
     }
-
+//
+//    @PostMapping("update")
+//    @PreAuthorize("hasRole(@roles.admin())")
+//    public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequest request) {}
 
 }
