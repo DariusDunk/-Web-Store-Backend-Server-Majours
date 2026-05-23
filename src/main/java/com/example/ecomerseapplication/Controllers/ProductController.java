@@ -92,7 +92,7 @@ public class ProductController {
         PageRequest pageRequest;
         Page<CompactProductResponse> responsePages;
 
-        System.out.println("name: " + name + " sort: " + sortOrder + " page: " + page);
+//        System.out.println("name: " + name + " sort: " + sortOrder + " page: " + page);
 
         if (sortOrder == null || sortOrder.equals(ProductSortType.RELEVANCE.getValue())) {
             pageRequest = PageRequest.of(page, PageContentLimit.limit);

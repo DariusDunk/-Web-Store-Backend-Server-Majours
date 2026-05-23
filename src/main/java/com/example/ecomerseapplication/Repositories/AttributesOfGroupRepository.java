@@ -25,5 +25,17 @@ join aog.attributesOfGroupId.attributeGroup ag
 where ag.id in :groupIds
 """
     )
-    List<AttributeOfGroupProjection> findByGroupIds(@Param("groupIds") List<Long> groupIds);
+    List<AttributeOfGroupProjection> findByGroupIdsProjection(@Param("groupIds") List<Long> groupIds);
+
+    @Query(
+"""
+select aog.measurementUnit as measurementUnit,
+an.attributeName as name,
+ag.id as groupId
+from AttributeOfGroup aog
+join aog.attributesOfGroupId.attributeName an
+join aog.attributesOfGroupId.attributeGroup ag
+"""
+    )
+    List<AttributeOfGroupProjection> findAllProjection();
 }

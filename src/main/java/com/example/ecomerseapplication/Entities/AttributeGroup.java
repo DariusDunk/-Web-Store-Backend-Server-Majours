@@ -22,7 +22,8 @@ public class AttributeGroup {
     @Column(name = "group_name")
     private String groupName;
 
-    @ManyToMany(mappedBy = "attributeGroups",cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(mappedBy = "attributeGroups",cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+    fetch = FetchType.LAZY)
     private List<ProductCategory> categories;
 
 

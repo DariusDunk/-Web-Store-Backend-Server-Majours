@@ -98,10 +98,10 @@ public class CategoryService {
     public DetailedCategoryResponse getDetailedCategory(Integer categoryId) {
         ProductCategory category = findById(categoryId);
         List<AttributeGroupsWithCategoryProjection> attributeGroups = attributeGroupService.getAllWithACategory(categoryId);
-
-        for (AttributeGroupsWithCategoryProjection attributeGroup : attributeGroups) {
-            System.out.println(attributeGroup);
-        }
+//
+//        for (AttributeGroupsWithCategoryProjection attributeGroup : attributeGroups) {
+//            System.out.println(attributeGroup);
+//        }
 
         List<Long> attributeGroupIds = attributeGroups.stream()
                 .map(AttributeGroupsWithCategoryProjection::getId)

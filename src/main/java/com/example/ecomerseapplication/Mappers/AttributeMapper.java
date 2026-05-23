@@ -1,11 +1,13 @@
 package com.example.ecomerseapplication.Mappers;
 
+import com.example.ecomerseapplication.DTOs.responses.DetailedAttributeGroupResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOfGroupDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.DetailedAttributeGroupsWithCategoryResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeGroupsWithCategoryProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfGroupProjection;
+import com.example.ecomerseapplication.Entities.AttributeGroup;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,6 +59,13 @@ public class AttributeMapper {
         return new DetailedAttributeGroupsWithCategoryResponse(
                 projection.getName(),
                 projection.getIsInCategory(),
+                attributesDto
+        );
+    }
+
+    public static DetailedAttributeGroupResponse attributeGroupProjToResponse(AttributeGroup attributeGroup, List<AttributeOfGroupDTO> attributesDto) {
+        return new DetailedAttributeGroupResponse(
+                attributeGroup.getGroupName(),
                 attributesDto
         );
     }

@@ -19,8 +19,7 @@ public class CategoryAttribute {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "attribute_id")
     private int id;
-
-
+    
     @JoinColumn(name = "product_category_id")
     @ManyToOne(cascade = {CascadeType.ALL})
     private ProductCategory productCategory;

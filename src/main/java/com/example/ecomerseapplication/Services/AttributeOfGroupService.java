@@ -16,6 +16,10 @@ public class AttributeOfGroupService {
     }
 
     public List<AttributeOfGroupProjection> getByGroupId(List<Long> groupIds) {
-        return attributeOfGroupRepository.findByGroupIds(groupIds);
+        return attributeOfGroupRepository.findByGroupIdsProjection(groupIds);
+    }
+
+    public List<AttributeOfGroupProjection> getAllDetailedProjection() {
+        return  attributeOfGroupRepository.findAllProjection();
     }
 }

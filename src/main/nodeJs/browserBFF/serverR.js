@@ -9,10 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import cartRoutes from "./routes/cartRoutes.js";
 import adminSessionRoutes from "./routes/admin/adminSessionRoutes.js";
 import adminCategoryRoutes from "./routes/admin/adminCategoryRoutes.js";
-// import http from 'http';
-// import url from 'url';
-// import {response, request} from "express";
-// import test from "node:test";
+import adminAttributeRoutes from "./routes/admin/adminAttributeRoutes.js";
 import cookieParser from 'cookie-parser';
 
 const app = express();
@@ -31,6 +28,7 @@ app.use('/auth', authRoutes)
 app.use('/cart', cartRoutes)
 app.use('/admin/session', adminSessionRoutes)
 app.use('/admin/category', adminCategoryRoutes)
+app.use('/admin/attribute', adminAttributeRoutes)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

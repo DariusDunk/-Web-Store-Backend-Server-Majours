@@ -22,4 +22,8 @@ public class AttributeGroupService {
     public List<AttributeGroup> getByNames(List<String> strings) {
         return attributeGroupRepository.getAttributeGroupByGroupNameIn(strings);
     }
+
+    public List<AttributeGroup> getAll() {
+        return attributeGroupRepository.findAll();
+    }
 }
