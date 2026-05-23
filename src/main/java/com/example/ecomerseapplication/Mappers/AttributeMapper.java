@@ -1,7 +1,11 @@
 package com.example.ecomerseapplication.Mappers;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOfGroupDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.DTOs.responses.CategoryAttributesResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.DetailedAttributeGroupsWithCategoryResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeGroupsWithCategoryProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfGroupProjection;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,4 +41,24 @@ public class AttributeMapper {
                 })
                 .toList();
     }
+
+    public static AttributeOfGroupDTO attributeOfGroupProjToDto(AttributeOfGroupProjection projection) {
+        return new AttributeOfGroupDTO(
+                projection.getName(),
+                projection.getMeasurementUnit()
+        );
+    }
+
+    public static List<AttributeOfGroupDTO> attributeOfGroupProjListToDtoList(List<AttributeOfGroupProjection> projections) {
+        return projections.stream().map(AttributeMapper::attributeOfGroupProjToDto).toList();
+    }
+
+    public static DetailedAttributeGroupsWithCategoryResponse attributeGroupWCatProjToResponse(AttributeGroupsWithCategoryProjection projection, List<AttributeOfGroupDTO> attributesDto) {
+        return new DetailedAttributeGroupsWithCategoryResponse(
+                projection.getName(),
+                projection.getIsInCategory(),
+                attributesDto
+        );
+    }
+
 }

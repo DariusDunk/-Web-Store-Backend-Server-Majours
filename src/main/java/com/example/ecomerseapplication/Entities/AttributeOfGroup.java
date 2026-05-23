@@ -10,7 +10,7 @@ import lombok.Data;
 @Entity
 @Table(name = "attributes_of_group", schema = "online_shop")
 @Data
-public class AttributesOfGroup {
+public class AttributeOfGroup {
 
     @EmbeddedId
     private AttributesOfGroupId attributesOfGroupId;

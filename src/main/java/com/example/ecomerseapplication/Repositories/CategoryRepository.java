@@ -31,7 +31,7 @@ public interface CategoryRepository extends JpaRepository<ProductCategory, Integ
         join p.categoryAttributeSet ca
             join AttributeName an on an = ca.attributeName
                 join pc.attributeGroups ag
-                    join AttributesOfGroup aog on aog.attributesOfGroupId.attributeGroup.id = ag.id
+                    join AttributeOfGroup aog on aog.attributesOfGroupId.attributeGroup.id = ag.id
                         where pc.id=:categoryId
                             and aog.attributesOfGroupId.attributeName = an
                                 order by an.attributeName asc
@@ -46,7 +46,7 @@ public interface CategoryRepository extends JpaRepository<ProductCategory, Integ
                 join p.categoryAttributeSet ca
                     join AttributeName an on an = ca.attributeName
                         join pc.attributeGroups ag
-                            join AttributesOfGroup aog on aog.attributesOfGroupId.attributeGroup.id = ag.id
+                            join AttributeOfGroup aog on aog.attributesOfGroupId.attributeGroup.id = ag.id
                                 where pc.id=:categoryId
                                     and aog.attributesOfGroupId.attributeName = an
                                                 and aog.attributesOfGroupId.attributeName in :attributeNames
@@ -79,4 +79,5 @@ from ProductCategory pc
 order by pc.isDeleted asc, pc.id asc
 """)
     List<CompactAdminCategoryProjection> findAllCompact();
+
 }

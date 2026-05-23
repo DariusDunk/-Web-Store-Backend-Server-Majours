@@ -33,6 +33,8 @@ public class CategoryAttribute {
     private String attributeOption;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "categoryAttributeSet", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(mappedBy = "categoryAttributeSet",
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+    fetch = FetchType.LAZY)
     private List<Product> products;
 }

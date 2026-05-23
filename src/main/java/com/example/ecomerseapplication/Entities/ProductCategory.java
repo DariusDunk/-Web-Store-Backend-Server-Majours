@@ -36,7 +36,7 @@ public class ProductCategory {
     private List<Product> products;
 
     @JsonIgnore
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "productCategory")
+    @OneToMany(cascade = {CascadeType.DETACH,CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, mappedBy = "productCategory")
     private List<CategoryAttribute> categoryAttributes;
 
     @ManyToMany
