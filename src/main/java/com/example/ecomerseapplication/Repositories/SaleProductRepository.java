@@ -22,4 +22,6 @@ and sp.sale in ?1
     )
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     void unmarkIsMainBySales(List<Sale> sales);
+
+    List<SaleProduct> getAllBySale_Id(Long saleId);
 }

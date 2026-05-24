@@ -11,7 +11,6 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 @Table(name = "sale_products", schema = "online_shop")
 @Data
-@NoArgsConstructor
 @EqualsAndHashCode()
 public class SaleProduct {
 
@@ -35,4 +34,8 @@ public class SaleProduct {
     @ColumnDefault("false")
     @Column(name = "is_main", nullable = false)
     private Boolean isMain;
+
+    public SaleProduct() {
+        this.saleProductId = new SaleProductId();
+    }
 }

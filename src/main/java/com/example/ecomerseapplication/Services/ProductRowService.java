@@ -3,7 +3,7 @@ package com.example.ecomerseapplication.Services;
 import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.ProductRowResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.VeryCompactSaleProjection;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.GlobalConstants;
@@ -26,7 +26,7 @@ public class ProductRowService {
     }
 
     public List<ProductRowResponse> getTopActiveSaleProducts() {
-        List<CompactSaleProjection> saleProjections = saleService.getTopCurrentSalesCompact();
+        List<VeryCompactSaleProjection> saleProjections = saleService.getTopCurrentSalesCompact();
 
         if (saleProjections.isEmpty()) {
             return List.of();
@@ -34,11 +34,11 @@ public class ProductRowService {
 
         List<ProductRowResponse> productRowResponses = new ArrayList<>();
 
-        for (CompactSaleProjection saleProjection : saleProjections) {
+        for (VeryCompactSaleProjection saleProjection : saleProjections) {
 
             long saleId = saleProjection.getId();
 
-            List<CompactProductResponse> productsOfSale = productService.getProductsOfSale(saleId);
+            List<CompactProductResponse> productsOfSale = productService.getTopProductsOfSale(saleId);
 
             if (productsOfSale.isEmpty()) {
                 continue;

@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.Entities.Sale;
+import com.example.ecomerseapplication.Entities.SaleProduct;
 import com.example.ecomerseapplication.Repositories.SaleProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,4 +23,19 @@ public class SaleProductService {
     }
 
 
+//    public List<SaleProduct> persistAll(List<SaleProduct> saleProductsForInsert) {
+//        return saleProductRepository.saveAll(saleProductsForInsert);
+//    }
+
+    public void saveAll(List<SaleProduct> saleProducts) {
+        saleProductRepository.saveAll(saleProducts);
+    }
+
+    public List<SaleProduct> getAllBySaleId(Long id) {
+        return saleProductRepository.getAllBySale_Id(id);
+    }
+
+    public void deleteAll(List<SaleProduct> saleProductsToRemove) {
+        saleProductRepository.deleteAll(saleProductsToRemove);
+    }
 }

@@ -4,6 +4,7 @@ import com.example.ecomerseapplication.DTOs.requests.PurchaseRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Services.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -32,7 +33,7 @@ public class PurchaseController {
 
     @PostMapping("complete")
     @Transactional
-    public ResponseEntity<?> createPurchase(@RequestBody PurchaseRequest request) {
+    public ResponseEntity<?> createPurchase(@RequestBody @Valid PurchaseRequest request) {
 
         Session session = sessionService.getRequestSession();
 

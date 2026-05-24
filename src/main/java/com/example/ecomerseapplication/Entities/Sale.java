@@ -33,4 +33,17 @@ public class Sale {
 
     @Column(name = "is_active")
     private Boolean isActive;
+
+    public void updateSale(String name, Short discountPercent, Instant startDate, Instant endDate, Boolean isActive){
+        this.name = name;
+        this.discountPercent = discountPercent;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.isActive = isActive;
+    }
+
+    public Boolean isExpired(){
+        return Instant.now().isAfter(endDate);
+    }
+
 }

@@ -3,9 +3,9 @@ package com.example.ecomerseapplication.DTOs.responses;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
-import java.util.List;
 
-public record DetailedSaleResponse(
+public record DetailedSalePageResponse(
+        Long id,
         @JsonProperty("name")
         String name,
         @JsonProperty("default_discount")
@@ -16,10 +16,7 @@ public record DetailedSaleResponse(
         Instant endDate,
         @JsonProperty("is_active")
         Boolean isActive,
-        @JsonProperty("products")
-        List<ProductOfSaleResponse> products
-
-        ) {
-
-
+        @JsonProperty("product_count")
+        Integer productCount
+) {
 }

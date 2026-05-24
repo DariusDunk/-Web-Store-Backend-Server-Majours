@@ -1,7 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedSaleProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.VeryCompactSaleProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedSalePageProjection;
 import com.example.ecomerseapplication.Entities.Sale;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,12 +45,13 @@ and current_timestamp between s.startDate and s.endDate
 order by s.discountPercent desc, s.startDate desc
 """
     )
-    List<CompactSaleProjection> findActiveAndNotExpired(Pageable pageable);
+    List<VeryCompactSaleProjection> findActiveAndNotExpired(Pageable pageable);
 
 
     @Query(
 """
 select s.name as name,
+s.id as id,
 s.discountPercent as defaultDiscount,
 s.startDate as startDate,
 s.endDate as endDate,
@@ -62,5 +63,18 @@ where sp.sale.id = s.id
 from Sale s
 """
     )
-    Page<DetailedSaleProjection> getAllSalesProjection(Pageable pageable);
+    Page<DetailedSalePageProjection> getAllSalesProjection(Pageable pageable);
+
+    @Query(
+"""
+select s.name as name,
+s.discountPercent as defaultDiscount,
+s.startDate as startDate,
+s.endDate as endDate,
+s.isActive as isActive
+from Sale s
+where s.id = ?1
+"""
+    )
+    DetailedSalePageProjection getSaleProjection(Long saleId);
 }

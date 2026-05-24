@@ -1,15 +1,18 @@
 package com.example.ecomerseapplication.Controllers.Admin;
 
+import com.example.ecomerseapplication.DTOs.requests.SaleUpdateRequest;
 import com.example.ecomerseapplication.Services.SaleService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin/sale/")
+@PreAuthorize("hasRole(@roles.admin())")
+@Validated
 public class AdminSaleController {
 
     private final SaleService saleService;
@@ -20,8 +23,20 @@ public class AdminSaleController {
 
 
     @GetMapping("all/{page}")
-    @PreAuthorize("hasRole(@roles.admin())")
     public ResponseEntity<?> getAllSales(@PathVariable int page) {
         return ResponseEntity.ok(saleService.getAllSales(page));
+    }
+
+    @GetMapping("detailed/{id}")
+    public ResponseEntity<?> getDetailedSale(@PathVariable long id) {
+        return ResponseEntity.ok(saleService.getDetailedSaleById(id));
+    }
+
+    @PatchMapping("update")
+    public ResponseEntity<?> updateSale(@RequestBody @Valid SaleUpdateRequest request) {
+
+        saleService.updateSale(request);
+
+        return ResponseEntity.noContent().build();
     }
 }

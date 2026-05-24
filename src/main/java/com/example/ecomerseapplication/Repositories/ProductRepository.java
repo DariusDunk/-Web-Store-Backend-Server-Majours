@@ -1,9 +1,11 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.responses.ProductOfSaleResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.VeryCompactSaleProjection;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import jakarta.persistence.LockModeType;
@@ -120,7 +122,7 @@ p.reviewCount desc,
 p.rating desc
 """
     )
-    List<CompactSaleProductProjection> getProductsOfSale(@Param("saleId") long saleId, Pageable pageable);
+    List<CompactSaleProductProjection> getTopProductsOfSale(@Param("saleId") long saleId, Pageable pageable);
 
     @Query("select new com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto (p.productCode," +
             " p.productName, " +
@@ -167,4 +169,24 @@ order by (p.rating * log(p.reviewCount + 1)) desc
             @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
     })
     List<Product> getAllByIdIn(Set<Integer> ids);
+
+    @Query(value =
+            "select p.productName as name, p.productCode as productCode " +
+                    "from Product p " +
+                    "where p.productName ilike %?1% " +
+                    "order by p.rating, p.productName " +
+                    "limit 7 ")
+    List<CompactProductProjection> getNameSuggestionsForSaleForm(String name);
+
+    @Query(
+"""
+select new com.example.ecomerseapplication.DTOs.responses.ProductOfSaleResponse
+(p.productName,
+p.productCode,
+sp.overrideDiscountPercentage)
+from Product p
+join p.saleProducts sp
+where sp.sale.id = ?1 and sp.isMain = true
+""")
+    List<ProductOfSaleResponse> getAllProductsOfSaleMini(long saleId);
 }

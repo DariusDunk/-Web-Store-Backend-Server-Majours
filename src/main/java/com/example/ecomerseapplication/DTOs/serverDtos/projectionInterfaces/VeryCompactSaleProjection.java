@@ -1,6 +1,6 @@
 package com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces;
 
-public interface CompactSaleProjection {
+public interface VeryCompactSaleProjection {
 
     long getId();
 

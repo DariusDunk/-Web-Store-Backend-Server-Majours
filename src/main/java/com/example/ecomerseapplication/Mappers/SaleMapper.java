@@ -1,14 +1,16 @@
 package com.example.ecomerseapplication.Mappers;
 
-import com.example.ecomerseapplication.DTOs.responses.DetailedSaleResponse;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedSaleProjection;
+import com.example.ecomerseapplication.DTOs.responses.DetailedSalePageResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedSalePageProjection;
 
 import java.util.List;
 
 public class SaleMapper {
 
-    public static DetailedSaleResponse saleDetailProjToResponse(DetailedSaleProjection projection) {
-        return new DetailedSaleResponse(projection.getName(),
+    public static DetailedSalePageResponse saleDetailProjToResponse(DetailedSalePageProjection projection) {
+        return new DetailedSalePageResponse(
+                projection.getId(),
+                projection.getName(),
                 projection.getDefaultDiscount(),
                 projection.getStartDate(),
                 projection.getEndDate(),
@@ -16,7 +18,7 @@ public class SaleMapper {
                 projection.getProductCount());
     }
 
-    public static List<DetailedSaleResponse> saleDetailProjListToResponseList(List<DetailedSaleProjection> projections) {
+    public static List<DetailedSalePageResponse> saleDetailProjListToResponseList(List<DetailedSalePageProjection> projections) {
         return projections.stream().map(SaleMapper::saleDetailProjToResponse).toList();
     }
 }

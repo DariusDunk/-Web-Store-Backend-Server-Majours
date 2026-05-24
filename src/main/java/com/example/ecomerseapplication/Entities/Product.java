@@ -76,7 +76,8 @@ public class Product {
     @Column(name = "added_at")
     private Instant creationTimeStamp;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<SaleProduct> saleProducts;
 
     public boolean isInStock() {

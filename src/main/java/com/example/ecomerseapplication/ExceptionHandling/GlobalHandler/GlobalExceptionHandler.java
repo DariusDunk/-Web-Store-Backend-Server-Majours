@@ -201,7 +201,7 @@ public class GlobalExceptionHandler {
                 ErrorType.RESOURCE_CONFLICT,
                 exception.getTitle(),
                 HttpStatus.CONFLICT.value()
-                ,exception.getDetail()
+                , exception.getDetail()
         ));
     }
 
@@ -263,5 +263,13 @@ public class GlobalExceptionHandler {
                 exception.getTitle(),
                 HttpStatus.BAD_REQUEST.value(),
                 exception.getDetail()));
+    }
+
+    @ExceptionHandler(ProductAlreadyInSaleException.class)
+    public ResponseEntity<?> handleProductAlreadyInSaleExceptions(ProductAlreadyInSaleException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.RESOURCE_CONFLICT,
+                "Продуктът е зает",
+                HttpStatus.CONFLICT.value(),
+                "Продуктът " + exception.getProductName() + " вече е част от промоцията: "+ exception.getSaleName()));
     }
 }

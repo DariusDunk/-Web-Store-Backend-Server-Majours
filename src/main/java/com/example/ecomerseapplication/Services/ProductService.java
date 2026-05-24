@@ -735,11 +735,15 @@ public class ProductService {
         return products;
     }
 
-    public List<CompactProductResponse> getProductsOfSale(long saleId) {
+    public List<CompactProductResponse> getTopProductsOfSale(long saleId) {
         List<CompactSaleProductProjection> productProjections = productRepository
-                .getProductsOfSale(saleId, PageRequest.of(0, 8));
+                .getTopProductsOfSale(saleId, PageRequest.of(0, 8));
 
        return ProductDTOMapper.compactSaleProjectionListToResponseList(productProjections);
+    }
+
+    public List<ProductOfSaleResponse> getAllProductsOfSale(long saleId) {
+       return productRepository.getAllProductsOfSaleMini(saleId);
     }
 
     public List<CompactProductProjection> getTopProductsOfCategory(ProductCategory category) {
@@ -778,4 +782,18 @@ public class ProductService {
     public List<Product> getByIdSetWithLock(Set<Integer> productIds) {
         return productRepository.getAllByIdIn(productIds);
     }
+
+    public List<SaleProductSuggestionResponse> getSuggestionsForSale(String keyword) {
+        List<CompactProductProjection> projections = productRepository.getNameSuggestionsForSaleForm(keyword);
+
+        List<SaleProductSuggestionResponse> responseList = new ArrayList<>();
+
+        for (CompactProductProjection projection : projections) {
+            responseList.add(new SaleProductSuggestionResponse(projection.getName(), projection.getProductCode()));
+        }
+
+        return responseList;
+    }
+
+
 }

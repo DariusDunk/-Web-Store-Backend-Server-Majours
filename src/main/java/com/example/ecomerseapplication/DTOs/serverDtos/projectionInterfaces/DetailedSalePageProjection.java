@@ -2,7 +2,8 @@ package com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces;
 
 import java.time.Instant;
 
-public interface DetailedSaleProjection {
+public interface DetailedSalePageProjection {
+    Long getId();
     String getName();
     Short getDefaultDiscount();
     Instant getStartDate();
