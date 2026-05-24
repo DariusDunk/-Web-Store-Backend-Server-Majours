@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Repositories;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedSaleProjection;
 import com.example.ecomerseapplication.Entities.Sale;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -61,5 +62,5 @@ where sp.sale.id = s.id
 from Sale s
 """
     )
-    List<DetailedSaleProjection> getAllSalesProjection();
+    Page<DetailedSaleProjection> getAllSalesProjection(Pageable pageable);
 }

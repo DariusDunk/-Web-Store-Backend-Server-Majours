@@ -4,11 +4,15 @@ import {Backend_Url, WEB_CLIENT_NAME} from '../config.js';
 import axiosBackendClient from '../../axiosBackendClient.js';
 import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
-router.get('/all', async (req, res) => {
+const CONTROLLER_ROUTE = `${Backend_Url}/admin/sale`;
+
+
+router.get('/all/:page', async (req, res) => {
     const sessionId = req.cookies.session_id;
+    const {page} = req.params;
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.get(`${Backend_Url}/admin/sale/all`, {
+            return await axiosBackendClient.get(`${CONTROLLER_ROUTE}/all/${page}`, {
                 headers:
                     {
                         'Content-Type': 'application/json',
@@ -23,8 +27,10 @@ router.get('/all', async (req, res) => {
         },
             {req, res});
 
+        console.log("response: " + JSON.stringify(response.data))
+
         const responseData = response.data;
-        return res.status(response.status).json({sales: responseData} || {});
+        return res.status(response.status).json(responseData || {});
 
     }
     catch (error) {

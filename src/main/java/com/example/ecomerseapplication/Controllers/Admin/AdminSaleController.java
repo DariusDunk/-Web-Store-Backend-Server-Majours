@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -17,9 +18,10 @@ public class AdminSaleController {
         this.saleService = saleService;
     }
 
-    @GetMapping("all")
+
+    @GetMapping("all/{page}")
     @PreAuthorize("hasRole(@roles.admin())")
-    public ResponseEntity<?> getAllSales() {
-        return ResponseEntity.ok(saleService.getAllSales());
+    public ResponseEntity<?> getAllSales(@PathVariable int page) {
+        return ResponseEntity.ok(saleService.getAllSales(page));
     }
 }
