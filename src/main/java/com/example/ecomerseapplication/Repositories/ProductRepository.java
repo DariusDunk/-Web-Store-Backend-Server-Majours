@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Repositories;
 
-import com.example.ecomerseapplication.DTOs.responses.AdminProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.ProductOfSaleResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;

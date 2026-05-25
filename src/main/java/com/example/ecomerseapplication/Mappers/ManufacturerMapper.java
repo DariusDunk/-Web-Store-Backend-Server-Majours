@@ -1,12 +1,9 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.CompactManufacturerResponse;
-import com.example.ecomerseapplication.DTOs.responses.ManufacturerDTOResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ManufacturerProjection;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ManufacturerMapper {
 
