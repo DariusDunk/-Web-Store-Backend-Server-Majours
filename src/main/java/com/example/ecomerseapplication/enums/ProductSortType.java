@@ -10,7 +10,8 @@ public enum ProductSortType {
     PRICE_ASC("price_asc"),
     PRICE_DESC("price_desc"),
     NEWEST("newest"),
-    REVIEW_COUNT("review_count");
+    REVIEW_COUNT("review_count"),
+    PRODUCT_CODE("product_code");
 
     @Getter
     private final String value;
@@ -22,7 +23,8 @@ public enum ProductSortType {
                 || Objects.equals(value, PRICE_ASC.getValue())
                 || Objects.equals(value, PRICE_DESC.getValue())
                 || Objects.equals(value, NEWEST.getValue())
-                || Objects.equals(value, REVIEW_COUNT.getValue());
+                || Objects.equals(value, REVIEW_COUNT.getValue())
+                || Objects.equals(value, PRODUCT_CODE.getValue());
     }
 
     ProductSortType(String value) {

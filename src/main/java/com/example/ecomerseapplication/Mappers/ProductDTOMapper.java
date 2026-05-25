@@ -288,11 +288,11 @@ public class ProductDTOMapper {
         return new AdminProductResponse(
                 projection.getId(),
                 projection.getName(),
-                projection.getCategoryName(),
+                projection.getCategoryId(),
                 projection.getOriginalPriceStotinki(),
                 projection.getProductCode(),
                 projection.getQuantityInStock(),
-                projection.getManufacturerName()
+                projection.getManufacturerId()
         );
     }
 

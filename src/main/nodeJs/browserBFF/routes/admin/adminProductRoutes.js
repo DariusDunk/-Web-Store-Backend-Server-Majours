@@ -1,15 +1,19 @@
 import express from 'express';
+
 const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from '../config.js';
 import axiosBackendClient from '../../axiosBackendClient.js';
 import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
-router.get(`/detailed/:id`, async (req, res) => {
+router.patch(`/update/:id`, async (req, res) => {
     const sessionId = req.cookies.session_id;
-    const {id} = req.params;
+    const reqBody = req.body;
+    const {id} = req.params
+
     try {
+
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.get(`${Backend_Url}/admin/product/detail/${id}`, {
+            return await axiosBackendClient.patch(`${Backend_Url}/admin/product/update/${id}`, reqBody, {
                 headers:
                     {
                         'Content-Type': 'application/json',
@@ -24,11 +28,40 @@ router.get(`/detailed/:id`, async (req, res) => {
         },
             {req, res});
 
-        const responseData = response.data;
-        
-        return res.status(response.status).json(responseData || {});
+        return res.status(response.status).end();
+
+    } catch (error) {
+        console.error('-------------------Error updating product-------------------\n', error);
+        if (error.response)
+            return res.status(error.response.status || 500).json(error.response.data);
+        return res.status(500).end();
     }
-    catch (error) {
+});
+
+router.get(`/detailed/:id`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const {id} = req.params;
+    try {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                return await axiosBackendClient.get(`${Backend_Url}/admin/product/detail/${id}`, {
+                    headers:
+                        {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            },
+            {req, res});
+
+        const responseData = response.data;
+
+        return res.status(response.status).json(responseData || {});
+    } catch (error) {
         console.error('-------------------Error fetching detailed product-------------------\n', error);
         if (error.response)
             return res.status(error.response.status || 500).json(error.response.data);
@@ -41,27 +74,25 @@ router.get('/all/:page', async (req, res) => {
     const {page} = req.params;
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.get(`${Backend_Url}/admin/product/all/p/${page}`, {
-                headers:
-                    {
-                        'Content-Type': 'application/json',
-                        'x-client_type': WEB_CLIENT_NAME,
-                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                        ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
-                    },
-                bffContext: {
-                    req, res
-                }
-            });
-        },
+                return await axiosBackendClient.get(`${Backend_Url}/admin/product/all/p/${page}`, {
+                    headers:
+                        {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            },
             {req, res});
 
         const responseData = response.data;
         return res.status(response.status).json(responseData || {});
 
-    }
-    catch(error)
-    {
+    } catch (error) {
         console.error('-------------------Error fetching all products-------------------\n', error);
         if (error.response)
             return res.status(error.response.status || 500).json(error.response.data);
@@ -91,8 +122,7 @@ router.get('/sale-suggestions', async (req, res) => {
 
         const responseData = response.data;
         return res.status(response.status).json({suggestions: responseData} || {});
-    }
-    catch (error) {
+    } catch (error) {
         console.error('-------------------Error fetching product suggestions-------------------\n', error);
         if (error.response)
             return res.status(error.response.status || 500).json(error.response.data);

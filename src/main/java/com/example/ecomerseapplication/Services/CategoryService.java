@@ -159,5 +159,10 @@ public class CategoryService {
         category.updateCategory(request.name(), attributeGroups, request.isDeleted());
         categoryRepository.save(category);
     }
+
+    public ProductCategory getById(Integer integer) {
+        return categoryRepository.findById(integer)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + integer));
+    }
 }
 

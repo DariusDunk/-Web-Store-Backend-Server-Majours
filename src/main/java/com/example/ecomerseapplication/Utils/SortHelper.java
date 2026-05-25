@@ -10,6 +10,8 @@ public class SortHelper {
             case "review_count" -> Sort.by(Sort.Direction.DESC, "reviewCount");
             case "popularity" -> Sort.by(Sort.Direction.DESC, "reviewCount")
                     .and(Sort.by(Sort.Direction.DESC, "rating"));
+            case "product_code" -> Sort.by(Sort.Direction.ASC, "productCode");
+
             default -> Sort.by(Sort.Direction.ASC, "name");
         };
     }

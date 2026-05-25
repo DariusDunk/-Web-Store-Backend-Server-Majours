@@ -48,4 +48,10 @@ public class ManufacturerService {
         }
         return names;
     }
+
+    public Manufacturer getById(int id) {
+        return repository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Manufacturer not found with id: " + id));
+    }
 }

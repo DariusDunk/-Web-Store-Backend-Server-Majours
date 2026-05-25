@@ -211,8 +211,8 @@ join p.manufacturer m
 select p.productCode as productCode,
 p.productName as name,
 p.originalPriceStotinki as originalPriceStotinki,
-pc.categoryName as categoryName,
-m.manufacturerName as manufacturerName,
+pc.id as categoryId,
+m.id as manufacturerId,
 p.quantityInStock as quantityInStock,
 p.id as id
 from Product p

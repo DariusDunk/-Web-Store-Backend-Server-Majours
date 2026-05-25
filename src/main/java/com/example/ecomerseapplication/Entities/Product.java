@@ -93,5 +93,23 @@ public class Product {
         return saleProducts.stream().filter(SaleProduct::getIsMain).findFirst();
     }
 
+    public void updateProduct(String productName,
+                              int originalPriceStotinki,
+                              String productDescription,
+                              ProductCategory category,
+                              String productCode,
+                              int quantityInStock,
+                              Manufacturer manufacturer) {
+        this.productName = productName;
+        this.originalPriceStotinki = originalPriceStotinki;
+        this.productDescription = productDescription.trim();
+
+        System.out.println(productDescription.trim());
+
+        this.productCategory = category;
+        this.productCode = productCode;
+        this.quantityInStock = quantityInStock;
+        this.manufacturer = manufacturer;
+    }
 
 }

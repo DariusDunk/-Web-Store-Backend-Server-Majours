@@ -14,4 +14,6 @@ public interface DetailedProductProjection {
     String getCategoryName();
     String getManufacturerName();
     Integer getQuantityInStock();
+    Integer getManufacturerId();
+    Integer getCategoryId();
 }

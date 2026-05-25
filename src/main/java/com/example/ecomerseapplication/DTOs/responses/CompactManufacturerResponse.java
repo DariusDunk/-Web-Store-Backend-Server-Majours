@@ -7,5 +7,5 @@ public record CompactManufacturerResponse
                 @JsonProperty("name")
                 String name,
                 Integer id
-                ) {
+        ) {
 }

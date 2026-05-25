@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.ProductCodeQuantityPairRequest;
+import com.example.ecomerseapplication.DTOs.requests.ProductFormRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,16 +43,18 @@ public class ProductService {
     private final ReviewService reviewService;
     private final CategoryService categoryService;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
+    private final ManufacturerService manufacturerService;
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, CategoryService categoryService, FavoriteOfCustomerService favoriteOfCustomerService) {
+    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, CategoryService categoryService, FavoriteOfCustomerService favoriteOfCustomerService, ManufacturerService manufacturerService) {
         this.productRepository = productRepository;
         this.cartProductService = cartProductService;
         this.reviewService = reviewService;
         this.categoryService = categoryService;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
+        this.manufacturerService = manufacturerService;
     }
 
     public Page<CompactProductResponse> findAllByRatingResponsePage(PageRequest pageRequest) {
@@ -797,18 +801,42 @@ public class ProductService {
     }
 
     public PageResponse<AdminProductResponse> getAllProductsPaged(String page) {
+
+        Sort sort = SortHelper.buildProdSort(ProductSortType.PRODUCT_CODE.getValue());
+
         Page<DetailedProductProjection> productProjections = productRepository.getAllDetailedProductsPaged(
-                PageRequest.of(Integer.parseInt(page), PageContentLimit.limit)
+                PageRequest.of(Integer.parseInt(page), PageContentLimit.limit, sort)
         );
 
         return ProductDTOMapper.adminProductProjPageToResponsePage(productProjections);
     }
 
-    public AdminProductResponse getByIdForAdmin(int id) {
+    public AdminProductResponse getByIdForAdminResponse(int id) {
 
         DetailedProductProjection projection = productRepository
                 .getByIdDetProjection(id).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         return ProductDTOMapper.detailedProjectionToAdminResponse(projection);
+    }
+
+    public Product getById(int id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+
+    @Transactional
+    public void updateProduct(ProductFormRequest request, int id) {
+        Product product = getById(id);
+        ProductCategory category = categoryService.getById(request.categoryId());
+        Manufacturer manufacturer = manufacturerService.getById(request.manufacturerId());
+
+        product.updateProduct(request.productName(),
+                request.originalPriceStotinki(),
+                request.description(),
+                category,
+                request.productCode(),
+                request.stockQuantity(),
+                manufacturer);
+
     }
 }
