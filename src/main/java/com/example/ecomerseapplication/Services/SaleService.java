@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.ProductForSaleUpdateRequest;
+import com.example.ecomerseapplication.DTOs.requests.SaleCreateRequest;
 import com.example.ecomerseapplication.DTOs.requests.SaleUpdateRequest;
 import com.example.ecomerseapplication.DTOs.responses.DetailedSalePageResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedSaleResponse;
@@ -93,9 +94,6 @@ public class SaleService {
 
         List<ProductForSaleUpdateRequest> productDtos = request.products();
         List<SaleProduct> oldSaleProducts = saleProductService.getAllBySaleId(sale.getId());
-//        Map<String, SaleProduct> oldSaleProductsMap = oldSaleProducts
-//                .stream()
-//                .collect(Collectors.toMap(sp -> sp.getProduct().getProductCode(), sp -> sp));
 
         Map<String, ProductForSaleUpdateRequest> productDtossMap = productDtos
                 .stream()
@@ -118,41 +116,20 @@ public class SaleService {
         for (Product product : products) {
             SaleProduct oldSaleProduct = product.getMainSaleProduct().orElse(null);
             if (oldSaleProduct != null) {
-                System.out.println("Old sale product: " + oldSaleProduct.getSale().getId() + " New sale: " + sale.getId() );
-
-                System.out.println("Old sale product isMain: " + oldSaleProduct.getIsMain() + " \nIs new sale old sale: " + (Objects.equals(oldSaleProduct.getSale().getId(), sale.getId())));
-
                 if ((!oldSaleProduct.getSale().isExpired() && oldSaleProduct.getIsMain())
-                && (!Objects.equals(oldSaleProduct.getSale().getId(), sale.getId())) ) {
+                        && (!Objects.equals(oldSaleProduct.getSale().getId(), sale.getId()))) {
                     throw new ProductAlreadyInSaleException("Product already in sale", product.getProductName(), sale.getName());
                 } else {
 
-                    if(!Objects.equals(oldSaleProduct.getSale().getId(), sale.getId())) {
-                        oldSaleProduct.setIsMain(false);
-
-                        SaleProduct saleProduct = new SaleProduct();
-
-                        saleProduct.setSale(sale);
-                        saleProduct.setProduct(product);
-                        saleProduct.setIsMain(true);
-                        saleProduct.setOverrideDiscountPercentage(productDtossMap.get(product.getProductCode()).explicitDiscount());
-
-                        saleProductsForInsert.add(saleProduct);
-                    }
-                    else {
+                    if (!Objects.equals(oldSaleProduct.getSale().getId(), sale.getId())) {
+                        replaceOldSaleProduct(sale, productDtossMap, saleProductsForInsert, product, oldSaleProduct);
+                    } else {
                         oldSaleProduct.setOverrideDiscountPercentage(productDtossMap.get(product.getProductCode()).explicitDiscount());
                     }
                 }
 
             } else {
-                SaleProduct saleProduct = new SaleProduct();
-
-                saleProduct.setSale(sale);
-                saleProduct.setProduct(product);
-                saleProduct.setIsMain(true);
-                saleProduct.setOverrideDiscountPercentage(productDtossMap.get(product.getProductCode()).explicitDiscount());
-
-                saleProductsForInsert.add(saleProduct);
+                createNewSaleProductForSale(sale, productDtossMap, saleProductsForInsert, product);
 
             }
 
@@ -167,6 +144,71 @@ public class SaleService {
 
         saleProductService.saveAll(saleProductsForInsert);
 
+    }
+
+
+    @Transactional
+    public void createSale(@Valid SaleCreateRequest request) {
+        Sale sale = new Sale();
+
+        sale.updateSale(request.name(),
+                request.defaultDiscount(),
+                request.startDate(),
+                request.endDate(),
+                request.isActive());
+
+        sale = saleRepository.save(sale);
+
+        List<Product> products = productService.findByCodesWithSale(request
+                .products()
+                .stream()
+                .map(ProductForSaleUpdateRequest::productCode).toList());
+
+        Map<String, ProductForSaleUpdateRequest> productDtossMap = request
+                .products()
+                .stream()
+                .collect(Collectors.toMap(ProductForSaleUpdateRequest::productCode,
+                        p -> p,
+                        (oldValue, newValue) -> newValue,
+                        HashMap::new));
+
+
+        List<SaleProduct> saleProductsForInsert = new ArrayList<>();
+
+        for (Product product : products) {
+            SaleProduct oldSaleProduct = product.getMainSaleProduct().orElse(null);
+            if (oldSaleProduct != null) {
+                if ((!oldSaleProduct.getSale().isExpired() && oldSaleProduct.getIsMain())) {
+                    throw new ProductAlreadyInSaleException("Product already in sale", product.getProductName(), oldSaleProduct.getSale().getName());
+                } else {
+                    replaceOldSaleProduct(sale, productDtossMap, saleProductsForInsert, product, oldSaleProduct);
+                }
+            }
+            else {
+                createNewSaleProductForSale(sale, productDtossMap, saleProductsForInsert, product);
+            }
+        }
+
+        entityManager.flush();
+
+        saleProductService.saveAll(saleProductsForInsert);
+
+    }
+
+    private void replaceOldSaleProduct(Sale sale, Map<String, ProductForSaleUpdateRequest> productDtossMap, List<SaleProduct> saleProductsForInsert, Product product, SaleProduct oldSaleProduct) {
+        oldSaleProduct.setIsMain(false);
+        createNewSaleProductForSale(sale, productDtossMap, saleProductsForInsert, product);
+    }
+
+    private static void createNewSaleProductForSale(Sale sale, Map<String, ProductForSaleUpdateRequest> productDtossMap, List<SaleProduct> saleProductsForInsert, Product product) {
+        SaleProduct saleProduct = new SaleProduct();
+
+        saleProduct.setSale(sale);
+        saleProduct.setProduct(product);
+        saleProduct.setIsMain(true);
+        saleProduct.setOverrideDiscountPercentage(productDtossMap.get(product.getProductCode()).explicitDiscount());
+
+        saleProductsForInsert.add(saleProduct);
     }
 }
 

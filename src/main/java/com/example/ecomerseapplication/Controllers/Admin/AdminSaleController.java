@@ -1,8 +1,10 @@
 package com.example.ecomerseapplication.Controllers.Admin;
 
+import com.example.ecomerseapplication.DTOs.requests.SaleCreateRequest;
 import com.example.ecomerseapplication.DTOs.requests.SaleUpdateRequest;
 import com.example.ecomerseapplication.Services.SaleService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -37,6 +39,13 @@ public class AdminSaleController {
 
         saleService.updateSale(request);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("create")
+    public ResponseEntity<?> createSale(@RequestBody @Valid SaleCreateRequest request) {
+
+        saleService.createSale(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
