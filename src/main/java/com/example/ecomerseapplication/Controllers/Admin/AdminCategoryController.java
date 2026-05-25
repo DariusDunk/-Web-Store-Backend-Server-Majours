@@ -5,16 +5,19 @@ import com.example.ecomerseapplication.DTOs.responses.CompactCategoryAdminRespon
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
 import com.example.ecomerseapplication.Mappers.CategoryMapper;
 import com.example.ecomerseapplication.Services.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Controller
 @RequestMapping("/admin/category/")
+@Validated
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
@@ -43,7 +46,7 @@ public class AdminCategoryController {
 
     @PatchMapping("update")
     @PreAuthorize("hasRole(@roles.admin())")
-    public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequest request) {
+    public ResponseEntity<?> updateCategory(@RequestBody @Valid UpdateCategoryRequest request) {
 
         categoryService.updateCategory(request);
 
@@ -52,7 +55,7 @@ public class AdminCategoryController {
 
     @PostMapping("create")
     @PreAuthorize("hasRole(@roles.admin())")
-    public ResponseEntity<?> createCategory(@RequestBody UpdateCategoryRequest request) {
+    public ResponseEntity<?> createCategory(@RequestBody @Valid UpdateCategoryRequest request) {
 
         categoryService.createCategory(request);
 
