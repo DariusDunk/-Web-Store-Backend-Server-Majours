@@ -4,8 +4,6 @@ import com.example.ecomerseapplication.DTOs.requests.UpdateCategoryRequest;
 import com.example.ecomerseapplication.DTOs.responses.CompactCategoryAdminResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
 import com.example.ecomerseapplication.Mappers.CategoryMapper;
-import com.example.ecomerseapplication.Services.AttributeNameService;
-import com.example.ecomerseapplication.Services.CategoryAttributeService;
 import com.example.ecomerseapplication.Services.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +18,9 @@ import java.util.List;
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
-    private final AttributeNameService attributeNameService;
-    private final CategoryAttributeService categoryAttributeService;
 
-    public AdminCategoryController(CategoryService categoryService, AttributeNameService attributeNameService, CategoryAttributeService categoryAttributeService) {
+    public AdminCategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
-        this.attributeNameService = attributeNameService;
-        this.categoryAttributeService = categoryAttributeService;
     }
 
 

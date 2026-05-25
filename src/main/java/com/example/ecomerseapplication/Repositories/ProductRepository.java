@@ -1,9 +1,11 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.responses.AdminProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.ProductOfSaleResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductCategory;
@@ -188,4 +190,37 @@ join p.saleProducts sp
 where sp.sale.id = ?1 and sp.isMain = true
 """)
     List<ProductOfSaleResponse> getAllProductsOfSaleMini(long saleId);
+
+    @Query(
+"""
+select p.productCode as productCode,
+p.productName as name,
+p.originalPriceStotinki as originalPriceStotinki,
+pc.categoryName as categoryName,
+m.manufacturerName as manufacturerName,
+p.quantityInStock as quantityInStock,
+p.id as id
+from Product p
+join p.productCategory pc
+join p.manufacturer m
+"""
+    )
+    Page<DetailedProductProjection> getAllDetailedProductsPaged(Pageable pageable);
+
+    @Query(
+"""
+select p.productCode as productCode,
+p.productName as name,
+p.originalPriceStotinki as originalPriceStotinki,
+pc.categoryName as categoryName,
+m.manufacturerName as manufacturerName,
+p.quantityInStock as quantityInStock,
+p.id as id
+from Product p
+join p.productCategory pc
+join p.manufacturer m
+where p.id = ?1
+"""
+    )
+    Optional<DetailedProductProjection> getByIdDetProjection(int id);
 }

@@ -283,4 +283,29 @@ public class ProductDTOMapper {
     public static List<DetailedPurchaseProductResponse> detailedPurchaseProdProjectionListToResponseList(List<ProductForDetailedPurchaseProjection> projections) {
         return projections.stream().map(ProductDTOMapper::detailedPurchaseProdProjectionToResponse).toList();
     }
+
+    public static AdminProductResponse detailedProjectionToAdminResponse (DetailedProductProjection projection) {
+        return new AdminProductResponse(
+                projection.getId(),
+                projection.getName(),
+                projection.getCategoryName(),
+                projection.getOriginalPriceStotinki(),
+                projection.getProductCode(),
+                projection.getQuantityInStock(),
+                projection.getManufacturerName()
+        );
+    }
+
+    public static List<AdminProductResponse> detailedProjectionListToAdminResponseList (List<DetailedProductProjection> projections) {
+        return projections.stream().map(ProductDTOMapper::detailedProjectionToAdminResponse).toList();
+    }
+
+    public static PageResponse<AdminProductResponse> adminProductProjPageToResponsePage(Page<DetailedProductProjection> projections) {
+        List<DetailedProductProjection> content = projections.getContent();
+        List<AdminProductResponse> adminProductResponses = ProductDTOMapper.detailedProjectionListToAdminResponseList(content);
+
+        Page<AdminProductResponse> page = new PageImpl<>(adminProductResponses, projections.getPageable(), projections.getTotalElements());
+        return PageResponse.from(page);
+    }
+
 }

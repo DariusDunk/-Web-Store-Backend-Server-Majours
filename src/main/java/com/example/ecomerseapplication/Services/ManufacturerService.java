@@ -1,7 +1,10 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.responses.CompactManufacturerResponse;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ManufacturerProjection;
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.ProductCategory;
+import com.example.ecomerseapplication.Mappers.ManufacturerMapper;
 import com.example.ecomerseapplication.Repositories.ManufacturerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -20,8 +23,14 @@ public class ManufacturerService {
         this.repository = repository;
     }
 
-    public List<Manufacturer> getAll() {
-        return repository.findAll();
+//    public List<Manufacturer> getAll() {
+//        return repository.findAll();
+//    }
+
+    public List<CompactManufacturerResponse> getAllCompact() {
+        List<ManufacturerProjection> projections = repository.getAllProjections();
+
+        return ManufacturerMapper.projectionListToCompactResponseList(projections);
     }
 
     public Manufacturer findByName(String manufacturerName) {

@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ManufacturerProjection;
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,4 +34,13 @@ public interface ManufacturerRepository extends JpaRepository<Manufacturer, Inte
             where p.productCategory = ?1
             """)
     Set<String> getNamesByCategory(ProductCategory category);
+
+    @Query(
+"""
+select m.id as id, m.manufacturerName as name
+from Manufacturer m
+"""
+    )
+    List<ManufacturerProjection> getAllProjections();
+
 }

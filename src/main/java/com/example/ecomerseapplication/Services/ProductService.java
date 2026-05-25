@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoCategoryAndManufacturerPresentException;
@@ -795,5 +796,19 @@ public class ProductService {
         return responseList;
     }
 
+    public PageResponse<AdminProductResponse> getAllProductsPaged(String page) {
+        Page<DetailedProductProjection> productProjections = productRepository.getAllDetailedProductsPaged(
+                PageRequest.of(Integer.parseInt(page), PageContentLimit.limit)
+        );
 
+        return ProductDTOMapper.adminProductProjPageToResponsePage(productProjections);
+    }
+
+    public AdminProductResponse getByIdForAdmin(int id) {
+
+        DetailedProductProjection projection = productRepository
+                .getByIdDetProjection(id).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+
+        return ProductDTOMapper.detailedProjectionToAdminResponse(projection);
+    }
 }

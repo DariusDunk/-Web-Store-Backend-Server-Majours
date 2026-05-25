@@ -12,6 +12,7 @@ import adminCategoryRoutes from "./routes/admin/adminCategoryRoutes.js";
 import adminAttributeRoutes from "./routes/admin/adminAttributeRoutes.js";
 import adminSaleRoutes from "./routes/admin/adminSaleRoutes.js";
 import adminProductRoutes from "./routes/admin/adminProductRoutes.js";
+import AdminManufacturerRoutes from "./routes/admin/adminManufacturerRoutes.js";
 import cookieParser from 'cookie-parser';
 
 const app = express();
@@ -33,6 +34,7 @@ app.use('/admin/category', adminCategoryRoutes)
 app.use('/admin/attribute', adminAttributeRoutes)
 app.use('/admin/sale', adminSaleRoutes)
 app.use('/admin/product', adminProductRoutes)
+app.use('/admin/manufacturer', AdminManufacturerRoutes)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

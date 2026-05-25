@@ -21,8 +21,8 @@ public class ManufacturerController {
         this.manufacturerService = manufacturerService;
     }
 
-    @GetMapping("manufacturers")
-    public List<Manufacturer> getALl() {
-        return manufacturerService.getAll();
-    }
+//    @GetMapping("manufacturers")
+//    public List<Manufacturer> getALl() {
+//        return manufacturerService.getAll();
+//    }
 }
