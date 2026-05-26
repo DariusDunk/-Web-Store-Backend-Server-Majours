@@ -17,4 +17,5 @@ public interface DetailedProductProjection {
     Integer getManufacturerId();
     Integer getCategoryId();
     String getModel();
+    String getProductDescription();
 }

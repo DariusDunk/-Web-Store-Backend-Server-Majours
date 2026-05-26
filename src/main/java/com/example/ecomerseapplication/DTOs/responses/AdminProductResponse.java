@@ -18,6 +18,8 @@ public record AdminProductResponse(
         @JsonProperty("manufacturer_id")
         Integer manufacturerId,
         @JsonProperty("model")
-        String model
-) {
+        String model,
+        @JsonProperty("description")
+        String description
+        ) {
 }

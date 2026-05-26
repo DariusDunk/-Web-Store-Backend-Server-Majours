@@ -293,7 +293,8 @@ public class ProductDTOMapper {
                 projection.getProductCode(),
                 projection.getQuantityInStock(),
                 projection.getManufacturerId(),
-                projection.getModel()
+                projection.getModel(),
+                projection.getProductDescription()
         );
     }
 

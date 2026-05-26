@@ -215,7 +215,8 @@ pc.id as categoryId,
 m.id as manufacturerId,
 p.quantityInStock as quantityInStock,
 p.id as id,
-p.model as model
+p.model as model,
+p.productDescription as productDescription
 from Product p
 join p.productCategory pc
 join p.manufacturer m
