@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Controllers.Admin;
 
 import com.example.ecomerseapplication.DTOs.requests.ProductFormRequest;
 import com.example.ecomerseapplication.Services.ProductService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -39,5 +40,12 @@ public class AdminProductController {
         productService.updateProduct(request, id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("create")
+    public ResponseEntity<?> createProduct(@RequestBody ProductFormRequest request) {
+        productService.createProduct(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

@@ -5,6 +5,39 @@ import {Backend_Url, WEB_CLIENT_NAME} from '../config.js';
 import axiosBackendClient from '../../axiosBackendClient.js';
 import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
+router.post(`/create`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const reqBody = req.body;
+
+    try
+    {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) =>{
+            return axiosBackendClient.post(`${Backend_Url}/admin/product/create`, reqBody, {
+                headers:
+                    {
+                        'Content-Type': 'application/json',
+                        'x-client_type': WEB_CLIENT_NAME,
+                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                        ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                    },
+                bffContext: {
+                    req, res
+                }
+            });
+        },
+            {req, res});
+
+        return res.status(response.status).end();
+    }
+
+    catch (error) {
+        console.error('-------------------Error creating product-------------------\n', error);
+        if (error.response)
+            return res.status(error.response.status || 500).json(error.response.data);
+        return res.status(500).end();
+    }
+})
+
 router.patch(`/update/:id`, async (req, res) => {
     const sessionId = req.cookies.session_id;
     const reqBody = req.body;

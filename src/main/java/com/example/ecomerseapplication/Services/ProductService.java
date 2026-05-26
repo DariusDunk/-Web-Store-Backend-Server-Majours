@@ -840,4 +840,24 @@ public class ProductService {
                 request.model());
 
     }
+
+    @Transactional
+    public void createProduct(ProductFormRequest request) {
+        ProductCategory category = categoryService.getById(request.categoryId());
+        Manufacturer manufacturer = manufacturerService.getById(request.manufacturerId());
+        Product product = new Product();
+        product.updateProduct(request.productName(),
+                request.originalPriceStotinki(),
+                request.description(),
+                category,
+                request.productCode(),
+                request.stockQuantity(),
+                manufacturer,
+                request.model());
+
+        product.setProductCategory(category);
+        product.setManufacturer(manufacturer);
+
+        productRepository.save(product);
+    }
 }
