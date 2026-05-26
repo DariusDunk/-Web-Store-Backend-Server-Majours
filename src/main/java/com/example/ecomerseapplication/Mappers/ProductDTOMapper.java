@@ -292,7 +292,8 @@ public class ProductDTOMapper {
                 projection.getOriginalPriceStotinki(),
                 projection.getProductCode(),
                 projection.getQuantityInStock(),
-                projection.getManufacturerId()
+                projection.getManufacturerId(),
+                projection.getModel()
         );
     }
 

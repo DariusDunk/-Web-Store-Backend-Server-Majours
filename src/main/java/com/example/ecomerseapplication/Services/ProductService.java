@@ -836,7 +836,8 @@ public class ProductService {
                 category,
                 request.productCode(),
                 request.stockQuantity(),
-                manufacturer);
+                manufacturer,
+                request.model());
 
     }
 }

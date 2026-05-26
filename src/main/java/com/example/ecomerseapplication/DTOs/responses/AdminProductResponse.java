@@ -16,6 +16,8 @@ public record AdminProductResponse(
         @JsonProperty("stock_quantity")
         Integer stockQuantity,
         @JsonProperty("manufacturer_id")
-        Integer manufacturerId
+        Integer manufacturerId,
+        @JsonProperty("model")
+        String model
 ) {
 }

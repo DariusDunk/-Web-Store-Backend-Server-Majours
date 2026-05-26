@@ -16,6 +16,8 @@ public record ProductFormRequest(
         @JsonProperty("manufacturer_id")
         Integer manufacturerId,
         @JsonProperty("description")
-        String description
-) {
+        String description,
+        @JsonProperty("model")
+        String model
+        ) {
 }

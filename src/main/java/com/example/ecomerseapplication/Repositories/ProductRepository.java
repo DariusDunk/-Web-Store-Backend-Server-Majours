@@ -214,7 +214,8 @@ p.originalPriceStotinki as originalPriceStotinki,
 pc.id as categoryId,
 m.id as manufacturerId,
 p.quantityInStock as quantityInStock,
-p.id as id
+p.id as id,
+p.model as model
 from Product p
 join p.productCategory pc
 join p.manufacturer m
