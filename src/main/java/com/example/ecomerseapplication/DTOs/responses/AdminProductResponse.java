@@ -20,6 +20,10 @@ public record AdminProductResponse(
         @JsonProperty("model")
         String model,
         @JsonProperty("description")
-        String description
+        String description,
+        @JsonProperty("category_name")
+        String categoryName,
+        @JsonProperty("manufacturer_name")
+        String manufacturerName
         ) {
 }
