@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.ToString;
 
 import java.util.List;
-import java.util.Set;
 
 @ToString
 public class DetailedProductResponse {
@@ -14,7 +13,7 @@ public class DetailedProductResponse {
     public int salePriceStotinki;
     public String productCode;
     public String manufacturer;
-    public Set<AttributeOptionResponse> attributes;
+    public List<AttributeOptionResponse> attributes;
     public String productDescription;
     public short rating;
     public short deliveryCost;

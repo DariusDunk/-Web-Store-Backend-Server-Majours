@@ -116,9 +116,9 @@ public class ProductController {
 
 //        System.out.println("In detailed product endpoint: " + productCode + " ");
 
-        Session session = sessionService.getRequestSession();
 
-        DetailedProductResponse response = productService.getByCodeAndWithSession(productCode, session);
+
+        DetailedProductResponse response = productService.getByCodeAndWithSession(productCode);
 
 //        System.out.println("Product detail response: " + response);
 

@@ -52,4 +52,15 @@ where ag.id in :groupIds
     )
     List<AttributeOfProjection> findByGroupIdsProjection(@Param("groupIds") List<Long> groupIds);
 
+        @Query(
+"""
+select an.attributeName as name,
+an.id as nameId
+from AttributeGroup ag
+join ag.attributeNames an
+join ag.categories pc
+where pc.id = ?1
+"""
+        )
+    List<AttributeOfProjection> getAttributesByCategoryId(int categoryId);
 }

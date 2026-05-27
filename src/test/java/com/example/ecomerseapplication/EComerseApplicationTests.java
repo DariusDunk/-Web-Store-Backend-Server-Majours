@@ -1,19 +1,15 @@
 package com.example.ecomerseapplication;
-import com.example.ecomerseapplication.DTOs.responses.CartSummaryResponse;
-import com.example.ecomerseapplication.DTOs.responses.CompactProductResponse;
-import com.example.ecomerseapplication.DTOs.responses.PageResponse;
+import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.*;
 import com.example.ecomerseapplication.Services.*;
+import com.example.ecomerseapplication.Services.Admin.AdminAttributeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-//import org.mindrot.jbcrypt.BCrypt;
-
-import java.time.LocalDateTime;
 import java.util.*;
 
 @SpringBootTest
@@ -39,6 +35,8 @@ class EComerseApplicationTests {
     private FavoriteOfCustomerService favoriteOfCustomerService;
     @Autowired
     private SessionService sessionService;
+    @Autowired
+    private AdminAttributeService adminAttributeService;
 
     @Test
     void contextLoads() {
@@ -122,19 +120,19 @@ class EComerseApplicationTests {
         }
     }
 
-    @Test
-    void getAttributeMeasurementByNameAndCategory() {
-
-        List<AttributeName> names = attributeNameRepository.getAllByIdIn(List.of(
-                1, 2, 3, 4, 5));
-
-       List<String > units = categoryRepository.getMeasurementUnitsOfCategoryAttributes(5,names );
-
-
-        for ( String unit : units) {
-            System.out.println(unit);
-        }
-    }
+//    @Test
+//    void getAttributeMeasurementByNameAndCategory() {
+//
+//        List<AttributeName> names = attributeNameRepository.getAllByIdIn(List.of(
+//                1, 2, 3, 4, 5));
+//
+//       List<String > units = categoryRepository.getMeasurementUnitsOfCategoryAttributes(5,names );
+//
+//
+//        for ( String unit : units) {
+//            System.out.println(unit);
+//        }
+//    }
 
 //    @Test
 //    void isReviewerVerifiedCheck() {
@@ -224,7 +222,35 @@ class EComerseApplicationTests {
 
        CartSummaryResponse cartSummaryResponse = cartProductService.getSummary(customer);
 
-       System.out.println("Cart sumarry response: "+cartSummaryResponse);
+       System.out.println("Cart summary response: "+cartSummaryResponse);
+    }
+
+    @Test
+    void testAttributesOfProductQuery() {
+        int productId = 3;
+
+        AttributesOfProductAndCategory attributesOfProductAndCategory = adminAttributeService.getAttributesOfProductAndCategory(productId);
+
+        System.out.println("Product attributes:");
+        for (AttributeOfProductResponse attribute : attributesOfProductAndCategory.productAttributes()) {
+            System.out.println(" \n----------------------------------\n" +
+                    "attribute name: " + attribute.attributeName()
+                    + "\n attribute name id: " + attribute.attributeNameId()
+            + "\nmeasurement unit: " + attribute.measurementUnit()
+            + "\nvalue: " + attribute.attributeValue()
+            + "is in category: "+ attribute.isInCategory()
+            + " \n" +
+                    "----------------------------------\n");
+        }
+
+        System.out.println("Category attributes:");
+        for (CompactAttributeResponse attribute : attributesOfProductAndCategory.categoryAttributes()) {
+            System.out.println(" \n----------------------------------\n" +
+                    "attribute name: " + attribute.attributeName()
+                    + "\n attribute name id: " + attribute.attributeNameId()
+                    + " \n" +
+                    "----------------------------------\n");
+        }
     }
 
 }

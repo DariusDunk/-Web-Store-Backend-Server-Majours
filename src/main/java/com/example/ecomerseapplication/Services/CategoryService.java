@@ -6,10 +6,9 @@ import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOfGroupDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.DetailedAttributeGroupsWithCategoryResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeGroupsWithCategoryProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfGroupProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
 import com.example.ecomerseapplication.Entities.AttributeGroup;
-import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Repositories.CategoryRepository;
@@ -28,16 +27,12 @@ import java.util.Map;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final CategoryAttributeService categoryAttributeService;
     private final AttributeGroupService attributeGroupService;
-    private final AttributeOfGroupService attributeOfGroupService;
 
     @Autowired
-    public CategoryService(CategoryRepository categoryRepository, CategoryAttributeService categoryAttributeService, AttributeGroupService attributeGroupService, AttributeOfGroupService attributeOfGroupService) {
+    public CategoryService(CategoryRepository categoryRepository, AttributeGroupService attributeGroupService) {
         this.categoryRepository = categoryRepository;
-        this.categoryAttributeService = categoryAttributeService;
         this.attributeGroupService = attributeGroupService;
-        this.attributeOfGroupService = attributeOfGroupService;
     }
 
     public List<CompactAdminCategoryProjection> findAllCompact() {
@@ -63,28 +58,6 @@ public class CategoryService {
         return categoryRepository.getAttributesOfCategory(categoryId);
     }
 
-    public List<String[]> getSpecificAttributesOfCategory(int categoryId,
-                                                          List<AttributeName> attributeNames) {
-        List<String> combinations = categoryRepository.getMeasurementUnitsOfCategoryAttributes(categoryId, attributeNames);
-
-        if (combinations.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<String[]> attributeOptionResponses = new ArrayList<>();
-
-        for (String combination : combinations) {
-            String[] split = combination.split(",");
-
-            if (split.length == 2) {
-                attributeOptionResponses.add(split);
-            }
-        }
-
-        return attributeOptionResponses;
-    }
-
-
     public List<Integer> getTopCategories() {
         return categoryRepository.getTopCategoriesIds(PageRequest.of(0, 6));
     }
@@ -98,19 +71,15 @@ public class CategoryService {
     public DetailedCategoryResponse getDetailedCategory(Integer categoryId) {
         ProductCategory category = findById(categoryId);
         List<AttributeGroupsWithCategoryProjection> attributeGroups = attributeGroupService.getAllWithACategory(categoryId);
-//
-//        for (AttributeGroupsWithCategoryProjection attributeGroup : attributeGroups) {
-//            System.out.println(attributeGroup);
-//        }
 
         List<Long> attributeGroupIds = attributeGroups.stream()
                 .map(AttributeGroupsWithCategoryProjection::getId)
                 .toList();
-        List<AttributeOfGroupProjection> attributeOfGroupProjections = attributeOfGroupService.getByGroupId(attributeGroupIds);
+        List<AttributeOfProjection> attributeOfProjections = attributeGroupService.getByGroupId(attributeGroupIds);
 
-        Map<Long, List<AttributeOfGroupProjection>> groupAttributesMap = new HashMap<>();
+        Map<Long, List<AttributeOfProjection>> groupAttributesMap = new HashMap<>();
 
-        for (AttributeOfGroupProjection attribute : attributeOfGroupProjections) {
+        for (AttributeOfProjection attribute : attributeOfProjections) {
             if (groupAttributesMap.isEmpty()
                     || !groupAttributesMap.containsKey(attribute.getGroupId())) {
 
@@ -125,7 +94,7 @@ public class CategoryService {
         List<DetailedAttributeGroupsWithCategoryResponse> groupResponseList = new ArrayList<>();
 
         for (AttributeGroupsWithCategoryProjection attributeGroup : attributeGroups) {
-            List<AttributeOfGroupProjection> attributeProjections = groupAttributesMap
+            List<AttributeOfProjection> attributeProjections = groupAttributesMap
                     .get(attributeGroup.getId());
 
             List<AttributeOfGroupDTO> attributesDto = new ArrayList<>();

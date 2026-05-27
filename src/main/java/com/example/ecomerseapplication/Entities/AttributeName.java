@@ -27,6 +27,10 @@ public class AttributeName {
     private String measurementUnit;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "attributeName")
+    @OneToMany(mappedBy = "attributeName", fetch = FetchType.LAZY)
     private List<CategoryAttribute> categoryAttributeList;
+
+    @ManyToMany(mappedBy = "attributeNames",
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    List<AttributeGroup> attributeGroups;
 }

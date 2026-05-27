@@ -9,9 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ProductDTOMapper {
@@ -145,7 +143,7 @@ public class ProductDTOMapper {
     }
 
 
-    public static DetailedProductResponse entityToDetailedResponse(Product product, List<String[]> attributeNameMUnitPairs) {
+    public static DetailedProductResponse entityToDetailedResponse(Product product,  List<AttributeOfProjection> attributeProjections) {
 
         DetailedProductResponse detailedProductResponse = new DetailedProductResponse();
         int originalPrice = product.getOriginalPriceStotinki();
@@ -155,7 +153,7 @@ public class ProductDTOMapper {
         detailedProductResponse.name = product.getProductName();
         detailedProductResponse.categoryName = product.getProductCategory().getCategoryName();
         detailedProductResponse.manufacturer = product.getManufacturer().getManufacturerName();
-        detailedProductResponse.attributes = formAttributeOptionResponses(product, attributeNameMUnitPairs);
+        detailedProductResponse.attributes = AttributeMapper.projectionListToAttributeOptionResponseList(attributeProjections);
         detailedProductResponse.productDescription = product.getProductDescription();
         detailedProductResponse.deliveryCost = product.getDeliveryCost();
         detailedProductResponse.model = product.getModel();
@@ -178,28 +176,6 @@ public class ProductDTOMapper {
         } else {
             return List.of();
         }
-    }
-
-    private static Set<AttributeOptionResponse> formAttributeOptionResponses(Product product, List<String[]> attributeNameMUnitPairs) {
-        Set<CategoryAttribute> categoryAttributes = product.getCategoryAttributeSet();
-
-        Set<AttributeOptionResponse> attributeOptionResponses = new HashSet<>();
-
-        if (categoryAttributes.size() == attributeNameMUnitPairs.size()) {
-            for (CategoryAttribute categoryAttribute : categoryAttributes) {
-                for (String[] pair : attributeNameMUnitPairs) {
-                    if (pair[0].equals(categoryAttribute
-                            .getAttributeName()
-                            .getAttributeName())) {
-
-                        attributeOptionResponses.add(new AttributeOptionResponse(pair[0],
-                                categoryAttribute.getAttributeOption(),
-                                pair[1]));
-                    }
-                }
-            }
-        }
-        return attributeOptionResponses;
     }
 
     public static List<CompactProductResponse> compactSaleProjectionListToResponseList(List<CompactSaleProductProjection> productProjections) {

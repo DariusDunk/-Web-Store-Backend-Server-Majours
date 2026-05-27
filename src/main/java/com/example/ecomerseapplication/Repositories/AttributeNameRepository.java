@@ -20,5 +20,15 @@ public interface AttributeNameRepository extends JpaRepository<AttributeName, In
             "from CategoryAttribute ca where ca.productCategory =:category)")
     Set<AttributeName> getByCategory(@Param("category")ProductCategory productCategory);
 
-    List<AttributeName> getAllByIdIn(Collection<Integer> ids);
+    @Query(
+"""
+select an
+from AttributeName an
+join fetch an.categoryAttributeList
+where an.id in ?1
+"""
+    )
+    List<AttributeName> getAllByIdInWithOptions(Collection<Integer> ids);
+
+    Collection<Integer> id(int id);
 }

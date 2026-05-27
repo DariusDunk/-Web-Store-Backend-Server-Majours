@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Controllers.Admin;
 
+import com.example.ecomerseapplication.DTOs.requests.ProductAttributeUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFormRequest;
 import com.example.ecomerseapplication.Services.Admin.AdminProductService;
 import org.springframework.http.HttpStatus;
@@ -7,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/product/")
@@ -48,4 +51,9 @@ public class AdminProductController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PatchMapping("update/{id}/attributes")
+    public ResponseEntity<?> updateProductAttributes(@PathVariable Integer id, @RequestBody List<ProductAttributeUpdateRequest> request) {
+        adminProductService.updateProductAttributes(id, request);
+    return ResponseEntity.noContent().build();}
 }

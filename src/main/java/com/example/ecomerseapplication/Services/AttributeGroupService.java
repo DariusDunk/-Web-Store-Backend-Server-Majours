@@ -35,4 +35,8 @@ public class AttributeGroupService {
     public List<AttributeOfProjection> getByGroupId(List<Long> groupIds) {
         return attributeGroupRepository.findByGroupIdsProjection(groupIds);
     }
+
+    public List<AttributeOfProjection> getAttributesOfCategory(int categoryId) {
+        return attributeGroupRepository.getAttributesByCategoryId(categoryId);
+    }
 }

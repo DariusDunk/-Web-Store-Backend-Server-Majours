@@ -1,17 +1,20 @@
 package com.example.ecomerseapplication.Services.Admin;
 
+import com.example.ecomerseapplication.DTOs.responses.AttributeOfProductResponse;
+import com.example.ecomerseapplication.DTOs.responses.AttributesOfProductAndCategory;
+import com.example.ecomerseapplication.DTOs.responses.CompactAttributeResponse;
 import com.example.ecomerseapplication.DTOs.responses.DetailedAttributeGroupResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOfGroupDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfProjection;
 import com.example.ecomerseapplication.Entities.AttributeGroup;
+import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Mappers.AttributeMapper;
 import com.example.ecomerseapplication.Services.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminAttributeService {
@@ -72,42 +75,48 @@ public class AdminAttributeService {
 
     }
 
-//    List<AttributeOfProductResponse>
-//    private List<AttributeOfProductResponse> getAttributesOfProduct(int id) {
-//
-//        Product product = productService.getById(id);
-//
-//        List<AttributeOfProjection> projections = categoryAttributeService.getAttributesOfProduct(id);
-////
-////        Map<Integer, AttributeOfProjection> projectionMap = projections.stream().collect(HashMap::new,
-////                (m, e) -> m.put(e.getNameId(), e), HashMap::putAll);
-//
-//        List<Integer> attributeNameIds = projections.stream().map(AttributeOfProjection::getNameId).toList();
-//
-////        Map<Integer, String> prodAttrNamemeasurementUnitsMap = categoryService
-////                .getSpecificAttributesOfCategoryBetter(product.getProductCategory().getId(), attributeNameIds);
-//
-//
-//
-//
-//        List<AttributeOfProductResponse> attributeOfProductResponses = new ArrayList<>();
-//
-//        for (AttributeOfProjection projection : projections) {
-//            AttributeOfProductResponse response = new AttributeOfProductResponse(projection.getNameId(),
-//                    projection.getName(),
-//                    projection.getValue(),
-//                    prodAttrNamemeasurementUnitsMap.get(projection.getNameId()),
-//                    null);
-//            attributeOfProductResponses.add(response);
-//        }
-//        return attributeOfProductResponses;
-//    }
+    public List<AttributeOfProductResponse> getAttributesOfProduct(Integer id) {
+        List<AttributeOfProjection> projections = categoryAttributeService.getAttributesOfProduct(id);
+        return AttributeMapper.attributeProjectionListToAttributeOfProductResponseList(projections);
+    }
 
-//    public void getAttributesOfProductAndCategory(int id) {
-//        Product product = productService.getById(id);
-//        ProductCategory category = categoryService.getById(id);
-//
-//        List<AttributeOfProductResponse> productAttributes = getAttributesOfProduct(id);
-//        List<AttributeOfProductResponse> categoryAttributes = attributeOfGroupService.getAllByCategoryProjection(id);
-//    }
+    public AttributesOfProductAndCategory getAttributesOfProductAndCategory(int id) {
+        Product product = productService.getById(id);
+
+        List<AttributeOfProductResponse> productAttributes = getAttributesOfProduct(id);
+        List<CompactAttributeResponse> categoryAttributes = getAllByCategoryProjection(product.getProductCategory().getId());
+        List<AttributeOfProductResponse> productAttributeResponseList = checkForProdAttributesOutsideCategory(categoryAttributes, productAttributes);
+
+        return new AttributesOfProductAndCategory(categoryAttributes, productAttributeResponseList);
+
+    }
+
+    @NotNull
+    private List<AttributeOfProductResponse> checkForProdAttributesOutsideCategory(List<CompactAttributeResponse> categoryAttributes, List<AttributeOfProductResponse> productAttributes) {
+        List<AttributeOfProductResponse> productAttributeResponseList = new ArrayList<>();
+
+        Set<Integer> allowedAttributeIds = categoryAttributes
+                .stream()
+                .map(CompactAttributeResponse::attributeNameId)
+                .collect(Collectors.toSet());
+
+        for (AttributeOfProductResponse attribute : productAttributes) {
+            Boolean allowed = allowedAttributeIds.contains(attribute.attributeNameId());
+
+            AttributeOfProductResponse attributeOfProductResponse = new AttributeOfProductResponse(
+                    attribute.attributeNameId(),
+                    attribute.attributeName(),
+                    attribute.attributeValue(),
+                    attribute.measurementUnit(),
+                    allowed
+            );
+            productAttributeResponseList.add(attributeOfProductResponse);
+        }
+        return productAttributeResponseList;
+    }
+
+    private List<CompactAttributeResponse> getAllByCategoryProjection(int id) {
+        List<AttributeOfProjection> attributeGroups = attributeGroupService.getAttributesOfCategory(id);
+        return AttributeMapper.projectionListToCompactResponseList(attributeGroups);
+    }
 }

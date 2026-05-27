@@ -1,20 +1,17 @@
 package com.example.ecomerseapplication.Services.Admin;
 
+import com.example.ecomerseapplication.DTOs.requests.ProductAttributeUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFormRequest;
 import com.example.ecomerseapplication.DTOs.responses.AdminProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.DTOs.responses.SaleProductSuggestionResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedProductProjection;
-import com.example.ecomerseapplication.Entities.Manufacturer;
-import com.example.ecomerseapplication.Entities.Product;
-import com.example.ecomerseapplication.Entities.ProductCategory;
+import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
-import com.example.ecomerseapplication.Services.CategoryService;
-import com.example.ecomerseapplication.Services.ManufacturerService;
-import com.example.ecomerseapplication.Services.ProductService;
+import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Utils.SortHelper;
 import com.example.ecomerseapplication.enums.ProductSortType;
 import org.springframework.data.domain.Page;
@@ -24,8 +21,9 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminProductService {
@@ -33,12 +31,16 @@ public class AdminProductService {
     private final ProductRepository productRepository;
     private final ManufacturerService manufacturerService;
     private final CategoryService categoryService;
+    private final AttributeNameService attributeNameService;
+    private final CategoryAttributeService categoryAttributeService;
 
-    public AdminProductService(ProductService productService, ProductRepository productRepository, ManufacturerService manufacturerService, CategoryService categoryService) {
+    public AdminProductService(ProductService productService, ProductRepository productRepository, ManufacturerService manufacturerService, CategoryService categoryService, AttributeNameService attributeNameService, CategoryAttributeService categoryAttributeService) {
         this.productService = productService;
         this.productRepository = productRepository;
         this.manufacturerService = manufacturerService;
         this.categoryService = categoryService;
+        this.attributeNameService = attributeNameService;
+        this.categoryAttributeService = categoryAttributeService;
     }
 
 
@@ -110,4 +112,77 @@ public class AdminProductService {
         return responseList;
     }
 
+    @Transactional
+    public void updateProductAttributes(Integer id, List<ProductAttributeUpdateRequest> request) {
+        Product product = productService.getById(id);
+
+        Map<Integer, String> requestMap = request
+                .stream()
+                .collect(Collectors
+                        .toMap(ProductAttributeUpdateRequest::nameId,
+                                r -> normalize(r.value()))
+                );
+
+        List<AttributeName> attributeNames = attributeNameService.getByIdsWithOptions(requestMap
+                .keySet()
+                .stream()
+                .toList());
+
+        Map<Integer, Map<String, CategoryAttribute>> attributeNameOptionMap = attributeNames
+                .stream()
+                .collect
+                        (Collectors.toMap(AttributeName::getId,
+                        an -> an.getCategoryAttributeList()
+                                .stream()
+                                .collect(Collectors
+                                        .toMap(ca-> normalize(ca.getAttributeOption()),
+                                                Function.identity())))
+                );
+        List<CategoryAttribute> processedAttributes = processProductAttributes(
+                attributeNameOptionMap,
+                requestMap,
+                attributeNames);
+
+        processedAttributes = categoryAttributeService.saveAll(processedAttributes);
+
+        product.getCategoryAttributeSet().clear();
+        product.getCategoryAttributeSet().addAll(processedAttributes);
+
+    }
+
+    private List<CategoryAttribute> processProductAttributes(Map<Integer, Map<String, CategoryAttribute>> attributeMap,
+                                                             Map<Integer, String> requestMap,
+                                                             List<AttributeName> attributeNames) {
+
+        List<CategoryAttribute> newAttributes = new ArrayList<>();
+
+        for (AttributeName attributeName: attributeNames) {
+
+            String newAttributeValue = normalize(requestMap.get(attributeName.getId()));
+
+            Map<String, CategoryAttribute> inner =
+                    attributeMap.get(attributeName.getId());
+
+            CategoryAttribute oldAttribute =
+                    inner != null ? inner.get(newAttributeValue) : null;
+
+            if (oldAttribute == null) {
+                CategoryAttribute newAttribute = new CategoryAttribute();
+                newAttribute.setAttributeName(attributeName);
+
+                newAttribute.setAttributeOption(newAttributeValue);
+
+                newAttributes.add(newAttribute);
+            }
+            else {
+                newAttributes.add(oldAttribute);
+            }
+        }
+        return newAttributes;
+
+    }
+
+    private String normalize(String v) {
+        return v == null ? null : v.trim().toLowerCase();
+    }
 }

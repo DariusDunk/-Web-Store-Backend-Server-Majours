@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfProjection;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
@@ -34,5 +35,13 @@ public class CategoryAttributeService {
         Specification<CategoryAttribute> specification = AttributeSpecifications.filterByAttributes(stringMap);
 
         return new HashSet<>(categoryAttributeRepository.findAll(specification));
+    }
+
+    public List<AttributeOfProjection> getAttributesOfProduct(int productId) {
+        return categoryAttributeRepository.findAttributesOfProduct(productId);
+    }
+
+    public List<CategoryAttribute> saveAll(List<CategoryAttribute> processedAttributes) {
+        return categoryAttributeRepository.saveAll(processedAttributes);
     }
 }

@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactAdminCategoryProjection;
-import com.example.ecomerseapplication.Entities.AttributeName;
 import com.example.ecomerseapplication.Entities.ProductCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,40 +18,22 @@ public interface CategoryRepository extends JpaRepository<ProductCategory, Integ
 
     @Query(value = "select c.categoryName " +
             "from ProductCategory c " +
-//            "where c.categoryName!= 'електрически машини' AND c.categoryName!= 'Бензинови машини' " +
             "where c.isDeleted = false " +
             "order by c.categoryName asc")
     List<String> getAllNamesActive();
 
     @Query(value =
     """
-    select distinct new com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO(an.attributeName, ca.attributeOption, aog.measurementUnit)
-        from ProductCategory pc
-    join Product p on p.productCategory = pc
-        join p.categoryAttributeSet ca
-            join AttributeName an on an = ca.attributeName
-                join pc.attributeGroups ag
-                    join AttributeOfGroup aog on aog.attributesOfGroupId.attributeGroup.id = ag.id
-                        where pc.id=:categoryId
-                            and aog.attributesOfGroupId.attributeName = an
-                                order by an.attributeName asc
+select distinct new com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO(an.attributeName, ca.attributeOption, an.measurementUnit)
+from ProductCategory pc
+join pc.products p
+join p.categoryAttributeSet ca
+join ca.attributeName an
+join pc.attributeGroups ag
+where pc.id=:categoryId
+order by an.attributeName asc
     """)
     List<AttributeOptionDTO>getAttributesOfCategory(@Param("categoryId") int productCategoryId);
-
-    @Query(value =
-            """
-            select distinct (an.attributeName,aog.measurementUnit)
-                from ProductCategory pc
-            join Product p on p.productCategory = pc
-                join p.categoryAttributeSet ca
-                    join AttributeName an on an = ca.attributeName
-                        join pc.attributeGroups ag
-                            join AttributeOfGroup aog on aog.attributesOfGroupId.attributeGroup.id = ag.id
-                                where pc.id=:categoryId
-                                    and aog.attributesOfGroupId.attributeName = an
-                                                and aog.attributesOfGroupId.attributeName in :attributeNames
-            """)
-    List<String> getMeasurementUnitsOfCategoryAttributes(@Param("categoryId")int categoryId, @Param("attributeNames")List<AttributeName> attributeNameIds);
 
     @Query(
 """
