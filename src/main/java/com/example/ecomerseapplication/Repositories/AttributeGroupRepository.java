@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeGroupsWithCategoryProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfProjection;
 import com.example.ecomerseapplication.Entities.AttributeGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,28 @@ from AttributeGroup ag
     List<AttributeGroupsWithCategoryProjection> getAllWithCategory(@Param("categoryId") int categoryId);
 
     List<AttributeGroup> getAttributeGroupByGroupNameIn(Collection<String> groupNames);
+
+        @Query(
+"""
+select an.measurementUnit as measurementUnit,
+an.attributeName as name,
+ag.id as groupId
+from AttributeGroup ag
+join ag.attributeNames an
+"""
+    )
+    List<AttributeOfProjection> findAllProjection();
+
+        @Query(
+"""
+select an.measurementUnit as measurementUnit,
+an.attributeName as name,
+ag.id as groupId
+from AttributeGroup ag
+join ag.attributeNames an
+where ag.id in :groupIds
+"""
+    )
+    List<AttributeOfProjection> findByGroupIdsProjection(@Param("groupIds") List<Long> groupIds);
+
 }
