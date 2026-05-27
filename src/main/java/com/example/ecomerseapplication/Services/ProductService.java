@@ -1,13 +1,9 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.requests.ProductCodeQuantityPairRequest;
-import com.example.ecomerseapplication.DTOs.requests.ProductFormRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.CompactProductDto;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactSaleProductProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedProductProjection;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.FiltersPriceRange;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.*;
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoCategoryAndManufacturerPresentException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.StockForNamedProductExceeded;
@@ -41,20 +37,20 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CartProductService cartProductService;
     private final ReviewService reviewService;
-    private final CategoryService categoryService;
     private final FavoriteOfCustomerService favoriteOfCustomerService;
-    private final ManufacturerService manufacturerService;
+    private final SessionService sessionService;
+    private final CategoryAttributeService categoryAttributeService;
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, CategoryService categoryService, FavoriteOfCustomerService favoriteOfCustomerService, ManufacturerService manufacturerService) {
+    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, FavoriteOfCustomerService favoriteOfCustomerService, SessionService sessionService, CategoryAttributeService categoryAttributeService) {
         this.productRepository = productRepository;
         this.cartProductService = cartProductService;
         this.reviewService = reviewService;
-        this.categoryService = categoryService;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
-        this.manufacturerService = manufacturerService;
+        this.sessionService = sessionService;
+        this.categoryAttributeService = categoryAttributeService;
     }
 
     public Page<CompactProductResponse> findAllByRatingResponsePage(PageRequest pageRequest) {
@@ -281,16 +277,9 @@ public class ProductService {
     public DetailedProductResponse getByCodeForAuth(String productCode, Customer customer) {
         Product product = findByCodeWithRelations(productCode);
 
-        List<AttributeName> attributeNames = new ArrayList<>();
+        List<AttributeOfProjection> attributeNames = categoryAttributeService.getAttributesOfProduct(product.getId());
 
-        for (CategoryAttribute categoryAttribute : product.getCategoryAttributeSet()) {
-            attributeNames.add(categoryAttribute.getAttributeName());
-        }
-
-        List<String[]> attributeNameMUnitPairs = categoryService
-                .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
-
-        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
+        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNames);
 
         if (cartProductService.cartItemExistsByCustomer(customer, product))
             detailedProductResponse.inCart = true;
@@ -304,7 +293,9 @@ public class ProductService {
     }
 
 
-    public DetailedProductResponse getByCodeAndWithSession(String productCode, Session session) {
+    @Transactional(readOnly = true)
+    public DetailedProductResponse getByCodeAndWithSession(String productCode) {
+        Session session = sessionService.getRequestSession();
         try
         {
             if (session.getIsGuest()) {
@@ -326,16 +317,9 @@ public class ProductService {
     public DetailedProductResponse getByCodeForGuest(String productCode) {
         Product product = findByCodeWithRelations(productCode);
 
-        List<AttributeName> attributeNames = new ArrayList<>();
+        List<AttributeOfProjection> attributeNames = categoryAttributeService.getAttributesOfProduct(product.getId());
 
-        for (CategoryAttribute categoryAttribute : product.getCategoryAttributeSet()) {
-            attributeNames.add(categoryAttribute.getAttributeName());
-        }
-
-        List<String[]> attributeNameMUnitPairs = categoryService
-                .getSpecificAttributesOfCategory(product.getProductCategory().getId(), attributeNames);
-
-        return ProductDTOMapper.entityToDetailedResponse(product, attributeNameMUnitPairs);
+        return ProductDTOMapper.entityToDetailedResponse(product, attributeNames);
     }
 
         public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, int page, String sortOrder, int pageSize) {
@@ -752,7 +736,6 @@ public class ProductService {
     }
 
     public List<CompactProductProjection> getTopProductsOfCategory(ProductCategory category) {
-//        return getByCategory(category, 0, ProductSortType.POPULARITY.getValue(), 8).getContent();
         return productRepository.getTopProductsOfCategory(category.getId(), PageRequest.of(0, 8));
     }
 
@@ -788,76 +771,9 @@ public class ProductService {
         return productRepository.getAllByIdIn(productIds);
     }
 
-    public List<SaleProductSuggestionResponse> getSuggestionsForSale(String keyword) {
-        List<CompactProductProjection> projections = productRepository.getNameSuggestionsForSaleForm(keyword);
-
-        List<SaleProductSuggestionResponse> responseList = new ArrayList<>();
-
-        for (CompactProductProjection projection : projections) {
-            responseList.add(new SaleProductSuggestionResponse(projection.getName(), projection.getProductCode()));
-        }
-
-        return responseList;
-    }
-
-    public PageResponse<AdminProductResponse> getAllProductsPaged(String page) {
-
-        Sort sort = SortHelper.buildProdSort(ProductSortType.PRODUCT_CODE.getValue());
-
-        Page<DetailedProductProjection> productProjections = productRepository.getAllDetailedProductsPaged(
-                PageRequest.of(Integer.parseInt(page), PageContentLimit.limit, sort)
-        );
-
-        return ProductDTOMapper.adminProductProjPageToResponsePage(productProjections);
-    }
-
-    public AdminProductResponse getByIdForAdminResponse(int id) {
-
-        DetailedProductProjection projection = productRepository
-                .getByIdDetProjection(id).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-
-        return ProductDTOMapper.detailedProjectionToAdminResponse(projection);
-    }
-
     public Product getById(int id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
-    @Transactional
-    public void updateProduct(ProductFormRequest request, int id) {
-        Product product = getById(id);
-        ProductCategory category = categoryService.getById(request.categoryId());
-        Manufacturer manufacturer = manufacturerService.getById(request.manufacturerId());
-
-        product.updateProduct(request.productName(),
-                request.originalPriceStotinki(),
-                request.description(),
-                category,
-                request.productCode(),
-                request.stockQuantity(),
-                manufacturer,
-                request.model());
-
-    }
-
-    @Transactional
-    public void createProduct(ProductFormRequest request) {
-        ProductCategory category = categoryService.getById(request.categoryId());
-        Manufacturer manufacturer = manufacturerService.getById(request.manufacturerId());
-        Product product = new Product();
-        product.updateProduct(request.productName(),
-                request.originalPriceStotinki(),
-                request.description(),
-                category,
-                request.productCode(),
-                request.stockQuantity(),
-                manufacturer,
-                request.model());
-
-        product.setProductCategory(category);
-        product.setManufacturer(manufacturer);
-
-        productRepository.save(product);
-    }
 }
