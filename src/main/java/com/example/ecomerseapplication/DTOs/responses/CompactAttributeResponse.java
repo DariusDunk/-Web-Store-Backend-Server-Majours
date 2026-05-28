@@ -6,5 +6,7 @@ public record CompactAttributeResponse(
         @JsonProperty("id")
         Integer attributeNameId,
         @JsonProperty("attribute_name")
-        String attributeName) {
+        String attributeName,
+        @JsonProperty("measurement_unit")
+        String measurementUnit) {
 }

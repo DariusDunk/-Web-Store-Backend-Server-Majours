@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AttributeOfProjection;
 import com.example.ecomerseapplication.Entities.CategoryAttribute;
-import com.example.ecomerseapplication.Entities.ProductCategory;
 import com.example.ecomerseapplication.Repositories.CategoryAttributeRepository;
 import com.example.ecomerseapplication.Specifications.AttributeSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +23,6 @@ public class CategoryAttributeService {
 
     public List<CategoryAttribute> getAll() {
         return categoryAttributeRepository.findAll();
-    }
-
-    public List<CategoryAttribute> getByCategory(ProductCategory productCategory) {
-        return categoryAttributeRepository.findByProductCategory(productCategory);
     }
 
     public Set<CategoryAttribute> getByNamesAndOptions(Map<String, List<String>> stringMap) {

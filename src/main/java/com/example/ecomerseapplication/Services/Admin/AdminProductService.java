@@ -8,6 +8,8 @@ import com.example.ecomerseapplication.DTOs.responses.SaleProductSuggestionRespo
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedProductProjection;
 import com.example.ecomerseapplication.Entities.*;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.DuplicatedAttributeException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.EmptyAttributeValueException;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
@@ -115,38 +117,51 @@ public class AdminProductService {
     @Transactional
     public void updateProductAttributes(Integer id, List<ProductAttributeUpdateRequest> request) {
         Product product = productService.getById(id);
+        if (!request.isEmpty())
+        {
+            Map<Integer, String> requestMap;
+            try {
+                requestMap = request
+                        .stream()
+                        .collect(Collectors
+                                .toMap(ProductAttributeUpdateRequest::nameId,
+                                        r -> normalize(r.value()))
+                        );
+            } catch (IllegalStateException ex) {
+                System.out.println(ex.getMessage());
+                throw new DuplicatedAttributeException("Duplicated attribute names in request!");
 
-        Map<Integer, String> requestMap = request
-                .stream()
-                .collect(Collectors
-                        .toMap(ProductAttributeUpdateRequest::nameId,
-                                r -> normalize(r.value()))
-                );
+            }
 
-        List<AttributeName> attributeNames = attributeNameService.getByIdsWithOptions(requestMap
-                .keySet()
-                .stream()
-                .toList());
+            List<AttributeName> attributeNames = attributeNameService.getByIdsWithOptions(requestMap
+                    .keySet()
+                    .stream()
+                    .toList());
 
-        Map<Integer, Map<String, CategoryAttribute>> attributeNameOptionMap = attributeNames
-                .stream()
-                .collect
-                        (Collectors.toMap(AttributeName::getId,
-                        an -> an.getCategoryAttributeList()
-                                .stream()
-                                .collect(Collectors
-                                        .toMap(ca-> normalize(ca.getAttributeOption()),
-                                                Function.identity())))
-                );
-        List<CategoryAttribute> processedAttributes = processProductAttributes(
-                attributeNameOptionMap,
-                requestMap,
-                attributeNames);
+            Map<Integer, Map<String, CategoryAttribute>> attributeNameOptionMap = attributeNames
+                    .stream()
+                    .collect
+                            (Collectors.toMap(AttributeName::getId,
+                                    an -> an.getCategoryAttributeList()
+                                            .stream()
+                                            .collect(Collectors
+                                                    .toMap(ca -> normalize(ca.getAttributeOption()),
+                                                            Function.identity())))
+                            );
+            List<CategoryAttribute> processedAttributes = processProductAttributes(
+                    attributeNameOptionMap,
+                    requestMap,
+                    attributeNames);
 
-        processedAttributes = categoryAttributeService.saveAll(processedAttributes);
+            processedAttributes = categoryAttributeService.saveAll(processedAttributes);
 
-        product.getCategoryAttributeSet().clear();
-        product.getCategoryAttributeSet().addAll(processedAttributes);
+            product.getCategoryAttributeSet().clear();
+            product.getCategoryAttributeSet().addAll(processedAttributes);
+        }
+        else
+        {
+            product.getCategoryAttributeSet().clear();
+        }
 
     }
 
@@ -159,6 +174,10 @@ public class AdminProductService {
         for (AttributeName attributeName: attributeNames) {
 
             String newAttributeValue = normalize(requestMap.get(attributeName.getId()));
+
+            if (newAttributeValue == null||newAttributeValue.isBlank()) {
+                throw new EmptyAttributeValueException("Attribute value cannot be empty");
+            }
 
             Map<String, CategoryAttribute> inner =
                     attributeMap.get(attributeName.getId());

@@ -6,12 +6,12 @@ import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
 const CONTROLLER_ROUTE = `${Backend_Url}/admin/attribute`;
 
-router.get(`attributes-of-product/:productId`, async (req, res) => {
+router.get(`/attributes-of-product/:productId`, async (req, res) => {
     const sessionId = req.cookies.session_id;
     const {productId} = req.params;
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.get(`${CONTROLLER_ROUTE}/product/${productId}`, {
+            return await axiosBackendClient.get(`${CONTROLLER_ROUTE}/get-for-product/${productId}`, {
                 headers:
                     {
                         'Content-Type': 'application/json',

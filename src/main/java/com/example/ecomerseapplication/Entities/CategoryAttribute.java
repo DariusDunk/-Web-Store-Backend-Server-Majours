@@ -13,16 +13,12 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(exclude = "products")
 @ToString(exclude = {"products"})
-public class CategoryAttribute {
+public class CategoryAttribute {//todo trqbva da se preimenuva v bude6te CategoryAttribute ve4e ne e korektno za6toto kategoriite ve4e ne sa predstaveni tuk
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "attribute_id")
     private int id;
-    
-    @JoinColumn(name = "product_category_id")
-    @ManyToOne(cascade = {CascadeType.ALL})
-    private ProductCategory productCategory;
 
     @JoinColumn(name = "attribute_name_id")
     @ManyToOne

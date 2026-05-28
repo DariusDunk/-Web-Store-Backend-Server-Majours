@@ -98,7 +98,8 @@ public class AttributeMapper {
     public static CompactAttributeResponse projectionToCompactResponse(AttributeOfProjection projection) {
         return new CompactAttributeResponse(
                 projection.getNameId(),
-                projection.getName()
+                projection.getName(),
+                projection.getMeasurementUnit()
         );
     }
 

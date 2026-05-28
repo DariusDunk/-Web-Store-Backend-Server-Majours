@@ -11,8 +11,12 @@ import java.util.List;
 @Entity
 @Table(name = "product_categories", schema = "online_shop")
 @Data
-@EqualsAndHashCode(exclude = {"categoryAttributes", "products"})
-@ToString(exclude = {"products","categoryAttributes", "attributeGroups"} )
+@EqualsAndHashCode(exclude = {
+//        "categoryAttributes",
+        "products"})
+@ToString(exclude = {"products",
+//        "categoryAttributes",
+        "attributeGroups"} )
 public class ProductCategory {
 
     @Id
@@ -36,10 +40,10 @@ public class ProductCategory {
             cascade = {CascadeType.DETACH,CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<Product> products;
 
-    @JsonIgnore
-    @OneToMany(cascade = {CascadeType.DETACH,CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},
-            mappedBy = "productCategory")
-    private List<CategoryAttribute> categoryAttributes;
+//    @JsonIgnore
+//    @OneToMany(cascade = {CascadeType.DETACH,CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},
+//            mappedBy = "productCategory")
+//    private List<CategoryAttribute> categoryAttributes;
 
     @ManyToMany
     @JoinTable(name = "attribute_groups_of_category", schema = "online_shop",

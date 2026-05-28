@@ -55,7 +55,8 @@ where ag.id in :groupIds
         @Query(
 """
 select an.attributeName as name,
-an.id as nameId
+an.id as nameId,
+an.measurementUnit as measurementUnit
 from AttributeGroup ag
 join ag.attributeNames an
 join ag.categories pc

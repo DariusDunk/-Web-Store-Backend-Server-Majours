@@ -20,16 +20,14 @@ import java.util.stream.Collectors;
 public class AdminAttributeService {
 
     private final AttributeGroupService attributeGroupService;
-    private final AttributeNameService attributeNameService;
     private final CategoryAttributeService categoryAttributeService;
-    private final CategoryService categoryService;
     private final ProductService productService;
 
-    public AdminAttributeService(AttributeGroupService attributeGroupService, AttributeNameService attributeNameService, CategoryAttributeService categoryAttributeService, CategoryService categoryService, ProductService productService) {
+    public AdminAttributeService(AttributeGroupService attributeGroupService,
+                                 CategoryAttributeService categoryAttributeService,
+                                 ProductService productService) {
         this.attributeGroupService = attributeGroupService;
-        this.attributeNameService = attributeNameService;
         this.categoryAttributeService = categoryAttributeService;
-        this.categoryService = categoryService;
         this.productService = productService;
     }
 
@@ -87,7 +85,9 @@ public class AdminAttributeService {
         List<CompactAttributeResponse> categoryAttributes = getAllByCategoryProjection(product.getProductCategory().getId());
         List<AttributeOfProductResponse> productAttributeResponseList = checkForProdAttributesOutsideCategory(categoryAttributes, productAttributes);
 
-        return new AttributesOfProductAndCategory(categoryAttributes, productAttributeResponseList);
+        return new AttributesOfProductAndCategory(product.getProductName(),
+                categoryAttributes,
+                productAttributeResponseList);
 
     }
 

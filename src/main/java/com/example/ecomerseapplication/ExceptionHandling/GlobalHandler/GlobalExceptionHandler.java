@@ -270,6 +270,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ErrorType.RESOURCE_CONFLICT,
                 "Продуктът е зает",
                 HttpStatus.CONFLICT.value(),
-                "Продуктът " + exception.getProductName() + " вече е част от промоцията: "+ exception.getSaleName()));
+                "Продуктът " + exception.getProductName() + " вече е част от промоцията: " + exception.getSaleName()));
+    }
+
+    @ExceptionHandler(EmptyAttributeValueException.class)
+    public ResponseEntity<?> handleEmptyAttributeValueExceptions() {
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+                        "Невалиден атрибут",
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Един или повече от подадените атрибути нямат въведена стойност!"));
+    }
+
+    @ExceptionHandler(DuplicatedAttributeException.class)
+    public ResponseEntity<?> handleDuplicatedAttributeExceptions() {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(ErrorType.DUPLICATION_OF_DATA,
+                        "Дублиране на атрибути",
+                        HttpStatus.CONFLICT.value(),
+                        "Има дублиране при един или повече от подадените атрибути"));
     }
 }

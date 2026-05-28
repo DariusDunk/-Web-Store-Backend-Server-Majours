@@ -1,4 +1,5 @@
 package com.example.ecomerseapplication;
+import com.example.ecomerseapplication.DTOs.requests.ProductAttributeUpdateRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.*;
@@ -6,6 +7,7 @@ import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.*;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Services.Admin.AdminAttributeService;
+import com.example.ecomerseapplication.Services.Admin.AdminProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +39,8 @@ class EComerseApplicationTests {
     private SessionService sessionService;
     @Autowired
     private AdminAttributeService adminAttributeService;
+    @Autowired
+    private AdminProductService adminProductService;
 
     @Test
     void contextLoads() {
@@ -54,52 +58,9 @@ class EComerseApplicationTests {
     @Autowired
     CustomerService customerService;
 
-    @Test
-    void attributeTest() {
-        ProductCategory productCategory = categoryService.findById(4);
-
-        List<CategoryAttribute> categoryAttributeList = categoryAttributeService.getByCategory(productCategory);
-
-        System.out.println(categoryAttributeList.getFirst().getAttributeOption());
-    }
-
-//    @Test
-//    void encryptTest() {
-//
-//        char[] pass = {'l','u','d','o','t','Z','a','v','e','t'};
-//
-//        String pwHash = BCrypt.hashpw(Arrays.toString(pass),BCrypt.gensalt(10));
-//
-//        String candidate = Arrays.toString(pass);
-//
-//        System.out.println(BCrypt.checkpw(candidate, pwHash));
-//    }
-
-//    @Test
-//    void codeHashTest() {
-//        System.out.println(PurchaseCodeGenerator.generateCode(LocalDateTime.now()));
-//    }
-
-//    @Test
-//    void passwordCheck() {
-//        Customer customer = customerService.getByEmail("konstantin_aleksandrov@abv.bg");
-//
-//        String password = "fitnesmaniak200klek";
-//
-//        String hashedPw = String.valueOf(customer.getPassword());
-//        System.out.println(hashedPw);
-//
-//        System.out.println(BCrypt.checkpw(password,hashedPw));
-//    }
 
     @Test
     void getAttributeByNameAndOption(){
-
-//        HashSet<String> names = new HashSet<>();
-//        HashSet<String> options = new HashSet<>();
-//        names.add("Широчина на фрезоване");
-//
-//        options.add("1000-1200");
 
         Map<String, List<String> > attMap = new HashMap<>();
         attMap.put("Широчина на фрезоване", List.of( "1000-1200", "1200-1400"));
@@ -120,24 +81,6 @@ class EComerseApplicationTests {
         }
     }
 
-//    @Test
-//    void getAttributeMeasurementByNameAndCategory() {
-//
-//        List<AttributeName> names = attributeNameRepository.getAllByIdIn(List.of(
-//                1, 2, 3, 4, 5));
-//
-//       List<String > units = categoryRepository.getMeasurementUnitsOfCategoryAttributes(5,names );
-//
-//
-//        for ( String unit : units) {
-//            System.out.println(unit);
-//        }
-//    }
-
-//    @Test
-//    void isReviewerVerifiedCheck() {
-//        System.out.println("Result: " + purchaseCartRepository.isProductPurchased("20621301",6L));
-//    }
 
     @Test
     void getReviewOverviewByProductCode() {
@@ -148,13 +91,6 @@ class EComerseApplicationTests {
     void checkTimeZones() {
         System.out.println("Timezone: "+TimeZone.getDefault());
     }
-//
-//    @Test
-//    void addProductToFavouritesTest() {
-////        customerService.addProductToFavourites("6", productService.findByPCode("20621307"));
-//        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customerService.getById("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
-//        System.out.println(response);
-//    }
 
     @Test
     void getFavouritesTest() {
@@ -164,48 +100,6 @@ class EComerseApplicationTests {
         System.out.println("Fetch result: " +fetchResponse.content());
     }
 
-//    @Test
-//    void removeProductFromFavorites() {
-//        ResponseEntity<?> response = favoriteOfCustomerService.removeFromFavoritesWRefetch(customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f"), productService.findByPCode("20621307"));
-//        System.out.println(response);
-//    }
-
-//    @Test
-//    void removeFavoritesBatch() {
-//        ResponseEntity<?> response = favoriteOfCustomerService.removeFavoritesBatch(customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f"),List.of("20621307"));
-//    }
-
-//    @Test
-//    void testFavorites() {
-//
-//        Customer customer = customerService.getByKID("a5668417-ddc8-4029-9fcb-4f61512d044f");
-//
-//        ResponseEntity<?> response = favoriteOfCustomerService.addToFavorite(customer, productService.findByPCode("20621307"));
-//        System.out.println("Insert 1: " + response);
-//        ResponseEntity<?> response2 = favoriteOfCustomerService.addToFavorite(customer, productService.findByPCode("20621308"));
-//        System.out.println("Insert 2: " +response2);
-//        ResponseEntity<?> response3 = favoriteOfCustomerService.addToFavorite(customer, productService.findByPCode("20621309"));
-//        System.out.println("Insert 3: " +response3);
-//
-//        PageResponse<CompactProductResponse> fetchResponse = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
-//
-//        System.out.println("Fetch after inserts: " +fetchResponse.content());
-//
-//        ResponseEntity<?> deleteResponse = favoriteOfCustomerService.removeFromFavoritesWRefetch(customer, productService.findByPCode("20621307"));
-//        System.out.println("Single delete response: "+deleteResponse);
-//
-//        PageResponse<CompactProductResponse> fetchResponse2 = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
-//
-//        System.out.println("Fetch after single delete: " +fetchResponse2.content());
-//
-//        ResponseEntity<?> favoritesBatchDeleteResponse = favoriteOfCustomerService.removeFavoritesBatch(customer,List.of("20621308", "20621309"));
-//        System.out.println("Batch delete response: "+favoritesBatchDeleteResponse);
-//
-//        PageResponse<CompactProductResponse> fetchResponse3 = favoriteOfCustomerService.getFromFavourites(customer, PageRequest.of(0, PageContentLimit.limit));
-//
-//        System.out.println("Fetch after batch delete: " +fetchResponse3.content());
-//
-//    }
 
     @Test
     void testActiveSessionFetch() {
@@ -231,14 +125,15 @@ class EComerseApplicationTests {
 
         AttributesOfProductAndCategory attributesOfProductAndCategory = adminAttributeService.getAttributesOfProductAndCategory(productId);
 
-        System.out.println("Product attributes:");
+        System.out.println("Product attributes:\n");
+        System.out.println("Product name: " + attributesOfProductAndCategory.productName());
         for (AttributeOfProductResponse attribute : attributesOfProductAndCategory.productAttributes()) {
             System.out.println(" \n----------------------------------\n" +
                     "attribute name: " + attribute.attributeName()
                     + "\n attribute name id: " + attribute.attributeNameId()
             + "\nmeasurement unit: " + attribute.measurementUnit()
             + "\nvalue: " + attribute.attributeValue()
-            + "is in category: "+ attribute.isInCategory()
+            + "\nis in category: "+ attribute.isInCategory()
             + " \n" +
                     "----------------------------------\n");
         }
@@ -251,6 +146,40 @@ class EComerseApplicationTests {
                     + " \n" +
                     "----------------------------------\n");
         }
+    }
+
+    @Test
+    void testProductAttributeUpdateWithDuplicates() {
+        int productId = 3;
+
+        AttributesOfProductAndCategory attributesOfProductAndCategory = adminAttributeService.getAttributesOfProductAndCategory(productId);
+        List<AttributeOfProductResponse> productAttributes = attributesOfProductAndCategory.productAttributes();
+        AttributeOfProductResponse last = productAttributes.getLast();
+        AttributeOfProductResponse lastUpdated = new AttributeOfProductResponse(last.attributeNameId(),
+                last.attributeName(),
+                "sadasdsa",
+                last.measurementUnit(),
+                last.isInCategory());
+        AttributeOfProductResponse first = productAttributes.getFirst();
+        AttributeOfProductResponse firstUpdated = new AttributeOfProductResponse(
+                first.attributeNameId(),
+                first.attributeName(),
+                "asdsadsdaswqedqw",
+                first.measurementUnit(),
+                first.isInCategory()
+        );
+
+        productAttributes.add(firstUpdated);
+        productAttributes.add(lastUpdated);
+        List<ProductAttributeUpdateRequest> updateRequestList = new ArrayList<>();
+
+        for (AttributeOfProductResponse attribute : productAttributes) {
+            ProductAttributeUpdateRequest attributeUpdateRequest = new ProductAttributeUpdateRequest(attribute.attributeNameId(), attribute.attributeValue());
+            updateRequestList.add(attributeUpdateRequest);
+        }
+
+        adminProductService.updateProductAttributes(productId, updateRequestList);
+
     }
 
 }
