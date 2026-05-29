@@ -229,9 +229,9 @@ where p.id = ?1
 """
 select p
 from Product p
-join fetch p.productImages
+left join fetch p.productImages
 where p.id = ?1
 """
     )
-    Product getByIdWithImages(Integer productId);
+    Optional<Product> getByIdWithImages(int productId);
 }
