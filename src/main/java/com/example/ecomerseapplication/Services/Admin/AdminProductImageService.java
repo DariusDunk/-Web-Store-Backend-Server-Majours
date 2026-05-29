@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Services.Admin;
 import com.example.ecomerseapplication.DTOs.responses.ProductImageResponse;
 import com.example.ecomerseapplication.DTOs.responses.ProductImagesSectionResponse;
 import com.example.ecomerseapplication.Entities.Product;
+import com.example.ecomerseapplication.Repositories.ProductImageRepository;
 import com.example.ecomerseapplication.Services.ProductService;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +13,11 @@ import java.util.List;
 public class AdminProductImageService {
 
     private final ProductService productService;
+    private final ProductImageRepository productImageRepository;
 
-    public AdminProductImageService(ProductService productService) {
+    public AdminProductImageService(ProductService productService, ProductImageRepository productImageRepository) {
         this.productService = productService;
+        this.productImageRepository = productImageRepository;
     }
 
     public ProductImagesSectionResponse getProductImages(Integer productId) {
@@ -30,4 +33,5 @@ public class AdminProductImageService {
 
         return new ProductImagesSectionResponse(mainImageResponse, productImagesResponse);
     }
+
 }

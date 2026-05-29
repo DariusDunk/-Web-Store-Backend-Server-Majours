@@ -40,17 +40,19 @@ public class ProductService {
     private final FavoriteOfCustomerService favoriteOfCustomerService;
     private final SessionService sessionService;
     private final CategoryAttributeService categoryAttributeService;
+    private final ProductImageService productImageService;
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, FavoriteOfCustomerService favoriteOfCustomerService, SessionService sessionService, CategoryAttributeService categoryAttributeService) {
+    public ProductService(ProductRepository productRepository, CartProductService cartProductService, ReviewService reviewService, FavoriteOfCustomerService favoriteOfCustomerService, SessionService sessionService, CategoryAttributeService categoryAttributeService, ProductImageService productImageService) {
         this.productRepository = productRepository;
         this.cartProductService = cartProductService;
         this.reviewService = reviewService;
         this.favoriteOfCustomerService = favoriteOfCustomerService;
         this.sessionService = sessionService;
         this.categoryAttributeService = categoryAttributeService;
+        this.productImageService = productImageService;
     }
 
     public Page<CompactProductResponse> findAllByRatingResponsePage(PageRequest pageRequest) {
@@ -278,8 +280,11 @@ public class ProductService {
         Product product = findByCodeWithRelations(productCode);
 
         List<AttributeOfProjection> attributeNames = categoryAttributeService.getAttributesOfProduct(product.getId());
+        List<String> productImageNames = productImageService.getImageNamesByProductId(product.getId());
 
-        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product, attributeNames);
+        DetailedProductResponse detailedProductResponse = ProductDTOMapper.entityToDetailedResponse(product,
+                attributeNames,
+                productImageNames);
 
         if (cartProductService.cartItemExistsByCustomer(customer, product))
             detailedProductResponse.inCart = true;
@@ -318,8 +323,9 @@ public class ProductService {
         Product product = findByCodeWithRelations(productCode);
 
         List<AttributeOfProjection> attributeNames = categoryAttributeService.getAttributesOfProduct(product.getId());
+        List<String> productImageNames = productImageService.getImageNamesByProductId(product.getId());
 
-        return ProductDTOMapper.entityToDetailedResponse(product, attributeNames);
+        return ProductDTOMapper.entityToDetailedResponse(product, attributeNames, productImageNames);
     }
 
         public Page<CompactProductResponse> getByCategory(ProductCategory productCategory, int page, String sortOrder, int pageSize) {

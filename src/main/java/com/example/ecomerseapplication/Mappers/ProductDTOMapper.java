@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -143,7 +144,9 @@ public class ProductDTOMapper {
     }
 
 
-    public static DetailedProductResponse entityToDetailedResponse(Product product,  List<AttributeOfProjection> attributeProjections) {
+    public static DetailedProductResponse entityToDetailedResponse(Product product,
+                                                                   List<AttributeOfProjection> attributeProjections,
+                                                                   List<String> productImageNames) {
 
         DetailedProductResponse detailedProductResponse = new DetailedProductResponse();
         int originalPrice = product.getOriginalPriceStotinki();
@@ -157,7 +160,7 @@ public class ProductDTOMapper {
         detailedProductResponse.productDescription = product.getProductDescription();
         detailedProductResponse.deliveryCost = product.getDeliveryCost();
         detailedProductResponse.model = product.getModel();
-        detailedProductResponse.productImageURLs = processDetailedProductImages(product);
+        detailedProductResponse.productImageURLs = processDetailedProductImages(product, productImageNames);
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         detailedProductResponse.salePriceStotinki = calculatePriceForDto(saleProduct, originalPrice);
@@ -166,13 +169,15 @@ public class ProductDTOMapper {
         return detailedProductResponse;
     }
 
-    private static List<String > processDetailedProductImages(Product product) {
+    private static List<String > processDetailedProductImages(Product product, List<String> productImageNames) {
         if (product.getProductImages() != null && !product.getProductImages().isEmpty()) {
-            return product
-                    .getProductImages()
-                    .stream()
-                    .map((ProductImage::getImageFileName))
-                    .toList();
+
+            List<String> productImageURLs = new ArrayList<>();
+
+            productImageURLs.add(product.getMainImageUrl());
+            productImageURLs.addAll(productImageNames);
+
+             return productImageURLs;
         } else {
             return List.of();
         }
