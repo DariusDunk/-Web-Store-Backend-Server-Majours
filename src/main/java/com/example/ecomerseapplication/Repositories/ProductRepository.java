@@ -224,4 +224,14 @@ where p.id = ?1
 """
     )
     Optional<DetailedProductProjection> getByIdDetProjection(int id);
+
+    @Query(
+"""
+select p
+from Product p
+join fetch p.productImages
+where p.id = ?1
+"""
+    )
+    Product getByIdWithImages(Integer productId);
 }

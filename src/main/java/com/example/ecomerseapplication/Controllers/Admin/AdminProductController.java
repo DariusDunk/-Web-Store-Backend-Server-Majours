@@ -55,5 +55,7 @@ public class AdminProductController {
     @PatchMapping("update/{id}/attributes")
     public ResponseEntity<?> updateProductAttributes(@PathVariable Integer id, @RequestBody List<ProductAttributeUpdateRequest> request) {
         adminProductService.updateProductAttributes(id, request);
-    return ResponseEntity.noContent().build();}
+        return ResponseEntity.noContent().build();
+    }
+
 }
