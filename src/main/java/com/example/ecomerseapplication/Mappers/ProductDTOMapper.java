@@ -78,8 +78,7 @@ public class ProductDTOMapper {
             Short saleDiscount = null;
             Short overrideDiscountPercentage = null;
 
-            if (sale.getIsActive() && sale.getStartDate().isBefore(now) && sale.getEndDate().isAfter(now))
-            {
+            if (sale.getIsActive() && sale.getStartDate().isBefore(now) && sale.getEndDate().isAfter(now)) {
                 saleDiscount = sale.getDiscountPercent();
                 overrideDiscountPercentage = saleProduct.getOverrideDiscountPercentage();
             }
@@ -137,8 +136,8 @@ public class ProductDTOMapper {
         compactProductResponse.reviewCount = productDto.reviewCount();
         compactProductResponse.salePriceStotinki = calculateDiscountPrice(
                 productDto.originalPriceStotinki(),
-                    productDto.defaultSaleDiscount(),
-                    productDto.explicitDiscount());
+                productDto.defaultSaleDiscount(),
+                productDto.explicitDiscount());
 
         return compactProductResponse;
     }
@@ -160,7 +159,7 @@ public class ProductDTOMapper {
         detailedProductResponse.productDescription = product.getProductDescription();
         detailedProductResponse.deliveryCost = product.getDeliveryCost();
         detailedProductResponse.model = product.getModel();
-        detailedProductResponse.productImageURLs = processDetailedProductImages(product, productImageNames);
+        detailedProductResponse.productImageURLs = processDetailedProductImages(product.getMainImageUrl(), productImageNames);
         detailedProductResponse.rating = product.getRating();
         detailedProductResponse.originalPriceStotinki = product.getOriginalPriceStotinki();
         detailedProductResponse.salePriceStotinki = calculatePriceForDto(saleProduct, originalPrice);
@@ -169,18 +168,18 @@ public class ProductDTOMapper {
         return detailedProductResponse;
     }
 
-    private static List<String > processDetailedProductImages(Product product, List<String> productImageNames) {
-        if (product.getProductImages() != null && !product.getProductImages().isEmpty()) {
+    private static List<String> processDetailedProductImages(String mainProductImage, List<String> productImageNames) {
 
-            List<String> productImageURLs = new ArrayList<>();
+        List<String> productImageURLs = new ArrayList<>();
 
-            productImageURLs.add(product.getMainImageUrl());
-            productImageURLs.addAll(productImageNames);
-
-             return productImageURLs;
-        } else {
-            return List.of();
+        if (mainProductImage != null && !mainProductImage.isBlank())
+        {
+            productImageURLs.add(mainProductImage);
         }
+        productImageURLs.addAll(productImageNames);
+
+        return productImageURLs;
+
     }
 
     public static List<CompactProductResponse> compactSaleProjectionListToResponseList(List<CompactSaleProductProjection> productProjections) {
@@ -222,11 +221,11 @@ public class ProductDTOMapper {
         return response;
     }
 
-    public static ProductForCompactPurchaseHistoryResponse compactPurchaseProjToCompactPurchHistoryResp(CompactPurchaseProductProjection projection) {
-        return new ProductForCompactPurchaseHistoryResponse(projection.getProductName(),
-                projection.getProductCode(),
-                projection.getImageUrl());
-    }
+//    public static ProductForCompactPurchaseHistoryResponse compactPurchaseProjToCompactPurchHistoryResp(CompactPurchaseProductProjection projection) {
+//        return new ProductForCompactPurchaseHistoryResponse(projection.getProductName(),
+//                projection.getProductCode(),
+//                projection.getImageUrl());
+//    }
 
 
 //
@@ -244,9 +243,9 @@ public class ProductDTOMapper {
                 product.getMainImageUrl());
     }
 
-    public static List<ProductForCompactPurchaseHistoryResponse> entityListToCompactPurchIhistoryRespList(List<Product> products) {
-        return products.stream().map(ProductDTOMapper::entityToCompactPurchIhistoryResp).toList();
-    }
+//    public static List<ProductForCompactPurchaseHistoryResponse> entityListToCompactPurchIhistoryRespList(List<Product> products) {
+//        return products.stream().map(ProductDTOMapper::entityToCompactPurchIhistoryResp).toList();
+//    }
 
 
     public static DetailedPurchaseProductResponse detailedPurchaseProdProjectionToResponse(ProductForDetailedPurchaseProjection projection) {
@@ -265,7 +264,7 @@ public class ProductDTOMapper {
         return projections.stream().map(ProductDTOMapper::detailedPurchaseProdProjectionToResponse).toList();
     }
 
-    public static AdminProductResponse detailedProjectionToAdminResponse (DetailedProductProjection projection) {
+    public static AdminProductResponse detailedProjectionToAdminResponse(DetailedProductProjection projection) {
         return new AdminProductResponse(
                 projection.getId(),
                 projection.getName(),
@@ -281,7 +280,7 @@ public class ProductDTOMapper {
         );
     }
 
-    public static List<AdminProductResponse> detailedProjectionListToAdminResponseList (List<DetailedProductProjection> projections) {
+    public static List<AdminProductResponse> detailedProjectionListToAdminResponseList(List<DetailedProductProjection> projections) {
         return projections.stream().map(ProductDTOMapper::detailedProjectionToAdminResponse).toList();
     }
 
