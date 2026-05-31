@@ -93,6 +93,11 @@ public class AdminProductImageService {
 
         Set<String> finalExistingNames;
         List<NewGalleryImageData> finalNewGalleryImages;
+        Set<String> initialDbImageNames = product
+                .getProductImages()
+                .stream()
+                .map(ProductImage::getImageFileName)
+                .collect(Collectors.toSet());
 
         GalleryImagesData galleryImagesData = sanitizeGalleryImages(existingGalleryImagesNames,
                 newGalleryImages
@@ -103,7 +108,12 @@ public class AdminProductImageService {
 
         if (replaceMainImage) {
             dbMainImageName = product.getMainImageUrl();
-            System.out.println("dbMainImageName: " + dbMainImageName + "");
+
+            if (dbMainImageName != null)
+                initialDbImageNames.add(dbMainImageName);
+
+//            System.out.println("dbMainImageName: " + dbMainImageName + "");
+
             newMainImageData = mainImageHandler(mainImage, product);
             if (newMainImageData != null)
                 finalNewGalleryImages.add(newMainImageData);
@@ -133,27 +143,36 @@ public class AdminProductImageService {
 
             if (rediscoveredMainImage.isPresent()) {
 
-                System.out.println("sanitized main image name: " + rediscoveredMainImage.get().fileName() + "");
+//                System.out.println("sanitized main image name: " + rediscoveredMainImage.get().fileName() + "");
 
                 product.setMainImageUrl(
                         rediscoveredMainImage.get().fileName());
             }
             else {
-                System.out.println("no main image found, marking product as not having a main image");
+//                System.out.println("no main image found, marking product as not having a main image");
                 product.setMainImageUrl(null);
             }
         }
 
         dbImagesToDelete.removeAll(finalNameList);
-        System.out.println("images to delete: " + dbImagesToDelete + "");
-        minIoUpload(finalNewGalleryImages, subDir);
-        performDBops(dbImagesToDelete, product, finalNewGalleryImages);
-
+//        System.out.println("images to delete: " + dbImagesToDelete + "");
+        Set<String> uploaded = minIoUpload(finalNewGalleryImages, subDir, initialDbImageNames);
+        uploaded.removeAll(initialDbImageNames);
+        try {
+            performDBops(dbImagesToDelete, product, finalNewGalleryImages);
+        }
+        catch (Exception e) {
+            System.out.println("Error performing DB operations: " + e.getMessage());
+            rollbackMinioUploads(uploaded);
+            throw e;
+        }
         return new ProductAndImageContextForMinIOCleanupDto(product.getProductCode(), dbImagesToDelete);
 
     }
 
-    private void performDBops(Set<String> dbImagesToDelete, Product product, @MonotonicNonNull List<NewGalleryImageData> finalNewGalleryImages) {
+    private void performDBops(Set<String> dbImagesToDelete,
+                              Product product,
+                              @MonotonicNonNull List<NewGalleryImageData> finalNewGalleryImages) {
 
         List<String> finalNewNameList = finalNewGalleryImages
                 .stream()
@@ -185,9 +204,9 @@ public class AdminProductImageService {
     }
 
 
-    private void minIoUpload(List<NewGalleryImageData> finalNewGalleryImages,
-                             String subDir
-                                ) throws Exception {
+    private Set<String> minIoUpload(List<NewGalleryImageData> finalNewGalleryImages,
+                             String subDir,
+                                    Set<String> initialDbImageNames) throws Exception {
 
         Set<String> uploaded = new HashSet<>();
 
@@ -211,11 +230,13 @@ public class AdminProductImageService {
         }
         catch (Exception e)
         {
+            uploaded.removeAll(initialDbImageNames);
             rollbackMinioUploads(uploaded);
 
             throw e;
         }
 
+        return uploaded;
     }
 
     private void rollbackMinioUploads(Set<String> uploaded) {
