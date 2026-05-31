@@ -2,10 +2,12 @@ package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.AdditionalPurchaseDataProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.InvoicePurchaseProjection;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -103,4 +105,33 @@ where p.purchaseCode = :purchaseCode and c.keycloakId = :customerId
     Optional<Purchase> getByCustomer_KeycloakIdAndPurchaseCode(String customerKeycloakId, String purchaseCode);
 
     Purchase getPurchasesByPurchaseCodeAndCustomer_KeycloakId(String purchaseCode, String customerKeycloakId);
+
+    @Query(
+"""
+select p.id as id,
+p.purchaseCode as purchaseCode,
+p.contactName as recipientName,
+p.contactNumber as recipientPhone,
+p.address as deliveryAddress,
+(case
+    when p.email = null then c.email
+    else p.email
+end) as email,
+p.date as purchaseDate,
+p.totalCost as totalCost,
+c.keycloakId as userId,
+c.firstName as userName,
+c.lastName as userFamilyName,
+p.deliveryStatus as deliveryStatus
+from Purchase p
+left join p.customer c
+order by
+case
+    when p.deliveryStatus= 'REFUND_REQUESTED' then 0
+    else 1
+end,
+p.date desc
+"""
+    )
+    List<PurchaseProjection> getAllForAdminPaged(PageRequest pageRequest);
 }

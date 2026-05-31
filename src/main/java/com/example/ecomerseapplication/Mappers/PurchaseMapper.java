@@ -1,6 +1,7 @@
 package com.example.ecomerseapplication.Mappers;
 
 import com.example.ecomerseapplication.DTOs.responses.*;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -60,5 +61,27 @@ public class PurchaseMapper {
                 mappedProducts
 
         );
+    }
+
+    public static CompactAdminPurchaseResponse purchaseProjectionToCompactAdminResponse(PurchaseProjection projection) {
+        return new CompactAdminPurchaseResponse(
+                projection.getId(),
+                projection.getPurchaseCode(),
+                projection.getPurchaseDate(),
+                new RecipientResponse(projection.getRecipientName(),
+                        projection.getRecipientPhone(),
+                        projection.getDeliveryAddress()),
+                projection.getUserId(),
+                projection.getUserName() + " " + projection.getUserFamilyName(),
+                projection.getTotalCost(),
+                projection.getDeliveryStatus(),
+                List.of(),//todo sloji ne6to tuk
+                projection.getEmail()
+        );
+    }
+
+    public static List<CompactAdminPurchaseResponse> purchaseProjectionListToCompactAdminResponseList(List<PurchaseProjection> projection) {
+
+        return projection.stream().map(PurchaseMapper::purchaseProjectionToCompactAdminResponse).toList();
     }
 }
