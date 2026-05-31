@@ -6,12 +6,10 @@ import com.example.ecomerseapplication.DTOs.serverDtos.ProductAndImageContextFor
 import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Entities.ProductImage;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
-import com.example.ecomerseapplication.Repositories.ProductImageRepository;
 import com.example.ecomerseapplication.Services.MinioService;
 import com.example.ecomerseapplication.Services.ProductService;
 import com.example.ecomerseapplication.Utils.FileNameSanitizer;
 import com.example.ecomerseapplication.Utils.ImageValidator;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -32,15 +30,11 @@ import java.util.stream.Collectors;
 public class AdminProductImageService {
 
     private final ProductService productService;
-    private final ProductImageRepository productImageRepository;
     private final MinioService minioService;
-    private final EntityManager entityManager;
 
-    public AdminProductImageService(ProductService productService, ProductImageRepository productImageRepository, MinioService minioService, EntityManager entityManager) {
+    public AdminProductImageService(ProductService productService, MinioService minioService) {
         this.productService = productService;
-        this.productImageRepository = productImageRepository;
         this.minioService = minioService;
-        this.entityManager = entityManager;
     }
 
     public ProductImagesSectionResponse getProductImages(Integer productId) {
@@ -256,7 +250,7 @@ public class AdminProductImageService {
 
         Set<String> occupiedNames = new HashSet<>(finalExistingNames);
 
-        System.out.println("existing names before duplicate resolving : " + occupiedNames + " \nfinalNewGalleryImages: " + finalNewGalleryImages + "");
+//        System.out.println("existing names before duplicate resolving : " + occupiedNames + " \nfinalNewGalleryImages: " + finalNewGalleryImages);
 
         return finalNewGalleryImages
                 .stream()
