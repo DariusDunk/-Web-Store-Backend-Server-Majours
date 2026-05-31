@@ -782,6 +782,10 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
+    public Product getByIdWithImagesAndLocking(int id) {
+        return productRepository.getByIdWithImagesAndLock(id).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+
     public Product getByIdWithImages(Integer productId) {
         return productRepository.getByIdWithImages(productId).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
     }

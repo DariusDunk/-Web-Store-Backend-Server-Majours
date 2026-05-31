@@ -11,6 +11,7 @@ import com.example.ecomerseapplication.CustomErrorHelpers.ErrorMessage;
 import com.example.ecomerseapplication.CustomErrorHelpers.ErrorType;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Services.*;
+import com.example.ecomerseapplication.Utils.ImageValidator;
 import com.example.ecomerseapplication.Utils.SortHelper;
 import com.example.ecomerseapplication.enums.ProductSortType;
 import com.example.ecomerseapplication.enums.ReviewSortType;
@@ -374,7 +375,7 @@ public class ProductController {
     @PostMapping(path = "imageSearch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> getProductsByImage(@RequestParam("image") MultipartFile image) throws IOException {
         BufferedImage bufferedImage =
-                imageSearchService.validateImageInput(image);
+                ImageValidator.validateImageInput(image);
 
         return ResponseEntity.ok(imageSearchService.findByImage(bufferedImage));
     }

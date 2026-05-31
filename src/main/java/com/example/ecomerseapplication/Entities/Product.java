@@ -63,7 +63,9 @@ public class Product {
     @Column(name = "main_image_url")
     private String mainImageUrl;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product",
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+    orphanRemoval = true)
     private List<ProductImage> productImages;
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product")

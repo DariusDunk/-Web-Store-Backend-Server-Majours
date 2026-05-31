@@ -4,14 +4,10 @@ import com.example.ecomerseapplication.DTOs.responses.ImageSearchPagedResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.PredictionResponseDTO;
 import com.example.ecomerseapplication.Entities.Manufacturer;
 import com.example.ecomerseapplication.Entities.ProductCategory;
-import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidImageException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.NoCategoryAndManufacturerPresentException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -81,31 +77,4 @@ public class ImageSearchService {
                 .toList();
     }
 
-    public BufferedImage validateImageInput(MultipartFile image) throws IOException {
-        if (image.isEmpty()) {
-            throw new InvalidImageException("No image for inference!", "empty");
-        }
-
-        if (image.getContentType() == null ||
-                !image.getContentType().startsWith("image/")) {
-            throw new InvalidImageException("Content type for inference is not an image!", "contentType");
-        }
-
-        BufferedImage bufferedImage =
-                ImageIO.read(image.getInputStream());
-
-        if (bufferedImage == null) {
-            throw new InvalidImageException("Decoding of the image for inference failed", "decoding");
-        }
-
-        if (bufferedImage.getWidth() < 50 ||
-                bufferedImage.getHeight() < 50) {
-            throw new InvalidImageException("Image too small", "size-small");
-        }
-        if (bufferedImage.getWidth() > 8000 ||
-                bufferedImage.getHeight() > 8000)
-            throw new InvalidImageException("Image too large", "size-large");
-
-        return bufferedImage;
-    }
 }

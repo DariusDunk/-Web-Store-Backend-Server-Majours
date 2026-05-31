@@ -1,7 +1,9 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.Entities.Product;
 import com.example.ecomerseapplication.Repositories.ProductImageRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

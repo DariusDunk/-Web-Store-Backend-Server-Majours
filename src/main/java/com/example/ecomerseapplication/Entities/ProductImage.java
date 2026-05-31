@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "product_images", schema = "online_shop")
 @Data
 @EqualsAndHashCode(exclude = "product")
+@NoArgsConstructor
 public class ProductImage {
 
     @Id
@@ -24,4 +26,8 @@ public class ProductImage {
     @ManyToOne
     private Product product;
 
+    public ProductImage(String imageFileName, Product product) {
+        this.imageFileName = imageFileName;
+        this.product = product;
+    }
 }
