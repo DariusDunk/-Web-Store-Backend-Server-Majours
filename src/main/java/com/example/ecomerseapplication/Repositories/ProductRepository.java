@@ -248,4 +248,19 @@ where p.id = ?1
 """
     )
     Optional<Product> getByIdWithImagesAndLock(int id);
+
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+    })
+    @Query(
+"""
+select p
+from Product p
+left join fetch p.categoryAttributeSet
+where p.id =?1
+"""
+    )
+    Optional<Product> getByIdWithAttributesAndLock(int id);
 }

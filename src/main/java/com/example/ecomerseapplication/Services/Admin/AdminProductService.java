@@ -10,12 +10,15 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Deta
 import com.example.ecomerseapplication.Entities.*;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.DuplicatedAttributeException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.EmptyAttributeValueException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.Mappers.ProductDTOMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.ProductRepository;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Utils.SortHelper;
 import com.example.ecomerseapplication.enums.ProductSortType;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -116,7 +119,17 @@ public class AdminProductService {
 
     @Transactional
     public void updateProductAttributes(Integer id, List<ProductAttributeUpdateRequest> request) {
-        Product product = productService.getById(id);
+
+        Product product;
+        try {
+            product = productService.getByIdWithAttributesAndLock(id);
+        } catch (PessimisticLockException | LockTimeoutException e) {
+            throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock encountered for fetching product in attributes update request",
+                    "Заключен продукт",
+                    "Избраният продукт е временно заключен за обработка, опитайте отново");
+        }
+
+
         if (!request.isEmpty())
         {
             Map<Integer, String> requestMap;
