@@ -54,4 +54,9 @@ public class ManufacturerService {
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Manufacturer not found with id: " + id));
     }
+
+    public CompactManufacturerResponse getByIdCompact(Integer id) {
+        Manufacturer manufacturer = getById(id);
+        return new CompactManufacturerResponse(manufacturer.getManufacturerName(), manufacturer.getId());
+    }
 }
