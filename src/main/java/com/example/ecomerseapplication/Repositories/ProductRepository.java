@@ -186,7 +186,7 @@ p.productCode,
 sp.overrideDiscountPercentage)
 from Product p
 join p.saleProducts sp
-where sp.sale.id = ?1 and sp.isMain = true
+where sp.sale.id = ?1
 """)
     List<ProductOfSaleResponse> getAllProductsOfSaleMini(long saleId);
 
