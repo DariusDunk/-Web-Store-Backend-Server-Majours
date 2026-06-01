@@ -7,6 +7,39 @@ import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
 const PURCHASE_CONTROLLER_ROUTE = `${Backend_Url}/admin/purchase`;
 
+router.patch(`/update-status`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const reqBody = req.body;
+
+    console.log(JSON.stringify(reqBody));
+
+    try {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                return await axiosBackendClient.patch(`${PURCHASE_CONTROLLER_ROUTE}/purchase-action`, reqBody, {
+                    headers:
+                        {
+                            'Content-Type': 'application/json',
+                            'x-client_type': WEB_CLIENT_NAME,
+                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                        },
+                    bffContext: {
+                        req, res
+                    }
+                });
+            },
+            {req, res});
+
+        return res.status(response.status).end();
+
+    } catch (error) {
+        console.error('-------------------Error updating purchase status-------------------\n', error);
+        if (error.response)
+            return res.status(error.response.status || 500).json(error.response.data);
+        return res.status(500).end();
+    }
+});
+
 router.get(`/pending-refund-count`, async (req, res) => {
     const sessionId = req.cookies.session_id;
     try {

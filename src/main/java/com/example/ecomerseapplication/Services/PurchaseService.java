@@ -185,33 +185,9 @@ public class PurchaseService {
 
             purchase.cancelPurchase();
 
-            List<PurchaseCart> purchaseCarts = purchaseCartService.getByPurchase(purchase);
+            List<PurchaseCart> purchaseCarts = purchaseCartService.getByPurchaseWithProducts(purchase);
 
-            Set<Integer> productIds = purchaseCarts
-                    .stream()
-                    .map(purchaseCart -> purchaseCart.getPurchaseCartId().getProduct().getId())
-                    .collect(toSet());
-
-            List<Product> purchaseProducts = productService.getByIdSetWithLock(productIds);
-
-            Map<Integer, Product> productMap = purchaseProducts.stream()
-                    .collect(Collectors.toMap(
-                            Product::getId,
-                            p -> p,
-                            (oldValue, newValue) -> newValue,
-                            HashMap::new
-                    ));
-
-            for (PurchaseCart purchaseCart: purchaseCarts) {
-                int productId = purchaseCart.getPurchaseCartId().getProduct().getId();
-                int quantity = purchaseCart.getQuantity();
-                Product product = productMap.get(productId);
-                if (product==null) {
-                    throw new ResourceNotFoundException("Product for purchase cancel not found");
-                }
-
-                product.setQuantityInStock(product.getQuantityInStock() + quantity);
-            }
+            restockProductsOfCancelledPurchase(purchaseCarts);
 
         } catch (PessimisticLockException | LockTimeoutException e) {
             throw new PessimisticLockOrTimeoutPurchaseException("Pessimistic lock or timeout exception occurred during purchase cancellation",
@@ -219,6 +195,34 @@ public class PurchaseService {
                     "Заявката не беше успешна, моля опитайте отново");
         }
 
+    }
+
+    public void restockProductsOfCancelledPurchase(List<PurchaseCart> purchaseCarts) {
+        Set<Integer> productIds = purchaseCarts
+                .stream()
+                .map(purchaseCart -> purchaseCart.getPurchaseCartId().getProduct().getId())
+                .collect(toSet());
+
+        List<Product> purchaseProducts = productService.getByIdSetWithLock(productIds);
+
+        Map<Integer, Product> productMap = purchaseProducts.stream()
+                .collect(Collectors.toMap(
+                        Product::getId,
+                        p -> p,
+                        (oldValue, newValue) -> newValue,
+                        HashMap::new
+                ));
+
+        for (PurchaseCart purchaseCart: purchaseCarts) {
+            int productId = purchaseCart.getPurchaseCartId().getProduct().getId();
+            int quantity = purchaseCart.getQuantity();
+            Product product = productMap.get(productId);
+            if (product==null) {
+                throw new ResourceNotFoundException("Product for purchase cancel not found");
+            }
+
+            product.setQuantityInStock(product.getQuantityInStock() + quantity);
+        }
     }
 
     @Transactional
@@ -240,9 +244,15 @@ public class PurchaseService {
         }
 
     }
+//
+//    private Purchase getPurchaseByCodeAndCustomer(String purchaseCode, String keycloakId) {
+//        return purchaseRepository.getPurchasesByPurchaseCodeAndCustomer_KeycloakId(purchaseCode, keycloakId);
+//    }
 
-    private Purchase getPurchaseByCodeAndCustomer(String purchaseCode, String keycloakId) {
-        return purchaseRepository.getPurchasesByPurchaseCodeAndCustomer_KeycloakId(purchaseCode, keycloakId);
+    public Purchase getByIdWithLock(Long id) {
+        return purchaseRepository
+                .getByIdWIthLock(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No purchase found with id " + id));
     }
 
     private record PurchaseCompletionDTO(List<String> productCodes,

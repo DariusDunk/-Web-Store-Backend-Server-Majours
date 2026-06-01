@@ -18,7 +18,7 @@ public interface PurchaseCartRepository extends JpaRepository<PurchaseCart, Purc
 
     @Query(value = "select pc " +
             "from PurchaseCart pc " +
-            "join pc.purchaseCartId.product p " +
+            "left join fetch pc.purchaseCartId.product p " +
             "where pc.purchaseCartId.purchase=?1")
     List<PurchaseCart> getByPurchase(Purchase purchase);
 
@@ -50,21 +50,6 @@ where pu.purchaseCode = ?1
     )
     List<PurchaseProductProjection> getProductProjectionsOfPurchase(String purchaseCode);
 
-
-//    @Query(
-//"""
-//select p.productName as productName,
-//p.productCode as productCode,
-//p.mainImageUrl as imageUrl
-//from PurchaseCart pc
-//join pc.purchaseCartId.product p
-//join pc.purchaseCartId.purchase pur
-//where pur.id = ?1
-//
-//"""
-//    )
-//    List<CompactPurchaseProductProjection> getProductsForCompactPurchaseHistory(@Param("purchaseId") long purchaseId, Pageable pageable);
-
     @Query(
             """
 select pur.id as purchaseId,
@@ -94,4 +79,12 @@ where pu.purchaseCode = ?1
 """)
     List<ProductForDetailedPurchaseProjection> getProductsForDetailedPurchaseHistory(String purchaseCode);
 
+    @Query(
+"""
+select pc
+from PurchaseCart pc
+where pc.purchaseCartId.purchase.id = ?1
+"""
+    )
+    List<PurchaseCart> getAllByPurchaseId(long purchaseId);
 }

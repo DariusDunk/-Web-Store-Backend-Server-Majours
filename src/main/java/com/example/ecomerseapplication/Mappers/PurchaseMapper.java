@@ -4,6 +4,7 @@ import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.enums.DeliveryStatus;
+import com.example.ecomerseapplication.enums.PurchaseStatusAction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
@@ -89,9 +90,9 @@ public class PurchaseMapper {
     private static List<String>  purchaseActionHelper(DeliveryStatus deliveryStatus) {
 
         return switch (deliveryStatus) {
-            case DeliveryStatus.SHIPPED -> List.of("DELIVER");
-            case DeliveryStatus.PROCESSING -> List.of("CANCEL", "SHIP");
-            case DeliveryStatus.REFUND_REQUESTED -> List.of("APPROVE_REFUND", "REJECT_REFUND");
+            case DeliveryStatus.SHIPPED -> List.of(PurchaseStatusAction.DELIVER.name());
+            case DeliveryStatus.PROCESSING -> List.of(PurchaseStatusAction.CANCEL.name(), PurchaseStatusAction.SHIP.name());
+            case DeliveryStatus.REFUND_REQUESTED -> List.of(PurchaseStatusAction.APPROVE_REFUND.name(), PurchaseStatusAction.REJECT_REFUND.name());
             default -> List.of();
         };
     }

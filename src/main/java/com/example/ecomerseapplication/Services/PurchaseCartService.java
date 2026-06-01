@@ -27,7 +27,7 @@ public class PurchaseCartService {
         purchaseCartRepository.saveAll(purchaseCarts);
     }
 
-    public List<PurchaseCart> getByPurchase(Purchase purchase) {
+    public List<PurchaseCart> getByPurchaseWithProducts(Purchase purchase) {
         return purchaseCartRepository.getByPurchase(purchase);
     }
 
@@ -45,5 +45,9 @@ public class PurchaseCartService {
 
     public List<ProductForDetailedPurchaseProjection> getProductsForDetailedPurchase(String purchaseCode) {
         return purchaseCartRepository.getProductsForDetailedPurchaseHistory(purchaseCode);
+    }
+
+    public List<PurchaseCart> getByPurchaseId(long purchaseId) {
+        return purchaseCartRepository.getAllByPurchaseId(purchaseId);
     }
 }

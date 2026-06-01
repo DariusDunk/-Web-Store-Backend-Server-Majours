@@ -292,4 +292,24 @@ public class GlobalExceptionHandler {
                         HttpStatus.CONFLICT.value(),
                         "Има дублиране при един или повече от подадените атрибути"));
     }
+
+    @ExceptionHandler(InvalidEnumNameException.class)
+    public ResponseEntity<?> handleInvalidEnumNameExceptions(InvalidEnumNameException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorType.VALIDATION_ERROR,
+                        exception.getTitle(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        exception.getDetail()));
+    }
+
+    @ExceptionHandler(InvalidPurchaseActionException.class)
+    public ResponseEntity<?> handleInvalidPurchaseActionException() {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorType.INVALID_OPERATION,
+                        "Невалидно действие",
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Това действие не може да се изпълни за тази поръчка"));
+    }
 }

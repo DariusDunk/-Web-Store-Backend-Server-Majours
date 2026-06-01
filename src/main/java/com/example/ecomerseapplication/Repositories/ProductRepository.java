@@ -263,4 +263,5 @@ where p.id =?1
 """
     )
     Optional<Product> getByIdWithAttributesAndLock(int id);
+
 }

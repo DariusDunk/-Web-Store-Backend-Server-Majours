@@ -2,6 +2,7 @@ package com.example.ecomerseapplication.Entities;
 
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.BadPurchaseCancelRequestException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.BadPurchaseRefundRequestException;
+import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidPurchaseActionException;
 import com.example.ecomerseapplication.enums.DeliveryStatus;
 import com.example.ecomerseapplication.enums.PaymentMethod;
 import jakarta.persistence.*;
@@ -126,7 +127,7 @@ public class Purchase {
 
     public void cancelPurchase() {
 
-        if (!this.getDeliveryStatus().equals(DeliveryStatus.PROCESSING) ) {
+        if (!this.getDeliveryStatus().equals(DeliveryStatus.PROCESSING)) {
             throw new BadPurchaseCancelRequestException("Purchase is not in processing status");
         }
 
@@ -149,5 +150,35 @@ public class Purchase {
         }
 
         this.setDeliveryStatus(DeliveryStatus.REFUND_REQUESTED);
+    }
+
+    public void deliverPurchase() {
+        if (this.deliveryStatus.equals(DeliveryStatus.SHIPPED)) {
+            this.setDeliveryStatus(DeliveryStatus.DELIVERED);
+            this.setDeliveryDate(Instant.now());
+        } else
+            throw new InvalidPurchaseActionException("Cannot perform action: DELIVER on purchase with status: " + this.deliveryStatus.name());
+    }
+
+    public void shipPurchase() {
+        if (this.deliveryStatus.equals(DeliveryStatus.PROCESSING))
+            this.setDeliveryStatus(DeliveryStatus.SHIPPED);
+        else
+            throw new InvalidPurchaseActionException("Cannot perform action: SHIP on purchase with status: " + this.deliveryStatus.name());
+    }
+
+    public void approveRefund() {
+        if (this.deliveryStatus.equals(DeliveryStatus.REFUND_REQUESTED))
+            this.setDeliveryStatus(DeliveryStatus.REFUNDED);
+        else
+            throw new InvalidPurchaseActionException("Cannot perform action: APPROVE REFUND on purchase with status: " + this.deliveryStatus.name());
+    }
+
+    public void rejectRefund() {
+        if (this.deliveryStatus.equals(DeliveryStatus.REFUND_REQUESTED))
+            this.setDeliveryStatus(DeliveryStatus.DELIVERED);
+        else
+            throw new InvalidPurchaseActionException("Cannot perform action: REJECT REFUND on purchase with status: " + this.deliveryStatus.name());
+
     }
 }

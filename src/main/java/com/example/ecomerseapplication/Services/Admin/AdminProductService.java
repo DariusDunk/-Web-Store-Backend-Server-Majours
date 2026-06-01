@@ -217,4 +217,38 @@ public class AdminProductService {
     private String normalize(String v) {
         return v == null ? null : v.trim().toLowerCase();
     }
+
+    public void refreshStockOfPurchaseProducts(List<PurchaseCart> purchaseCarts) {
+
+        Set<Integer> productIds = purchaseCarts
+                .stream()
+                .map(pc-> pc.getPurchaseCartId().getProduct().getId())
+                .collect(Collectors.toSet());
+
+        List<Product> purchaseProducts;
+
+        try
+        {
+            purchaseProducts = productService.getByIdSetWithLock(productIds);
+        }
+        catch (PessimisticLockException | LockTimeoutException e)
+        {
+            throw new PessimisticLockOrTimeoutPurchaseException("One or more of the requested produts for stock increase are locked for edits",
+                    "Заключени продукту",
+                    "Един или повече от продуктите за тази поръчка в момента са заключени за промяна, опитайте отново");
+        }
+
+        Map<Integer, Product> productMap = purchaseProducts
+                .stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
+        for (PurchaseCart purchaseCart : purchaseCarts) {
+            Product product = productMap.get(purchaseCart.getPurchaseCartId().getProduct().getId());
+
+            if (product != null) {
+                int newStock = purchaseCart.getQuantity() + product.getQuantityInStock();
+                product.setQuantityInStock(newStock);
+            }
+        }
+    }
 }

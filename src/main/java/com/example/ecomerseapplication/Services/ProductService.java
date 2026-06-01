@@ -793,4 +793,5 @@ public class ProductService {
     public Product getByIdWithImages(Integer productId) {
         return productRepository.getByIdWithImages(productId).orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
     }
+
 }

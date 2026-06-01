@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -143,4 +144,17 @@ where p.deliveryStatus = ?1
 """
     )
     Integer refundPendingCount(DeliveryStatus refundRequestedStatus);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+    })
+    @Query(
+"""
+select p
+from Purchase p
+where p.id = ?1
+"""
+    )
+    Optional<Purchase> getByIdWIthLock(Long id);
 }
