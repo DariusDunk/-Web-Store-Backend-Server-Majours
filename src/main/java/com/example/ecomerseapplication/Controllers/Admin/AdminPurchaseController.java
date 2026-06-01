@@ -23,4 +23,9 @@ public class AdminPurchaseController {
     public ResponseEntity<?> getAllPurchases(@PathVariable int page) {
         return ResponseEntity.ok(adminPurchaseService.getPagedPurchasesCompact(page));
     }
+
+    @GetMapping("pending-refund-count")
+    public ResponseEntity<?> getRefundPendingCount() {
+        return ResponseEntity.ok(adminPurchaseService.getRefundPendingCount());
+    }
 }

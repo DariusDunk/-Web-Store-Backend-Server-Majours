@@ -114,7 +114,7 @@ p.contactName as recipientName,
 p.contactNumber as recipientPhone,
 p.address as deliveryAddress,
 (case
-    when p.email = null then c.email
+    when p.email is null then c.email
     else p.email
 end) as email,
 p.date as purchaseDate,
@@ -133,5 +133,14 @@ end,
 p.date desc
 """
     )
-    List<PurchaseProjection> getAllForAdminPaged(PageRequest pageRequest);
+    Page<PurchaseProjection> getAllForAdminPaged(Pageable pageable);
+
+    @Query(
+"""
+select count(p)
+from Purchase p
+where p.deliveryStatus = ?1
+"""
+    )
+    Integer refundPendingCount(String refundRequestedStatus);
 }

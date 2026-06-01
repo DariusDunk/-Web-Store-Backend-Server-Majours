@@ -3,6 +3,7 @@ package com.example.ecomerseapplication.Mappers;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
+import com.example.ecomerseapplication.enums.DeliveryStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
@@ -75,7 +76,7 @@ public class PurchaseMapper {
                 projection.getUserName() + " " + projection.getUserFamilyName(),
                 projection.getTotalCost(),
                 projection.getDeliveryStatus(),
-                List.of(),//todo sloji ne6to tuk
+                purchaseActionHelper(DeliveryStatus.valueOf(projection.getDeliveryStatus())),
                 projection.getEmail()
         );
     }
@@ -83,5 +84,15 @@ public class PurchaseMapper {
     public static List<CompactAdminPurchaseResponse> purchaseProjectionListToCompactAdminResponseList(List<PurchaseProjection> projection) {
 
         return projection.stream().map(PurchaseMapper::purchaseProjectionToCompactAdminResponse).toList();
+    }
+
+    private static List<String>  purchaseActionHelper(DeliveryStatus deliveryStatus) {
+
+        return switch (deliveryStatus) {
+            case DeliveryStatus.SHIPPED -> List.of("DELIVER");
+            case DeliveryStatus.PROCESSING -> List.of("CANCEL", "SHIP");
+            case DeliveryStatus.REFUND_REQUESTED -> List.of("APPROVE_REFUND", "REJECT_REFUND");
+            default -> List.of();
+        };
     }
 }

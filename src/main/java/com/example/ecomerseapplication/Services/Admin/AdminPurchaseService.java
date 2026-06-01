@@ -1,10 +1,15 @@
 package com.example.ecomerseapplication.Services.Admin;
 
 import com.example.ecomerseapplication.DTOs.responses.CompactAdminPurchaseResponse;
+import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProjection;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
+import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import com.example.ecomerseapplication.Services.PurchaseService;
+import com.example.ecomerseapplication.enums.DeliveryStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +26,23 @@ public class AdminPurchaseService {
         this.purchaseService = purchaseService;
     }
 
-    public List<CompactAdminPurchaseResponse> getPagedPurchasesCompact(int page) {
-        PageRequest pageRequest = PageRequest.of(page, 10);
+    public PageResponse<CompactAdminPurchaseResponse> getPagedPurchasesCompact(int page) {
+        PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit);
 
-        List<PurchaseProjection> purchaseProjections = purchaseRepository.getAllForAdminPaged(pageRequest);
+        Page<PurchaseProjection> purchaseProjectionsPage = purchaseRepository.getAllForAdminPaged(pageRequest);
 
-        return PurchaseMapper.purchaseProjectionListToCompactAdminResponseList(purchaseProjections);
+        List<PurchaseProjection> purchaseProjectionsList = purchaseProjectionsPage.getContent();
+
+        List<CompactAdminPurchaseResponse> responseList = PurchaseMapper.purchaseProjectionListToCompactAdminResponseList(purchaseProjectionsList);
+
+        Page<CompactAdminPurchaseResponse> oldPage = new PageImpl<>(responseList,
+                purchaseProjectionsPage.getPageable(),
+                purchaseProjectionsPage.getTotalElements());
+
+        return PageResponse.from(oldPage);
+    }
+
+    public Integer getRefundPendingCount() {
+        return purchaseRepository.refundPendingCount(DeliveryStatus.REFUND_REQUESTED.name());
     }
 }
