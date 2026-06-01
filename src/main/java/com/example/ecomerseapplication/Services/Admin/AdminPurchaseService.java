@@ -43,6 +43,6 @@ public class AdminPurchaseService {
     }
 
     public Integer getRefundPendingCount() {
-        return purchaseRepository.refundPendingCount(DeliveryStatus.REFUND_REQUESTED.name());
+        return purchaseRepository.refundPendingCount(DeliveryStatus.REFUND_REQUESTED);
     }
 }

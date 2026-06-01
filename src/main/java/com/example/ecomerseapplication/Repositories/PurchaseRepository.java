@@ -4,10 +4,10 @@ import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.Addi
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.InvoicePurchaseProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
+import com.example.ecomerseapplication.enums.DeliveryStatus;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -142,5 +142,5 @@ from Purchase p
 where p.deliveryStatus = ?1
 """
     )
-    Integer refundPendingCount(String refundRequestedStatus);
+    Integer refundPendingCount(DeliveryStatus refundRequestedStatus);
 }
