@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Repositories;
 
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.SessionActivityProjection;
 import com.example.ecomerseapplication.Entities.Session;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,13 +14,15 @@ import java.util.Optional;
 public interface SessionRepository extends JpaRepository<Session,String> {
 
     @Query(value = """
-select count (s)
+select count (s) as total,
+SUM(CASE WHEN s.isGuest = true THEN 1 ELSE 0 END) as guest,
+SUM(CASE WHEN s.isGuest = false THEN 1 ELSE 0 END) as auth
 from Session s
 where s.isRevoked = false
-and s.lastActivityAt<:fiveMinsAgo
-and s.expiresAt <CURRENT_TIMESTAMP
+and s.lastActivityAt>:fiveMinsAgo
+and s.expiresAt >CURRENT_TIMESTAMP
 """)
-    int getActiveSessionCount(@Param("fiveMinsAgo")Instant fiveMinutesAgo);
+    SessionActivityProjection getActiveSessionCount(@Param("fiveMinsAgo")Instant fiveMinutesAgo);
 
 
     @Query(value =

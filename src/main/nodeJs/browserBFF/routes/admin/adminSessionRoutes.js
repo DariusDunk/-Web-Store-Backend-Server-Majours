@@ -4,9 +4,9 @@ import {Backend_Url, WEB_CLIENT_NAME} from '../config.js';
 import axiosBackendClient from '../../axiosBackendClient.js';
 import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
-const CONTROLLER_ROUTE = `${Backend_Url}/admin/sessions`;
+const CONTROLLER_ROUTE = `${Backend_Url}/admin/session`;
 //todo test
-router.get('/activeSessions', async (req, res) => {
+router.get('/active-sessions', async (req, res) => {
     const sessionId = req.cookies.session_id;
 
     try{
@@ -27,7 +27,8 @@ router.get('/activeSessions', async (req, res) => {
             {req, res});
 
         const responseData = response.data;
-        return res.status(response.status).json({count: responseData} || {});
+
+        return res.status(response.status).json(responseData || {});
     }
     catch (error) {
         console.error('-------------------Error fetching active sessions-------------------\n', error);

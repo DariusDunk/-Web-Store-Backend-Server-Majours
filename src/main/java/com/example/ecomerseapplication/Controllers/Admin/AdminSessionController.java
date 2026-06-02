@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/admin/session/")
+@PreAuthorize("hasRole(@roles.admin())")
 public class AdminSessionController {
     private final SessionService sessionService;
 
@@ -17,7 +18,6 @@ public class AdminSessionController {
     }
 
     @GetMapping("active/get")
-    @PreAuthorize("hasRole(@roles.admin())")
     public ResponseEntity<?> getActiveSessions() {
         return ResponseEntity.ok(sessionService.getActiveSessions());
     }
