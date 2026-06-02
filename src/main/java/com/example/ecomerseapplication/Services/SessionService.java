@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -131,34 +134,25 @@ public class SessionService {
         Instant now = Instant.now();
         Instant fourMinutesAgo = now.minus(4, ChronoUnit.MINUTES);
         Instant truncated = now.truncatedTo(ChronoUnit.MINUTES);
+        ZoneId sofiaZone = ZoneId.of("Europe/Sofia");
+        ZonedDateTime sofiaTime = truncated.atZone(sofiaZone);
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        String formattedDateTime = sofiaTime.format(formatter);
 
         SessionActivityProjection projection = sessionRepository.getActiveSessionCount(fourMinutesAgo);
 
         List<Map<String, String>> rows = getMapList(projection);
 
-//        ReportResponses.ReportResponse response = ReportResponses.buildTableReport("Потребителска активност към " + truncated,
-//                List.of("Общо", "Потребители", "Гост потребители"),
-//                rows);
-
-//        List<ReportResponses.MetricDto> metrics = new ArrayList<>();
-//
-//        if (!rows.isEmpty()) {
-//            for (Map.Entry<String, String> entry : rows.getFirst().entrySet()) {
-//                String key = entry.getKey();
-//                String value = entry.getValue();
-//
-//                metrics.add(new ReportResponses.MetricDto(key, value));
-//            }
-//        }
-
         List<Map<String, String>> chartData = buildChartDataMapList(projection);
 
         ReportResponses.ChartDto chartDto = ReportResponses.buildBarChart("sessionType", "count", "Брой потребители", chartData);
 
-        ReportResponses.ReportResponse response = ReportResponses.buildMixedReport("Потребителска активност към " + truncated,
+        ReportResponses.ReportResponse response = ReportResponses.buildMixedReport("Потребителска активност към " + formattedDateTime,
                 null,
                 chartDto,
-                List.of("Общо", "Потребители", "Гост потребители"),
+//                List.of("Общо", "Потребители", "Гост потребители"),
+                List.of("Тип потребител", "Брой"),
                 rows);
 
         System.out.println("response: " + response);
@@ -172,9 +166,16 @@ public class SessionService {
         String auth = projection.getAuth() != null ? projection.getAuth().toString() : "0";
         String guest = projection.getGuest() != null ? projection.getGuest().toString() : "0";
 
-        Map<String, String> totalMap = Map.of("Общо", total, "Потребители", auth, "Гост потребители", guest);
+//        Map<String, String> totalMap = Map.of("Общо", total, "Потребители", auth, "Гост потребители", guest);
+//        Map<String, String> authMap  = Map.of("Общо", total, "Потребители", auth, "Гост потребители", guest);
+//        Map<String, String> guestMap = Map.of("Общо", total, "Потребители", auth, "Гост потребители", guest);
 
-        return List.of(totalMap);
+
+        Map<String, String> totalMap = Map.of("Тип потребител", "Общо", "Брой", total);
+        Map<String, String> authMap  = Map.of("Тип потребител", "Потребители", "Брой", auth);
+        Map<String, String> guestMap = Map.of("Тип потребител", "Гост потребители", "Брой", guest);
+
+        return List.of(totalMap, authMap, guestMap);
     }
 
     @NotNull
