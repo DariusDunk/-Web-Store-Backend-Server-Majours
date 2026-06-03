@@ -19,4 +19,6 @@ public interface PurchaseProjection {
     String getUserFamilyName();
 
     String getDeliveryStatus();
+
+    Integer getStatusCount();
 }

@@ -46,7 +46,8 @@ public class ReportResponses {
     public enum ValueType {
         CURRENCY,
         TEXT,
-        NUMBER
+        NUMBER,
+        PERCENTAGE
     }
 
     public static ReportResponse buildTableReport(String title,
@@ -65,6 +66,15 @@ public class ReportResponses {
                                                   List<String> dateData) {
         return new ReportResponse(ReportType.MIXED, title, metrics, chart, columns, rows , dateData);
     }
+
+    public static ReportResponse buildMixedReportNoMetrics(String title,
+                                                  ChartDto chart,
+                                                  List<String> columns,
+                                                  List<Map<String, TableColumnRow>> rows,
+                                                  List<String> dateData) {
+        return new ReportResponse(ReportType.MIXED, title, null, chart, columns, rows , dateData);
+    }
+
 
     public static ChartDto buildBarChart(String xKey, String yKey, String label, List<Map<String, String>> data, ValueType valueType) {
         return new ChartDto(ChartType.BAR, xKey, yKey, label, data, valueType);

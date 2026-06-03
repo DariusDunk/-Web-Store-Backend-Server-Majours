@@ -35,7 +35,6 @@ public class ReportPdfService {
 
     private final PDFService pdfService;
 
-    // ─── Store constants (mirror InvoiceHtmlService) ──────────────────────────
     private static final String STORE_NAME    = "Агромаг";
     private static final String STORE_TAGLINE = "Земеделски продукти и консумативи";
     private static final String STORE_EIK     = "ЕИК: 1234567890";
@@ -46,8 +45,6 @@ public class ReportPdfService {
     private static final ZoneId            SOFIA_ZONE         = ZoneId.of("Europe/Sofia");
     private static final DateTimeFormatter TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-
-    // ─── Public API ───────────────────────────────────────────────────────────
 
     /**
      * Builds the HTML for {@code report} and converts it to a PDF byte array.
@@ -61,8 +58,6 @@ public class ReportPdfService {
         String html = buildReportHtml(report, dates, timezone);
         return pdfService.generateInvoicePdf(html);
     }
-
-    // ─── HTML orchestration ───────────────────────────────────────────────────
 
     private String buildReportHtml(ReportResponses.ReportResponse report, List<Instant> dates, String timezone) {
         String timestamp = nowTimestamp();
@@ -100,12 +95,8 @@ public class ReportPdfService {
         return sb.toString();
     }
 
-    // ─── Styles ───────────────────────────────────────────────────────────────
-
     private void appendStyles(StringBuilder sb) {
 
-        // ── Reset & base ──────────────────────────────────────────────────────
-        // Open Sans is pre-registered in PDFService — no @font-face needed here.
         sb.append("body {")
           .append("  font-family: 'Open Sans', sans-serif;")
           .append("  color: #111;")
@@ -116,8 +107,6 @@ public class ReportPdfService {
           .append("}");
         sb.append("b, strong { font-weight: bold; }");
 
-        // ── Branded header bar ────────────────────────────────────────────────
-        // Uses a full-width table because OpenHTMLtoPDF does not support flexbox.
         sb.append(".page-header {")
           .append("  background-color: #2d6a2d;")
           .append("  padding: 18px 32px;")

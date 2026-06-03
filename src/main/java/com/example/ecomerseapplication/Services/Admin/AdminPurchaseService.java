@@ -21,6 +21,7 @@ import com.example.ecomerseapplication.enums.DeliveryStatus;
 import com.example.ecomerseapplication.enums.PurchaseStatusAction;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
+import jakarta.validation.Valid;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -255,6 +256,96 @@ public class AdminPurchaseService {
         return responseList;
     }
 
+    public ReportResponses.ReportResponse getPurchaseStatusStatistic(@Valid DateRangeRequest request) {
+
+        List<PurchaseProjection> projections = purchaseRepository.getCountsForDeliveryStatuses(request.startDate(), request.endDate());
+
+        Map<DeliveryStatus, Integer> statusCountMap = projections
+                .stream()
+                .collect(Collectors.toMap(pr -> DeliveryStatus.valueOf(pr.getDeliveryStatus()), PurchaseProjection::getStatusCount));
+
+
+//        List<ReportResponses.MetricDto> metrics = getMetricDtosForPurchaseStatusReport(statusCountMap);
+
+        ReportResponses.ChartDto chartDto = new ReportResponses.ChartDto(ReportResponses.ChartType.BAR,
+                "status",
+                "count",
+                "Брой поръчки на статус",
+                buildChartDataMapListForPurchaseStatusReport(statusCountMap),
+                ReportResponses.ValueType.NUMBER);
+
+        return ReportResponses.buildMixedReportNoMetrics("Състоянието на вискчи поръчки за периода ",
+                chartDto,
+                List.of("Статус", "Брой", "Дял"),
+                getTableRowMapListForPurchaseStatusReport(statusCountMap),
+                List.of(request.startDate().toString(), request.endDate().toString()));
+
+    }
+
+    private static int totalPurchaseStatusCount(Map<DeliveryStatus, Integer> statusCountMap) {
+        int total = 0;
+        for (Integer count : statusCountMap.values()) {
+            total += count;
+        }
+        return total;
+    }
+
+    @NotNull
+    private static List<Map<String, ReportResponses.TableColumnRow>> getTableRowMapListForPurchaseStatusReport(Map<DeliveryStatus, Integer> statusCountMap) {
+
+        int totalCount = totalPurchaseStatusCount(statusCountMap);
+
+        String name = "Статус";
+        String statCount = "Брой";
+        String portion = "Дял";
+
+        List<Map<String, ReportResponses.TableColumnRow>> mapList = new ArrayList<>();
+
+        for (DeliveryStatus status : DeliveryStatus.values()) {
+            Integer count = statusCountMap.get(status);
+
+            double portionValue = count!=null ?((double) count / totalCount) :0;
+
+            Map<String, ReportResponses.TableColumnRow> monthMap = Map.of(
+                    name, new ReportResponses.TableColumnRow(status.name(), ReportResponses.ValueType.TEXT),
+                    statCount, new ReportResponses.TableColumnRow(count!=null ?count+ "" :"0" , ReportResponses.ValueType.NUMBER),
+                    portion, new ReportResponses.TableColumnRow( portionValue+ "", ReportResponses.ValueType.PERCENTAGE));
+
+            mapList.add(monthMap);
+        }
+
+        return mapList;
+    }
+
+    @NotNull
+    private static List<Map<String, String>> buildChartDataMapListForPurchaseStatusReport(Map<DeliveryStatus, Integer> statusCountMap) {
+
+        List<Map<String, String>> responseList = new ArrayList<>();
+
+        for (DeliveryStatus status : DeliveryStatus.values()) {
+            Integer count = statusCountMap.get(status);
+
+            Map<String, String> monthMap = Map.of("status", status.name(), "count", count!=null ?count+ "" :"0");
+            responseList.add(monthMap);
+        }
+        return responseList;
+    }
+//
+//    @NotNull
+//    private static List<ReportResponses.MetricDto> getMetricDtosForPurchaseStatusReport(Map<DeliveryStatus, Integer> statusCountMap) {
+//
+//        List<ReportResponses.MetricDto> metrics = new ArrayList<>();
+//
+//        for (DeliveryStatus status : DeliveryStatus.values()) {
+//            Integer count = statusCountMap.get(status);
+//            metrics.add(new ReportResponses.MetricDto(status.name(), count!=null ?count+ "" :"0", ReportResponses.ValueType.NUMBER));
+//        }
+//
+//        return metrics;
+//
+//    }
+
+
     @ToString
     public static class MonthDataResponse {
         public String monthKey;
@@ -269,7 +360,6 @@ public class AdminPurchaseService {
 
         Instant startDate = request.startDate();
         Instant endDate = request.endDate();
-//        ZoneId zoneId = ZoneId.of(request.timezone());
 
 
         List<PurchaseProductProjection> productPurchaseProjections = purchaseCartRepository.getTopSellingOfPeriod(startDate,

@@ -170,4 +170,17 @@ and p.deliveryDate between :startDate and :endDate
 """
     )
     List<PurchaseProjection> purchasesOfPeriod(@Param("startDate")Instant startDate, @Param("endDate")Instant endDate, @Param("deliveredStatus") DeliveryStatus deliveredStatus);
+
+
+    @Query(
+"""
+select p.deliveryStatus as deliveryStatus,
+count(p) as statusCount
+from Purchase p
+where p.date between :startDate and :endDate
+group by p.deliveryStatus
+order by statusCount desc
+"""
+    )
+    List<PurchaseProjection> getCountsForDeliveryStatuses(@Param("startDate")Instant startDate, @Param("endDate")Instant endDate);
 }

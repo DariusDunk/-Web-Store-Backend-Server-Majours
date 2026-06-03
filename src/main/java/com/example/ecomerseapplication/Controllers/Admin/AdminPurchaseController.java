@@ -79,11 +79,11 @@ public class AdminPurchaseController {
 
     @PostMapping("top-selling-for-period/pdf")
     public ResponseEntity<?> getTopSellingProductsForPeriodAsPdf(@RequestBody @Valid DateRangeRequest request,
-                                                            @RequestParam("limit") Integer limit) {
+                                                                 @RequestParam("limit") Integer limit) {
 
         ReportResponses.ReportResponse productResponse = adminPurchaseService.getTopSellingProductsForPeriod(request, limit);
 
-        byte[] pdfBytes = reportPdfService.generateReportPdf(productResponse, List.of(request.startDate(),request.endDate()),request.timezone());
+        byte[] pdfBytes = reportPdfService.generateReportPdf(productResponse, List.of(request.startDate(), request.endDate()), request.timezone());
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
@@ -91,5 +91,11 @@ public class AdminPurchaseController {
                         "inline; filename=top-products-report.pdf")
                 .body(pdfBytes);
 
+    }
+
+    @PostMapping("purchase-statuses-report")
+    public ResponseEntity<?> getStatisticForPurchaseStatuses(@RequestBody @Valid DateRangeRequest request) {
+
+       return ResponseEntity.ok( adminPurchaseService.getPurchaseStatusStatistic(request));
     }
 }
