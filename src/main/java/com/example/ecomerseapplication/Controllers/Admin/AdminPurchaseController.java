@@ -2,10 +2,13 @@ package com.example.ecomerseapplication.Controllers.Admin;
 
 import com.example.ecomerseapplication.DTOs.requests.PurchaseActionRequest;
 import com.example.ecomerseapplication.Services.Admin.AdminPurchaseService;
+import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
 
 @Controller
 @RequestMapping("/admin/purchase/")
@@ -34,5 +37,10 @@ public class AdminPurchaseController {
         adminPurchaseService.executePurchaseStatusAction(request);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("revenue-report")
+    public ResponseEntity<?> getRevenueReportForPeriod(@RequestParam Instant start, @RequestParam Instant end) {
+        return ResponseEntity.ok(adminPurchaseService.revenueReport(start, end));
     }
 }

@@ -1,25 +1,43 @@
 package com.example.ecomerseapplication.Controllers.Admin;
 
-import com.example.ecomerseapplication.Services.SessionService;
+import com.example.ecomerseapplication.DTOs.requests.ActiveSessionsPDFRequest;
+import com.example.ecomerseapplication.Services.Admin.AdminSessionService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/admin/session/")
 @PreAuthorize("hasRole(@roles.admin())")
 public class AdminSessionController {
-    private final SessionService sessionService;
 
-    public AdminSessionController(SessionService sessionService) {
-        this.sessionService = sessionService;
+    private final AdminSessionService adminSessionService;
+
+    public AdminSessionController(AdminSessionService adminSessionService) {
+        this.adminSessionService = adminSessionService;
     }
 
     @GetMapping("active/get")
     public ResponseEntity<?> getActiveSessions() {
-        return ResponseEntity.ok(sessionService.getActiveSessions());
+        return ResponseEntity.ok(adminSessionService.getActiveSessions());
     }
 
+    @PostMapping("active/pdf")
+    public ResponseEntity<?> getActiveSessionsPDF(@RequestBody ActiveSessionsPDFRequest request) {
+
+        System.out.println("Request: " + request + "");
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=active-sessions-report.pdf")
+                .body(adminSessionService.getActiveSessionSPDF(request));
+
+    }
 }

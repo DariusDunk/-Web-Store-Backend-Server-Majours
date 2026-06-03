@@ -10,7 +10,9 @@ public class ReportResponses {
             List<MetricDto> metrics,
             ChartDto chart,
             List<String> columns,
-            List<Map<String, String>> rows
+            List<Map<String, String>> rows,
+            List<String> dates,
+            String pdfUrl
     ) {}
 
     public record MetricDto(
@@ -37,16 +39,22 @@ public class ReportResponses {
         BAR
     }
 
-    public static ReportResponse buildTableReport(String title, List<String> columns, List<Map<String, String>> rows) {
-        return new ReportResponse(ReportType.TABLE, title, null, null, columns, rows);
+    public static ReportResponse buildTableReport(String title,
+                                                  List<String> columns,
+                                                  List<Map<String, String>> rows,
+                                                  List<String> dateData,
+                                                  String pdfUrl) {
+        return new ReportResponse(ReportType.TABLE, title, null, null, columns, rows, dateData, pdfUrl);
     }
 
     public static ReportResponse buildMixedReport(String title,
                                                   List<MetricDto> metrics,
                                                   ChartDto chart,
                                                   List<String> columns,
-                                                  List<Map<String, String>> rows) {
-        return new ReportResponse(ReportType.MIXED, title, metrics, chart, columns, rows);
+                                                  List<Map<String, String>> rows,
+                                                  List<String> dateData,
+                                                  String pdfUrl) {
+        return new ReportResponse(ReportType.MIXED, title, metrics, chart, columns, rows , dateData, pdfUrl);
     }
 
     public static ChartDto buildBarChart(String xKey, String yKey, String label, List<Map<String, String>> data) {

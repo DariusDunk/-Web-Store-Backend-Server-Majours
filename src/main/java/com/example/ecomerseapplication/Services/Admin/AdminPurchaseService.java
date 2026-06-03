@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -108,4 +109,7 @@ public class AdminPurchaseService {
     }
 
 
+    public Object revenueReport(Instant start, Instant end) {
+        return null;
+    }
 }
