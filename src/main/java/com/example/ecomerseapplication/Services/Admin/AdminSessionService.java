@@ -91,13 +91,4 @@ public class AdminSessionService {
 
         return List.of(totalMap, authMap, guestMap);
     }
-
-    public byte[] getActiveSessionSPDF(ActiveSessionsPDFRequest request) {
-
-        return reportPdfService.generateReportPdf(getReportResponse(request.totalCount(),
-                request.authCount(),
-                request.guestCount(),
-                List.of(request.timestamp())));
-
-    }
 }

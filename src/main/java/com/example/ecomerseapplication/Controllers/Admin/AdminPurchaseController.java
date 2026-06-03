@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.Controllers.Admin;
 
 import com.example.ecomerseapplication.DTOs.requests.PurchaseActionRequest;
 import com.example.ecomerseapplication.Services.Admin.AdminPurchaseService;
-import okhttp3.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;

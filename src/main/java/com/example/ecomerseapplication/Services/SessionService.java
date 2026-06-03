@@ -2,14 +2,11 @@ package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.Auth.helpers.SessionExtractor;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
-import com.example.ecomerseapplication.DTOs.responses.ReportResponses;
-import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.SessionActivityProjection;
 import com.example.ecomerseapplication.Entities.ClientType;
 import com.example.ecomerseapplication.Entities.Customer;
 import com.example.ecomerseapplication.Entities.Session;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.InvalidSessionException;
 import com.example.ecomerseapplication.Repositories.SessionRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
@@ -17,9 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 

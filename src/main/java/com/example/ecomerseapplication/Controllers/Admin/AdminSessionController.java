@@ -28,16 +28,4 @@ public class AdminSessionController {
         return ResponseEntity.ok(adminSessionService.getActiveSessions());
     }
 
-    @PostMapping("active/pdf")
-    public ResponseEntity<?> getActiveSessionsPDF(@RequestBody ActiveSessionsPDFRequest request) {
-
-        System.out.println("Request: " + request + "");
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=active-sessions-report.pdf")
-                .body(adminSessionService.getActiveSessionSPDF(request));
-
-    }
 }
