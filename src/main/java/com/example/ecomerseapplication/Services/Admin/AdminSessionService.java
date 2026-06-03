@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Services.Admin;
 
-import com.example.ecomerseapplication.DTOs.requests.ActiveSessionsPDFRequest;
 import com.example.ecomerseapplication.DTOs.responses.ReportResponses;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.SessionActivityProjection;
 import com.example.ecomerseapplication.Repositories.SessionRepository;
@@ -41,7 +40,7 @@ public class AdminSessionService {
 
     @NotNull
     private static ReportResponses.ReportResponse getReportResponse(String totalCount, String authCount, String guestCount, List<String> dateList) {
-        List<Map<String, String>> rows = getMapList(
+        List<Map<String, ReportResponses.TableRow>> rows = getTableRowMapList(
                 totalCount,
                 authCount,
                 guestCount);
@@ -51,7 +50,11 @@ public class AdminSessionService {
                 authCount,
                 guestCount);
 
-        ReportResponses.ChartDto chartDto = ReportResponses.buildBarChart("sessionType", "count", "Брой потребители", chartData);
+        ReportResponses.ChartDto chartDto = ReportResponses.buildBarChart("sessionType",
+                "count",
+                "Брой потребители",
+                chartData,
+                ReportResponses.ValueType.NUMBER);
 
         ReportResponses.ReportResponse response = ReportResponses.buildMixedReport("Потребителска активност към ",
                 null,
@@ -59,7 +62,8 @@ public class AdminSessionService {
                 List.of("Тип потребител", "Брой"),
                 rows,
                 dateList,
-                "http://localhost:3000/admin/session/active-sessions/pdf");
+                "http://localhost:3000/admin/session/active-sessions/pdf"
+        );
 
         System.out.println("response: " + response);
 
@@ -67,14 +71,19 @@ public class AdminSessionService {
     }
 
     @NotNull
-    private static List<Map<String, String>> getMapList(String totalCount, String authCount, String guestCount) {
+    private static List<Map<String, ReportResponses.TableRow>> getTableRowMapList(String totalCount, String authCount, String guestCount) {
         String total = totalCount != null ? totalCount : "0";
         String auth = authCount != null ? authCount : "0";
         String guest = guestCount != null ? guestCount : "0";
 
-        Map<String, String> totalMap = Map.of("Тип потребител", "Общо", "Брой", total);
-        Map<String, String> authMap = Map.of("Тип потребител", "Потребители", "Брой", auth);
-        Map<String, String> guestMap = Map.of("Тип потребител", "Гост потребители", "Брой", guest);
+        Map<String, ReportResponses.TableRow> totalMap = Map.of(
+                "Тип потребител", new ReportResponses.TableRow("Общо", ReportResponses.ValueType.TEXT),
+                "Брой", new ReportResponses.TableRow(total, ReportResponses.ValueType.NUMBER));
+        Map<String, ReportResponses.TableRow> authMap = Map.of(
+                "Тип потребител", new ReportResponses.TableRow("Потребители", ReportResponses.ValueType.TEXT),
+                "Брой", new ReportResponses.TableRow(auth, ReportResponses.ValueType.NUMBER));
+        Map<String, ReportResponses.TableRow> guestMap = Map.of("Тип потребител", new ReportResponses.TableRow("Гост потребители", ReportResponses.ValueType.TEXT),
+                "Брой", new ReportResponses.TableRow(guest, ReportResponses.ValueType.NUMBER));
 
         return List.of(totalMap, authMap, guestMap);
     }

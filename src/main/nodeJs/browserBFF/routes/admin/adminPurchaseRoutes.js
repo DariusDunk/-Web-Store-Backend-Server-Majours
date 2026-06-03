@@ -7,6 +7,40 @@ import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
 const PURCHASE_CONTROLLER_ROUTE = `${Backend_Url}/admin/purchase`;
 
+router.post(`/revenue-report`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const reqBody = req.body;
+    const{startDate, endDate, timezone} = reqBody;
+    const bodyForRequest = {start_date:startDate, end_date:endDate, timezone};
+
+    try {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+            return await axiosBackendClient.post(`${PURCHASE_CONTROLLER_ROUTE}/revenue-report`,bodyForRequest, {
+                headers:
+                    {
+                        'Content-Type': 'application/json',
+                        'x-client_type': WEB_CLIENT_NAME,
+                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                        ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                    },
+                bffContext: {
+                    req, res
+                }
+            });
+        },
+            {req, res});
+
+        const responseData = response.data;
+        return res.status(response.status).json(responseData || {});
+    }
+    catch (error) {
+        console.error('-------------------Error fetching revenue report-------------------\n', error);
+        if (error.response)
+            return res.status(error.response.status || 500).json(error.response.data);
+        return res.status(500).end();
+    }
+})
+
 router.patch(`/update-status`, async (req, res) => {
     const sessionId = req.cookies.session_id;
     const reqBody = req.body;

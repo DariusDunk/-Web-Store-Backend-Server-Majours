@@ -193,7 +193,7 @@ public class ReportPdfService {
 
     // ─── Table ────────────────────────────────────────────────────────────────
 
-    private void appendTable(StringBuilder sb, List<String> columns, List<Map<String, String>> rows) {
+    private void appendTable(StringBuilder sb, List<String> columns, List<Map<String, ReportResponses.TableRow>> rows) {
         sb.append("<div class='table-wrapper'>");
         sb.append("<table class='data-table'>");
 
@@ -213,7 +213,14 @@ public class ReportPdfService {
 
             sb.append("<tr class='").append(stripingClass).append(lastClass).append("'>");
             for (String col : columns) {
-                String value = rows.get(i).getOrDefault(col, "—");
+                ReportResponses.TableRow rowElement = rows.get(i).get(col);
+                ReportResponses.ValueType valueType = rowElement!=null ? rowElement.valueType() : ReportResponses.ValueType.TEXT;
+                String value = rowElement!=null ? rowElement.value() : "-";
+
+                if (valueType != null && valueType.equals(ReportResponses.ValueType.CURRENCY)) {
+                    value = ((Integer.parseInt(value) + 50) / 100) + "€";
+                }
+//                String value = rows.get(i).getOrDefault(col, new ReportResponses.TableRow("-", ReportResponses.ValueType.TEXT)).value();
                 sb.append("<td>").append(esc(value)).append("</td>");
             }
             sb.append("</tr>");

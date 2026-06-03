@@ -16,6 +16,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,8 +106,6 @@ where p.purchaseCode = :purchaseCode and c.keycloakId = :customerId
     })
     Optional<Purchase> getByCustomer_KeycloakIdAndPurchaseCode(String customerKeycloakId, String purchaseCode);
 
-    Purchase getPurchasesByPurchaseCodeAndCustomer_KeycloakId(String purchaseCode, String customerKeycloakId);
-
     @Query(
 """
 select p.id as id,
@@ -157,4 +156,18 @@ where p.id = ?1
 """
     )
     Optional<Purchase> getByIdWIthLock(Long id);
+
+
+    @Query(
+"""
+select p.totalCost as totalCost,
+p.deliveryDate as deliveryDate
+from Purchase p
+where p.deliveryStatus = :deliveredStatus
+and p.deliveryDate is not null
+and p.deliveryDate between :startDate and :endDate
+
+"""
+    )
+    List<PurchaseProjection> purchasesOfPeriod(@Param("startDate")Instant startDate, @Param("endDate")Instant endDate, @Param("deliveredStatus") DeliveryStatus deliveredStatus);
 }

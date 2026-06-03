@@ -11,6 +11,7 @@ public interface PurchaseProjection {
     String getDeliveryAddress();
     String getEmail();
     Instant getPurchaseDate();
+    Instant getDeliveryDate();
     Integer getTotalCost();
 
     String getUserId();

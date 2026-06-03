@@ -1,17 +1,19 @@
 package com.example.ecomerseapplication.Controllers.Admin;
 
+import com.example.ecomerseapplication.DTOs.requests.DateRangeRequest;
 import com.example.ecomerseapplication.DTOs.requests.PurchaseActionRequest;
 import com.example.ecomerseapplication.Services.Admin.AdminPurchaseService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Instant;
 
 @Controller
 @RequestMapping("/admin/purchase/")
 @PreAuthorize("hasRole(@roles.admin())")
+@Validated
 public class AdminPurchaseController {
 
     private final AdminPurchaseService adminPurchaseService;
@@ -38,8 +40,10 @@ public class AdminPurchaseController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("revenue-report")
-    public ResponseEntity<?> getRevenueReportForPeriod(@RequestParam Instant start, @RequestParam Instant end) {
-        return ResponseEntity.ok(adminPurchaseService.revenueReport(start, end));
+    @PostMapping("revenue-report")
+    public ResponseEntity<?> getRevenueReportForPeriod(@RequestBody @Valid DateRangeRequest request) {
+        return ResponseEntity.ok(adminPurchaseService.revenueReport(request));
+
+//        return ResponseEntity.ok("Not implemented yet");
     }
 }
