@@ -1,11 +1,9 @@
 package com.example.ecomerseapplication.Services.Admin;
 
-import com.example.ecomerseapplication.DTOs.requests.DateRangeRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductAttributeUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFormRequest;
 import com.example.ecomerseapplication.DTOs.responses.AdminProductResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
-import com.example.ecomerseapplication.DTOs.responses.ReportResponses;
 import com.example.ecomerseapplication.DTOs.responses.SaleProductSuggestionResponse;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.CompactProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.DetailedProductProjection;

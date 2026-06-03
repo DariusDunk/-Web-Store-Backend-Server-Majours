@@ -14,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/admin/purchase/")
 @PreAuthorize("hasRole(@roles.admin())")
@@ -56,7 +58,7 @@ public class AdminPurchaseController {
     public ResponseEntity<?> getRevenueReportForPeriodAsPdf(@RequestBody @Valid DateRangeRequest request) {
         ReportResponses.ReportResponse revenueResponse = adminPurchaseService.revenueReport(request);
 
-        byte[] pdfBytes = reportPdfService.generateReportPdf(revenueResponse);
+        byte[] pdfBytes = reportPdfService.generateReportPdf(revenueResponse, List.of(request.startDate(), request.endDate()), request.timezone());
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
@@ -70,8 +72,24 @@ public class AdminPurchaseController {
     public ResponseEntity<?> getTopSellingProductsForPeriod(@RequestBody @Valid DateRangeRequest request,
                                                             @RequestParam("limit") Integer limit) {
 
-        System.out.println("Inside getTopSellingProductsForPeriod: " + request + "limit: " + limit + "");
+//        System.out.println("Inside getTopSellingProductsForPeriod: " + request + "limit: " + limit + "");
 
         return ResponseEntity.ok(adminPurchaseService.getTopSellingProductsForPeriod(request, limit));
+    }
+
+    @PostMapping("top-selling-for-period/pdf")
+    public ResponseEntity<?> getTopSellingProductsForPeriodAsPdf(@RequestBody @Valid DateRangeRequest request,
+                                                            @RequestParam("limit") Integer limit) {
+
+        ReportResponses.ReportResponse productResponse = adminPurchaseService.getTopSellingProductsForPeriod(request, limit);
+
+        byte[] pdfBytes = reportPdfService.generateReportPdf(productResponse, List.of(request.startDate(),request.endDate()),request.timezone());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=top-products-report.pdf")
+                .body(pdfBytes);
+
     }
 }

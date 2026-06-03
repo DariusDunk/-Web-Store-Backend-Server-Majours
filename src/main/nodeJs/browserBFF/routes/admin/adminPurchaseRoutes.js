@@ -4,9 +4,62 @@ const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from '../config.js';
 import axiosBackendClient from '../../axiosBackendClient.js';
 import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
+import {timestamp} from "../../services/timeStamper.js";
 
 const PURCHASE_CONTROLLER_ROUTE = `${Backend_Url}/admin/purchase`;
 
+
+router.get(`/top-selling-for-period/pdf`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const{startDate, endDate, timezone, limit} = req.query;
+    const bodyForRequest = {start_date:startDate, end_date:endDate, timezone};
+
+    try
+    {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                return await axiosBackendClient.post(`${PURCHASE_CONTROLLER_ROUTE}/top-selling-for-period/pdf?limit=${encodeURIComponent(limit)}`, bodyForRequest,
+                    {
+                        headers:
+                            {
+                                'x-client_type': WEB_CLIENT_NAME,
+                                ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                                ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                            }
+                        , bffContext: {
+                            req, res
+                        }, responseType: "stream"
+                    });
+            },
+            {req, res}
+        );
+
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename=top-products-report.pdf`
+        );
+
+        response.data.on("error", (err) => {
+            console.error("PDF stream error:", err);
+            res.status(500).end();
+        });
+
+        response.data.pipe(res);
+
+        return;
+
+    }
+    catch ( error )
+    {
+        console.error("error in get top selling products pdf: ", error)
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for get top selling products pdf request`);
+            return res.status(error.response.status || 500).json(error.response.data);
+        }
+        return res.status(500).end();
+    }
+})
 
 router.get(`/top-selling-products`, async (req, res) => {
     const sessionId = req.cookies.session_id;
@@ -51,7 +104,7 @@ router.get(`/revenue-report/pdf`, async (req, res) => {
     const{startDate, endDate, timezone} = req.query;
     const bodyForRequest = {start_date:startDate, end_date:endDate, timezone};
 
-    console.log("About to make request: " + JSON.stringify(bodyForRequest));
+    // console.log("About to make request: " + JSON.stringify(bodyForRequest));
 
     try
     {
@@ -71,7 +124,7 @@ router.get(`/revenue-report/pdf`, async (req, res) => {
         },
             {req, res});
 
-        console.log("About to return pdf response")
+        // console.log("About to return pdf response")
 
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(

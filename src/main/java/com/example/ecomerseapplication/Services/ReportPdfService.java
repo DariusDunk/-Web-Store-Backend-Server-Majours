@@ -1,9 +1,11 @@
 package com.example.ecomerseapplication.Services;
 
 import com.example.ecomerseapplication.DTOs.responses.ReportResponses;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -50,19 +52,26 @@ public class ReportPdfService {
     /**
      * Builds the HTML for {@code report} and converts it to a PDF byte array.
      *
-     * @param report a {@link ReportResponses.ReportResponse} — any {@code ReportType}
-     *               is accepted; only {@code columns} and {@code rows} are rendered.
+     * @param report   a {@link ReportResponses.ReportResponse} — any {@code ReportType}
+     *                 is accepted; only {@code columns} and {@code rows} are rendered.
+     * @param timezone timezone for the report dates, used to format the timestamp.
      * @return raw PDF bytes ready to stream as {@code application/pdf}.
      */
-    public byte[] generateReportPdf(ReportResponses.ReportResponse report) {
-        String html = buildReportHtml(report);
+    public byte[] generateReportPdf(ReportResponses.ReportResponse report, List<Instant> dates, @NotBlank String timezone) {
+        String html = buildReportHtml(report, dates, timezone);
         return pdfService.generateInvoicePdf(html);
     }
 
     // ─── HTML orchestration ───────────────────────────────────────────────────
 
-    private String buildReportHtml(ReportResponses.ReportResponse report) {
+    private String buildReportHtml(ReportResponses.ReportResponse report, List<Instant> dates, String timezone) {
         String timestamp = nowTimestamp();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        List<String> dateStrings = dates
+                .stream()
+                .map(i -> ZonedDateTime.ofInstant(i, ZoneId.of(timezone)).format(formatter))
+                .toList();
+
         StringBuilder sb = new StringBuilder();
 
         sb.append("<!DOCTYPE html>");
@@ -76,7 +85,7 @@ public class ReportPdfService {
         sb.append("<body>");
 
         appendPageHeader(sb);
-        appendTitleSection(sb, report.title(), timestamp);
+        appendTitleSection(sb, report.title(), timestamp,dateStrings);
 
         if (hasTableData(report)) {
             appendTable(sb, report.columns(), report.rows());
@@ -182,10 +191,19 @@ public class ReportPdfService {
 
     // ─── Title / timestamp section ────────────────────────────────────────────
 
-    private void appendTitleSection(StringBuilder sb, String title, String timestamp) {
+    private void appendTitleSection(StringBuilder sb, String title, String timestamp, List<String> dateStrings) {
         sb.append("<div class='title-section'>");
         sb.append("<div class='report-label'>Статистически отчет</div>");
-        sb.append("<div class='report-title'>").append(esc(title)).append("</div>");
+        if (dateStrings != null && !dateStrings.isEmpty())
+        {
+            if (dateStrings.size() == 1)
+                sb.append("<div class='report-title'>").append(esc(title + dateStrings.getFirst())).append("</div>");
+
+            if (dateStrings.size()==2)
+                sb.append("<div class='report-title'>").append(esc(title + dateStrings.getFirst() + " - " + dateStrings.get(1))).append("</div>");
+        }
+        else
+            sb.append("<div class='report-title'>").append(esc(title)).append("</div>");
         sb.append("<div class='report-meta'>Генериран на: <b>").append(esc(timestamp)).append("</b></div>");
         sb.append("</div>");
         sb.append("<hr class='title-rule' />");
