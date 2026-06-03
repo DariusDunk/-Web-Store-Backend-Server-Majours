@@ -191,7 +191,7 @@ public class AdminPurchaseService {
                 List.of("Месец", "Приходи (€)", "Поръчки"),
                 getTableRowMapList(months),
                 List.of(request.startDate().toString(), request.endDate().toString()),
-                "http://localhost:3000/admin/purchases/revenue-report/pdf"
+                "http://localhost:3000/admin/purchase/revenue-report/pdf"
         );
     }
 
