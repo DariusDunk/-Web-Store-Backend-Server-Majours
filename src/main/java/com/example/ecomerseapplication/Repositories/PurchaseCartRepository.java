@@ -1,16 +1,20 @@
 package com.example.ecomerseapplication.Repositories;
 
 import com.example.ecomerseapplication.CompositeIdClasses.PurchaseCartId;
+import com.example.ecomerseapplication.DTOs.requests.DateRangeRequest;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.ProductForDetailedPurchaseProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductPairProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Entities.PurchaseCart;
+import com.example.ecomerseapplication.enums.DeliveryStatus;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -87,4 +91,28 @@ where pc.purchaseCartId.purchase.id = ?1
 """
     )
     List<PurchaseCart> getAllByPurchaseId(long purchaseId);
+
+
+    @Query(
+"""
+select p.productCode as productCode,
+        p.productName as productName,
+sum (pc.quantity) as unitsSold,
+sum(pc.quantity*pc.singlePrice) as revenueGained
+from PurchaseCart pc
+join pc.purchaseCartId.product p
+join pc.purchaseCartId.purchase pu
+where pu.deliveryStatus = :deliveredStatus
+and pu.deliveryDate between :startDate and :endDate
+group by p.id,
+p.productCode,
+p.productName
+order by unitsSold desc
+"""
+    )
+    List<PurchaseProductProjection> getTopSellingOfPeriod(@Param("startDate")Instant startDate,
+                                                          @Param("endDate")Instant endDate,
+                                                          PageRequest pageRequest,
+                                                          @Param("deliveredStatus") DeliveryStatus deliveredStatus);
+
 }

@@ -1,12 +1,15 @@
 package com.example.ecomerseapplication.Controllers.Admin;
 
+import com.example.ecomerseapplication.DTOs.requests.DateRangeRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductAttributeUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.ProductFormRequest;
 import com.example.ecomerseapplication.Services.Admin.AdminProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +17,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/product/")
 @PreAuthorize("hasRole(@roles.admin())")
+@Validated
 public class AdminProductController {
 
     private final AdminProductService adminProductService;

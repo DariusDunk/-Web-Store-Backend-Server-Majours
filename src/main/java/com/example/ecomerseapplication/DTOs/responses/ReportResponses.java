@@ -10,12 +10,11 @@ public class ReportResponses {
             List<MetricDto> metrics,
             ChartDto chart,
             List<String> columns,
-            List<Map<String, TableRow>> rows,
-            List<String> dates,
-            String pdfUrl
+            List<Map<String, TableColumnRow>> rows,
+            List<String> dates
     ) {}
 
-    public record TableRow(String value, ValueType valueType) {
+    public record TableColumnRow(String value, ValueType valueType) {
     }
 
 
@@ -52,21 +51,19 @@ public class ReportResponses {
 
     public static ReportResponse buildTableReport(String title,
                                                   List<String> columns,
-                                                  List<Map<String, TableRow>> rows,
-                                                  List<String> dateData,
-                                                  String pdfUrl
+                                                  List<Map<String, TableColumnRow>> rows,
+                                                  List<String> dateData
                                                   ) {
-        return new ReportResponse(ReportType.TABLE, title, null, null, columns, rows, dateData, pdfUrl);
+        return new ReportResponse(ReportType.TABLE, title, null, null, columns, rows, dateData);
     }
 
     public static ReportResponse buildMixedReport(String title,
                                                   List<MetricDto> metrics,
                                                   ChartDto chart,
                                                   List<String> columns,
-                                                  List<Map<String, TableRow>> rows,
-                                                  List<String> dateData,
-                                                  String pdfUrl) {
-        return new ReportResponse(ReportType.MIXED, title, metrics, chart, columns, rows , dateData, pdfUrl);
+                                                  List<Map<String, TableColumnRow>> rows,
+                                                  List<String> dateData) {
+        return new ReportResponse(ReportType.MIXED, title, metrics, chart, columns, rows , dateData);
     }
 
     public static ChartDto buildBarChart(String xKey, String yKey, String label, List<Map<String, String>> data, ValueType valueType) {

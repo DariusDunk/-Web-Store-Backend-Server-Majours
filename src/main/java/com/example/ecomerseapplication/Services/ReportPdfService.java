@@ -193,7 +193,7 @@ public class ReportPdfService {
 
     // ─── Table ────────────────────────────────────────────────────────────────
 
-    private void appendTable(StringBuilder sb, List<String> columns, List<Map<String, ReportResponses.TableRow>> rows) {
+    private void appendTable(StringBuilder sb, List<String> columns, List<Map<String, ReportResponses.TableColumnRow>> rows) {
         sb.append("<div class='table-wrapper'>");
         sb.append("<table class='data-table'>");
 
@@ -213,7 +213,7 @@ public class ReportPdfService {
 
             sb.append("<tr class='").append(stripingClass).append(lastClass).append("'>");
             for (String col : columns) {
-                ReportResponses.TableRow rowElement = rows.get(i).get(col);
+                ReportResponses.TableColumnRow rowElement = rows.get(i).get(col);
                 ReportResponses.ValueType valueType = rowElement!=null ? rowElement.valueType() : ReportResponses.ValueType.TEXT;
                 String value = rowElement!=null ? rowElement.value() : "-";
 

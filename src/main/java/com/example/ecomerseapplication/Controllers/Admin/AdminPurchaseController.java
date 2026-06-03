@@ -64,4 +64,14 @@ public class AdminPurchaseController {
                         "inline; filename=revenue-report.pdf")
                 .body(pdfBytes);
     }
+
+
+    @PostMapping("top-selling-for-period")
+    public ResponseEntity<?> getTopSellingProductsForPeriod(@RequestBody @Valid DateRangeRequest request,
+                                                            @RequestParam("limit") Integer limit) {
+
+        System.out.println("Inside getTopSellingProductsForPeriod: " + request + "limit: " + limit + "");
+
+        return ResponseEntity.ok(adminPurchaseService.getTopSellingProductsForPeriod(request, limit));
+    }
 }

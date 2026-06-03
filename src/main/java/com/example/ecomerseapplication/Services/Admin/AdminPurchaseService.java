@@ -5,6 +5,7 @@ import com.example.ecomerseapplication.DTOs.requests.PurchaseActionRequest;
 import com.example.ecomerseapplication.DTOs.responses.CompactAdminPurchaseResponse;
 import com.example.ecomerseapplication.DTOs.responses.PageResponse;
 import com.example.ecomerseapplication.DTOs.responses.ReportResponses;
+import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProjection;
 import com.example.ecomerseapplication.Entities.Purchase;
 import com.example.ecomerseapplication.Entities.PurchaseCart;
@@ -12,6 +13,7 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.Invali
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.PessimisticLockOrTimeoutPurchaseException;
 import com.example.ecomerseapplication.Mappers.PurchaseMapper;
 import com.example.ecomerseapplication.Others.PageContentLimit;
+import com.example.ecomerseapplication.Repositories.PurchaseCartRepository;
 import com.example.ecomerseapplication.Repositories.PurchaseRepository;
 import com.example.ecomerseapplication.Services.PurchaseCartService;
 import com.example.ecomerseapplication.Services.PurchaseService;
@@ -27,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -44,12 +47,14 @@ public class AdminPurchaseService {
     private final PurchaseService purchaseService;
     private final AdminProductService adminProductService;
     private final PurchaseCartService purchaseCartService;
+    private final PurchaseCartRepository purchaseCartRepository;
 
-    public AdminPurchaseService(PurchaseRepository purchaseRepository, PurchaseService purchaseService, AdminProductService adminProductService, PurchaseCartService purchaseCartService) {
+    public AdminPurchaseService(PurchaseRepository purchaseRepository, PurchaseService purchaseService, AdminProductService adminProductService, PurchaseCartService purchaseCartService, PurchaseCartRepository purchaseCartRepository) {
         this.purchaseRepository = purchaseRepository;
         this.purchaseService = purchaseService;
         this.adminProductService = adminProductService;
         this.purchaseCartService = purchaseCartService;
+        this.purchaseCartRepository = purchaseCartRepository;
     }
 
     public PageResponse<CompactAdminPurchaseResponse> getPagedPurchasesCompact(int page) {
@@ -133,8 +138,6 @@ public class AdminPurchaseService {
                 .stream()
                 .collect(Collectors.toMap(mdr -> mdr.monthKey, mdr -> mdr));
 
-//        System.out.println("monthMap: " + monthMap);
-
         ZoneId zoneId = ZoneId.of(request.timezone());
 
         for (PurchaseProjection projection : projections) {
@@ -143,18 +146,9 @@ public class AdminPurchaseService {
                 continue;
             }
 
-            // 1. Convert the Instant to the user's timezone
             ZonedDateTime zonedDelivery = projection.getDeliveryDate().atZone(zoneId);
 
-// 2. Convert to a YearMonth object and call toString()
             String mapKey = YearMonth.from(zonedDelivery).toString();
-
-//            String mapKey = String
-//                    .valueOf(projection
-//                            .getDeliveryDate()
-//                            .atZone(zoneId).getMonth());
-
-//            System.out.println("month key: " + mapKey);
 
             MonthDataResponse monthResponse = monthMap
                     .get(mapKey);
@@ -164,15 +158,7 @@ public class AdminPurchaseService {
                 monthResponse.purchasesCount++;
             }
 
-//            System.out.println("\nprojection:\n");
-//
-//            System.out.println("Total cost: " + projection.getTotalCost() + "\n" +
-//                    "Delivery date: " + projection.getDeliveryDate() + "");
-//
-//            System.out.println("monthResponse: " + monthResponse);
         }
-
-//        System.out.println("months list: "+months);
 
         List<ReportResponses.MetricDto> metrics = getMetricDtos(monthMap, projections);
 
@@ -183,15 +169,12 @@ public class AdminPurchaseService {
                 buildChartDataMapList(months),
                 ReportResponses.ValueType.CURRENCY);
 
-        //        System.out.println("response: " + response);
-
         return ReportResponses.buildMixedReport("Приходи за периода ",
                 metrics,
                 chartDto,
                 List.of("Месец", "Приходи (€)", "Поръчки"),
-                getTableRowMapList(months),
-                List.of(request.startDate().toString(), request.endDate().toString()),
-                "http://localhost:3000/admin/purchase/revenue-report/pdf"
+                getTableRowMapListForRevenueReport(months),
+                List.of(request.startDate().toString(), request.endDate().toString())
         );
     }
 
@@ -211,40 +194,28 @@ public class AdminPurchaseService {
     }
 
     @NotNull
-    private static List<Map<String, ReportResponses.TableRow>> getTableRowMapList(List<MonthDataResponse> months) {
-//        String total = totalCount != null ? totalCount : "0";
-//        String auth = authCount != null ? authCount : "0";
-//        String guest = guestCount != null ? guestCount : "0";
+    private static List<Map<String, ReportResponses.TableColumnRow>> getTableRowMapListForRevenueReport(List<MonthDataResponse> months) {
 
         String mon = "Месец";
         String cash = "Приходи (€)";
         String purch = "Поръчки";
 
-        List<Map<String, ReportResponses.TableRow>> mapList = new ArrayList<>();
+        List<Map<String, ReportResponses.TableColumnRow>> mapList = new ArrayList<>();
 
         for (MonthDataResponse month : months) {
-            Map<String, ReportResponses.TableRow> monthMap = Map.of(
-                    mon, new ReportResponses.TableRow(month.displayName, ReportResponses.ValueType.TEXT),
-                    cash, new ReportResponses.TableRow(month.revenueCents + "", ReportResponses.ValueType.CURRENCY),
-                    purch, new ReportResponses.TableRow(month.purchasesCount + "", ReportResponses.ValueType.NUMBER));
+            Map<String, ReportResponses.TableColumnRow> monthMap = Map.of(
+                    mon, new ReportResponses.TableColumnRow(month.displayName, ReportResponses.ValueType.TEXT),
+                    cash, new ReportResponses.TableColumnRow(month.revenueCents + "", ReportResponses.ValueType.CURRENCY),
+                    purch, new ReportResponses.TableColumnRow(month.purchasesCount + "", ReportResponses.ValueType.NUMBER));
 
             mapList.add(monthMap);
         }
 
-
-//        Map<String, String> totalMap = Map.of("Тип потребител", "Общо", "Брой", total);
-//        Map<String, String> authMap = Map.of("Тип потребител", "Потребители", "Брой", auth);
-//        Map<String, String> guestMap = Map.of("Тип потребител", "Гост потребители", "Брой", guest);
-
-//        return List.of(totalMap, authMap, guestMap);
         return mapList;
     }
 
     @NotNull
     private static List<Map<String, String>> buildChartDataMapList(List<MonthDataResponse> months) {
-//        String total = totalCount != null ? totalCount : "0";
-//        String auth = authCount != null ? authCount : "0";
-//        String guest = guestCount != null ? guestCount : "0";
 
         List<Map<String, String>> responseList = new ArrayList<>();
 
@@ -252,28 +223,17 @@ public class AdminPurchaseService {
             Map<String, String> monthMap = Map.of("month", month.displayName, "revenue", month.revenueCents + "");
             responseList.add(monthMap);
         }
-
-//        Map<String, String> totalMap = Map.of("sessionType", "Общо", "count", total);
-//        Map<String, String> authMap = Map.of("sessionType", "Потребители", "count", auth);
-//        Map<String, String> guestMap = Map.of("sessionType", "Гост потребители", "count", guest);
-
-//        return List.of(totalMap, authMap, guestMap);
         return responseList;
     }
 
 
     public List<MonthDataResponse> getMonthsFromRequest(DateRangeRequest request) {
-        // 1. Parse the timezone safely
         ZoneId zoneId = ZoneId.of(request.timezone());
-
-        // 2. Convert the UTC Instants back to the user's local timeline
-        // to accurately figure out what month it was for THEM.
         ZonedDateTime localStart = request.startDate().atZone(zoneId);
         ZonedDateTime localEnd = request.endDate().atZone(zoneId);
 
         List<MonthDataResponse> responseList = new ArrayList<>();
 
-        // 3. Extract the months sequentially
         YearMonth startMonth = YearMonth.from(localStart);
         YearMonth endMonth = YearMonth.from(localEnd);
 
@@ -284,10 +244,8 @@ public class AdminPurchaseService {
         while (!current.isAfter(endMonth)) {
             MonthDataResponse item = new MonthDataResponse();
 
-            // "2026-01" -> ISO standard, always sorts perfectly, easy to map to data
             item.monthKey = current.toString();
 
-            // Localized name for table headers / graph axis labels
             item.displayName = current.format(formatter);
 
             responseList.add(item);
@@ -304,4 +262,45 @@ public class AdminPurchaseService {
         public int revenueCents = 0;
         public int purchasesCount = 0;
     }
+
+    public ReportResponses.ReportResponse getTopSellingProductsForPeriod(DateRangeRequest request, Integer limit) {
+
+        PageRequest pageRequest = PageRequest.of(0, limit);
+
+        Instant startDate = request.startDate();
+        Instant endDate = request.endDate();
+//        ZoneId zoneId = ZoneId.of(request.timezone());
+
+
+        List<PurchaseProductProjection> productPurchaseProjections = purchaseCartRepository.getTopSellingOfPeriod(startDate,
+                endDate,
+                pageRequest,
+                DeliveryStatus.DELIVERED);
+
+        List<String> columns = List.of("Код на продукт", "Име на продукт", "Продадени бройки", "Приходи (€)");
+
+       return ReportResponses.buildTableReport("Най-продавани продукти за периода ",
+                columns,
+                getTableRowMapListForTopProductsReport(productPurchaseProjections, columns),
+                List.of(request.startDate().toString(), request.endDate().toString()));
+    }
+
+    @NotNull
+    private static List<Map<String, ReportResponses.TableColumnRow>> getTableRowMapListForTopProductsReport(List<PurchaseProductProjection> productProjections,
+                                                                                                            List<String> columns) {
+        List<Map<String, ReportResponses.TableColumnRow>> mapList = new ArrayList<>();
+
+        for (PurchaseProductProjection product : productProjections) {
+            Map<String, ReportResponses.TableColumnRow> monthMap = Map.of(
+                    columns.getFirst(), new ReportResponses.TableColumnRow(product.getProductCode(), ReportResponses.ValueType.TEXT),
+                    columns.get(1), new ReportResponses.TableColumnRow(product.getProductName(), ReportResponses.ValueType.TEXT),
+                    columns.get(2), new ReportResponses.TableColumnRow(product.getUnitsSold() + "", ReportResponses.ValueType.NUMBER),
+                    columns.get(3), new ReportResponses.TableColumnRow(product.getRevenueGained() + "", ReportResponses.ValueType.CURRENCY));
+
+            mapList.add(monthMap);
+        }
+
+        return mapList;
+    }
+
 }

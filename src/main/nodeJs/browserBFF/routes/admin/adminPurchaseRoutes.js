@@ -7,6 +7,44 @@ import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
 
 const PURCHASE_CONTROLLER_ROUTE = `${Backend_Url}/admin/purchase`;
 
+
+router.get(`/top-selling-products`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const{startDate, endDate, timezone, limit} = req.query;
+    const bodyForRequest = {start_date:startDate, end_date:endDate, timezone};
+
+    try {
+
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData)=>{
+            return await axiosBackendClient.post(`${PURCHASE_CONTROLLER_ROUTE}/top-selling-for-period?limit=${encodeURIComponent(limit)}`, bodyForRequest, {
+                headers:
+                    {
+                        'Content-Type': 'application/json',
+                        'x-client_type': WEB_CLIENT_NAME,
+                        ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                        ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                    },
+                bffContext: {
+                    req, res
+                }
+            });
+        },
+            {req, res});
+
+        const responseData = response.data;
+        return res.status(response.status).json(responseData || {});
+
+    }
+    catch (error) {
+        console.error("error in get top selling products: ", error)
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for get top selling products request`);
+            return res.status(error.response.status || 500).json(error.response.data);
+        }
+        return res.status(500).end();
+    }
+})
+
 router.get(`/revenue-report/pdf`, async (req, res) => {
     const sessionId = req.cookies.session_id;
     // const reqBody = req.body;
