@@ -215,10 +215,11 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             res.cookie('session_id', newSessionId,
                 {
                     maxAge: (session_expires_in ?? 660) * 1000,
-                    secure: false,
+                    secure: true,
                     path: '/',
-                    sameSite: 'lax',
-                    httpOnly: true
+                    sameSite: 'none',
+                    httpOnly: true,
+                    domain: '.agromag.local'
                 });
         } else if (!_isCacheHit) {
             // sessionCache.set(oldSessionId, newSessionData);
@@ -233,10 +234,11 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             res.cookie('session_id', oldSessionId,
                 {
                     maxAge: (session_expires_in ?? 660) * 1000,
-                    secure: false,
+                    secure: true,
                     path: '/',
-                    sameSite: 'lax',
-                    httpOnly: true
+                    sameSite: 'none',
+                    httpOnly: true,
+                    domain: '.agromag.local'
                 });
         }
 
@@ -295,10 +297,11 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                 res.cookie('session_id', session_id,
                     {
                         maxAge: (session_expires_in ?? 660) * 1000,
-                        secure: false,
+                        secure: true,
                         path: '/',
-                        sameSite: 'lax',
-                        httpOnly: true
+                        sameSite: 'none',
+                        httpOnly: true,
+                        domain: '.agromag.local'
                     });
 
                 sessionCache.setSession(

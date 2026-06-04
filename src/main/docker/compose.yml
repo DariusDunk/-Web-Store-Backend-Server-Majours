@@ -37,6 +37,11 @@
         # === HTTP (dev only) ===
         KC_HTTP_ENABLED: "true"
         KC_HOSTNAME: localhost
+#        KC_HOSTNAME: auth.agromag.local
+        KC_PROXY: edge
+        KC_PROXY_HEADERS: xforwarded
+        KC_HOSTNAME_STRICT: "false"
+        KC_HOSTNAME_STRICT_HTTPS: "false"
 #        KC_HOSTNAME_URL: http://localhost:8544
 
         # KC_HOSTNAME_PORT: "8544"

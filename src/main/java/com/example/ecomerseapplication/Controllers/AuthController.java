@@ -70,6 +70,8 @@ public class AuthController {
     @PostMapping("forgotten-password/{email}")
     public ResponseEntity<?> forgottenPasswordRequest(@PathVariable("email") String email) {
 
+        System.out.println("inside forgotten password");
+
         authService.forgottenPasswordRequest(email);
 
         return ResponseEntity.ok().build();

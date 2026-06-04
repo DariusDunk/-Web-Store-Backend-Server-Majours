@@ -344,13 +344,21 @@ public class KeycloakService {
     }
 
 
-
     public void passwordChangeRequestForCustomerId(String userId) {
-        String adminToken = getAdminAccessToken();
-        String passwordChangeUrl = "/admin/realms/" + userRealm + "/users/" + userId + "/execute-actions-email?lifespan=1800";
+        String passwordChangeUrl;
+        String adminToken;
 
-        try
-        {
+        try {
+//            String adminToken;
+            adminToken = getAdminAccessToken();
+//            String passwordChangeUrl;
+            passwordChangeUrl = "/admin/realms/" + userRealm + "/users/" + userId + "/execute-actions-email?lifespan=1800";
+        } catch (Exception e) {
+            System.out.println("Error getting admin token for password reset: " + e.getMessage());
+            throw e;
+        }
+
+        try {
             keycloakWebClient.put()
                     .uri(passwordChangeUrl)
                     .headers(h -> h.setBearerAuth(adminToken))
@@ -358,9 +366,7 @@ public class KeycloakService {
                     .retrieve()
                     .toBodilessEntity()
                     .block();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Error sending password change email: " + e.getMessage());
             throw e;
         }

@@ -101,10 +101,11 @@ function resolveUnauthorizedAuthRequest(sessionId, res) {
     res.cookie('session_id', "",
         {
             maxAge: 0,
-            secure: false,
+            secure: true,
             path: '/',
-            sameSite: 'lax',
-            httpOnly: true
+            sameSite: 'none',
+            httpOnly: true,
+            domain: '.agromag.local'
         });
 
 }

@@ -19,7 +19,7 @@ router.post(`/forgotten-password/:email`, async (req, res) => {
 
         try {
             const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                    return await axiosBackendClient.post(`${Backend_Url}/authd/forgotten-password/${email}`, {},
+                    return await axiosBackendClient.post(`${Backend_Url}/auth/forgotten-password/${email}`, {},
                         {
                             headers:
                                 {
@@ -41,7 +41,14 @@ router.post(`/forgotten-password/:email`, async (req, res) => {
 
             if (error.response) {
                 console.warn(`${timestamp()} Handled backend error for forgotten password`);
-                return res.status(error.response.status || 500).end();
+
+
+                const responseData = error.response.data;
+                if (responseData != null) {
+                    console.log("Error in forgotten password: ", responseData);
+
+                    return res.status(error.response.status).json(responseData);
+                }
             }
 
             console.error('-------------------Unexpected error in forgotten password-------------------\n', error);
@@ -126,10 +133,11 @@ router.post(`/login`, async (req, res) => {
         res.cookie('session_id', authResponse.session_id,
             {
                 maxAge: (session_expires_in ?? 660) * 1000,
-                secure: false,
+                secure: true,
                 path: '/',
-                sameSite: 'lax',
-                httpOnly: true
+                sameSite: 'none',
+                httpOnly: true,
+                domain: '.agromag.local'
             });
     }
     catch (error) {
@@ -216,10 +224,11 @@ router.post('/logout', async (req, res) => {
                     res.cookie('session_id', session_id,
                         {
                             maxAge: (session_expires_in ?? 660) * 1000,
-                            secure: false,
+                            secure: true,
                             path: '/',
-                            sameSite: 'lax',
-                            httpOnly: true
+                            sameSite: 'none',
+                            httpOnly: true,
+                            domain: '.agromag.local'
                         });
 
                     // return res.status(200).json({authenticated: false, cartSummary: cartSummary});
