@@ -35,10 +35,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -264,9 +261,6 @@ public class AdminPurchaseService {
                 .stream()
                 .collect(Collectors.toMap(pr -> DeliveryStatus.valueOf(pr.getDeliveryStatus()), PurchaseProjection::getStatusCount));
 
-
-//        List<ReportResponses.MetricDto> metrics = getMetricDtosForPurchaseStatusReport(statusCountMap);
-
         ReportResponses.ChartDto chartDto = new ReportResponses.ChartDto(ReportResponses.ChartType.BAR,
                 "status",
                 "count",
@@ -279,7 +273,37 @@ public class AdminPurchaseService {
                 List.of("Статус", "Брой", "Дял"),
                 getTableRowMapListForPurchaseStatusReport(statusCountMap),
                 List.of(request.startDate().toString(), request.endDate().toString()));
+    }
 
+    public ReportResponses.ReportResponse purchaseStatusReportWithBgTableNames(ReportResponses.ReportResponse response) {
+
+        List<Map<String, ReportResponses.TableColumnRow>> tableRowMap = response.rows();
+
+        List<Map<String, ReportResponses.TableColumnRow>> newMapList = new ArrayList<>();
+
+        for (Map<String, ReportResponses.TableColumnRow> map : tableRowMap) {
+
+            Map<String, ReportResponses.TableColumnRow> mutableCopy =
+                    new LinkedHashMap<>(map);
+
+            ReportResponses.TableColumnRow tableNameColumnRow = mutableCopy.get("Статус");
+
+            ReportResponses.TableColumnRow newStatusName = new ReportResponses.TableColumnRow(DeliveryStatus.valueOf(tableNameColumnRow.value()).getBgLabel(),
+                    ReportResponses.ValueType.TEXT);
+
+            mutableCopy.remove("Статус");
+
+            Map<String, ReportResponses.TableColumnRow> newRowMap = new HashMap<>();
+            newRowMap.put("Статус", newStatusName);
+            newRowMap.putAll(mutableCopy);
+
+            newMapList.add(newRowMap);
+        }
+        return ReportResponses.buildMixedReportNoMetrics(response.title(),
+                response.chart(),
+                List.of("Статус", "Брой", "Дял"),
+                newMapList,
+               response.dates());
     }
 
     private static int totalPurchaseStatusCount(Map<DeliveryStatus, Integer> statusCountMap) {
@@ -330,21 +354,6 @@ public class AdminPurchaseService {
         }
         return responseList;
     }
-//
-//    @NotNull
-//    private static List<ReportResponses.MetricDto> getMetricDtosForPurchaseStatusReport(Map<DeliveryStatus, Integer> statusCountMap) {
-//
-//        List<ReportResponses.MetricDto> metrics = new ArrayList<>();
-//
-//        for (DeliveryStatus status : DeliveryStatus.values()) {
-//            Integer count = statusCountMap.get(status);
-//            metrics.add(new ReportResponses.MetricDto(status.name(), count!=null ?count+ "" :"0", ReportResponses.ValueType.NUMBER));
-//        }
-//
-//        return metrics;
-//
-//    }
-
 
     @ToString
     public static class MonthDataResponse {

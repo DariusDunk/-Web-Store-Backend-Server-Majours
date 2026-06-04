@@ -8,6 +8,55 @@ import {timestamp} from "../../services/timeStamper.js";
 
 const PURCHASE_CONTROLLER_ROUTE = `${Backend_Url}/admin/purchase`;
 
+router.get(`/purchase-statuses-report/pdf`, async (req, res) => {
+    const sessionId = req.cookies.session_id;
+    const{startDate, endDate, timezone} = req.query;
+    const bodyForRequest = {start_date:startDate, end_date:endDate, timezone};
+
+    try
+    {
+        const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
+                return await axiosBackendClient.post(`${PURCHASE_CONTROLLER_ROUTE}/purchase-statuses-report/pdf`, bodyForRequest,
+                    {
+                        headers:
+                            {
+                                'x-client_type': WEB_CLIENT_NAME,
+                                ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                                ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                            }, bffContext: {
+                            req, res
+                        }, responseType: "stream"
+                    });
+            },
+            {req, res});
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename=purchase-status-report.pdf`
+        );
+
+        response.data.on("error", (err) => {
+            console.error("PDF stream error:", err);
+            res.status(500).end();
+        });
+
+        response.data.pipe(res);
+
+        return;
+
+    }
+    catch (error)
+    {
+        console.error("error in get purchase statuses report pdf: ", error)
+        if (error.response) {
+            console.warn(`${timestamp()} Handled backend error for get purchase statuses report pdf request`);
+            return res.status(error.response.status || 500).json(error.response.data);
+        }
+        return res.status(500).end();
+    }
+})
+
 router.get(`/purchase-statuses-report`, async (req, res) => {
     const sessionId = req.cookies.session_id;
     const{startDate, endDate, timezone} = req.query;
@@ -16,21 +65,21 @@ router.get(`/purchase-statuses-report`, async (req, res) => {
     try {
 
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-            return await axiosBackendClient.post(`${PURCHASE_CONTROLLER_ROUTE}/purchase-statuses-report`, bodyForRequest,
-                {
-                    headers:
-                        {
-                            'Content-Type': 'application/json',
-                            'x-client_type': WEB_CLIENT_NAME,
-                            ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
-                            ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                return await axiosBackendClient.post(`${PURCHASE_CONTROLLER_ROUTE}/purchase-statuses-report`, bodyForRequest,
+                    {
+                        headers:
+                            {
+                                'Content-Type': 'application/json',
+                                'x-client_type': WEB_CLIENT_NAME,
+                                ...(!sessionData?.is_guest && {'Authorization': 'Bearer ' + sessionData?.access_token}),
+                                ...(sessionData?.session_id && {'x-session-id': sessionData?.session_id}),
+                            }
+                        , bffContext: {
+                            req, res
                         }
-                    , bffContext: {
-                        req, res
-                    }
-                });
-        },
-            {req, res})
+                    });
+            },
+            {req, res});
 
         const responseData = response.data;
         return res.status(response.status).json(responseData || {});

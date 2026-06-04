@@ -98,4 +98,19 @@ public class AdminPurchaseController {
 
        return ResponseEntity.ok( adminPurchaseService.getPurchaseStatusStatistic(request));
     }
+
+    @PostMapping("purchase-statuses-report/pdf")
+    public ResponseEntity<?> getStatisticForPurchaseStatusesPdf(@RequestBody @Valid DateRangeRequest request) {
+
+        ReportResponses.ReportResponse productResponse = adminPurchaseService.getPurchaseStatusStatistic(request);
+        ReportResponses.ReportResponse productResponseBG = adminPurchaseService.purchaseStatusReportWithBgTableNames(productResponse);
+
+        byte[] pdfBytes = reportPdfService.generateReportPdf(productResponseBG, List.of(request.startDate(), request.endDate()), request.timezone());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=purchase-status-report.pdf")
+                .body(pdfBytes);
+    }
 }

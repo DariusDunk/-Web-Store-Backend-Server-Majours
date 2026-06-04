@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -227,7 +229,11 @@ public class ReportPdfService {
                 if (valueType != null && valueType.equals(ReportResponses.ValueType.CURRENCY)) {
                     value = ((Integer.parseInt(value) + 50) / 100) + "€";
                 }
-//                String value = rows.get(i).getOrDefault(col, new ReportResponses.TableRow("-", ReportResponses.ValueType.TEXT)).value();
+
+                if (valueType != null && valueType.equals(ReportResponses.ValueType.PERCENTAGE)) {
+                    BigDecimal decimal = new BigDecimal(value);
+                    value = decimal.setScale(2, RoundingMode.HALF_UP) + "%";
+                }
                 sb.append("<td>").append(esc(value)).append("</td>");
             }
             sb.append("</tr>");
