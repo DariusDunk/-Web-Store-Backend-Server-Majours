@@ -22,16 +22,16 @@ public class InvoiceHtmlService {
 
         for (var item : invoice.products()) {
 
-            var product = item.purchaseProductProjection();
+//            var product = item.purchaseProductProjection();
 
-            double price = item.finalPrice() / 100.0;
-            int qty = product.getQuantity();
+            double price = item.getPurchasePrice() / 100.0;
+            int qty = item.getQuantity();
             double totalLine = price * qty;
 
             html.append("<tr>");
 
             html.append("<td>")
-                    .append(escapeHtml(product.getProductName()))
+                    .append(escapeHtml(item.getProductName()))
                     .append("</td>");
 
             html.append("<td style='text-align:right;'>")

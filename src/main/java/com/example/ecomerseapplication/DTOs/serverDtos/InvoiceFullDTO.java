@@ -6,6 +6,6 @@ import java.util.List;
 
 public record InvoiceFullDTO(
         InvoicePurchaseProjection invoicePurchaseProjection,
-        List<CompactProductPricePairDTO> products
+        List<com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.PurchaseProductProjection> products
 ) {
 }

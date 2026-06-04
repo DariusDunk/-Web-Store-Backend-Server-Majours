@@ -36,17 +36,17 @@ public class InvoiceService {
     @NonNull
     private InvoiceFullDTO mainInvoiceBuildAction(String purchaseCode, InvoicePurchaseProjection invoice) {
         List<PurchaseProductProjection> purchaseCarts = purchaseCartService.getByPurchaseCode(purchaseCode);
-        List<CompactProductPricePairDTO> pricePairDTOS = new ArrayList<>();
 
-        for (PurchaseProductProjection product : purchaseCarts) {
-            int originalPrice = product.getOriginalPriceStotinki();
-            Short saleDiscount = product.getDefaultSaleDiscount();
-            Short explicitDiscount = product.getExplicitDiscount();
-            int finalPrice = ProductDTOMapper.calculateDiscountPrice(originalPrice, saleDiscount, explicitDiscount);
-            pricePairDTOS.add(new CompactProductPricePairDTO(product, finalPrice));
-        }
+//        List<CompactProductPricePairDTO> pricePairDTOS = purchaseCarts
+//                .stream()
+//                .map(ppp -> new CompactProductPricePairDTO(ppp, ppp.getPurchasePrice()))
+//                .toList();
 
-        return new InvoiceFullDTO(invoice, pricePairDTOS);
+//        for (PurchaseProductProjection product : purchaseCarts) {
+//            pricePairDTOS.add(new CompactProductPricePairDTO(product, finalPrice));
+//        }
+
+        return new InvoiceFullDTO(invoice, purchaseCarts);
     }
 
 

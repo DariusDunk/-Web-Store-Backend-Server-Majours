@@ -10,6 +10,9 @@ public interface PurchaseProductProjection {
     String getImageUrl();
     int getQuantity();
 
+    Integer getPurchasePrice();
+
+
     Integer getUnitsSold();
 
     Integer getRevenueGained();

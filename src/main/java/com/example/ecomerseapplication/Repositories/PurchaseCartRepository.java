@@ -36,18 +36,13 @@ public interface PurchaseCartRepository extends JpaRepository<PurchaseCart, Purc
 """
 select p.productCode as productCode,
 p.productName as productName,
-p.originalPriceStotinki as originalPriceStotinki,
-s.discountPercent as defaultSaleDiscount,
-sp.overrideDiscountPercentage explicitDiscount,
+pc.singlePrice as purchasePrice,
 p.rating as rating,
 p.mainImageUrl as imageUrl,
 pc.quantity as quantity
 from PurchaseCart pc
 join pc.purchaseCartId.product p
 join pc.purchaseCartId.purchase pu
-left join p.saleProducts sp on sp.isMain = true
-left join sp.sale s on s.isActive = true
-and current_timestamp between s.startDate and s.endDate
 where pu.purchaseCode = ?1
 """
     )

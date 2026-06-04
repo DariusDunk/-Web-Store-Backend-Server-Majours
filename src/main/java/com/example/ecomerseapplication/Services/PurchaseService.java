@@ -393,7 +393,6 @@ public class PurchaseService {
                 purchaseProjection.getRecipientPhone(),
                 purchaseProjection.getPaymentMethod(),
                 purchaseProjection.getDeliveryDate(),
-                "http://localhost:3000/purchase/invoice/" + purchaseCode,
                 purchaseProducts
         );
 

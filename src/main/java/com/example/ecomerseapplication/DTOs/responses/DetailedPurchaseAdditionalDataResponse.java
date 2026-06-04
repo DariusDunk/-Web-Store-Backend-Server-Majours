@@ -17,8 +17,6 @@ public record DetailedPurchaseAdditionalDataResponse(
         String paymentMethod,
         @JsonProperty("delivery_date")
         Instant deliveryDate,
-        @JsonProperty("invoice_url")
-        String invoiceUrl,
         @JsonProperty("products")
         List<DetailedPurchaseProductResponse> products
         ) {
