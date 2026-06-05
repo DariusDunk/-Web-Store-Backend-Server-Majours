@@ -53,7 +53,6 @@ axiosBackendClient.interceptors.response.use(
         let refreshPromise = refreshPromises.get(sessionId);
 
         if (!refreshPromise) {
-            // console.log("Attempting to refresh token...");
 
             refreshPromise = refreshToken(sessionId, res)
                 .catch(err => {

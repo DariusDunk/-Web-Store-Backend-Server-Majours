@@ -11,6 +11,7 @@ export default function getExtractedExpiration(accessToken) {
         return 0; // If token is malformed, treat as expired
     }
 }
+export const TOKEN_REFRESH_BUFFER_MS = 60 * 1000;
 
 // When saving to your cache:
 // sessionCache.set(sessionId, {

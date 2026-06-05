@@ -1,39 +1,59 @@
 import sessionCache from "./sessionCache.js";
 import fetchTokensOfSession from "./refreshRequest.js";
+import getExtractedExpiration, {TOKEN_REFRESH_BUFFER_MS} from "./accessTokenExpirationExtractor.js";
 
 const refreshInProgress = new Map();
 
 async function getSessionData(sessionId) {
-    // 1. Check Cache
     const cachedData = sessionCache.get(sessionId);
     if (cachedData) {
-        // console.log("✅ Cache Hit:", sessionId);
-        return {...cachedData, _isCacheHit: true};
+
+        if (cachedData.is_guest) {
+            return {...cachedData, _isCacheHit: true};
+        }
+
+        const accessToken = cachedData.access_token;
+
+        if (accessToken) {
+            const currentTime = Date.now();
+
+            const tokenExpiryMs = getExtractedExpiration(accessToken);
+
+            if (currentTime >= (tokenExpiryMs - TOKEN_REFRESH_BUFFER_MS)) {
+                console.log(`[BFF] Token expiring soon (${((tokenExpiryMs - currentTime) / 1000).toFixed(0)}s left). Triggering preemptive refresh...`);
+            } else {
+                return {...cachedData, _isCacheHit: true};
+            }
+        }
+
+
     }
 
-    // 2. Check Lock
-    if (refreshInProgress.has(sessionId)) {
-        // console.log("⏳ Waiting for existing refresh:", sessionId);
-        return await refreshInProgress.get(sessionId);
-        // return sessionCache.get(sessionId);
+    let refreshPromise = refreshInProgress.get(sessionId);
+
+    // if (refreshInProgress.has(sessionId)) {
+    //     return await refreshInProgress.get(sessionId);
+    //     //todo tuk moje bi trqbva da se izvleq4e refresh promis-a predi da se pravi kakvoto i da e kakto e pri interceptora
+    // }
+
+    if (refreshPromise) {
+        return await refreshPromise;
     }
 
-    // 3. Create the actual work promise
     const fetchWork = async () => {
         try {
 
             const freshData = await fetchTokensOfSession(sessionId);
             return {...freshData, _isCacheHit: false};
         } catch (error) {
-            console.error("❌ Fetch internal error:", error.message);
-            throw error; // Re-throw so the lock-waiters and caller know it failed
+            console.error("Access token fetch internal error:", error.message);
+            throw error;
         } finally {
             refreshInProgress.delete(sessionId);
-            // console.log("🔓 Lock released for:", sessionId);
+
         }
     };
 
-    // 4. Store the promise and execute
     const p = fetchWork();
     refreshInProgress.set(sessionId, p);
 
@@ -43,28 +63,14 @@ async function getSessionData(sessionId) {
 export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
     const {isMe = false, req, res} = options;
 
-    // const makeResponse = (axiosResponse) => ({
-    //     status: axiosResponse?.status || 200,
-    //     data: axiosResponse?.data ?? {},
-    //     headers: axiosResponse?.headers ?? {}
-    // });
-
     const makeResponse = (axiosResponse) => {
         {
-            // If it's already an Axios response
-            // if (axiosResponse && typeof axiosResponse === 'object' && 'data' in axiosResponse && 'status' in axiosResponse) {
-                return {
-                    status: axiosResponse.status ||200,
-                    data: axiosResponse.data ?? {},
-                    headers: axiosResponse.headers ?? {}
-            //     };
-            // }
 
-            // Otherwise treat it as raw data
-            // return {
-            //     status: 200,
-            //     data: axiosResponse ?? {},
-            //     headers: {}
+            return {
+                status: axiosResponse.status || 200,
+                data: axiosResponse.data ?? {},
+                headers: axiosResponse.headers ?? {}
+
             };
         }
     };
@@ -85,6 +91,22 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             }
 
         }
+
+//         if (!sessionData.is_guest) {
+//            // const tokenExpiry = getExtractedExpiration(sessionData.access_token);
+//
+//             const expiresAtMs = getExtractedExpiration(sessionData.access_token); // This is the 13-digit millisecond number
+//             const currentTimeMs = Date.now(); // JavaScript's current time in milliseconds
+//
+// // Calculate the difference
+//             const executionDifferenceMs = expiresAtMs - currentTimeMs;
+//             const minutesRemaining = executionDifferenceMs / 1000 / 60;
+//
+//             console.log(`Token will expire in exactly: ${minutesRemaining.toFixed(2)} minutes`);
+//
+//             // console.log("Token expiration(seconds): "+tokenExpiry/1000);
+//             // console.log("Token expiration(minutes): "+(tokenExpiry/1000)/60);
+//         }
 
         const axiosResponse = await requestFn(sessionData);
 
@@ -142,8 +164,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
         responseSessionId = sessionData?.session_id;
         const {is_guest, session_id: refreshSessionId} = sessionDataAfterCacheRefresh;
 
-        if (res)
-        {
+        if (res) {
             if (responseSessionId) {
 
                 res.setHeader('Access-Control-Expose-Headers', 'x-guest-state');
@@ -166,8 +187,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                 }
             }
             // console.log("----------------------------------\nResponse headers: ", res.headers, "\n----------------------------------\n");
-        }
-        else
+        } else
             console.warn(" \n" +
                 "----------------------------------\n" +
                 "⚠️ fetchWithSessionTokens called without res" +

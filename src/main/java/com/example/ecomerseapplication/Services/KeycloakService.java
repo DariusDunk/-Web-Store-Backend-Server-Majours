@@ -141,7 +141,7 @@ public class KeycloakService {
 
     private ResponseEntity<?> assignUserRole(String userId, UserRole userRole, String adminToken) {
 //        System.out.println("Assigning user role: " + userRole);
-        RoleRepresentation role = getRealmRole(userRole.getValue(), adminToken);
+        RoleRepresentation role = getRealmRole(userRole.getValue().toLowerCase(), adminToken);
 
         try {
             keycloakWebClient.post()
