@@ -3,7 +3,6 @@ package com.example.ecomerseapplication.Services.Admin;
 import com.example.ecomerseapplication.DTOs.responses.ReportResponses;
 import com.example.ecomerseapplication.DTOs.serverDtos.projectionInterfaces.SessionActivityProjection;
 import com.example.ecomerseapplication.Repositories.SessionRepository;
-import com.example.ecomerseapplication.Services.ReportPdfService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +14,9 @@ import java.util.Map;
 @Service
 public class AdminSessionService {
     private final SessionRepository sessionRepository;
-    private final ReportPdfService reportPdfService;
 
-    public AdminSessionService(SessionRepository sessionRepository, ReportPdfService reportPdfService) {
+    public AdminSessionService(SessionRepository sessionRepository) {
         this.sessionRepository = sessionRepository;
-        this.reportPdfService = reportPdfService;
     }
 
     public ReportResponses.ReportResponse getActiveSessions() {

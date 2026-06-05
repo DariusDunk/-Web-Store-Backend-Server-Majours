@@ -33,17 +33,15 @@ public class CartController {
     private final CustomerService customerService ;
     private final CartProductService cartProductService;
     private final ProductService productService;
-    private final CartService cartService;
     private final SessionCartService sessionCartService;
 
     @Autowired
-    public CartController(SessionService sessionService, UserIdExtractor userIdExtractor, CustomerService customerService, CartProductService cartProductService, ProductService productService, CartService cartService, SessionCartService sessionCartService) {
+    public CartController(SessionService sessionService, UserIdExtractor userIdExtractor, CustomerService customerService, CartProductService cartProductService, ProductService productService, SessionCartService sessionCartService) {
         this.sessionService = sessionService;
         this.userIdExtractor = userIdExtractor;
         this.customerService = customerService;
         this.cartProductService = cartProductService;
         this.productService = productService;
-        this.cartService = cartService;
         this.sessionCartService = sessionCartService;
     }
 

@@ -16,8 +16,13 @@
       depends_on:
         keycloak_db:
           condition: service_healthy
-      ports:
-        - "8544:8080"
+          #todo tuk smeni ports sys expose
+#      ports:
+#        - "8544:8080"
+
+      expose:
+        - "8080"
+
       volumes:
         - ./spring-webstore-realm.json:/opt/keycloak/data/import/spring-webstore-realm.json
       environment:
@@ -36,12 +41,11 @@
 
         # === HTTP (dev only) ===
         KC_HTTP_ENABLED: "true"
-        KC_HOSTNAME: localhost
-#        KC_HOSTNAME: auth.agromag.local
-        KC_PROXY: edge
+        #todo smeni sys domeina
+#        KC_HOSTNAME: localhost
+        KC_HOSTNAME: "https://auth.agromag.local"
         KC_PROXY_HEADERS: xforwarded
         KC_HOSTNAME_STRICT: "false"
-        KC_HOSTNAME_STRICT_HTTPS: "false"
 #        KC_HOSTNAME_URL: http://localhost:8544
 
         # KC_HOSTNAME_PORT: "8544"
@@ -107,8 +111,11 @@
       volumes:
         - ../../../src/main/nodeJs/browserBFF:/app:cached         # <-- mount local BFF folder
         - browser_bff_node_modules:/app/node_modules    # <-- container keeps node_modules
-      ports:
-        - "3000:3000"          # <-- BFF port exposed outside
+#      ports:
+#        - "3000:3000"          # <-- BFF port exposed outside
+      expose:
+        - "3000"
+
       command: npm run dev
       environment:
         BACKEND_BASE_URL: http://host.docker.internal:1620
@@ -122,16 +129,22 @@
       image: mailhog/mailhog
       container_name: mailhog
       ports:
-        - "1025:1025"
+#        - "1025:1025"
         - "8025:8025"
+      expose:
+        - "1025"
       networks:
         - si
 
     webstore-tensorflow-serving:
+      container_name: webstore-tensorflow-serving
       image: tensorflow/serving
-      ports:
-        - "8500:8500"
-        - "8501:8501"
+#      ports:
+#        - "8500:8500"
+#        - "8501:8501"
+      expose:
+        - "8500"
+        - "8501"
       volumes:
         - ../../../models:/models
         - ./configs/models.config:/config/models.config
@@ -151,8 +164,10 @@
         MINIO_ROOT_PASSWORD: gigachadStrongManPassword
 
       ports:
-        - "9000:9000"
+#        - "9000:9000"
         - "9001:9001"
+      expose:
+        - "9000"
 
       volumes:
         - webstore_minio_data:/data
@@ -172,6 +187,29 @@
         - ./nginx/certs:/etc/nginx/certs:ro
 
       restart: unless-stopped
+      networks:
+        - si
+
+    backend:
+      build:
+        context: ../../../
+        dockerfile: Dockerfile
+
+      container_name: webstore-backend
+
+      restart: unless-stopped
+
+#      ports:
+#        - "1620:1620"
+      expose:
+        - "1620"
+
+      environment:
+        SPRING_PROFILES_ACTIVE: docker
+
+      depends_on:
+        - main-db
+
       networks:
         - si
 
