@@ -16,7 +16,6 @@
       depends_on:
         keycloak_db:
           condition: service_healthy
-          #todo tuk smeni ports sys expose
 #      ports:
 #        - "8544:8080"
 
@@ -41,7 +40,7 @@
 
         # === HTTP (dev only) ===
         KC_HTTP_ENABLED: "true"
-        #todo smeni sys domeina
+
 #        KC_HOSTNAME: localhost
         KC_HOSTNAME: "https://auth.agromag.local"
         KC_PROXY_HEADERS: xforwarded
