@@ -223,17 +223,8 @@ public class ReportPdfService {
             sb.append("<tr class='").append(stripingClass).append(lastClass).append("'>");
             for (String col : columns) {
                 ReportResponses.TableColumnRow rowElement = rows.get(i).get(col);
-                ReportResponses.ValueType valueType = rowElement!=null ? rowElement.valueType() : ReportResponses.ValueType.TEXT;
-                String value = rowElement!=null ? rowElement.value() : "-";
+                String value = getValueString(rowElement);
 
-                if (valueType != null && valueType.equals(ReportResponses.ValueType.CURRENCY)) {
-                    value = ((Integer.parseInt(value) + 50) / 100) + "€";
-                }
-
-                if (valueType != null && valueType.equals(ReportResponses.ValueType.PERCENTAGE)) {
-                    BigDecimal decimal = new BigDecimal(value);
-                    value = decimal.setScale(2, RoundingMode.HALF_UP) + "%";
-                }
                 sb.append("<td>").append(esc(value)).append("</td>");
             }
             sb.append("</tr>");
@@ -244,6 +235,27 @@ public class ReportPdfService {
         sb.append("</div>");
 
         sb.append("<div class='row-count'>Общо записи: <b>").append(rows.size()).append("</b></div>");
+    }
+
+    private static String getValueString(ReportResponses.TableColumnRow rowElement) {
+        ReportResponses.ValueType valueType = rowElement != null ? rowElement.valueType() : ReportResponses.ValueType.TEXT;
+        String value = rowElement != null ? rowElement.value() : "-";
+
+        if (!"-".equals(value) && valueType != null) {
+
+            if (valueType.equals(ReportResponses.ValueType.CURRENCY)) {
+
+                BigDecimal amount = new BigDecimal(value);
+                value = amount.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP) + "€";
+            }
+
+            else if (valueType.equals(ReportResponses.ValueType.PERCENTAGE)) {
+
+                BigDecimal decimal = new BigDecimal(value);
+                value = decimal.multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP) + "%";
+            }
+        }
+        return value;
     }
 
     // ─── Empty state ──────────────────────────────────────────────────────────

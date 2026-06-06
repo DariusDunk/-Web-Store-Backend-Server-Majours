@@ -2,7 +2,6 @@ package com.example.ecomerseapplication.DTOs.requests;
 
 import com.example.ecomerseapplication.enums.PaymentMethod;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -18,7 +17,6 @@ public record PurchaseRequest(
         @JsonProperty("recipientData")
         RecipientDataRequest recipientData,
         @JsonProperty("payment_method")
-        @NotBlank
         PaymentMethod paymentMethod,
         @JsonProperty("email")
         String email

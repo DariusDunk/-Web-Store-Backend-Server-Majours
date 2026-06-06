@@ -1,5 +1,4 @@
 package com.example.ecomerseapplication;
-import com.example.ecomerseapplication.DTOs.requests.ProductAttributeUpdateRequest;
 import com.example.ecomerseapplication.DTOs.responses.*;
 import com.example.ecomerseapplication.DTOs.serverDtos.AttributeOptionDTO;
 import com.example.ecomerseapplication.Entities.*;
@@ -7,7 +6,6 @@ import com.example.ecomerseapplication.Others.PageContentLimit;
 import com.example.ecomerseapplication.Repositories.*;
 import com.example.ecomerseapplication.Services.*;
 import com.example.ecomerseapplication.Services.Admin.AdminAttributeService;
-import com.example.ecomerseapplication.Services.Admin.AdminProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,36 +19,17 @@ import java.util.*;
 class EComerseApplicationTests {
 
     @Autowired
-    private CategoryAttributeRepository categoryAttributeRepository;
-    @Autowired
     private CategoryRepository categoryRepository;
-    @Autowired
-    private AttributeNameRepository attributeNameRepository;
     @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
-    private CartProductRepository cartProductRepository;
-    @Autowired
-    private PurchaseCartRepository purchaseCartRepository;
-    @Autowired
-    private ReviewService reviewService;
-    @Autowired
-    private ProductService productService;
-    @Autowired
     private FavoriteOfCustomerService favoriteOfCustomerService;
     @Autowired
-    private SessionService sessionService;
-    @Autowired
     private AdminAttributeService adminAttributeService;
-    @Autowired
-    private AdminProductService adminProductService;
 
     @Test
     void contextLoads() {
     }
-
-    @Autowired
-    CategoryService categoryService;
 
     @Autowired
     CategoryAttributeService categoryAttributeService;
