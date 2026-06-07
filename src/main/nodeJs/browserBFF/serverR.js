@@ -27,6 +27,19 @@ app.use(cors({
     ],
     credentials: true
 }));
+
+//TODO TEST SLED ANDROIDA?
+
+// app.use((req, res, next) => {
+//     const origin = req.headers.origin;
+//
+//     if (origin && origin !== 'https://agromag.local') {
+//         return res.status(403).send('Invalid origin');
+//     }
+//
+//     next();
+// });
+
 app.use(express.json());
 app.use(cookieParser());
 
