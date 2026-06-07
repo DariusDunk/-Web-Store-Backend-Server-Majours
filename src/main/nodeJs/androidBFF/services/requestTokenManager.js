@@ -3,6 +3,7 @@
 import sessionCache from "./sessionCache.js";
 import fetchTokensOfSession from "./refreshRequest.js";
 import getExtractedExpiration, {TOKEN_REFRESH_BUFFER_MS} from "./accessTokenExpirationExtractor.js";
+import {sessionHeaderBuilder} from "./sessionHeaderBuilder.js";
 
 const refreshInProgress = new Map();
 
@@ -32,11 +33,6 @@ async function getSessionData(sessionId) {
     }
 
     let refreshPromise = refreshInProgress.get(sessionId);
-
-    // if (refreshInProgress.has(sessionId)) {
-    //     return await refreshInProgress.get(sessionId);
-    //     //todo tuk moje bi trqbva da se izvleq4e refresh promis-a predi da se pravi kakvoto i da e kakto e pri interceptora
-    // }
 
     if (refreshPromise) {
         return await refreshPromise;
@@ -234,15 +230,20 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                 is_remember_me,
                 session_expires_in);
 
-            res.cookie('session_id', newSessionId,
-                {
-                    maxAge: (session_expires_in ?? 660) * 1000,
-                    secure: true,
-                    path: '/',
-                    sameSite: 'none',
-                    httpOnly: true,
-                    domain: '.agromag.local'
-                });
+            // res.cookie('session_id', newSessionId,
+            //     {
+            //         maxAge: (session_expires_in ?? 660) * 1000,
+            //         secure: true,
+            //         path: '/',
+            //         sameSite: 'none',
+            //         httpOnly: true,
+            //         domain: '.agromag.local'
+            //     });
+
+            sessionHeaderBuilder(res, newSessionId, session_expires_in);
+
+
+
         } else if (!_isCacheHit) {
             // sessionCache.set(oldSessionId, newSessionData);
             delete newSessionData._isCacheHit;
@@ -253,15 +254,18 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                 is_guest,
                 is_remember_me,
                 session_expires_in);
-            res.cookie('session_id', oldSessionId,
-                {
-                    maxAge: (session_expires_in ?? 660) * 1000,
-                    secure: true,
-                    path: '/',
-                    sameSite: 'none',
-                    httpOnly: true,
-                    domain: '.agromag.local'
-                });
+            // res.cookie('session_id', oldSessionId,
+            //     {
+            //         maxAge: (session_expires_in ?? 660) * 1000,
+            //         secure: true,
+            //         path: '/',
+            //         sameSite: 'none',
+            //         httpOnly: true,
+            //         domain: '.agromag.local'
+            //     });
+
+            sessionHeaderBuilder(res, oldSessionId, session_expires_in);
+
         }
 
         if (isMe && is_guest) {
@@ -316,15 +320,17 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                     sessionCache.safeDelete(oldSessionId);
                 }
 
-                res.cookie('session_id', session_id,
-                    {
-                        maxAge: (session_expires_in ?? 660) * 1000,
-                        secure: true,
-                        path: '/',
-                        sameSite: 'none',
-                        httpOnly: true,
-                        domain: '.agromag.local'
-                    });
+                // res.cookie('session_id', session_id,
+                //     {
+                //         maxAge: (session_expires_in ?? 660) * 1000,
+                //         secure: true,
+                //         path: '/',
+                //         sameSite: 'none',
+                //         httpOnly: true,
+                //         domain: '.agromag.local'
+                //     });
+
+                sessionHeaderBuilder(res, session_id, session_expires_in);
 
                 sessionCache.setSession(
                     session_id,

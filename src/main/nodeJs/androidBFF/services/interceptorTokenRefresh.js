@@ -3,6 +3,7 @@
 
 import fetchTokensOfSession from "./refreshRequest.js";
 import sessionCache from "./sessionCache.js";
+import {sessionHeaderBuilder} from "./sessionHeaderBuilder.js";
 
 export async function refreshToken(sessionId, res) {
 
@@ -23,15 +24,17 @@ export async function refreshToken(sessionId, res) {
                 is_remember_me
             } = responseData;
 
-            res.cookie('session_id', session_id,
-                {
-                    maxAge: (session_expires_in ?? 660) * 1000,
-                    secure: true,
-                    path: '/',
-                    sameSite: 'none',
-                    httpOnly: true,
-                    domain: '.agromag.local'
-                });
+            // res.cookie('session_id', session_id,
+            //     {
+            //         maxAge: (session_expires_in ?? 660) * 1000,
+            //         secure: true,
+            //         path: '/',
+            //         sameSite: 'none',
+            //         httpOnly: true,
+            //         domain: '.agromag.local'
+            //     });
+
+            sessionHeaderBuilder(res, session_id, session_expires_in);
 
             sessionCache.setSession(
                 session_id,

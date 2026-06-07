@@ -9,6 +9,7 @@ import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import axios from 'axios';
 import {getCartSummary} from "../services/cartSummaryFetcher.js"
+import {sessionHeaderBuilder} from "../services/sessionHeaderBuilder.js";
 
 const timestamp = () => {
     const now = new Date();
@@ -17,7 +18,8 @@ const timestamp = () => {
 
 router.post(`/forgotten-password/:email`, async (req, res) => {
         const {email} = req.params;
-        const sessionId = req.cookies.session_id;
+        // const sessionId = req.cookies.session_id;
+        const sessionId = req.headers["x-session-id"];
 
         try {
             const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -98,7 +100,8 @@ router.post(`/register`, async (req, res) => {
 router.post(`/login`, async (req, res) => {
     const {email, password, rememberMe = false} = req.body;
 
-    const guestSessionId = req.cookies.session_id;
+    // const guestSessionId = req.cookies.session_id;
+    const guestSessionId = req.headers["x-session-id"];
 
     // console.log("Node login:" + email + " " + password)
     let authResponse = null;
@@ -132,15 +135,18 @@ router.post(`/login`, async (req, res) => {
             rememberMe,
             session_expires_in);
 
-        res.cookie('session_id', authResponse.session_id,
-            {
-                maxAge: (session_expires_in ?? 660) * 1000,
-                secure: true,
-                path: '/',
-                sameSite: 'none',
-                httpOnly: true,
-                domain: '.agromag.local'
-            });
+        // res.cookie('session_id', authResponse.session_id,
+        //     {
+        //         maxAge: (session_expires_in ?? 660) * 1000,
+        //         secure: true,
+        //         path: '/',
+        //         sameSite: 'none',
+        //         httpOnly: true,
+        //         domain: '.agromag.local'
+        //     });
+
+        sessionHeaderBuilder(res, session_id, session_expires_in);
+
     }
     catch (error) {
         console.error('-------------Error with login-------------\n', error);
@@ -188,7 +194,8 @@ router.post(`/login`, async (req, res) => {
 
 
 router.post('/logout', async (req, res) => {
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
 
         try {
           const response =  await fetchWithSessionTokens(sessionId, async (sessionData) => await axiosBackendClient.get(
@@ -223,15 +230,18 @@ router.post('/logout', async (req, res) => {
                         false,
                         session_expires_in);
 
-                    res.cookie('session_id', session_id,
-                        {
-                            maxAge: (session_expires_in ?? 660) * 1000,
-                            secure: true,
-                            path: '/',
-                            sameSite: 'none',
-                            httpOnly: true,
-                            domain: '.agromag.local'
-                        });
+                    // res.cookie('session_id', session_id,
+                    //     {
+                    //         maxAge: (session_expires_in ?? 660) * 1000,
+                    //         secure: true,
+                    //         path: '/',
+                    //         sameSite: 'none',
+                    //         httpOnly: true,
+                    //         domain: '.agromag.local'
+                    //     });
+
+
+                    sessionHeaderBuilder(res, session_id, session_expires_in);
 
                     // return res.status(200).json({authenticated: false, cartSummary: cartSummary});
                     return res.status(200).end();

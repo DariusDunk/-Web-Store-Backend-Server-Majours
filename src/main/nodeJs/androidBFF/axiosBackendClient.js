@@ -4,6 +4,7 @@ import axios from 'axios';
 import {Backend_Url} from './routes/config.js';
 import {refreshToken} from './services/interceptorTokenRefresh.js';
 import sessionCache from "./services/sessionCache.js";
+import {deleteSessionHeaders} from "./services/sessionHeaderBuilder.js";
 
 const axiosBackendClient = axios.create({baseURL: Backend_Url, withCredentials: true});
 
@@ -99,15 +100,17 @@ function resolveUnauthorizedAuthRequest(sessionId, res) {
 
     console.log("session_id: " + sessionId + " is invalid, clearing cookies:");
 
-    res.cookie('session_id', "",
-        {
-            maxAge: 0,
-            secure: true,
-            path: '/',
-            sameSite: 'none',
-            httpOnly: true,
-            domain: '.agromag.local'
-        });
+    // res.cookie('session_id', "",
+    //     {
+    //         maxAge: 0,
+    //         secure: true,
+    //         path: '/',
+    //         sameSite: 'none',
+    //         httpOnly: true,
+    //         domain: '.agromag.local'
+    //     });
+
+    deleteSessionHeaders(res);
 
 }
 

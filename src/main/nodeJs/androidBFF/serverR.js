@@ -1,10 +1,10 @@
 // noinspection DuplicatedCode
 
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 // import productRoutes from './routes/productRoutes.js';
 // import categoryRoutes from './routes/categoryRoutes.js';
-// import customerRoutes from './routes/customerRoutes.js';
+import customerRoutes from './routes/customerRoutes.js';
 // import purchaseRoutes from './routes/purchaseRoutes.js';
 // import attributeRoutes from './routes/attributeRoutes.js';
 import authRoutes from './routes/authRoutes.js';
@@ -32,7 +32,7 @@ app.use(express.json());
 
 // app.use('/product', productRoutes)
 // app.use('/category', categoryRoutes)
-// app.use('/customer', customerRoutes)
+app.use('/customer', customerRoutes)
 // app.use('/purchase', purchaseRoutes)
 // app.use('/attribute', attributeRoutes)
 app.use('/auth', authRoutes)

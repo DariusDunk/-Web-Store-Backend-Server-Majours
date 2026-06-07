@@ -7,7 +7,7 @@
   services:
     keycloak:
       container_name: webstore_keycloak
-      image: quay.io/keycloak/keycloak:26.4.4  # Pin version!
+      image: quay.io/keycloak/keycloak:26.4.4
       command:
         - start
 #        - --optimized
@@ -214,6 +214,13 @@
         - ./nginx/certs:/etc/nginx/certs:ro
 
       restart: unless-stopped
+
+      depends_on:
+        - android-bff
+        - browser-bff
+        - keycloak
+        - webstore-minio
+
       networks:
         - si
 
