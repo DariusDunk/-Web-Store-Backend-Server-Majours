@@ -60,6 +60,6 @@ app.use('/admin/product-image', AdminProductImageRoutes)
 app.use('/admin/purchase', AdminPurchaseController)
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at https://api.agromag.local externally, and http://browser-bff:${port} internally`);
 });
 

@@ -2,7 +2,7 @@ import express from 'express';
 
 const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
-import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
+import fetchWithSessionTokens from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import {getCartSummary} from "../services/cartSummaryFetcher.js"
 

@@ -60,7 +60,7 @@ async function getSessionData(sessionId) {
     return await p;
 }
 
-export async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
+async function fetchWithSessionTokens(sessionId, requestFn, options = {}) {
     const {isMe = false, req, res} = options;
 
     const makeResponse = (axiosResponse) => {
@@ -83,30 +83,25 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             processRefreshedOrCachedSessionData(sessionData, res, isMe, sessionId);
         } catch (err) {
 
+            if (err.response && err.response.status === 401) {
+
+                // console.log("401 error in '/me' request detected, checking for guest error")
+
+                const errorResponse = err.response.data;
+
+                if (errorResponse?.guestError) {
+                    throw err;
+                }
+
+            }
+
             console.error("Error fetching session data:", err);
 
             if (sessionId) {
                 sessionData = {session_id: sessionId}
 
             }
-
         }
-
-//         if (!sessionData.is_guest) {
-//            // const tokenExpiry = getExtractedExpiration(sessionData.access_token);
-//
-//             const expiresAtMs = getExtractedExpiration(sessionData.access_token); // This is the 13-digit millisecond number
-//             const currentTimeMs = Date.now(); // JavaScript's current time in milliseconds
-//
-// // Calculate the difference
-//             const executionDifferenceMs = expiresAtMs - currentTimeMs;
-//             const minutesRemaining = executionDifferenceMs / 1000 / 60;
-//
-//             console.log(`Token will expire in exactly: ${minutesRemaining.toFixed(2)} minutes`);
-//
-//             // console.log("Token expiration(seconds): "+tokenExpiry/1000);
-//             // console.log("Token expiration(minutes): "+(tokenExpiry/1000)/60);
-//         }
 
         const axiosResponse = await requestFn(sessionData);
 
@@ -336,3 +331,5 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
     }
 }
+
+export default fetchWithSessionTokens

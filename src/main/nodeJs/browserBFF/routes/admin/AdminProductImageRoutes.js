@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from '../config.js';
 import axiosBackendClient from '../../axiosBackendClient.js';
-import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
+import fetchWithSessionTokens from "../../services/requestTokenManager.js";
 import multer from "multer";
 const upload = multer();
 import FormData from "form-data";

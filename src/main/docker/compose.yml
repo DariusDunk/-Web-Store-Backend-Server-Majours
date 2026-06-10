@@ -142,6 +142,9 @@
       expose:
         - "3001"
 
+#      ports:
+#        - "3001:3001"
+
       command: npm run dev
       environment:
         BACKEND_BASE_URL: http://backend:1620

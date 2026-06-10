@@ -1,6 +1,6 @@
 import express from 'express';
 import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
-import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
+import fetchWithSessionTokens from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import sessionCache from "../services/sessionCache.js";
 
@@ -428,13 +428,15 @@ router.get('/me', async (req, res) => {
 
         } catch (error) {
 
+            // console.log("Error response in '/me' request: ", error?.response?.data);
+
             if (error.response && error.response.status === 401) {
+
+                // console.log("401 error in '/me' request detected, checking for guest error")
 
                 const errorResponse = error.response.data;
 
                 if (errorResponse?.guestError) {
-
-                    // console.log("Guest error detected in '/me' request, creating guest session");
 
                     const {headers} = error.response;
 

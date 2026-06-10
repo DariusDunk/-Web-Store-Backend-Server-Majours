@@ -1,4 +1,4 @@
-import {fetchWithSessionTokens} from "./requestTokenManager.js";
+import fetchWithSessionTokens from "./requestTokenManager.js";
 import axiosBackendClient from "../axiosBackendClient.js";
 import {Backend_Url, WEB_CLIENT_NAME} from "../routes/config.js";
 

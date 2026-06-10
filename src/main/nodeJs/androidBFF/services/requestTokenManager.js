@@ -81,6 +81,18 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             processRefreshedOrCachedSessionData(sessionData, res, isMe, sessionId);
         } catch (err) {
 
+            if (err.response && err.response.status === 401) {
+
+                // console.log("401 error in '/me' request detected, checking for guest error")
+
+                const errorResponse = err.response.data;
+
+                if (errorResponse?.guestError) {
+                    throw err;
+                }
+
+            }
+
             console.error("Error fetching session data:", err);
 
             if (sessionId) {
@@ -89,22 +101,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             }
 
         }
-
-//         if (!sessionData.is_guest) {
-//            // const tokenExpiry = getExtractedExpiration(sessionData.access_token);
-//
-//             const expiresAtMs = getExtractedExpiration(sessionData.access_token); // This is the 13-digit millisecond number
-//             const currentTimeMs = Date.now(); // JavaScript's current time in milliseconds
-//
-// // Calculate the difference
-//             const executionDifferenceMs = expiresAtMs - currentTimeMs;
-//             const minutesRemaining = executionDifferenceMs / 1000 / 60;
-//
-//             console.log(`Token will expire in exactly: ${minutesRemaining.toFixed(2)} minutes`);
-//
-//             // console.log("Token expiration(seconds): "+tokenExpiry/1000);
-//             // console.log("Token expiration(minutes): "+(tokenExpiry/1000)/60);
-//         }
 
         const axiosResponse = await requestFn(sessionData);
 
@@ -229,17 +225,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                 is_guest,
                 is_remember_me,
                 session_expires_in);
-
-            // res.cookie('session_id', newSessionId,
-            //     {
-            //         maxAge: (session_expires_in ?? 660) * 1000,
-            //         secure: true,
-            //         path: '/',
-            //         sameSite: 'none',
-            //         httpOnly: true,
-            //         domain: '.agromag.local'
-            //     });
-
             sessionHeaderBuilder(res, newSessionId, session_expires_in);
 
 
@@ -254,15 +239,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                 is_guest,
                 is_remember_me,
                 session_expires_in);
-            // res.cookie('session_id', oldSessionId,
-            //     {
-            //         maxAge: (session_expires_in ?? 660) * 1000,
-            //         secure: true,
-            //         path: '/',
-            //         sameSite: 'none',
-            //         httpOnly: true,
-            //         domain: '.agromag.local'
-            //     });
 
             sessionHeaderBuilder(res, oldSessionId, session_expires_in);
 
@@ -319,16 +295,6 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
                     //     "----------------------------------\n ");
                     sessionCache.safeDelete(oldSessionId);
                 }
-
-                // res.cookie('session_id', session_id,
-                //     {
-                //         maxAge: (session_expires_in ?? 660) * 1000,
-                //         secure: true,
-                //         path: '/',
-                //         sameSite: 'none',
-                //         httpOnly: true,
-                //         domain: '.agromag.local'
-                //     });
 
                 sessionHeaderBuilder(res, session_id, session_expires_in);
 

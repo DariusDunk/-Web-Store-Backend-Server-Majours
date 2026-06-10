@@ -3,7 +3,7 @@ import express from 'express';
 const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from '../config.js';
 import axiosBackendClient from '../../axiosBackendClient.js';
-import {fetchWithSessionTokens} from "../../services/requestTokenManager.js";
+import fetchWithSessionTokens from "../../services/requestTokenManager.js";
 import {timestamp} from "../../services/timeStamper.js";
 
 const PURCHASE_CONTROLLER_ROUTE = `${Backend_Url}/admin/purchase`;

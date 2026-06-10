@@ -3,7 +3,7 @@ const router = express.Router();
 import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
 const AuthURL = `${Backend_Url}/auth`;
 import sessionCache from '../services/sessionCache.js';
-import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
+import fetchWithSessionTokens from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import axios from 'axios';
 import {getCartSummary} from "../services/cartSummaryFetcher.js"

@@ -103,7 +103,10 @@ router.post(`/login`, async (req, res) => {
     // const guestSessionId = req.cookies.session_id;
     const guestSessionId = req.headers["x-session-id"];
 
-    // console.log("Node login:" + email + " " + password)
+    console.log("Node login:" + email + " " + password);
+    console.log("Session id" + guestSessionId);
+
+
     let authResponse = null;
     const trimmedEmail = email.trim();
     try {

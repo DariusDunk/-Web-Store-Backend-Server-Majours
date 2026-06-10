@@ -1,6 +1,6 @@
 import express from 'express';
 import {Backend_Url, WEB_CLIENT_NAME} from './config.js';
-import {fetchWithSessionTokens} from "../services/requestTokenManager.js";
+import fetchWithSessionTokens from "../services/requestTokenManager.js";
 import axiosBackendClient from '../axiosBackendClient.js';
 import {getTopProductsOfTopSales, getTopProductsOfTopCategories} from "../services/homePageRequests.js";
 import multer from "multer";
