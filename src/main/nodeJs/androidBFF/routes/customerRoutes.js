@@ -15,7 +15,8 @@ const timestamp = () => {
 };
 
 router.post(`/password-update`, async (req, res) => {
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -48,7 +49,9 @@ router.post(`/password-update`, async (req, res) => {
 });
 
 router.post(`/updateProfile`, async (req, res) => {
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
+
     const {firstName, lastName, phone} = req.body;
     const requestBody = {first_name: firstName, last_name: lastName, phone_number: phone};
 
@@ -82,7 +85,8 @@ router.post(`/updateProfile`, async (req, res) => {
 });
 
 router.get('/profile', async (req, res) => {
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
 
     try {
 
@@ -120,7 +124,8 @@ router.get('/profile', async (req, res) => {
 });
 
 router.post(`/recipientTemplates/set`, async (req, res) => {
-        const sessionId = req.cookies.session_id;
+        // const sessionId = req.cookies.session_id;
+        const sessionId = req.headers["x-session-id"];
 
         try {
             const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -158,9 +163,10 @@ router.post(`/recipientTemplates/set`, async (req, res) => {
 );
 
 router.get(`/recipientTemplates/get`, async (req, res) => {
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
 
-    console.log("Session id in get recipient templates: ", sessionId);
+    // console.log("Session id in get recipient templates: ", sessionId);
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -197,7 +203,8 @@ router.get(`/recipientTemplates/get`, async (req, res) => {
 
 router.get('/getFavourites/:page', async (req, res) => {
     const page = req.params.page
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
 
     try {
 
@@ -234,7 +241,8 @@ router.get('/getFavourites/:page', async (req, res) => {
 
 router.post(`/addFavourite/:productCode`, async (req, res) => {
 
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
     const productCode = req.params.productCode;
 
     try {
@@ -275,7 +283,8 @@ router.post(`/addFavourite/:productCode`, async (req, res) => {
 
 router.post(`/removeFav/single`, async (req, res) => {
 
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
 
     const {productCode, currentPage} = req.body;
 
@@ -316,7 +325,8 @@ router.post(`/removeFav/single`, async (req, res) => {
 
 router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
 
-    const sessionId = req.cookies.session_id;
+    // const sessionId = req.cookies.session_id;
+    const sessionId = req.headers["x-session-id"];
     const productCode = req.params.productCode;
 
     try {
@@ -351,7 +361,8 @@ router.post(`/removeFav/detProd/:productCode`, async (req, res) => {
 
 router.post(`/removeFav/batch`, async (req, res) => {
     try {
-        const sessionId = req.cookies.session_id;
+        // const sessionId = req.cookies.session_id;
+        const sessionId = req.headers["x-session-id"];
         const {currentPage, productCodes} = req.body;
 
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -391,6 +402,8 @@ router.get('/me', async (req, res) => {
     let sessionId = req.headers["x-session-id"];
 
     const isGuest = sessionCache.get(sessionId)?.is_guest;
+
+    console.log("isGuest: ", isGuest);
 
     if (!isGuest) {
         try {
@@ -463,6 +476,7 @@ router.get('/me', async (req, res) => {
 
                     return res.status(200).json({authenticated: false, cartSummary: summaryData || {}});
                 }
+                return res.status(401).end();
             }
 
             console.error('------------------------Error fetching user info------------------------\n', error);

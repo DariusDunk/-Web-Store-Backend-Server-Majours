@@ -103,8 +103,8 @@ router.post(`/login`, async (req, res) => {
     // const guestSessionId = req.cookies.session_id;
     const guestSessionId = req.headers["x-session-id"];
 
-    console.log("Node login:" + email + " " + password);
-    console.log("Session id" + guestSessionId);
+    // console.log("Node login:" + email + " " + password);
+    // console.log("Session id" + guestSessionId);
 
 
     let authResponse = null;
@@ -153,7 +153,7 @@ router.post(`/login`, async (req, res) => {
     }
     catch (error) {
         console.error('-------------Error with login-------------\n', error);
-        return res.status(error.status || 500).end();
+        return res.status(error.response?.status || 500).end();
     }
 
     if (!authResponse.session_id) {
