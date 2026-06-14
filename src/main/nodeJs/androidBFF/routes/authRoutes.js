@@ -252,7 +252,7 @@ router.post('/logout', async (req, res) => {
             }
 
         } catch (error) {
-            console.error("Error invalidating token and session, cookies and sessionCache will still be erased: ", error);
+            console.error("Error invalidating token and session, sessionCache will still be erased: ", error);
             // clearSessionCookies(res, sessionId);
             sessionCache.safeDelete(sessionId);
             return res.status(200).end();

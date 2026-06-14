@@ -84,6 +84,7 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
             if (err.response && err.response.status === 401) {
 
                 // console.log("401 error in '/me' request detected, checking for guest error")
+                // console.log("401 error from the getSessionData request");
 
                 const errorResponse = err.response.data;
 
@@ -93,7 +94,8 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
             }
 
-            console.error("Error fetching session data:", err);
+            // console.error("Error fetching session data:", err);
+            console.error("Error fetching session data");
 
             if (sessionId) {
                 sessionData = {session_id: sessionId}
@@ -117,7 +119,8 @@ export async function fetchWithSessionTokens(sessionId, requestFn, options = {})
 
     } catch (err) {
 
-        console.error("Error in fetchWithSessionTokens:", err);
+        // console.error("Error in fetchWithSessionTokens:", err);
+        console.error("Error in fetchWithSessionTokens");
 
         const normalizedError = new Error(err?.message);
 

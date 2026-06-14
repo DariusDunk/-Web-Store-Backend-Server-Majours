@@ -20,6 +20,7 @@ axiosBackendClient.interceptors.response.use(
 
         if (!originalRequest?.bffContext) {
             console.error("No BFF context found in request during interceptor refresh, rejecting request.");
+            resolveUnauthorizedAuthRequest(sessionId, res);
 
             return Promise.reject(error);
         }
@@ -29,6 +30,8 @@ axiosBackendClient.interceptors.response.use(
         const sessionId = req?.cookies?.session_id;
 
         if (!sessionId) {
+            resolveUnauthorizedAuthRequest(sessionId, res);
+
             return Promise.reject(error);
         }
 
@@ -37,6 +40,7 @@ axiosBackendClient.interceptors.response.use(
         if (isGuestSession !== undefined && isGuestSession !== null && isGuestSession) {
 
             // console.log("Guest session detected, rejecting refresh...");
+            resolveUnauthorizedAuthRequest(sessionId, res);
 
             return Promise.reject(error);
         }
@@ -83,7 +87,7 @@ axiosBackendClient.interceptors.response.use(
                 return axiosBackendClient(originalRequest)
             })
             .catch(err => {
-
+                resolveUnauthorizedAuthRequest(sessionId, res);
                return Promise.reject(err)
             });
     }

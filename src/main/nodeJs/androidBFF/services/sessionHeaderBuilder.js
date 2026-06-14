@@ -8,7 +8,7 @@ export function sessionHeaderBuilder(res, sessionId, ttl) {
 export function deleteSessionHeaders(res) {
    if (res)
     {
-        res.removeHeader('x-session-id');
-        res.removeHeader('x-session-ttl');
+        res.setHeader('x-session-id', "");
+        res.setHeader('x-session-ttl', 0);
     }
 }

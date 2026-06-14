@@ -24,16 +24,6 @@ export async function refreshToken(sessionId, res) {
                 is_remember_me
             } = responseData;
 
-            // res.cookie('session_id', session_id,
-            //     {
-            //         maxAge: (session_expires_in ?? 660) * 1000,
-            //         secure: true,
-            //         path: '/',
-            //         sameSite: 'none',
-            //         httpOnly: true,
-            //         domain: '.agromag.local'
-            //     });
-
             sessionHeaderBuilder(res, session_id, session_expires_in);
 
             sessionCache.setSession(

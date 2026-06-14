@@ -23,15 +23,19 @@ axiosBackendClient.interceptors.response.use(
 
         if (!originalRequest?.bffContext) {
             console.error("No BFF context found in request during interceptor refresh, rejecting request.");
-
+            resolveUnauthorizedAuthRequest(sessionId, res);
             return Promise.reject(error);
         }
 
         const req = originalRequest?.bffContext?.req;
         const res = originalRequest?.bffContext?.res;
-        const sessionId = req?.cookies?.session_id;
+
+        const sessionId = req?.headers['x-session-id'];
 
         if (!sessionId) {
+            // console.error("No sessionId found in cookies or headers! Rejecting silently.");
+            resolveUnauthorizedAuthRequest(sessionId, res);
+
             return Promise.reject(error);
         }
 
@@ -40,16 +44,20 @@ axiosBackendClient.interceptors.response.use(
         if (isGuestSession !== undefined && isGuestSession !== null && isGuestSession) {
 
             // console.log("Guest session detected, rejecting refresh...");
+            resolveUnauthorizedAuthRequest(sessionId, res);
 
             return Promise.reject(error);
         }
 
         if (originalRequest._retry) {
 
+            // console.log("Interceptor retry failed, clearing session");
+
             resolveUnauthorizedAuthRequest(sessionId, res);
 
             return Promise.reject(error);
         }
+        // console.log("Interceptor first retry in progress");
 
         originalRequest._retry = true;
 
@@ -72,7 +80,7 @@ axiosBackendClient.interceptors.response.use(
             refreshPromises.set(sessionId, refreshPromise);
 
         } else {
-            // console.log("Token refresh already in progress, request paused...");
+            console.log("Token refresh already in progress, request paused...");
         }
 
         return refreshPromise
@@ -86,6 +94,7 @@ axiosBackendClient.interceptors.response.use(
                 return axiosBackendClient(originalRequest)
             })
             .catch(err => {
+                resolveUnauthorizedAuthRequest(sessionId, res);
 
                return Promise.reject(err)
             });
@@ -98,17 +107,7 @@ function resolveUnauthorizedAuthRequest(sessionId, res) {
 
     sessionCache.safeDelete(sessionId);
 
-    console.log("session_id: " + sessionId + " is invalid, clearing cookies:");
-
-    // res.cookie('session_id', "",
-    //     {
-    //         maxAge: 0,
-    //         secure: true,
-    //         path: '/',
-    //         sameSite: 'none',
-    //         httpOnly: true,
-    //         domain: '.agromag.local'
-    //     });
+    console.log("session_id: " + sessionId + " is invalid, clearing headers:");
 
     deleteSessionHeaders(res);
 

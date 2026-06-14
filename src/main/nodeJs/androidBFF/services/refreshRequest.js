@@ -16,7 +16,8 @@ import {Backend_Url, WEB_CLIENT_NAME} from "../routes/config.js";
             });
         return data;
     } catch (error) {
-        console.error("Error fetching tokens of session: ", error);
+        // console.error("Error fetching tokens of session: ", error);
+        console.error("Error fetching tokens of session: ");
         throw error;
     }
 }
