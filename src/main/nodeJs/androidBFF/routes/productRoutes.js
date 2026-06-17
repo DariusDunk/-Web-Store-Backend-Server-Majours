@@ -584,6 +584,8 @@ router.post(`/addReview`, async (req, res) => {
     const reviewText = req.body.reviewText;
     const sessionId = req.headers["x-session-id"];
 
+    console.log('addReview request body:', JSON.stringify(req.body));
+
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
             return await axiosBackendClient.post(`${Backend_Url}/product/review/add`, {
