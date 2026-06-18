@@ -419,6 +419,8 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         return res.status(400).json({error: 'Invalid page parameter'});
     }
 
+    console.log("Query: \n" + JSON.stringify(req.query));
+
     const category = decodeURIComponent(req.params.category);
     const {filters = {}, sort} = req.query;
     const sessionId = req.cookies.session_id;
@@ -445,6 +447,8 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
     }
 
     const rating = filters.r ? filters.r : null;  // Assuming ratings are numbers
+
+    // console.log("ratings: ", rating)
 
     const attributes = {};
     Object.keys(filters).forEach(key => {

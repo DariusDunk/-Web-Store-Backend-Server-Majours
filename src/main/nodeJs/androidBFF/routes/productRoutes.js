@@ -411,7 +411,7 @@ router.get(`/search`, async (req, res) => {
     }
 });
 
-router.get('/category-filter/:category/pg:page', async (req, res) => {
+router.post('/category-filter/:category/pg:page', async (req, res) => {
 
     // console.log('filter search');
 
@@ -421,40 +421,47 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         return res.status(400).json({error: 'Invalid page parameter'});
     }
 
+    // console.log("Filter body: ", JSON.stringify(req.body));
+
+    const {minPrice, maxPrice, manufacturers, minRating, attributes} = req.body;
+
+
     const category = decodeURIComponent(req.params.category);
-    const {filters = {}, sort} = req.query;
+    const {
+        // filters = {},
+        sort} = req.query;
     const sessionId = req.headers["x-session-id"];
-    let minPrice = 0;
-    let maxPrice = Infinity;  // Or some default max
-
-    if (filters.pr) {
-
-        const priceRange = filters.pr.split('-');
-        minPrice = parseInt(priceRange[0], 10) || 0;
-        maxPrice = parseInt(priceRange[1], 10) || Infinity;
-    }
-
-    let manufacturers = [];
-
-    if (filters.m) {
-        if (Array.isArray(filters.m)) {
-            manufacturers = filters.m.map(decodeURIComponent);
-        } else if (filters.m.includes(',')) {
-            manufacturers = filters.m.split(',').map(decodeURIComponent);
-        } else {
-            manufacturers = [decodeURIComponent(filters.m)];
-        }
-    }
-
-    const rating = filters.r ? filters.r : null;  // Assuming ratings are numbers
-
-    const attributes = {};
-    Object.keys(filters).forEach(key => {
-        if (key.startsWith('a')) {
-            const nameId = key.slice(1);  // e.g., '1' for 'a1'
-            attributes[nameId] = filters[key].split(',').map(decodeURIComponent);
-        }
-    });
+    // let minPrice = 0;
+    // let maxPrice = Infinity;  // Or some default max
+    //
+    // if (filters.pr) {
+    //
+    //     const priceRange = filters.pr.split('-');
+    //     minPrice = parseInt(priceRange[0], 10) || 0;
+    //     maxPrice = parseInt(priceRange[1], 10) || Infinity;
+    // }
+    //
+    // let manufacturers = [];
+    //
+    // if (filters.m) {
+    //     if (Array.isArray(filters.m)) {
+    //         manufacturers = filters.m.map(decodeURIComponent);
+    //     } else if (filters.m.includes(',')) {
+    //         manufacturers = filters.m.split(',').map(decodeURIComponent);
+    //     } else {
+    //         manufacturers = [decodeURIComponent(filters.m)];
+    //     }
+    // }
+    //
+    // const rating = filters.r ? filters.r : null;  // Assuming ratings are numbers
+    //
+    // const attributes = {};
+    // Object.keys(filters).forEach(key => {
+    //     if (key.startsWith('a')) {
+    //         const nameId = key.slice(1);  // e.g., '1' for 'a1'
+    //         attributes[nameId] = filters[key].split(',').map(decodeURIComponent);
+    //     }
+    // });
 
     const requestBody = {
         filter_attributes: attributes,
@@ -462,7 +469,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         price_lowest: minPrice,
         price_highest: maxPrice,
         manufacturer_names: manufacturers,
-        rating: rating,
+        rating: minRating,
         sort: sort
     };
 

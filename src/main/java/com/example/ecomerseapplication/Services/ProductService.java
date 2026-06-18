@@ -416,6 +416,8 @@ public class ProductService {
                     && (sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
                     || Objects.equals(sortOrder, ProductSortType.PRICE_DESC.getValue()));
 
+            Integer normalizedRating = rating != null ? rating * 10 : null;
+
             if (isPriceSort) {
                 Sort.Direction dir = sortOrder.equals(ProductSortType.PRICE_ASC.getValue())
                         ? Sort.Direction.ASC
@@ -423,13 +425,13 @@ public class ProductService {
                 return getByFiltersAndPriceSorted(
                         categoryAttributes, productCategory,
                         priceLowest, priceHighest,
-                        manufacturers, rating,
+                        manufacturers, normalizedRating,
                         dir, page);
             }
 
             Specification<Product> productSpec =
                     ProductSpecifications.equalsCategory(productCategory)
-                            .and(ProductSpecifications.ratingEqualOrHigher(rating));
+                            .and(ProductSpecifications.ratingEqualOrHigher(normalizedRating));
 
             if (priceLowest != 0 && priceHighest != 0) {
 
@@ -691,18 +693,13 @@ public class ProductService {
 
 
     public Set<Integer> getRatingsOfCategory(ProductCategory category) {
-        Set<Integer> dbrResponse = productRepository.getRatingsByCategory(category).orElse(new HashSet<>());
 
-        Set<Integer> roundResponse = new HashSet<>();
-
-        if (!dbrResponse.isEmpty()) {
-            for (Integer i : dbrResponse) {
-
-                roundResponse.add(Integer.parseInt(String.valueOf(i.toString().charAt(0))));
-            }
-        }
-
-        return roundResponse;
+        return productRepository.getRatingsByCategory(category)
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(rating -> rating / 10)
+                .filter(rating -> rating > 0)
+                .collect(Collectors.toSet());
     }
 
     public FiltersPriceRange getTotalPriceRangeOfCategory(ProductCategory category) {
