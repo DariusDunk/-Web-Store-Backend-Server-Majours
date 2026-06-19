@@ -1,6 +1,5 @@
 package com.example.ecomerseapplication.Services;
 
-import com.example.ecomerseapplication.DTOs.requests.UserDataUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
@@ -9,7 +8,6 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.Refres
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
 import com.example.ecomerseapplication.enums.UserRole;
-import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -371,13 +369,13 @@ public class KeycloakService {
         }
     }
 
-    public void updateUserNames(String userId, @Valid UserDataUpdateRequest request) {
+    public void updateUserNames(String userId, String trimmedFirstName, String trimmedLastName) {
         keycloakWebClient.put()
                 .uri("/admin/realms/{realm}/users/{id}", realmName, userId)
                 .header("Authorization", "Bearer " + getAdminAccessToken())
                 .bodyValue(Map.of(
-                        "firstName", request.firstName(),
-                        "lastName", request.familyName()
+                        "firstName", trimmedFirstName,
+                        "lastName", trimmedLastName
                 ))
                 .retrieve()
                 .toBodilessEntity()

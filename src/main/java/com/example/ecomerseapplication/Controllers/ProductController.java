@@ -72,7 +72,7 @@ public class ProductController {
     @GetMapping("findall")
     public ResponseEntity<PageResponse<CompactProductResponse>> findAll(@RequestParam @NotNull int page) {
 
-        Sort sort = SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+        Sort sort = SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue()).and(SortHelper.buildProdSort(ProductSortType.PRODUCT_ID.getValue()));
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
 
         return ResponseEntity.ok(PageResponse.
@@ -97,7 +97,6 @@ public class ProductController {
 
         if (sortOrder == null || sortOrder.equals(ProductSortType.RELEVANCE.getValue())) {
             pageRequest = PageRequest.of(page, PageContentLimit.limit);
-//            productService.testRelevance(name);
             responsePages = productService.getProductsByRelevance(pageRequest, name);
         } else {
             pageRequest = PageRequest.of(page, PageContentLimit.limit);

@@ -68,7 +68,9 @@ router.post(`/updateProfile`, async (req, res) => {
             },
             {req, res});
 
-        return res.status(response.status).end();
+        const responseData = response.data;
+
+        return res.status(response.status).json(responseData);
     } catch (error) {
         if (error.response) {
             console.warn(`${timestamp()} Handled backend error for updating profile`);
@@ -104,6 +106,8 @@ router.get('/profile', async (req, res) => {
         );
 
         const responseData = response.data;
+
+        console.log("Response data in profile: ", JSON.stringify(responseData));
 
         return res.status(response.status).json(responseData);
 

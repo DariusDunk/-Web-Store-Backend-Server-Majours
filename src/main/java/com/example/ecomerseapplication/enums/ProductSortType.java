@@ -11,7 +11,8 @@ public enum ProductSortType {
     PRICE_DESC("price_desc"),
     NEWEST("newest"),
     REVIEW_COUNT("review_count"),
-    PRODUCT_CODE("product_code");
+    PRODUCT_CODE("product_code"),
+    PRODUCT_ID("product_id_asc");
 
     @Getter
     private final String value;

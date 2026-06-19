@@ -69,18 +69,18 @@ public class ProductService {
                 p.original_price_stotinki * (1 - sp.override_discount_percentage / 100.0),
                 p.original_price_stotinki * (1 - s.discount_percent / 100.0),
                 p.original_price_stotinki
-            ) ASC
+            ) ASC, p.product_id ASC
         """;
             case "price_desc" -> """
             ORDER BY COALESCE(
                 p.original_price_stotinki * (1 - sp.override_discount_percentage / 100.0),
                 p.original_price_stotinki * (1 - s.discount_percent / 100.0),
                 p.original_price_stotinki
-            ) DESC
+            ) DESC, p.product_id ASC
         """;
-            case "newest" -> " ORDER BY p.added_at DESC ";
-            case "review_count" -> " ORDER BY p.review_count DESC ";
-            default -> " ORDER BY p.product_name DESC ";
+            case "newest" -> " ORDER BY p.added_at DESC, p.product_id ASC ";
+            case "review_count" -> " ORDER BY p.review_count DESC, p.product_id ASC ";
+            default -> " ORDER BY p.product_name DESC, p.product_id ASC ";
         };
     }
 
@@ -241,7 +241,7 @@ public class ProductService {
 
         //-----------------word array WHERE clause buildup--------------------
         sql.append(buildWhereClause(words));
-        sql.append(" ORDER BY relevance_score DESC, p.rating DESC ")
+        sql.append(" ORDER BY relevance_score DESC, p.rating DESC, p.product_id ASC ")
                 .append("LIMIT :limit OFFSET :offset");
 
         Query query = entityManager.createNativeQuery(sql.toString(), Product.class);
@@ -342,9 +342,7 @@ public class ProductService {
                 return getByCategorySortedByPrice(productCategory, page, dir);
             }
 
-            Sort sort = (sortOrder != null && !sortOrder.isBlank())
-                    ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
-                    : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+            Sort sort = setUpSort(sortOrder);
 
             PageRequest pageRequest = PageRequest.of(page, pageSize, sort);
             return ProductDTOMapper.productPageToDtoPage(
@@ -450,9 +448,7 @@ public class ProductService {
                 productSpec = productSpec.and(ProductSpecifications.containsAttributes(categoryAttributes));
             }
 
-            Sort sort = (sortOrder != null && !sortOrder.isBlank())
-                    ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
-                    : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+            Sort sort = setUpSort(sortOrder);
 
             PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
             return ProductDTOMapper.productPageToDtoPage(productRepository.findAll(productSpec, pageRequest));
@@ -676,15 +672,20 @@ public class ProductService {
             return getByManufacturerSortedByPrice(manufacturer, page, dir);
         }
 
-        Sort sort = (sortOrder != null && !sortOrder.isBlank())
-                ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
-                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+        Sort sort = setUpSort(sortOrder);
 
         PageRequest pageRequest = PageRequest.of(page, PageContentLimit.limit, sort);
         Specification<Product> manufacturerEqualsSpec = ProductSpecifications.manufacturerEquals(manufacturer);
 
         Page<Product> productPage = productRepository.findAll(manufacturerEqualsSpec, pageRequest);
         return ProductDTOMapper.productPageToDtoPage(productPage);
+    }
+
+    private static Sort setUpSort(String sortOrder) {
+        Sort sort = (sortOrder != null && !sortOrder.isBlank())
+                ? SortHelper.buildProdSort(ProductSortType.valueOf(sortOrder.toUpperCase()).getValue())
+                : SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue());
+        return sort.and(SortHelper.buildProdSort(ProductSortType.PRODUCT_ID.getValue()));
     }
 
     public void save(Product product) {
@@ -760,7 +761,10 @@ public class ProductService {
             sp = sp.and(ProductSpecifications.categoryIn(categories));
         }
 
-        Page<Product> products = productRepository.findAll(sp,  PageRequest.of(page, pageSize));
+        Sort sort = (SortHelper.buildProdSort(ProductSortType.POPULARITY.getValue()))
+                .and(SortHelper.buildProdSort(ProductSortType.PRODUCT_ID.getValue()));
+
+        Page<Product> products = productRepository.findAll(sp,  PageRequest.of(page, pageSize, sort));
 
         Page<CompactProductResponse> response = ProductDTOMapper.productPageToDtoPage(products);
 

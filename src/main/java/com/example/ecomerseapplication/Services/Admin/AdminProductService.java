@@ -96,7 +96,7 @@ public class AdminProductService {
 
     public PageResponse<AdminProductResponse> getAllProductsPaged(String page) {
 
-        Sort sort = SortHelper.buildProdSort(ProductSortType.PRODUCT_CODE.getValue());
+        Sort sort = SortHelper.buildProdSort(ProductSortType.PRODUCT_ID.getValue());
 
         Page<DetailedProductProjection> productProjections = productRepository.getAllDetailedProductsPaged(
                 PageRequest.of(Integer.parseInt(page), PageContentLimit.limit, sort)

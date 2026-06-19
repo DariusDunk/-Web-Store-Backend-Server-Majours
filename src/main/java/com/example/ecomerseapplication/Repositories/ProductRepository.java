@@ -29,7 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
             "select p.productName " +
                     "from Product p " +
                     "where p.productName ilike %?1% " +
-                    "order by p.rating, p.productName " +
+                    "order by p.rating desc, p.productName asc, p.id asc " +
                     "limit 7 ")
     List<String> getNameSuggestions(String name);
 
@@ -137,7 +137,7 @@ p.rating desc
             "with sp.isMain = true " +
             "left join sp.sale s " +
             "with s.isActive = true " +
-            "AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate")
+            "AND CURRENT_TIMESTAMP BETWEEN s.startDate AND s.endDate ")
     Page<CompactProductDto> findAllAsResponseSortByRating(Pageable pageable);
 
     @Query(

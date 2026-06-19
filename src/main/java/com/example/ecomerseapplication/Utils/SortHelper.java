@@ -11,6 +11,7 @@ public class SortHelper {
             case "popularity" -> Sort.by(Sort.Direction.DESC, "reviewCount")
                     .and(Sort.by(Sort.Direction.DESC, "rating"));
             case "product_code" -> Sort.by(Sort.Direction.DESC, "productCode");
+            case "product_id_asc" -> Sort.by(Sort.Direction.ASC, "id");
 
             default -> Sort.by(Sort.Direction.ASC, "name");
         };

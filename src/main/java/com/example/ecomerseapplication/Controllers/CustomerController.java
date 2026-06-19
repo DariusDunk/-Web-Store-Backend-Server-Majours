@@ -205,8 +205,14 @@ public class CustomerController {
 
         try
         {
-            keycloakService.updateUserNames(userId, request);
-            customerService.updateCustomerByIdFromProfile(userId, request);
+            String trimmedFirstName = request.firstName().trim();
+            String trimmedLastName = request.familyName().trim();
+            String trimmedPhoneNumber = request.phoneNumber().trim();
+
+            keycloakService.updateUserNames(userId, trimmedFirstName, trimmedLastName);
+
+            return ResponseEntity.ok(customerService.updateCustomerByIdFromProfile(userId, trimmedFirstName, trimmedLastName, trimmedPhoneNumber));
+
         }
         catch (Exception e)
             {
@@ -214,7 +220,6 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
 
-        return ResponseEntity.ok().build();
 
     }
 
