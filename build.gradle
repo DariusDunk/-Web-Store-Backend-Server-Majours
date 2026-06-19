@@ -62,6 +62,8 @@ dependencies {
     implementation 'io.grpc:grpc-stub:1.75.0'
     implementation 'com.google.protobuf:protobuf-java:4.34.1'
     implementation 'io.minio:minio:8.5.12'
+//    // Source: https://mvnrepository.com/artifact/org.apache.commons/commons-text
+//    implementation 'org.apache.commons:commons-text:1.15.0'
 
 
 

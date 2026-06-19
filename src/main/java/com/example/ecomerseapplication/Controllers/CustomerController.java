@@ -150,56 +150,6 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
-//    
-//    @GetMapping("purchase_history")//TODO kato go napravi6 trqbva da ima validacii na vhodnite danni i fetch-natite entitiy-ta
-//    public ResponseEntity<List<CompactPurchaseResponse>> showPurchases(@RequestParam long id) {
-//
-//        Customer customer = customerService.findById(id);
-//
-//        if (customer == null)
-//            return ResponseEntity.notFound().build();
-//
-//        List<Purchase> purchases = purchaseService.getByCustomer(customer);
-//
-//        List<CompactPurchaseResponse> responses = new ArrayList<>();
-//
-//        for (Purchase purchase : purchases) {
-//            List<PurchaseCart> purchaseCarts = purchaseCartService.getByPurchase(purchase);
-//
-//            if (purchaseCarts.isEmpty())
-//                continue;
-//
-//            List<CompactProductQuantityPairResponse> pairs = new ArrayList<>();
-//
-//
-//            for (PurchaseCart cart : purchaseCarts) {
-//                CompactProductQuantityPairResponse pair = new CompactProductQuantityPairResponse();
-//                pair.compactProductResponse = ProductDTOMapper
-//                        .entityToCompactResponse(cart.getPurchaseCartId().getProduct());
-
-    /// /                ProductDTOMapper.addReviewsCountToCompactResponse(pair.compactProductResponse);
-//                pair.quantity = cart.getQuantity();
-//
-//                pairs.add(pair);
-//            }
-//
-//            CompactPurchaseResponse compactPurchaseResponse = PurchaseMapper.purchaseDataToResponse(purchase, pairs);
-//
-//            responses.add(compactPurchaseResponse);
-//        }
-//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(responses);
-//    }
-
-//    @PostMapping("change-passowrd")
-//    @Transactional
-//    public ResponseEntity<String> resetPassword(@RequestBody CustomerAccountRequest request) {TODO syzdai keycloak ekvivalent
-//        Customer customer = customerService.getByEmail(request.email);
-//
-//        if (customer == null)
-//            return ResponseEntity.notFound().build();
-//
-//        return customerService.passwordUpdate(customer, request.password);
-//    }
     @GetMapping("me")
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<CustomerResponse> getCustomerInfo() {
@@ -255,6 +205,7 @@ public class CustomerController {
 
         try
         {
+            keycloakService.updateUserNames(userId, request);
             customerService.updateCustomerByIdFromProfile(userId, request);
         }
         catch (Exception e)

@@ -56,7 +56,7 @@ router.post("/image-search",
                 },
                 {req, res});
 
-            res.status(response.status).json(response.data);
+          return  res.status(response.status).json(response.data);
         }
         catch (error) {
             if (error.response) {

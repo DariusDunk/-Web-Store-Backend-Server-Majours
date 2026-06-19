@@ -59,7 +59,7 @@ router.post("/image-search",
                 },
                 {req, res});
 
-            res.status(response.status).json(response.data);
+          return  res.status(response.status).json(response.data);
         } catch (error) {
             if (error.response) {
                 console.warn(`${timestamp()} Handled backend error for image search`);
@@ -100,7 +100,7 @@ router.post("/catman", async (req, res) => {
 
         console.log("catman response: ", responseData);
 
-        res.status(response.status).json(responseData);
+        res.status(response.status).json(responseData.product_page);
 
     } catch (error) {
         if (error.response) {

@@ -49,9 +49,8 @@ public class AdminProductController {
 
     @PostMapping("create")
     public ResponseEntity<?> createProduct(@RequestBody ProductFormRequest request) {
-        adminProductService.createProduct(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminProductService.createProduct(request));
     }
 
     @PatchMapping("update/{id}/attributes")

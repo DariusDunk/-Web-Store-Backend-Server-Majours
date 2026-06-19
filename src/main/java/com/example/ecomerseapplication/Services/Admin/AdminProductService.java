@@ -67,7 +67,7 @@ public class AdminProductService {
     }
 
     @Transactional
-    public void createProduct(ProductFormRequest request) {
+    public int createProduct(ProductFormRequest request) {
         ProductCategory category = categoryService.getById(request.categoryId());
         Manufacturer manufacturer = manufacturerService.getById(request.manufacturerId());
         Product product = new Product();
@@ -83,7 +83,7 @@ public class AdminProductService {
         product.setProductCategory(category);
         product.setManufacturer(manufacturer);
 
-        productRepository.save(product);
+       return productRepository.save(product).getId();
     }
 
     public AdminProductResponse getByIdForAdminResponse(int id) {

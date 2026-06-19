@@ -62,7 +62,9 @@ router.post(`/create`, async (req, res) => {
         },
             {req, res});
 
-        return res.status(response.status).end();
+        const createdId = response.data;
+
+        return res.status(response.status).json({id: createdId} );
     }
 
     catch (error) {

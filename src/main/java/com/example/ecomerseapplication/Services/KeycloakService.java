@@ -1,5 +1,6 @@
 package com.example.ecomerseapplication.Services;
 
+import com.example.ecomerseapplication.DTOs.requests.UserDataUpdateRequest;
 import com.example.ecomerseapplication.DTOs.requests.UserLoginRequest;
 import com.example.ecomerseapplication.DTOs.responses.KeycloakTokenResponse;
 import com.example.ecomerseapplication.DTOs.responses.TokenRefreshResponse;
@@ -8,6 +9,7 @@ import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.Refres
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.RegistrationFailedException;
 import com.example.ecomerseapplication.ExceptionHandling.CustomExceptions.UserAlreadyExistsException;
 import com.example.ecomerseapplication.enums.UserRole;
+import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -26,10 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 @Service
@@ -370,5 +369,18 @@ public class KeycloakService {
             System.out.println("Error sending password change email: " + e.getMessage());
             throw e;
         }
+    }
+
+    public void updateUserNames(String userId, @Valid UserDataUpdateRequest request) {
+        keycloakWebClient.put()
+                .uri("/admin/realms/{realm}/users/{id}", realmName, userId)
+                .header("Authorization", "Bearer " + getAdminAccessToken())
+                .bodyValue(Map.of(
+                        "firstName", request.firstName(),
+                        "lastName", request.familyName()
+                ))
+                .retrieve()
+                .toBodilessEntity()
+                .block();
     }
 }
