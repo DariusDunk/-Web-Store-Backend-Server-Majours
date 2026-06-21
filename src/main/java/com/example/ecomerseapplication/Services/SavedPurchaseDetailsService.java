@@ -8,6 +8,7 @@ import com.example.ecomerseapplication.Repositories.SavedPurchaseDetailsReposito
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SavedPurchaseDetailsService {
@@ -19,8 +20,21 @@ public class SavedPurchaseDetailsService {
         this.savedPurchaseDetailsRepository = savedPurchaseDetailsRepository;
     }
 
-    public void saveDetails(SavedPurchaseDetails purchaseDetails) {
-        savedPurchaseDetailsRepository.save(purchaseDetails);
+    @Transactional
+    public void saveOrReplaceDetails(SavedPurchaseDetails purchaseDetails) {
+
+        SavedPurchaseDetails existingDetails = savedPurchaseDetailsRepository.getByCustomer(purchaseDetails.getCustomer().getKeycloakId()).orElse(null);
+
+        if (existingDetails != null) {
+            existingDetails.setAddress(purchaseDetails.getAddress());
+            existingDetails.setContactName(purchaseDetails.getContactName());
+            existingDetails.setContactNumber(purchaseDetails.getContactNumber());
+        }
+        else
+        {
+            savedPurchaseDetailsRepository.save(purchaseDetails);
+        }
+
     }
 
     public SavedPurchaseDetails getById(String customerId) {

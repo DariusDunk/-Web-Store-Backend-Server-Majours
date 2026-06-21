@@ -132,7 +132,7 @@ public class CustomerController {
         Customer customer = customerService.getById(userId);
         SavedPurchaseDetails purchaseDetails = new SavedPurchaseDetails(savedPurchaseDetailsResponse, customer);
 
-        purchaseDetailsService.saveDetails(purchaseDetails);
+        purchaseDetailsService.saveOrReplaceDetails(purchaseDetails);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -140,13 +140,10 @@ public class CustomerController {
     @PreAuthorize("hasRole(@roles.customer())")
     public ResponseEntity<?> getPurchaseInformation() {
 
-        System.out.println("Inside getPurchaseInformation");
-
         String userId = userIdExtractor.getUserId();
         Customer customer = customerService.getById(userId);
         SavedPurchaseDetailsResponse response = purchaseDetailsService.getByCustomer(customer);
 
-        System.out.println("getPurchaseInformation Response: " + response);
         return ResponseEntity.ok(response);
     }
 
