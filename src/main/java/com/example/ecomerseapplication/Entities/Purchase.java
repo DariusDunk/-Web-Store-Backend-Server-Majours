@@ -142,8 +142,9 @@ public class Purchase {
         }
 
         Instant deliveryDate = this.getDeliveryDate();
-        Instant purchaseDate = this.getDate();
-        if (deliveryDate != null && deliveryDate.isAfter(purchaseDate.plus(refundDays, ChronoUnit.DAYS))) {
+        Instant now = Instant.now();
+        Instant maxRefundDate = deliveryDate.plus(refundDays, ChronoUnit.DAYS);
+        if (now.isAfter(maxRefundDate)) {
             throw new BadPurchaseRefundRequestException("Purchase refund time passed",
                     "Връщане отказано",
                     "Периодът за връщане на поръчката вече е изтекъл");

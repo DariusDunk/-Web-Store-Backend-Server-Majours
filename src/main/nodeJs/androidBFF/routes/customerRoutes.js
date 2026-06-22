@@ -20,7 +20,7 @@ router.post(`/password-update`, async (req, res) => {
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
-                return await axiosBackendClient.post(`${Backend_Url}/customer/password-change`, req.body,
+                return await axiosBackendClient.post(`${Backend_Url}/customer/password-change`, {},
                     {
                         headers:
                             {
@@ -53,7 +53,12 @@ router.post(`/updateProfile`, async (req, res) => {
     const sessionId = req.headers["x-session-id"];
 
     const {firstName, lastName, phone} = req.body;
+
+    console.log("Request body in update profile: ", JSON.stringify(req.body));
+
     const requestBody = {first_name: firstName, last_name: lastName, phone_number: phone};
+
+    console.log("Request body for backend: ", JSON.stringify(requestBody));
 
     try {
         const response = await fetchWithSessionTokens(sessionId, async (sessionData) => {
@@ -76,7 +81,7 @@ router.post(`/updateProfile`, async (req, res) => {
         return res.status(response.status).end();
     } catch (error) {
         if (error.response) {
-            console.warn(`${timestamp()} Handled backend error for updating profile`);
+            console.warn(`${timestamp()} Handled backend error for updating profile: `, error);
             return res.status(error.response.status || 500).end();
         }
         console.error('-------------------Unexpected error updating profile-------------------\n', error);

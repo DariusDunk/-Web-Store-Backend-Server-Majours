@@ -208,6 +208,9 @@ public class ProductController {
         Sort sort = request.sortOrder().getValue().equalsIgnoreCase(ReviewSortType.NEWEST.getValue())
                 ? Sort.by("postTimestamp").descending()
                 : Sort.by("postTimestamp").ascending();
+
+        sort = sort.and(Sort.by("id").descending());
+
         PageRequest pageRequest = PageRequest.of(request.page(), PageContentLimit.limit, sort);
 
         Page<ReviewResponse> reviewPage;

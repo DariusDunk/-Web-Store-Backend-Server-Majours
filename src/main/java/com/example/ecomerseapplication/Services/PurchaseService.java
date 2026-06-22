@@ -145,7 +145,7 @@ public class PurchaseService {
 
     public PageResponse<CompactPurchaseResponse> getPurchasesOfCustomer(Customer customer, int page) {
 
-        Sort sort = Sort.by(Sort.Direction.DESC, "date");
+        Sort sort = Sort.by(Sort.Direction.DESC, "date").and(Sort.by(Sort.Direction.DESC, "id"));
 
         Page<Purchase> purchases = purchaseRepository.getPurchasesByCustomer_KeycloakId(customer.getKeycloakId(), PageRequest.of(page, 10, sort));
         List<Long> purchaseIds = purchases.getContent().stream().map(Purchase::getId).toList();
