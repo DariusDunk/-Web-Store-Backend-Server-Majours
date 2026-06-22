@@ -6,16 +6,12 @@ import java.util.List;
 
 public class NullFieldChecker { //todo tova ne mi trqbva za sega, moje bi 6te se iztrie v byde6te ako ne mu namerq upotreba
 
-    /**
-     * Returns true if the object has at least one null field.
-     */
+
     public static boolean hasNullFields(Object obj) {
         return !getNullFields(obj).isEmpty();
     }
 
-    /**
-     * Returns a list of field names that are null.
-     */
+
     public static List<String> getNullFields(Object obj) {
         List<String> nullFields = new ArrayList<>();
 
@@ -42,9 +38,7 @@ public class NullFieldChecker { //todo tova ne mi trqbva za sega, moje bi 6te se
         return nullFields;
     }
 
-    /**
-     * Throws an exception if any field is null.
-     */
+
     public static void validateNoNullFields(Object obj) {
         List<String> nulls = getNullFields(obj);
 

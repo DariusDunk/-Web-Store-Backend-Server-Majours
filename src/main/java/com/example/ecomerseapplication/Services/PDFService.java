@@ -73,7 +73,6 @@ public class PDFService {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
-            // Register Regular weight
             builder.useFont(() -> new ByteArrayInputStream(regularFontData),
                     "Open Sans", 400, BaseRendererBuilder.FontStyle.NORMAL, true);
 

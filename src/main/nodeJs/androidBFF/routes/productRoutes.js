@@ -415,7 +415,6 @@ router.post('/category-filter/:category/pg:page', async (req, res) => {
 
     // console.log('filter search');
 
-    // Parse page (it's the number after 'p', e.g., '0' for first page)
     const page = parseInt(req.params.page, 10);
     if (isNaN(page)) {
         return res.status(400).json({error: 'Invalid page parameter'});

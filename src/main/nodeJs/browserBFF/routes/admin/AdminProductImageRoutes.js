@@ -25,17 +25,13 @@ router.post("/upload/:id", upload.fields([
 
     try {
 
-        // -----------------------
-        // 1. SIMPLE FIELD
-        // -----------------------
+
         formData.append(
             "replaceMainImage",
             req.body.replaceMainImage
         );
 
-        // -----------------------
-        // 2. EXISTING GALLERY NAMES
-        // -----------------------
+
         if (req.body.existingGalleryImages) {
 
             const existing = Array.isArray(req.body.existingGalleryImages)
@@ -47,9 +43,6 @@ router.post("/upload/:id", upload.fields([
             });
         }
 
-        // -----------------------
-        // 3. MAIN IMAGE FILE
-        // -----------------------
         if (req.files?.mainImageFile?.length > 0) {
             const file = req.files.mainImageFile[0];
 
@@ -60,9 +53,7 @@ router.post("/upload/:id", upload.fields([
             );
         }
 
-        // -----------------------
-        // 4. GALLERY FILES
-        // -----------------------
+
         if (req.files?.galleryFiles?.length > 0) {
             for (const file of req.files.galleryFiles) {
                 formData.append(
@@ -73,12 +64,7 @@ router.post("/upload/:id", upload.fields([
             }
         }
 
-        // -----------------------
-        // 5. FORWARD
-        // -----------------------
 
-        // console.log("➡️ Sending to backend:", `${Backend_Url}/product/upload/${id}`);
-        // console.log("➡️ FormData headers:", formData.getHeaders());
         const response = await fetchWithSessionTokens(
             sessionId,
             async (sessionData) => {

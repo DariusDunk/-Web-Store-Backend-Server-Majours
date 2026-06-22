@@ -26,12 +26,10 @@ public class AttributeMapper {
                     String attributeName = entry.getKey();
                     List<AttributeOptionDTO> group = entry.getValue();
 
-                    // Extract unique options
                     List<String> options = group.stream()
                             .map(AttributeOptionDTO::option)
                             .collect(Collectors.toList());
 
-                    // Measurement unit: all entries in the same group have the same unit
                     String measurementUnit = group.getFirst().measurementUnit();
 
                     return new CategoryAttributesResponse(

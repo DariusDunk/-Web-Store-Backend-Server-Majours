@@ -108,10 +108,10 @@
         dockerfile: Dockerfile
       working_dir: /app
       volumes:
-        - ../../../src/main/nodeJs/browserBFF:/app:cached         # <-- mount local BFF folder
-        - browser_bff_node_modules:/app/node_modules    # <-- container keeps node_modules
+        - ../../../src/main/nodeJs/browserBFF:/app:cached
+        - browser_bff_node_modules:/app/node_modules
 #      ports:
-#        - "3000:3000"          # <-- BFF port exposed outside
+#        - "3000:3000"
       expose:
         - "3000"
 
@@ -136,8 +136,8 @@
         dockerfile: Dockerfile
       working_dir: /app
       volumes:
-        - ../../../src/main/nodeJs/androidBFF:/app:cached         # <-- mount local BFF folder
-        - android_bff_node_modules:/app/node_modules    # <-- container keeps node_modules
+        - ../../../src/main/nodeJs/androidBFF:/app:cached
+        - android_bff_node_modules:/app/node_modules
 
       expose:
         - "3001"

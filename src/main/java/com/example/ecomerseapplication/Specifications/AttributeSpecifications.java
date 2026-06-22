@@ -32,7 +32,6 @@ public class AttributeSpecifications {
                 predicates.add(p);
             }
 
-            // return ALL CategoryAttributes matching ANY of the filter groups
             return cb.or(predicates.toArray(new Predicate[0]));
         };
     }

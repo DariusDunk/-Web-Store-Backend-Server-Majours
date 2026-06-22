@@ -64,7 +64,6 @@ public class Session {
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
-    // Add these methods inside your Session.java entity class
 
     public void markAsGuestWithoutCart(int lowPriorityMinutes) {
         MarkAsGuest();

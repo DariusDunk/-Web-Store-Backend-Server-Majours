@@ -14,23 +14,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Generates a branded PDF document from any {@link ReportResponses.ReportResponse}.
- *
- * <p>Only the <em>table</em> section of the response is rendered (columns + rows).
- * Charts are intentionally excluded — they live in the React frontend only.
- *
- * <p>Relies on {@link PDFService#generateInvoicePdf(String)} for the actual PDF
- * conversion, so Open Sans (regular + bold) is already registered and available
- * in CSS without an explicit {@code @font-face} block.
- *
- * <p>OpenHTMLtoPDF CSS constraints respected throughout:
- * <ul>
- *   <li>No {@code display: flex / grid} — all multi-column layout uses {@code <table>}.</li>
- *   <li>No {@code :nth-child} pseudo-selectors — row striping is applied via Java-added classes.</li>
- *   <li>Background colours on block elements and {@code <td>} work fine.</li>
- * </ul>
- */
 @Service
 @RequiredArgsConstructor
 public class ReportPdfService {
@@ -48,14 +31,7 @@ public class ReportPdfService {
     private static final DateTimeFormatter TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
-    /**
-     * Builds the HTML for {@code report} and converts it to a PDF byte array.
-     *
-     * @param report   a {@link ReportResponses.ReportResponse} — any {@code ReportType}
-     *                 is accepted; only {@code columns} and {@code rows} are rendered.
-     * @param timezone timezone for the report dates, used to format the timestamp.
-     * @return raw PDF bytes ready to stream as {@code application/pdf}.
-     */
+
     public byte[] generateReportPdf(ReportResponses.ReportResponse report, List<Instant> dates, @NotBlank String timezone) {
         String html = buildReportHtml(report, dates, timezone);
         return pdfService.generateInvoicePdf(html);

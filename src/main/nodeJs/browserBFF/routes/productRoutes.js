@@ -36,7 +36,6 @@ router.post("/image-search",
         try
         {
             const response = await fetchWithSessionTokens(sessionId, async (
-                // sessionData
                 ) => {
                     return await axiosBackendClient.post(
                         `${Backend_Url}/product/imageSearch`,
@@ -413,7 +412,6 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
 
     // console.log('filter search');
 
-    // Parse page (it's the number after 'p', e.g., '0' for first page)
     const page = parseInt(req.params.page, 10);
     if (isNaN(page)) {
         return res.status(400).json({error: 'Invalid page parameter'});
@@ -425,7 +423,7 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
     const {filters = {}, sort} = req.query;
     const sessionId = req.cookies.session_id;
     let minPrice = 0;
-    let maxPrice = Infinity;  // Or some default max
+    let maxPrice = Infinity;
 
     if (filters.pr) {
 
@@ -446,14 +444,14 @@ router.get('/category-filter/:category/pg:page', async (req, res) => {
         }
     }
 
-    const rating = filters.r ? filters.r : null;  // Assuming ratings are numbers
+    const rating = filters.r ? filters.r : null;
 
     // console.log("ratings: ", rating)
 
     const attributes = {};
     Object.keys(filters).forEach(key => {
         if (key.startsWith('a')) {
-            const nameId = key.slice(1);  // e.g., '1' for 'a1'
+            const nameId = key.slice(1);  //   '1' for 'a1'
             attributes[nameId] = filters[key].split(',').map(decodeURIComponent);
         }
     });

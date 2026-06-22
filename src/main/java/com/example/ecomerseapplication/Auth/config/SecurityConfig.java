@@ -26,26 +26,21 @@ import java.util.Map;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // Pulling the external URL from application.properties
     @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
     private String issuerUri;
 
-    // Pulling the internal Docker URL from application.properties
     @Value("${spring.security.oauth2.client.provider.keycloak.jwk-set-uri}")
     private String jwkSetUri;
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        // 1. Point the decoder to the internal Docker network to fetch the public keys
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
-        // 2. Create a validator that enforces the token's 'iss' claim matches the external URL
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
                 new JwtTimestampValidator(),
                 new JwtIssuerValidator(issuerUri)
         );
 
-        // 3. Attach the validator to the decoder
         jwtDecoder.setJwtValidator(validator);
 
         return jwtDecoder;
@@ -55,11 +50,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF for simplicity (useful for APIs)
                 .csrf(AbstractHttpConfigurer::disable)
-                // Allow CORS if needed
                 .cors(Customizer.withDefaults())
-                // Define access rules
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
 //                                request -> endpointMatcher.isPublicOrSemiProtected(request.getRequestURI())
@@ -89,7 +81,6 @@ public class SecurityConfig {
 //                                .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                // Tell Spring this is a resource server using JWT tokens (from Keycloak)
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
